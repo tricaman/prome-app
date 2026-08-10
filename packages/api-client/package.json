@@ -1,0 +1,26 @@
+{
+  "name": "@prome/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Client API di Prome generato da Orval a partire dalla spec OpenAPI: tipi + hook React Query (TanStack Query v5), condiviso tra web e mobile.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "generate": "orval --config orval.config.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@prome/contracts": "workspace:*",
+    "@prome/i18n": "workspace:*"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.0.0"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^5.0.0",
+    "@types/node": "^22.10.0",
+    "orval": "^7.0.0",
+    "typescript": "^5.7.0"
+  }
+}

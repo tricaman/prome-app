@@ -1,0 +1,15 @@
+{
+  "name": "@prome/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Contratto client versionato di Prome: tipi condivisi tra api, web e mobile (tolerant reader, evoluzione solo additiva)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}

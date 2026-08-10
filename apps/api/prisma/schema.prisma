@@ -1,0 +1,32 @@
+// Schema Prisma di Prome — un solo database Postgres, uno schema per bounded
+// context (più "cancellazione" per il registro delle cancellazioni account).
+// Gli schemi senza modelli (bacheca, gruppo, aula_studio, cancellazione)
+// vengono creati vuoti nella migration iniziale (CREATE SCHEMA a mano nel SQL).
+//
+// Nota: multiSchema è GA in Prisma 6 — il flag previewFeatures non serve più
+// (Prisma emetteva un warning di deprecazione, quindi è stato rimosso).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["profilo", "bacheca", "gruppo", "aula_studio", "cancellazione"]
+}
+
+/// Identità accademica dell'utente (bounded context Profilo).
+/// utenteId arriva dal provider di identità (UUID), non è generato qui.
+model Profilo {
+  utenteId             String   @id @db.Uuid
+  nome                 String?
+  cognome              String?
+  universita           String?
+  corso                String?
+  onboardingCompletato Boolean  @default(false)
+  creatoIl             DateTime @default(now())
+
+  @@map("profilo")
+  @@schema("profilo")
+}

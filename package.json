@@ -1,0 +1,21 @@
+{
+  "name": "prome",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev:api": "pnpm --filter @prome/api dev",
+    "dev:worker": "pnpm --filter @prome/api dev:worker",
+    "dev:web": "pnpm --filter @prome/web dev",
+    "dev:mobile": "pnpm --filter @prome/mobile start",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @prome/api prisma:migrate",
+    "api:client": "pnpm --filter @prome/api openapi:emit && pnpm --filter @prome/api-client generate",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck"
+  }
+}

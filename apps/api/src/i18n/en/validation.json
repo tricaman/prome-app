@@ -1,0 +1,23 @@
+{
+  "REQUIRED": "Required field",
+  "INVALID_VALUE": "Invalid value",
+  "INVALID_STRING": "Must be a text",
+  "INVALID_NUMBER": "Must be a number",
+  "INVALID_INTEGER": "Must be an integer",
+  "INVALID_BOOLEAN": "Must be true or false",
+  "INVALID_ARRAY": "Must be a list",
+  "INVALID_OPTION": "Invalid option",
+  "INVALID_EMAIL": "Invalid email address",
+  "INVALID_DATE": "Invalid date",
+  "INVALID_UUID": "Invalid identifier",
+  "INVALID_URL": "Invalid web address",
+  "INVALID_FORMAT": "Invalid format",
+  "TOO_SHORT": "Text too short",
+  "TOO_LONG": "Text too long",
+  "TOO_SMALL": "Value too small",
+  "TOO_BIG": "Value too big",
+  "TOO_FEW_ITEMS": "Too few items",
+  "TOO_MANY_ITEMS": "Too many items",
+  "MUST_BE_POSITIVE": "Must be a positive number",
+  "UNKNOWN_FIELD": "Unexpected field"
+}

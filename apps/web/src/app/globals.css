@@ -1,0 +1,63 @@
+/*
+ * Fogli di stile dell'applicazione: utility, libreria di componenti, token.
+ *
+ * L'ordine degli `@import` non basta a far vincere i nostri token: la libreria
+ * emette le proprie variabili di tema dopo le nostre, e a parità di
+ * specificità vince l'ultima. Per questo il foglio dei token usa selettori
+ * più specifici (vedi il generatore in packages/design-tokens). Un livello
+ * dichiarato sarebbe stato più elegante, ma la libreria contiene `@utility`,
+ * che dentro un livello non è ammesso.
+ */
+@import 'tailwindcss';
+@import '@heroui/styles';
+@import '@prome/design-tokens/tokens.css';
+
+/* Il tema scuro è una classe sul documento, gestita dal provider del tema. */
+@custom-variant dark (&:is(.dark *));
+
+/* Le barre dell'indicatore audio: l'unica animazione con un significato,
+   ovvero "in questo momento qualcuno sta parlando". */
+@keyframes onda {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Chi ha chiesto meno animazioni al sistema operativo non deve subirle. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    background-color: var(--sfondo);
+    color: var(--testo);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Il contorno di messa a fuoco resta visibile: è l'unico riferimento per
+     chi naviga da tastiera. */
+  :focus-visible {
+    outline: 2px solid var(--primario);
+    outline-offset: 2px;
+  }
+}

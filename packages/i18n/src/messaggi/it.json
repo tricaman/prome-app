@@ -1,0 +1,512 @@
+{
+  "comune": {
+    "aggiornamento": "Aggiornamento…",
+    "annulla": "Annulla",
+    "avanti": "Avanti",
+    "avvisi": "Avvisi",
+    "campoObbligatorio": "Campo obbligatorio",
+    "caricamento": "Caricamento…",
+    "cerca": "Cerca",
+    "chiudi": "Chiudi",
+    "conferma": "Conferma",
+    "elimina": "Elimina",
+    "indietro": "Indietro",
+    "invioInCorso": "Invio in corso…",
+    "modifica": "Modifica",
+    "nessunRisultato": "Nessun risultato",
+    "operazioneCompletata": "Operazione completata",
+    "opzionale": "facoltativo",
+    "ricarica": "Ricarica la pagina",
+    "riprova": "Riprova",
+    "salva": "Salva"
+  },
+  "lingua": {
+    "etichetta": "Lingua",
+    "it": "Italiano",
+    "en": "Inglese"
+  },
+  "tema": {
+    "etichetta": "Tema",
+    "chiaro": "Chiaro",
+    "scuro": "Scuro",
+    "sistema": "Sistema"
+  },
+  "errori": {
+    "generico": {
+      "titolo": "Qualcosa è andato storto",
+      "descrizione": "Non siamo riusciti a completare l'operazione. Puoi riprovare."
+    },
+    "caricamentoDati": {
+      "titolo": "Non riusciamo a caricare i dati",
+      "descrizione": "Controlla la connessione e riprova."
+    },
+    "nonTrovato": {
+      "titolo": "Pagina non trovata",
+      "descrizione": "La pagina che cerchi non esiste o è stata spostata.",
+      "azione": "Torna alla home"
+    },
+    "senzaConnessione": {
+      "titolo": "Sei offline",
+      "descrizione": "Ricontrolla la connessione: riproveremo appena torna."
+    },
+    "codice": "Codice errore: {codice}",
+    "riferimento": "Riferimento: {id}",
+    "vuoto": {
+      "titolo": "Ancora nulla qui",
+      "descrizione": "Quando ci sarà qualcosa da vedere, lo troverai in questa pagina."
+    }
+  },
+  "validazione": {
+    "obbligatorio": "Campo obbligatorio",
+    "tipoNonValido": "Valore non valido",
+    "testoTroppoCorto": "Servono almeno {min} caratteri",
+    "testoTroppoLungo": "Massimo {max} caratteri",
+    "numeroTroppoPiccolo": "Il minimo è {min}",
+    "numeroTroppoGrande": "Il massimo è {max}",
+    "troppiPochiElementi": "Seleziona almeno {min} elementi",
+    "troppiElementi": "Puoi selezionare al massimo {max} elementi",
+    "emailNonValida": "Indirizzo email non valido",
+    "urlNonValido": "Indirizzo web non valido",
+    "dataNonValida": "Data non valida",
+    "formatoNonValido": "Formato non valido",
+    "opzioneNonValida": "Opzione non valida"
+  },
+  "meta": {
+    "titolo": "Prome — Tributo al progresso",
+    "titoloBreve": "Prome",
+    "descrizione": "Prome ti aiuta a trovare nuovi compagni di studio e a organizzarti al meglio durante il tuo percorso accademico."
+  },
+  "home": {
+    "occhiello": "Usata in 42 atenei italiani",
+    "titolo": "Studiare insieme, senza cercare più nulla",
+    "sommario": "Bacheca del tuo corso, aule studio con audio e materiali condivisi, gruppi che restano nel tempo. Tutto in un posto, gratis per gli studenti.",
+    "ctaPrincipale": "Inizia gratis",
+    "ctaSecondaria": "Guarda com'è",
+    "prova": "Oltre <forte>28.000 studenti</forte> studiano su Prome ogni settimana",
+    "anteprima": {
+      "nome": "Chiara Moretti",
+      "chiParla": "Chiara sta parlando",
+      "contesto": "Analisi 2 · ripasso pre-esame · 8 partecipanti",
+      "messaggio1": "Partiamo dagli integrali per parti, ho caricato gli esercizi",
+      "messaggio2": "Perfetto, io ho i temi d'esame del 2023",
+      "allegato": "esercizi_integrali.pdf · Argomento: Integrali",
+      "etichetta": "Esempio di aula studio"
+    },
+    "funzioni": {
+      "bacheca": {
+        "titolo": "Bacheca del corso",
+        "testo": "Domande, appunti e allegati fino a 25 MB. I post restano, organizzati per argomento."
+      },
+      "aule": {
+        "titolo": "Aule studio con audio",
+        "testo": "Chat, audiochat e materiali condivisi. Programmate o aperte al volo, con permessi per ogni partecipante."
+      },
+      "gruppi": {
+        "titolo": "Gruppi che restano",
+        "testo": "Il tuo corso, il tuo team di progetto, l'Erasmus: cartelle fino a 5 livelli e aule studio collocate dentro."
+      }
+    },
+    "chiusura": {
+      "titolo": "Tributo al <accento>progresso</accento>",
+      "testo": "Prome è gratis per gli studenti universitari. Registrati con la mail dell'ateneo e trova subito il tuo corso."
+    },
+    "comeFunziona": {
+      "titolo": "Come funziona un'aula studio",
+      "sommario": "Si apre in un attimo, si chiude quando avete finito. Nessuna sala d'attesa, nessuna riunione da programmare per forza.",
+      "passi": {
+        "apri": {
+          "titolo": "Apri l'aula",
+          "testo": "Bastano un titolo e un tocco. Decidi chi può entrare: solo su invito, chi studia nel tuo ateneo, oppure tutti gli studenti iscritti a Prome."
+        },
+        "invita": {
+          "titolo": "Invita chi vuoi",
+          "testo": "Un link valido sette giorni. Chi entra trova già chat, audio e materiali organizzati per argomento."
+        },
+        "studiate": {
+          "titolo": "Studiate insieme",
+          "testo": "Ognuno con i suoi permessi: parlare, scrivere, caricare. Chi preferisce resta ad ascoltare, e va benissimo così."
+        }
+      }
+    }
+  },
+  "sito": {
+    "nav": {
+      "esplora": "Esplora",
+      "atenei": "Atenei",
+      "argomenti": "Argomenti",
+      "guide": "Guide allo studio",
+      "chiSiamo": "Chi siamo"
+    },
+    "accedi": "Accedi",
+    "registrati": "Registrati",
+    "registratiGratis": "Registrati gratis",
+    "iniziaGratis": "Inizia gratis",
+    "scaricaApp": "Scarica l'app",
+    "vediTutte": "Vedi tutte",
+    "home": "Home",
+    "footer": {
+      "claim": "La piattaforma di studio degli universitari italiani: bacheca, aule studio e gruppi.",
+      "prodotto": "Prodotto",
+      "esplora": "Esplora",
+      "atenei": "Atenei",
+      "risorse": "Risorse",
+      "comeFunziona": "Come funziona",
+      "auleStudio": "Aule studio",
+      "gruppi": "Gruppi",
+      "appIos": "App iOS",
+      "appAndroid": "App Android",
+      "aulePubbliche": "Come funzionano le aule studio",
+      "profili": "Guide allo studio",
+      "gruppiPubblici": "Come funzionano i gruppi",
+      "tuttiGliAtenei": "Tutti gli atenei",
+      "privacy": "Privacy",
+      "termini": "Termini",
+      "cookie": "Cookie",
+      "sitemap": "Sitemap",
+      "diritti": "© {anno} Prome · Bologna",
+      "argomenti": "Argomenti",
+      "guide": "Guide allo studio",
+      "chiSiamo": "Chi siamo"
+    },
+    "motto1": "Tributo al",
+    "motto2": "progresso"
+  },
+  "pagine": {
+    "aula": {
+      "inCorso": "In corso ora",
+      "programmata": "Programmata",
+      "entra": "Entra ora",
+      "apriApp": "Apri nell'app",
+      "boxTitolo": "Entra nell'aula studio",
+      "boxTesto": "Gratis, serve solo un account con la mail dell'ateneo.",
+      "ateneo": "Ateneo",
+      "argomento": "Argomento",
+      "iniziata": "Iniziata",
+      "materiali": "Argomenti e materiali condivisi",
+      "senzaArgomento": "Senza argomento",
+      "avviso": "I materiali completi e la chat in tempo reale sono visibili dopo l'accesso.",
+      "faq": "Domande frequenti",
+      "partecipantiEvidenza": "Partecipanti in evidenza",
+      "correlate": "Aule studio correlate",
+      "aperta": "Aperta da"
+    },
+    "profilo": {
+      "segui": "Segui",
+      "messaggio": "Scrivi un messaggio",
+      "schede": {
+        "post": "Post",
+        "aule": "Aule studio",
+        "materiali": "Materiali"
+      },
+      "statistiche": {
+        "post": "Post",
+        "aule": "Aule studio",
+        "materiali": "Materiali",
+        "download": "Download"
+      },
+      "argomentiSeguiti": "Argomenti seguiti",
+      "gruppiPubblici": "Gruppi pubblici"
+    },
+    "ateneo": {
+      "titolo": "{nome} su Prome",
+      "entra": "Entra con la mail {breve}",
+      "statistiche": {
+        "studenti": "Studenti su Prome",
+        "aule": "Aule studio questo mese",
+        "materiali": "Materiali condivisi",
+        "gruppi": "Gruppi attivi"
+      },
+      "corsi": "Corsi più attivi",
+      "aule": "Aule studio {breve}",
+      "materiali": "Materiali più scaricati",
+      "suQuesto": "Su questo ateneo",
+      "altri": "Altri atenei",
+      "studenti": "{numero} studenti",
+      "conAule": "{numero} aule studio",
+      "elenco": {
+        "titolo": "Gli atenei su Prome",
+        "sommario": "Ogni ateneo ha la sua pagina: quanti studenti lo usano e quali corsi sono più attivi."
+      }
+    },
+    "argomento": {
+      "segui": "Segui l'argomento",
+      "comeSiStudia": "Come si studia {nome}",
+      "postUtili": "Post più utili",
+      "auleSu": "Aule studio su {nome}",
+      "materiali": "Materiali più scaricati",
+      "collegati": "Argomenti collegati",
+      "elenco": {
+        "titolo": "Argomenti",
+        "sommario": "Le materie su cui gli studenti italiani studiano insieme su Prome."
+      }
+    },
+    "chiSiamo": {
+      "titolo": "Abbiamo costruito quello che ci mancava",
+      "sommario": "Prome nasce a Bologna nel 2024 da tre studenti che si scambiavano appunti su chat sparse, perdendo file, link e sessioni di studio. Oggi è la piattaforma con cui 28.000 studenti italiani si organizzano.",
+      "motto": {
+        "titolo": "Tributo al progresso",
+        "p1": "Il nostro motto non è uno slogan di marketing: è il criterio con cui decidiamo cosa costruire. Ogni funzione deve far avanzare qualcuno nel suo percorso, non trattenerlo dentro l'app.",
+        "p2": "Per questo non ci sono like, classifiche o notifiche inventate: solo strumenti per studiare insieme e andarsene quando si è finito."
+      },
+      "sostegno": {
+        "titolo": "Come ci manteniamo",
+        "p1": "Prome è gratis per gli studenti e lo resterà. Ci finanziamo con accordi con gli atenei che vogliono strumenti di studio collaborativo per i loro corsi.",
+        "p2": "Non vendiamo dati, non profiliamo per la pubblicità e non addestriamo modelli sui vostri appunti."
+      },
+      "statistiche": {
+        "studenti": "Studenti attivi",
+        "atenei": "Atenei italiani",
+        "aule": "Aule studio nel 2026",
+        "dati": "Dati venduti"
+      },
+      "team": "Il team",
+      "fotoTeam": "Foto del team"
+    },
+    "guide": {
+      "titolo": "Guide allo studio",
+      "sommario": "Metodo, organizzazione ed esami raccontati da chi li sta dando. Scritte con gli studenti che usano Prome, senza fuffa motivazionale.",
+      "inEvidenza": "In evidenza",
+      "lettura": "{minuti} min di lettura",
+      "immagine": "Immagine dell'articolo",
+      "provaAula": {
+        "titolo": "Provalo in un'aula studio",
+        "testo": "Ce ne sono {numero} aperte in questo momento sul metodo di studio."
+      }
+    },
+    "privacy": {
+      "titolo": "Privacy policy",
+      "vigore": "In vigore dal 1 luglio 2026 · versione 3.1",
+      "documenti": "Documenti",
+      "inQuestaPagina": "In questa pagina",
+      "inBreve": "In breve, senza legalese",
+      "contatto": {
+        "titolo": "Hai domande sui tuoi dati?",
+        "testo": "Scrivi al nostro responsabile della protezione dei dati: rispondiamo entro 30 giorni come previsto dal GDPR."
+      },
+      "soloItaliano": "Questo documento è disponibile solo in italiano."
+    }
+  },
+  "app": {
+    "nav": {
+      "bacheca": "Bacheca",
+      "aule": "Aule studio",
+      "gruppi": "Gruppi",
+      "materiali": "Materiali salvati",
+      "profilo": "Profilo",
+      "tuoiGruppi": "I tuoi gruppi"
+    },
+    "nuovoPost": "Nuovo post",
+    "cerca": "Cerca post, materiali, aule studio…",
+    "notifiche": "Notifiche",
+    "accesso": {
+      "titolo": "Entra in Prome",
+      "sommario": "Ti arriva un codice via email. Nessuna password da ricordare.",
+      "primoAccesso": "Se è la prima volta, l'account si crea al primo accesso: non serve registrarsi a parte.",
+      "email": "Email universitaria",
+      "inviaCodice": "Inviami il codice",
+      "codiceTitolo": "Controlla la posta",
+      "codiceSommario": "Abbiamo mandato un codice a 6 cifre a {email}.",
+      "codice": "Codice a 6 cifre",
+      "codiceAiuto": "Il campo avanza da sé mentre digiti.",
+      "entra": "Entra",
+      "cambiaEmail": "Cambia l'email",
+      "nonArrivato": "Non ti è arrivato?",
+      "reinvia": "Invia di nuovo",
+      "provaTitolo": "Tributo al <accento>progresso</accento>",
+      "provaTesto": "Ogni settimana 28.000 studenti aprono un'aula studio, condividono appunti e si danno una mano prima degli appelli."
+    },
+    "onboarding": {
+      "passo": "Passo {corrente} di {totale}",
+      "titolo": "Dove studi?",
+      "sommario": "Serve per mostrarti la bacheca, le aule studio e i gruppi del tuo ateneo. Puoi cambiarlo in qualsiasi momento dal profilo.",
+      "privacy": "Chiediamo solo il minimo indispensabile: nome, università e corso. Non condividiamo nulla con terzi e non usiamo i tuoi dati per pubblicità.",
+      "comeLiUsiamo": "Come li usiamo",
+      "universita": "Università",
+      "cercaUniversita": "Cerca la tua università",
+      "indietro": "Indietro",
+      "continua": "Continua",
+      "nonTrovi": "Non trovi il tuo ateneo?",
+      "scrivicelo": "Scrivicelo",
+      "nessunRisultato": "Nessun ateneo con questo nome."
+    },
+    "feed": {
+      "composer": "Cosa vuoi condividere, {nome}?",
+      "pubblica": "Pubblica",
+      "filtri": {
+        "perTe": "Per te",
+        "mioCorso": "Il mio corso",
+        "mioAteneo": "Il mio ateneo",
+        "mieiGruppi": "I miei gruppi"
+      },
+      "commenti": "{numero} commenti",
+      "salva": "Salva",
+      "condividi": "Condividi",
+      "apri": "Apri",
+      "auleOra": "Aule studio ora",
+      "tutte": "Tutte",
+      "entra": "Entra",
+      "argomentiCorso": "Argomenti del tuo corso",
+      "appello": {
+        "titolo": "Appello di {materia} tra {giorni} giorni",
+        "testo": "Ci sono {numero} aule studio di ripasso questa settimana.",
+        "azione": "Guarda il calendario"
+      }
+    },
+    "post": {
+      "indietro": "Torna indietro",
+      "titolo": "Post di {autore}",
+      "condividi": "Condividi",
+      "anteprima": "Anteprima",
+      "scarica": "Scarica",
+      "salvaMateriali": "Salva nei materiali",
+      "commenti": "{numero} commenti",
+      "ordine": "Dal più recente",
+      "scriviCommento": "Scrivi un commento…",
+      "invia": "Invia",
+      "altriPost": "Altri post su {argomento}"
+    },
+    "aule": {
+      "titolo": "Aule studio",
+      "cerca": "Cerca un'aula studio",
+      "crea": "Crea aula studio",
+      "inCorso": "In corso ora · {numero}",
+      "programmate": "Programmate",
+      "entra": "Entra",
+      "avvisami": "Avvisami",
+      "modale": {
+        "titolo": "Nuova aula studio",
+        "campoTitolo": "Titolo",
+        "segnaposto": "Es. Analisi 2 · ripasso pre-esame",
+        "chiPuoEntrare": "Chi può entrare",
+        "programma": "Programma per più tardi",
+        "programmaAiuto": "Altrimenti l'aula si apre subito",
+        "colloca": "Colloca in un gruppo",
+        "collocaAiuto": "Opzionale · l'aula appare nella cartella scelta",
+        "nessuno": "Nessuno",
+        "nota": "Sarai <forte>Moderatore</forte>: potrai gestire Parlare, Scrivere e Caricare per ogni partecipante.",
+        "annulla": "Annulla",
+        "apri": "Apri l'aula studio",
+        "programmaCta": "Programma l'aula studio",
+        "visibilita": {
+          "privato": "Solo su invito. Non compare nelle ricerche.",
+          "ateneo": "Chi studia nel tuo ateneo può trovarla ed entrare.",
+          "pubblico": "Aperta a tutti gli studenti iscritti a Prome."
+        }
+      }
+    },
+    "sala": {
+      "schede": {
+        "chat": "Chat",
+        "materiali": "Argomenti e materiali",
+        "partecipanti": "Partecipanti"
+      },
+      "invita": "Invita",
+      "apertaDa": "Aperta da",
+      "nelGruppo": "nel gruppo",
+      "scrivi": "Scrivi nell'aula studio…",
+      "invia": "Invia",
+      "oggi": "Oggi",
+      "haCondiviso": "{nome} ha condiviso {file} in {argomento}",
+      "caricaMateriale": "Carica materiale",
+      "nuovoArgomento": "Nuovo argomento",
+      "conteggioFile": "{numero} file · max 25 MB per allegato",
+      "senzaArgomento": "Senza argomento",
+      "assegnaArgomento": "Assegna argomento",
+      "numeroFile": "{numero} file",
+      "linkInvito": "Link d'invito",
+      "scadeIl": "scade il {data} (7 giorni)",
+      "copiaLink": "Copia link",
+      "rigenera": "Rigenera",
+      "tabella": {
+        "partecipante": "Partecipante",
+        "parlare": "Parlare",
+        "scrivere": "Scrivere",
+        "caricare": "Caricare"
+      },
+      "moderatore": "Moderatore",
+      "promuovi": "Promuovi",
+      "notaPermessi": "Ogni modifica è immediata: la persona riceve un messaggio di sistema in chat. I Moderatori hanno sempre tutti e tre i permessi.",
+      "solaLettura": "{nomi} è in sola lettura: può ascoltare e leggere, senza intervenire.",
+      "solaLetturaPlurale": "{nomi} sono in sola lettura: possono ascoltare e leggere, senza intervenire.",
+      "staParlando": "{nome} sta parlando",
+      "audioFuori": "In audio: {dentro} di {totale} partecipanti · tu non sei collegata",
+      "audioDentro": "Sei in audio · {numero} persone collegate",
+      "audioMuto": "Sei in audio · microfono spento",
+      "entraAudio": "Entra nell'audio",
+      "esciAudio": "Esci dall'audio",
+      "microfonoAttivo": "Microfono attivo",
+      "microfonoSpento": "Microfono spento",
+      "inAudio": "In audio · {numero}",
+      "soloChat": "Solo in chat · {numero}",
+      "tuoiPermessi": "I tuoi permessi",
+      "tuoiPermessiTesto": "Parlare · Scrivere · Caricare. Sei Moderatore di questa aula studio."
+    },
+    "gruppo": {
+      "schede": {
+        "cartelle": "Cartelle e materiali",
+        "chat": "Chat del gruppo",
+        "membri": "Membri",
+        "impostazioni": "Impostazioni"
+      },
+      "invitaMembri": "Invita membri",
+      "nuovaAula": "Nuova aula studio",
+      "albero": "Albero cartelle",
+      "nuovaCartella": "Nuova cartella",
+      "profondita": "Massimo 5 livelli di profondità. Sei al livello {livello}.",
+      "auleInCartella": "Aule studio in questa cartella",
+      "apri": "Apri",
+      "sottotitolo": "{membri} membri · {ateneo} · gruppo {visibilita}"
+    },
+    "impostazioni": {
+      "titolo": "Impostazioni",
+      "nav": {
+        "profilo": "Profilo",
+        "privacy": "Privacy",
+        "notifiche": "Notifiche",
+        "aspetto": "Aspetto",
+        "account": "Account e sicurezza",
+        "dati": "Dati e download"
+      },
+      "modificaProfilo": "Modifica profilo",
+      "cambiaFoto": "Cambia foto",
+      "privacy": "Privacy",
+      "contatto": {
+        "titolo": "Chi può contattarti",
+        "testo": "Chi può scriverti in privato e invitarti in aule studio e gruppi.",
+        "privato": "Solo chi è già nei tuoi gruppi",
+        "ateneo": "Chi studia nel tuo ateneo",
+        "pubblico": "Qualunque studente su Prome"
+      },
+      "contenuti": {
+        "titolo": "Chi può vedere i tuoi contenuti",
+        "testo": "Chi vede i tuoi post in bacheca, i materiali che carichi e il tuo profilo pubblico su prome.app.",
+        "privato": "Solo i tuoi gruppi.",
+        "ateneo": "Solo chi studia nel tuo ateneo",
+        "pubblico": "Tutti gli studenti iscritti a Prome"
+      },
+      "aspetto": "Aspetto e notifiche",
+      "tema": "Tema",
+      "notifiche": {
+        "commenti": "Commenti ai tuoi post",
+        "commentiSub": "Email e in-app",
+        "inviti": "Inviti ad aule studio e gruppi",
+        "invitiSub": "Email e in-app",
+        "promemoria": "Promemoria aule programmate",
+        "promemoriaSub": "10 minuti prima",
+        "materiali": "Nuovi materiali nei tuoi gruppi",
+        "materialiSub": "Riepilogo giornaliero"
+      },
+      "account": "Account",
+      "scaricaDati": "Scarica i tuoi dati",
+      "archivioCompleto": "Archivio completo",
+      "esciDaTutti": "Esci da tutti i dispositivi",
+      "elimina": {
+        "titolo": "Elimina account",
+        "testo": "Il profilo scompare subito. I tuoi post e commenti restano utili a chi studia ma diventano anonimi (“Utente rimosso”), e i dati personali vengono cancellati anche dai backup entro 30 giorni. Se cambi idea, entro 14 giorni puoi riattivare l'account accedendo di nuovo.",
+        "azione": "Elimina il mio account",
+        "pausa": "Preferisci una pausa?",
+        "disattiva": "Disattiva temporaneamente"
+      }
+    }
+  }
+}

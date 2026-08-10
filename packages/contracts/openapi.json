@@ -1,0 +1,204 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "HealthController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/HealthDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Stato del servizio",
+        "tags": [
+          "sistema"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Prome API",
+    "description": "Facciata REST versionata di Prome.",
+    "version": "v1",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "PaginationMetaDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "example": 42
+          },
+          "page": {
+            "type": "number",
+            "example": 1
+          },
+          "limit": {
+            "type": "number",
+            "example": 20
+          },
+          "totalPages": {
+            "type": "number",
+            "example": 3
+          }
+        },
+        "required": [
+          "total",
+          "page",
+          "limit",
+          "totalPages"
+        ]
+      },
+      "ResponseMetaDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "number",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Operazione completata",
+            "description": "Messaggio di esito, già tradotto nella lingua della richiesta"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-08-09T12:00:00.000Z"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetaDto"
+          }
+        },
+        "required": [
+          "status",
+          "message",
+          "timestamp"
+        ]
+      },
+      "HealthDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "app",
+              "worker"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "example": "v1"
+          }
+        },
+        "required": [
+          "status",
+          "role",
+          "version"
+        ]
+      },
+      "ValidationErrorDetailDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "example": "titolo"
+          },
+          "constraint": {
+            "type": "string",
+            "example": "isNotEmpty"
+          },
+          "message": {
+            "type": "string",
+            "example": "Campo obbligatorio"
+          }
+        },
+        "required": [
+          "field",
+          "constraint",
+          "message"
+        ]
+      },
+      "ErrorResponseDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 404
+          },
+          "errorCode": {
+            "type": "string",
+            "example": "PR001",
+            "description": "Localizzatore del punto in cui l’errore è stato lanciato (indipendente dal messaggio)"
+          },
+          "message": {
+            "type": "string",
+            "example": "Profilo non trovato",
+            "description": "Messaggio già tradotto nella lingua della richiesta"
+          },
+          "errorId": {
+            "type": "string",
+            "example": "419c6fbd-a6d2-4a75-84c2-8c9e9c06a015",
+            "description": "UUID per correlare la segnalazione con i log del server"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-08-09T12:00:00.000Z"
+          },
+          "details": {
+            "description": "Presente solo per gli errori di validazione (errorCode V001)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationErrorDetailDto"
+            }
+          }
+        },
+        "required": [
+          "statusCode",
+          "errorCode",
+          "message",
+          "errorId",
+          "timestamp"
+        ]
+      }
+    }
+  }
+}

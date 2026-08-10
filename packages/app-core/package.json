@@ -1,0 +1,39 @@
+{
+  "name": "@prome/app-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Logica applicativa condivisa tra web e mobile: chiamate API con feedback automatico, form validati, stato delle query. Nessun componente: qui non si disegna nulla.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@prome/api-client": "workspace:*",
+    "@prome/contracts": "workspace:*"
+  },
+  "peerDependencies": {
+    "@hookform/resolvers": "^5.0.0",
+    "@tanstack/react-query": "^5.0.0",
+    "react": ">=19.0.0",
+    "react-hook-form": "^7.0.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@hookform/resolvers": "^5.7.1",
+    "@tanstack/react-query": "^5.101.0",
+    "@types/react": "^19.0.0",
+    "react": "^19.2.0",
+    "react-hook-form": "^7.85.0",
+    "typescript": "^5.7.0",
+    "zod": "^4.0.0"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "INTERNAL_SERVER_ERROR": "Internal server error",
+  "BAD_REQUEST": "Invalid request",
+  "UNAUTHORIZED": "Unauthorized",
+  "FORBIDDEN": "Access denied",
+  "RESOURCE_NOT_FOUND": "Resource not found",
+  "METHOD_NOT_ALLOWED": "Method not allowed",
+  "CONFLICT": "Resource conflict",
+  "PAYLOAD_TOO_LARGE": "Payload too large",
+  "VALIDATION_ERROR": "Validation error",
+  "TOO_MANY_REQUESTS": "Too many requests, try again shortly",
+  "SERVICE_UNAVAILABLE": "Service temporarily unavailable",
+
+  "PROFILO_NOT_FOUND": "Profile not found",
+  "ONBOARDING_INCOMPLETO": "Complete the onboarding to continue"
+}

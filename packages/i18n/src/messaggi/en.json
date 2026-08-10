@@ -1,0 +1,512 @@
+{
+  "comune": {
+    "aggiornamento": "Updating…",
+    "annulla": "Cancel",
+    "avanti": "Next",
+    "avvisi": "Notifications",
+    "campoObbligatorio": "Required field",
+    "caricamento": "Loading…",
+    "cerca": "Search",
+    "chiudi": "Close",
+    "conferma": "Confirm",
+    "elimina": "Delete",
+    "indietro": "Back",
+    "invioInCorso": "Submitting…",
+    "modifica": "Edit",
+    "nessunRisultato": "No results",
+    "operazioneCompletata": "Operation completed",
+    "opzionale": "optional",
+    "ricarica": "Reload the page",
+    "riprova": "Try again",
+    "salva": "Save"
+  },
+  "lingua": {
+    "etichetta": "Language",
+    "it": "Italian",
+    "en": "English"
+  },
+  "tema": {
+    "etichetta": "Theme",
+    "chiaro": "Light",
+    "scuro": "Dark",
+    "sistema": "System"
+  },
+  "errori": {
+    "generico": {
+      "titolo": "Something went wrong",
+      "descrizione": "We couldn't complete the operation. You can try again."
+    },
+    "caricamentoDati": {
+      "titolo": "We can't load the data",
+      "descrizione": "Check your connection and try again."
+    },
+    "nonTrovato": {
+      "titolo": "Page not found",
+      "descrizione": "The page you're looking for doesn't exist or has been moved.",
+      "azione": "Back to home"
+    },
+    "senzaConnessione": {
+      "titolo": "You're offline",
+      "descrizione": "Check your connection: we'll retry as soon as it's back."
+    },
+    "codice": "Error code: {codice}",
+    "riferimento": "Reference: {id}",
+    "vuoto": {
+      "titolo": "Nothing here yet",
+      "descrizione": "When there's something to see, you'll find it on this page."
+    }
+  },
+  "validazione": {
+    "obbligatorio": "Required field",
+    "tipoNonValido": "Invalid value",
+    "testoTroppoCorto": "At least {min} characters required",
+    "testoTroppoLungo": "At most {max} characters",
+    "numeroTroppoPiccolo": "The minimum is {min}",
+    "numeroTroppoGrande": "The maximum is {max}",
+    "troppiPochiElementi": "Select at least {min} items",
+    "troppiElementi": "You can select at most {max} items",
+    "emailNonValida": "Invalid email address",
+    "urlNonValido": "Invalid web address",
+    "dataNonValida": "Invalid date",
+    "formatoNonValido": "Invalid format",
+    "opzioneNonValida": "Invalid option"
+  },
+  "meta": {
+    "titolo": "Prome — A tribute to progress",
+    "titoloBreve": "Prome",
+    "descrizione": "Prome helps you find new study partners and get organised throughout your academic journey."
+  },
+  "home": {
+    "occhiello": "Used in 42 Italian universities",
+    "titolo": "Study together, stop hunting for things",
+    "sommario": "Your course board, study rooms with audio and shared materials, groups that last. All in one place, free for students.",
+    "ctaPrincipale": "Start for free",
+    "ctaSecondaria": "See how it looks",
+    "prova": "More than <forte>28,000 students</forte> study on Prome every week",
+    "anteprima": {
+      "nome": "Chiara Moretti",
+      "chiParla": "Chiara is speaking",
+      "contesto": "Calculus 2 · pre-exam review · 8 participants",
+      "messaggio1": "Let's start with integration by parts, I uploaded the exercises",
+      "messaggio2": "Great, I have the 2023 exam papers",
+      "allegato": "integrals_exercises.pdf · Topic: Integrals",
+      "etichetta": "Example study room"
+    },
+    "funzioni": {
+      "bacheca": {
+        "titolo": "Course board",
+        "testo": "Questions, notes and attachments up to 25 MB. Posts stay, organised by topic."
+      },
+      "aule": {
+        "titolo": "Study rooms with audio",
+        "testo": "Chat, audio chat and shared materials. Scheduled or opened on the spot, with permissions for each participant."
+      },
+      "gruppi": {
+        "titolo": "Groups that last",
+        "testo": "Your course, your project team, your Erasmus: folders up to 5 levels with study rooms placed inside."
+      }
+    },
+    "chiusura": {
+      "titolo": "A tribute to <accento>progress</accento>",
+      "testo": "Prome is free for university students. Sign up with your university email and find your course straight away."
+    },
+    "comeFunziona": {
+      "titolo": "How a study room works",
+      "sommario": "It opens in seconds and closes when you are done. No waiting room, no meeting you are forced to schedule.",
+      "passi": {
+        "apri": {
+          "titolo": "Open the room",
+          "testo": "A title and a tap. You decide who can join: invite only, people studying at your university, or every student signed up to Prome."
+        },
+        "invita": {
+          "titolo": "Invite who you want",
+          "testo": "A link valid for seven days. Whoever joins finds chat, audio and materials already organised by topic."
+        },
+        "studiate": {
+          "titolo": "Study together",
+          "testo": "Everyone with their own permissions: speak, write, upload. Anyone who prefers to just listen can, and that is fine."
+        }
+      }
+    }
+  },
+  "sito": {
+    "nav": {
+      "esplora": "Explore",
+      "atenei": "Universities",
+      "argomenti": "Topics",
+      "guide": "Study guides",
+      "chiSiamo": "About"
+    },
+    "accedi": "Log in",
+    "registrati": "Sign up",
+    "registratiGratis": "Sign up free",
+    "iniziaGratis": "Start for free",
+    "scaricaApp": "Get the app",
+    "vediTutte": "See all",
+    "home": "Home",
+    "footer": {
+      "claim": "The study platform of Italian university students: board, study rooms and groups.",
+      "prodotto": "Product",
+      "esplora": "Explore",
+      "atenei": "Universities",
+      "risorse": "Resources",
+      "comeFunziona": "How it works",
+      "auleStudio": "Study rooms",
+      "gruppi": "Groups",
+      "appIos": "iOS app",
+      "appAndroid": "Android app",
+      "aulePubbliche": "How study rooms work",
+      "profili": "Study guides",
+      "gruppiPubblici": "How groups work",
+      "tuttiGliAtenei": "All universities",
+      "privacy": "Privacy",
+      "termini": "Terms",
+      "cookie": "Cookies",
+      "sitemap": "Sitemap",
+      "diritti": "© {anno} Prome · Bologna",
+      "argomenti": "Topics",
+      "guide": "Study guides",
+      "chiSiamo": "About"
+    },
+    "motto1": "A tribute to",
+    "motto2": "progress"
+  },
+  "pagine": {
+    "aula": {
+      "inCorso": "Live now",
+      "programmata": "Scheduled",
+      "entra": "Join now",
+      "apriApp": "Open in the app",
+      "boxTitolo": "Join the study room",
+      "boxTesto": "Free, you only need an account with your university email.",
+      "ateneo": "University",
+      "argomento": "Topic",
+      "iniziata": "Started",
+      "materiali": "Topics and shared materials",
+      "senzaArgomento": "No topic",
+      "avviso": "Full materials and live chat are visible after signing in.",
+      "faq": "Frequently asked questions",
+      "partecipantiEvidenza": "Featured participants",
+      "correlate": "Related study rooms",
+      "aperta": "Opened by"
+    },
+    "profilo": {
+      "segui": "Follow",
+      "messaggio": "Send a message",
+      "schede": {
+        "post": "Posts",
+        "aule": "Study rooms",
+        "materiali": "Materials"
+      },
+      "statistiche": {
+        "post": "Posts",
+        "aule": "Study rooms",
+        "materiali": "Materials",
+        "download": "Downloads"
+      },
+      "argomentiSeguiti": "Topics followed",
+      "gruppiPubblici": "Public groups"
+    },
+    "ateneo": {
+      "titolo": "{nome} on Prome",
+      "entra": "Sign in with your {breve} email",
+      "statistiche": {
+        "studenti": "Students on Prome",
+        "aule": "Study rooms this month",
+        "materiali": "Shared materials",
+        "gruppi": "Active groups"
+      },
+      "corsi": "Most active courses",
+      "aule": "{breve} study rooms",
+      "materiali": "Most downloaded materials",
+      "suQuesto": "About this university",
+      "altri": "Other universities",
+      "studenti": "{numero} students",
+      "conAule": "{numero} study rooms",
+      "elenco": {
+        "titolo": "Universities on Prome",
+        "sommario": "Every university has its own page: how many students use it and which courses are most active."
+      }
+    },
+    "argomento": {
+      "segui": "Follow this topic",
+      "comeSiStudia": "How to study {nome}",
+      "postUtili": "Most useful posts",
+      "auleSu": "Study rooms on {nome}",
+      "materiali": "Most downloaded materials",
+      "collegati": "Related topics",
+      "elenco": {
+        "titolo": "Topics",
+        "sommario": "The subjects Italian students study together on Prome."
+      }
+    },
+    "chiSiamo": {
+      "titolo": "We built what we were missing",
+      "sommario": "Prome was born in Bologna in 2024 from three students swapping notes across scattered chats, losing files, links and study sessions. Today it is the platform 28,000 Italian students organise with.",
+      "motto": {
+        "titolo": "A tribute to progress",
+        "p1": "Our motto is not a marketing slogan: it is how we decide what to build. Every feature must move someone forward, not keep them inside the app.",
+        "p2": "That is why there are no likes, no leaderboards and no invented notifications: only tools to study together and leave when you are done."
+      },
+      "sostegno": {
+        "titolo": "How we sustain ourselves",
+        "p1": "Prome is free for students and will stay that way. We are funded through agreements with universities that want collaborative study tools for their courses.",
+        "p2": "We do not sell data, we do not profile for advertising and we do not train models on your notes."
+      },
+      "statistiche": {
+        "studenti": "Active students",
+        "atenei": "Italian universities",
+        "aule": "Study rooms in 2026",
+        "dati": "Data sold"
+      },
+      "team": "The team",
+      "fotoTeam": "Team photo"
+    },
+    "guide": {
+      "titolo": "Study guides",
+      "sommario": "Method, organisation and exams told by the people sitting them. Written with the students who use Prome, without motivational fluff.",
+      "inEvidenza": "Featured",
+      "lettura": "{minuti} min read",
+      "immagine": "Article image",
+      "provaAula": {
+        "titolo": "Try it in a study room",
+        "testo": "There are {numero} open right now on study method."
+      }
+    },
+    "privacy": {
+      "titolo": "Privacy policy",
+      "vigore": "In force from 1 July 2026 · version 3.1",
+      "documenti": "Documents",
+      "inQuestaPagina": "On this page",
+      "inBreve": "In short, without legalese",
+      "contatto": {
+        "titolo": "Questions about your data?",
+        "testo": "Write to our data protection officer: we reply within 30 days as required by the GDPR."
+      },
+      "soloItaliano": "This document is available in Italian only."
+    }
+  },
+  "app": {
+    "nav": {
+      "bacheca": "Board",
+      "aule": "Study rooms",
+      "gruppi": "Groups",
+      "materiali": "Saved materials",
+      "profilo": "Profile",
+      "tuoiGruppi": "Your groups"
+    },
+    "nuovoPost": "New post",
+    "cerca": "Search posts, materials, study rooms…",
+    "notifiche": "Notifications",
+    "accesso": {
+      "titolo": "Enter Prome",
+      "sommario": "We email you a code. No password to remember.",
+      "primoAccesso": "If it's your first time, your account is created as you sign in: there's no separate sign-up.",
+      "email": "University email",
+      "inviaCodice": "Send me the code",
+      "codiceTitolo": "Check your inbox",
+      "codiceSommario": "We sent a 6-digit code to {email}.",
+      "codice": "6-digit code",
+      "codiceAiuto": "The field moves on by itself as you type.",
+      "entra": "Enter",
+      "cambiaEmail": "Change email",
+      "nonArrivato": "Didn't get it?",
+      "reinvia": "Send again",
+      "provaTitolo": "A tribute to <accento>progress</accento>",
+      "provaTesto": "Every week 28,000 students open a study room, share notes and help each other before exams."
+    },
+    "onboarding": {
+      "passo": "Step {corrente} of {totale}",
+      "titolo": "Where do you study?",
+      "sommario": "We need it to show you the board, study rooms and groups of your university. You can change it any time from your profile.",
+      "privacy": "We ask only for the essentials: name, university and course. We share nothing with third parties and we do not use your data for advertising.",
+      "comeLiUsiamo": "How we use them",
+      "universita": "University",
+      "cercaUniversita": "Search for your university",
+      "indietro": "Back",
+      "continua": "Continue",
+      "nonTrovi": "Can't find your university?",
+      "scrivicelo": "Tell us",
+      "nessunRisultato": "No university with that name."
+    },
+    "feed": {
+      "composer": "What do you want to share, {nome}?",
+      "pubblica": "Publish",
+      "filtri": {
+        "perTe": "For you",
+        "mioCorso": "My course",
+        "mioAteneo": "My university",
+        "mieiGruppi": "My groups"
+      },
+      "commenti": "{numero} comments",
+      "salva": "Save",
+      "condividi": "Share",
+      "apri": "Open",
+      "auleOra": "Study rooms now",
+      "tutte": "All",
+      "entra": "Join",
+      "argomentiCorso": "Topics of your course",
+      "appello": {
+        "titolo": "{materia} exam in {giorni} days",
+        "testo": "There are {numero} review study rooms this week.",
+        "azione": "See the calendar"
+      }
+    },
+    "post": {
+      "indietro": "Go back",
+      "titolo": "Post by {autore}",
+      "condividi": "Share",
+      "anteprima": "Preview",
+      "scarica": "Download",
+      "salvaMateriali": "Save to materials",
+      "commenti": "{numero} comments",
+      "ordine": "Most recent first",
+      "scriviCommento": "Write a comment…",
+      "invia": "Send",
+      "altriPost": "More posts on {argomento}"
+    },
+    "aule": {
+      "titolo": "Study rooms",
+      "cerca": "Search a study room",
+      "crea": "Create study room",
+      "inCorso": "Live now · {numero}",
+      "programmate": "Scheduled",
+      "entra": "Join",
+      "avvisami": "Notify me",
+      "modale": {
+        "titolo": "New study room",
+        "campoTitolo": "Title",
+        "segnaposto": "E.g. Calculus 2 · pre-exam review",
+        "chiPuoEntrare": "Who can join",
+        "programma": "Schedule for later",
+        "programmaAiuto": "Otherwise the room opens right away",
+        "colloca": "Place in a group",
+        "collocaAiuto": "Optional · the room appears in the chosen folder",
+        "nessuno": "None",
+        "nota": "You will be <forte>Moderator</forte>: you can manage Speak, Write and Upload for each participant.",
+        "annulla": "Cancel",
+        "apri": "Open the study room",
+        "programmaCta": "Schedule the study room",
+        "visibilita": {
+          "privato": "Invite only. It does not appear in searches.",
+          "ateneo": "Anyone studying at your university can find and join it.",
+          "pubblico": "Open to every student signed up to Prome."
+        }
+      }
+    },
+    "sala": {
+      "schede": {
+        "chat": "Chat",
+        "materiali": "Topics and materials",
+        "partecipanti": "Participants"
+      },
+      "invita": "Invite",
+      "apertaDa": "Opened by",
+      "nelGruppo": "in the group",
+      "scrivi": "Write in the study room…",
+      "invia": "Send",
+      "oggi": "Today",
+      "haCondiviso": "{nome} shared {file} in {argomento}",
+      "caricaMateriale": "Upload material",
+      "nuovoArgomento": "New topic",
+      "conteggioFile": "{numero} files · max 25 MB per attachment",
+      "senzaArgomento": "No topic",
+      "assegnaArgomento": "Assign a topic",
+      "numeroFile": "{numero} files",
+      "linkInvito": "Invite link",
+      "scadeIl": "expires on {data} (7 days)",
+      "copiaLink": "Copy link",
+      "rigenera": "Regenerate",
+      "tabella": {
+        "partecipante": "Participant",
+        "parlare": "Speak",
+        "scrivere": "Write",
+        "caricare": "Upload"
+      },
+      "moderatore": "Moderator",
+      "promuovi": "Promote",
+      "notaPermessi": "Every change is immediate: the person receives a system message in chat. Moderators always hold all three permissions.",
+      "solaLettura": "{nomi} is read-only: they can listen and read, without taking part.",
+      "solaLetturaPlurale": "{nomi} are read-only: they can listen and read, without taking part.",
+      "staParlando": "{nome} is speaking",
+      "audioFuori": "In audio: {dentro} of {totale} participants · you are not connected",
+      "audioDentro": "You are in audio · {numero} people connected",
+      "audioMuto": "You are in audio · microphone off",
+      "entraAudio": "Join the audio",
+      "esciAudio": "Leave the audio",
+      "microfonoAttivo": "Microphone on",
+      "microfonoSpento": "Microphone off",
+      "inAudio": "In audio · {numero}",
+      "soloChat": "Chat only · {numero}",
+      "tuoiPermessi": "Your permissions",
+      "tuoiPermessiTesto": "Speak · Write · Upload. You are a Moderator of this study room."
+    },
+    "gruppo": {
+      "schede": {
+        "cartelle": "Folders and materials",
+        "chat": "Group chat",
+        "membri": "Members",
+        "impostazioni": "Settings"
+      },
+      "invitaMembri": "Invite members",
+      "nuovaAula": "New study room",
+      "albero": "Folder tree",
+      "nuovaCartella": "New folder",
+      "profondita": "Up to 5 levels deep. You are at level {livello}.",
+      "auleInCartella": "Study rooms in this folder",
+      "apri": "Open",
+      "sottotitolo": "{membri} members · {ateneo} · {visibilita} group"
+    },
+    "impostazioni": {
+      "titolo": "Settings",
+      "nav": {
+        "profilo": "Profile",
+        "privacy": "Privacy",
+        "notifiche": "Notifications",
+        "aspetto": "Appearance",
+        "account": "Account and security",
+        "dati": "Data and downloads"
+      },
+      "modificaProfilo": "Edit profile",
+      "cambiaFoto": "Change photo",
+      "privacy": "Privacy",
+      "contatto": {
+        "titolo": "Who can contact you",
+        "testo": "Who can message you privately and invite you to study rooms and groups.",
+        "privato": "Only people already in your groups",
+        "ateneo": "Anyone studying at your university",
+        "pubblico": "Any student on Prome"
+      },
+      "contenuti": {
+        "titolo": "Who can see your content",
+        "testo": "Who sees your posts on the board, the materials you upload and your public profile on prome.app.",
+        "privato": "Only your groups.",
+        "ateneo": "Only people studying at your university",
+        "pubblico": "Every student signed up to Prome"
+      },
+      "aspetto": "Appearance and notifications",
+      "tema": "Theme",
+      "notifiche": {
+        "commenti": "Comments on your posts",
+        "commentiSub": "Email and in-app",
+        "inviti": "Invitations to study rooms and groups",
+        "invitiSub": "Email and in-app",
+        "promemoria": "Reminders for scheduled rooms",
+        "promemoriaSub": "10 minutes before",
+        "materiali": "New materials in your groups",
+        "materialiSub": "Daily digest"
+      },
+      "account": "Account",
+      "scaricaDati": "Download your data",
+      "archivioCompleto": "Complete archive",
+      "esciDaTutti": "Sign out of all devices",
+      "elimina": {
+        "titolo": "Delete account",
+        "testo": "Your profile disappears immediately. Your posts and comments stay useful to those who study but become anonymous (“Removed user”), and personal data is deleted from backups too within 30 days. If you change your mind, you can reactivate the account within 14 days by signing in again.",
+        "azione": "Delete my account",
+        "pausa": "Prefer a break?",
+        "disattiva": "Deactivate temporarily"
+      }
+    }
+  }
+}

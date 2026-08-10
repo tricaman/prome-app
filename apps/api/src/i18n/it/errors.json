@@ -1,0 +1,16 @@
+{
+  "INTERNAL_SERVER_ERROR": "Errore interno del server",
+  "BAD_REQUEST": "Richiesta non valida",
+  "UNAUTHORIZED": "Accesso non autorizzato",
+  "FORBIDDEN": "Accesso negato",
+  "RESOURCE_NOT_FOUND": "Risorsa non trovata",
+  "METHOD_NOT_ALLOWED": "Metodo non consentito",
+  "CONFLICT": "Conflitto di risorse",
+  "PAYLOAD_TOO_LARGE": "Contenuto troppo grande",
+  "VALIDATION_ERROR": "Errore di validazione",
+  "TOO_MANY_REQUESTS": "Troppe richieste, riprova tra poco",
+  "SERVICE_UNAVAILABLE": "Servizio momentaneamente non disponibile",
+
+  "PROFILO_NOT_FOUND": "Profilo non trovato",
+  "ONBOARDING_INCOMPLETO": "Completa l'onboarding per continuare"
+}

@@ -1,0 +1,377 @@
+/*
+ * FILE GENERATO — non modificare a mano.
+ * Sorgente: packages/design-tokens/src · rigenera con
+ * `pnpm --filter @prome/design-tokens build`.
+ */
+
+@theme {
+  /* Rampe complete: bg-primary-500, text-neutral-700, ... */
+  --color-riempimento-1: #B4F8ED;
+  --color-riempimento-2: #FFE9AE;
+  --color-riempimento-3: #DADFE7;
+  --color-riempimento-4: #DAFCF6;
+  --color-riempimento-5: #B9D9F5;
+  --color-riempimento-testo: #181D25;
+  --color-primary-50: #ECFDFA;
+  --color-primary-100: #DAFCF6;
+  --color-primary-200: #B4F8ED;
+  --color-primary-300: #8FF5E4;
+  --color-primary-400: #6AF1DB;
+  --color-primary-500: #32E0C4;
+  --color-primary-600: #15E0BE;
+  --color-primary-700: #10A88F;
+  --color-primary-800: #0A705F;
+  --color-primary-900: #053830;
+  --color-neutral-50: #F8FAFC;
+  --color-neutral-100: #F0F2F5;
+  --color-neutral-200: #DADFE7;
+  --color-neutral-300: #A9B5C6;
+  --color-neutral-400: #6C809D;
+  --color-neutral-500: #647697;
+  --color-neutral-600: #5A6C87;
+  --color-neutral-700: #394556;
+  --color-neutral-800: #313B49;
+  --color-neutral-900: #181D25;
+  --color-success-50: #ECFDF5;
+  --color-success-100: #D1FAE5;
+  --color-success-200: #A7F3D0;
+  --color-success-300: #6EE7B7;
+  --color-success-400: #34D399;
+  --color-success-500: #10B981;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
+  --color-success-800: #065F46;
+  --color-success-900: #064E3B;
+  --color-warning-50: #FFFBEB;
+  --color-warning-100: #FEF3C7;
+  --color-warning-200: #FDE68A;
+  --color-warning-300: #FFCE30;
+  --color-warning-400: #FBBF24;
+  --color-warning-500: #F59E0B;
+  --color-warning-600: #D49100;
+  --color-warning-700: #B45309;
+  --color-warning-800: #92400E;
+  --color-warning-900: #78350F;
+  --color-danger-50: #FFF1F2;
+  --color-danger-100: #FFE4E6;
+  --color-danger-200: #FECDD3;
+  --color-danger-300: #FDA4AF;
+  --color-danger-400: #FB7185;
+  --color-danger-500: #F43F5E;
+  --color-danger-600: #E11D48;
+  --color-danger-700: #BE123C;
+  --color-danger-800: #9F1239;
+  --color-danger-900: #881337;
+  --color-info-50: #EEF2FF;
+  --color-info-100: #E0E7FF;
+  --color-info-200: #C7D2FE;
+  --color-info-300: #A5B4FC;
+  --color-info-400: #818CF8;
+  --color-info-500: #6366F1;
+  --color-info-600: #4F46E5;
+  --color-info-700: #4338CA;
+  --color-info-800: #3730A3;
+  --color-info-900: #312E81;
+  --color-nero: #212121;
+  --color-bianco: #FFFFFF;
+
+  /* Ombre morbide e diffuse: l'identità "soffice" del prodotto. */
+  --shadow-sm: 0 2px 10px rgb(24 29 37 / 0.04);
+  --shadow-md: 0 8px 20px -10px rgb(24 29 37 / 0.25);
+  --shadow-lg: 0 20px 44px -22px rgb(24 29 37 / 0.35);
+  --shadow-xl: 0 26px 60px -26px rgb(24 29 37 / 0.45);
+  --shadow-marchio: 0 10px 24px -12px rgb(21 224 190 / 0.95);
+
+  /* I font sono iniettati dal layout; il fallback resta di sistema.
+     Testo corrente e titoli hanno due famiglie distinte: i titoli usano una
+     grottesca più tonda e pesante, il corpo una più neutra e leggibile. */
+  --font-sans: var(--font-corpo), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-titoli), var(--font-corpo), ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * Ruoli semantici — tema chiaro (predefinito).
+ *
+ * La doppia `:root` non è un vezzo: alza la specificità quel tanto che basta
+ * per vincere sulle variabili della libreria di componenti, che vengono
+ * emesse dopo le nostre e a parità di peso avrebbero l'ultima parola.
+ */
+:root:root,
+:root:root.light,
+:root:root[data-theme='light'] {
+  color-scheme: light;
+  /* Raggio di base della libreria: da qui deriva anche quello dei campi
+     (una volta e mezza), che porta gli input ai 15px del disegno. */
+  --radius: 10px;
+  /* I campi della libreria nascono senza bordo; nel disegno il bordo c'è ed
+     è ciò che li rende riconoscibili come "qui si scrive". */
+  --field-border-width: 1px;
+  --sfondo: #F7F9FB;
+  --background: #F7F9FB;
+  --testo: #181D25;
+  --foreground: #181D25;
+  --surface-foreground: #181D25;
+  --surface-secondary-foreground: #181D25;
+  --surface-tertiary-foreground: #181D25;
+  --overlay-foreground: #181D25;
+  --default-foreground: #181D25;
+  --segment-foreground: #181D25;
+  --testo-corpo: #394556;
+  --testo-tenue: #5A6C87;
+  --muted: #5A6C87;
+  --testo-didascalia: #6C809D;
+  --testo-debole: #A9B5C6;
+  --superficie: #FFFFFF;
+  --surface: #FFFFFF;
+  --superficie-alt: #F7F9FB;
+  --surface-secondary: #F7F9FB;
+  --default: #F7F9FB;
+  --segment: #F7F9FB;
+  --superficie-alt-2: #F0F2F5;
+  --surface-tertiary: #F0F2F5;
+  --sovrapposizione: #FFFFFF;
+  --overlay: #FFFFFF;
+  --segnaposto: #DADFE7;
+  --segnaposto-fondo: #A9B5C6;
+  --superficie-inversa: #181D25;
+  --superficie-inversa-testo: #FFFFFF;
+  --superficie-inversa-tenue: #A9B5C6;
+  --superficie-inversa-debole: #647697;
+  --superficie-inversa-bordo: #313B49;
+  --campo: #FFFFFF;
+  --field-background: #FFFFFF;
+  --campo-testo: #181D25;
+  --field-foreground: #181D25;
+  --campo-segnaposto: #A9B5C6;
+  --field-placeholder: #A9B5C6;
+  --bordo: #E6EAF0;
+  --border: #E6EAF0;
+  --separator: #E6EAF0;
+  --scrollbar-thumb: #E6EAF0;
+  --bordo-forte: #DADFE7;
+  --field-border: #DADFE7;
+  --primario: #32E0C4;
+  --accent: #32E0C4;
+  --focus: #32E0C4;
+  --primario-testo: #053830;
+  --accent-foreground: #053830;
+  --primario-tenue: #ECFDFA;
+  --primario-accento: #0A705F;
+  --primario-collegamento: #10A88F;
+  --link: #10A88F;
+  --successo: #059669;
+  --success: #059669;
+  --successo-testo: #FFFFFF;
+  --success-foreground: #FFFFFF;
+  --successo-tenue: #ECFDF5;
+  --avviso: #FFCE30;
+  --warning: #FFCE30;
+  --avviso-testo: #212121;
+  --warning-foreground: #212121;
+  --avviso-tenue: #FFFBEB;
+  --errore: #E11D48;
+  --danger: #E11D48;
+  --errore-testo: #FFFFFF;
+  --danger-foreground: #FFFFFF;
+  --errore-tenue: #FFF1F2;
+  --info: #4F46E5;
+  --info-testo: #FFFFFF;
+  --info-tenue: #EEF2FF;
+  --velo: rgb(24 29 37 / 0.45);
+  --backdrop: rgb(24 29 37 / 0.45);
+  --tinta-menta: #DAFCF6;
+  --tinta-menta-testo: #0A705F;
+  --tinta-menta-velo: #F4FEFC;
+  --tinta-menta-bordo: #B4F8ED;
+  --tinta-ambra: #FFF6DC;
+  --tinta-ambra-testo: #6B5700;
+  --tinta-ambra-velo: #FFFCF2;
+  --tinta-ambra-bordo: #FFE9AE;
+  --tinta-rosa: #FFE4E8;
+  --tinta-rosa-testo: #B4213A;
+  --tinta-rosa-velo: #FFF5F6;
+  --tinta-rosa-bordo: #FFD4DB;
+  --tinta-blu: #DFF0FF;
+  --tinta-blu-testo: #1E5AA8;
+  --tinta-blu-velo: #F5FAFF;
+  --tinta-blu-bordo: #B9D9F5;
+  --tinta-verde: #E4F7E4;
+  --tinta-verde-testo: #1F6B2A;
+  --tinta-verde-velo: #F4FCF4;
+  --tinta-verde-bordo: #C9EFC9;
+  --tinta-neutra: #F0F2F5;
+  --tinta-neutra-testo: #5A6C87;
+  --tinta-neutra-velo: #F7F9FB;
+  --tinta-neutra-bordo: #DADFE7;
+}
+
+/* Ruoli semantici — tema scuro (più specifico del chiaro, quindi lo sostituisce) */
+:root:root.dark,
+:root:root[data-theme='dark'] {
+  color-scheme: dark;
+  --sfondo: #14181F;
+  --background: #14181F;
+  --testo: #F5F8FA;
+  --foreground: #F5F8FA;
+  --surface-foreground: #F5F8FA;
+  --surface-secondary-foreground: #F5F8FA;
+  --surface-tertiary-foreground: #F5F8FA;
+  --overlay-foreground: #F5F8FA;
+  --default-foreground: #F5F8FA;
+  --segment-foreground: #F5F8FA;
+  --testo-corpo: #DADFE7;
+  --testo-tenue: #A9B5C6;
+  --muted: #A9B5C6;
+  --testo-didascalia: #8095B0;
+  --testo-debole: #647697;
+  --superficie: #1D242E;
+  --surface: #1D242E;
+  --superficie-alt: #161C24;
+  --surface-secondary: #161C24;
+  --default: #161C24;
+  --segment: #161C24;
+  --superficie-alt-2: #262F3C;
+  --surface-tertiary: #262F3C;
+  --sovrapposizione: #1D242E;
+  --overlay: #1D242E;
+  --segnaposto: #313B49;
+  --segnaposto-fondo: #181D25;
+  --superficie-inversa: #0F1319;
+  --superficie-inversa-testo: #F5F8FA;
+  --superficie-inversa-tenue: #A9B5C6;
+  --superficie-inversa-debole: #647697;
+  --superficie-inversa-bordo: #262F3C;
+  --campo: #1D242E;
+  --field-background: #1D242E;
+  --campo-testo: #F5F8FA;
+  --field-foreground: #F5F8FA;
+  --campo-segnaposto: #8095B0;
+  --field-placeholder: #8095B0;
+  --bordo: #262F3C;
+  --border: #262F3C;
+  --separator: #262F3C;
+  --scrollbar-thumb: #262F3C;
+  --bordo-forte: #2E3A48;
+  --field-border: #2E3A48;
+  --primario: #32E0C4;
+  --accent: #32E0C4;
+  --focus: #32E0C4;
+  --primario-testo: #053830;
+  --accent-foreground: #053830;
+  --primario-tenue: rgb(50 224 196 / 0.14);
+  --primario-accento: #32E0C4;
+  --primario-collegamento: #32E0C4;
+  --link: #32E0C4;
+  --successo: #34D399;
+  --success: #34D399;
+  --successo-testo: #181D25;
+  --success-foreground: #181D25;
+  --successo-tenue: rgb(16 185 129 / 0.16);
+  --avviso: #FFCE30;
+  --warning: #FFCE30;
+  --avviso-testo: #212121;
+  --warning-foreground: #212121;
+  --avviso-tenue: rgb(255 206 48 / 0.14);
+  --errore: #FB7185;
+  --danger: #FB7185;
+  --errore-testo: #181D25;
+  --danger-foreground: #181D25;
+  --errore-tenue: rgb(244 63 94 / 0.16);
+  --info: #818CF8;
+  --info-testo: #181D25;
+  --info-tenue: rgb(99 102 241 / 0.18);
+  --velo: rgb(8 11 15 / 0.72);
+  --backdrop: rgb(8 11 15 / 0.72);
+  --tinta-menta: rgb(50 224 196 / 0.14);
+  --tinta-menta-testo: #8FF5E4;
+  --tinta-menta-velo: rgb(50 224 196 / 0.07);
+  --tinta-menta-bordo: rgb(50 224 196 / 0.3);
+  --tinta-ambra: rgb(255 206 48 / 0.14);
+  --tinta-ambra-testo: #FFCE30;
+  --tinta-ambra-velo: rgb(255 206 48 / 0.07);
+  --tinta-ambra-bordo: rgb(255 206 48 / 0.28);
+  --tinta-rosa: rgb(244 63 94 / 0.16);
+  --tinta-rosa-testo: #FF8A9B;
+  --tinta-rosa-velo: rgb(244 63 94 / 0.08);
+  --tinta-rosa-bordo: rgb(244 63 94 / 0.3);
+  --tinta-blu: rgb(99 102 241 / 0.18);
+  --tinta-blu-testo: #A5B4FC;
+  --tinta-blu-velo: rgb(99 102 241 / 0.08);
+  --tinta-blu-bordo: rgb(99 102 241 / 0.32);
+  --tinta-verde: rgb(16 185 129 / 0.16);
+  --tinta-verde-testo: #6EE7B7;
+  --tinta-verde-velo: rgb(16 185 129 / 0.08);
+  --tinta-verde-bordo: rgb(16 185 129 / 0.3);
+  --tinta-neutra: #262F3C;
+  --tinta-neutra-testo: #A9B5C6;
+  --tinta-neutra-velo: #1D242E;
+  --tinta-neutra-bordo: #2E3A48;
+}
+
+/* I ruoli diventano utility: bg-sfondo, text-testo-tenue, border-bordo, ... */
+@theme inline {
+  --color-sfondo: var(--sfondo);
+  --color-testo: var(--testo);
+  --color-testo-corpo: var(--testo-corpo);
+  --color-testo-tenue: var(--testo-tenue);
+  --color-testo-didascalia: var(--testo-didascalia);
+  --color-testo-debole: var(--testo-debole);
+  --color-superficie: var(--superficie);
+  --color-superficie-alt: var(--superficie-alt);
+  --color-superficie-alt-2: var(--superficie-alt-2);
+  --color-sovrapposizione: var(--sovrapposizione);
+  --color-segnaposto: var(--segnaposto);
+  --color-segnaposto-fondo: var(--segnaposto-fondo);
+  --color-superficie-inversa: var(--superficie-inversa);
+  --color-superficie-inversa-testo: var(--superficie-inversa-testo);
+  --color-superficie-inversa-tenue: var(--superficie-inversa-tenue);
+  --color-superficie-inversa-debole: var(--superficie-inversa-debole);
+  --color-superficie-inversa-bordo: var(--superficie-inversa-bordo);
+  --color-campo: var(--campo);
+  --color-campo-testo: var(--campo-testo);
+  --color-campo-segnaposto: var(--campo-segnaposto);
+  --color-bordo: var(--bordo);
+  --color-bordo-forte: var(--bordo-forte);
+  --color-primario: var(--primario);
+  --color-primario-testo: var(--primario-testo);
+  --color-primario-tenue: var(--primario-tenue);
+  --color-primario-accento: var(--primario-accento);
+  --color-primario-collegamento: var(--primario-collegamento);
+  --color-successo: var(--successo);
+  --color-successo-testo: var(--successo-testo);
+  --color-successo-tenue: var(--successo-tenue);
+  --color-avviso: var(--avviso);
+  --color-avviso-testo: var(--avviso-testo);
+  --color-avviso-tenue: var(--avviso-tenue);
+  --color-errore: var(--errore);
+  --color-errore-testo: var(--errore-testo);
+  --color-errore-tenue: var(--errore-tenue);
+  --color-info: var(--info);
+  --color-info-testo: var(--info-testo);
+  --color-info-tenue: var(--info-tenue);
+  --color-velo: var(--velo);
+  --color-tinta-menta: var(--tinta-menta);
+  --color-tinta-menta-testo: var(--tinta-menta-testo);
+  --color-tinta-menta-velo: var(--tinta-menta-velo);
+  --color-tinta-menta-bordo: var(--tinta-menta-bordo);
+  --color-tinta-ambra: var(--tinta-ambra);
+  --color-tinta-ambra-testo: var(--tinta-ambra-testo);
+  --color-tinta-ambra-velo: var(--tinta-ambra-velo);
+  --color-tinta-ambra-bordo: var(--tinta-ambra-bordo);
+  --color-tinta-rosa: var(--tinta-rosa);
+  --color-tinta-rosa-testo: var(--tinta-rosa-testo);
+  --color-tinta-rosa-velo: var(--tinta-rosa-velo);
+  --color-tinta-rosa-bordo: var(--tinta-rosa-bordo);
+  --color-tinta-blu: var(--tinta-blu);
+  --color-tinta-blu-testo: var(--tinta-blu-testo);
+  --color-tinta-blu-velo: var(--tinta-blu-velo);
+  --color-tinta-blu-bordo: var(--tinta-blu-bordo);
+  --color-tinta-verde: var(--tinta-verde);
+  --color-tinta-verde-testo: var(--tinta-verde-testo);
+  --color-tinta-verde-velo: var(--tinta-verde-velo);
+  --color-tinta-verde-bordo: var(--tinta-verde-bordo);
+  --color-tinta-neutra: var(--tinta-neutra);
+  --color-tinta-neutra-testo: var(--tinta-neutra-testo);
+  --color-tinta-neutra-velo: var(--tinta-neutra-velo);
+  --color-tinta-neutra-bordo: var(--tinta-neutra-bordo);
+}

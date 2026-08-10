@@ -1,0 +1,26 @@
+{
+  "name": "@prome/design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Token del design system di Prome: unica fonte di verità di colori, spaziature, raggi, tipografia e ombre. Consumati da web (CSS generato) e mobile (oggetto TS).",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./sorgente": "./src/index.ts",
+    "./tokens.css": "./tokens.css"
+  },
+  "files": ["dist", "src", "tokens.css"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node dist/scripts/genera-css.js",
+    "tokens:build": "pnpm build",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}

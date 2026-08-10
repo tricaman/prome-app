@@ -1,0 +1,25 @@
+{
+  "name": "@prome/i18n",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cataloghi di traduzione e negoziazione della lingua, condivisi tra web e mobile. Lingue: italiano e inglese, ripiego su inglese.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./messaggi/it": "./src/messaggi/it.json",
+    "./messaggi/en": "./src/messaggi/en.json"
+  },
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}
