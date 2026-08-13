@@ -13,7 +13,12 @@ const nextConfig: NextConfig = {
   // che servono davvero a servire il sito, con le sole dipendenze usate.
   // Senza, il contenitore si porterebbe dietro l'intero node_modules del
   // monorepo — centinaia di megabyte di roba che non gira mai.
-  output: 'standalone',
+  //
+  // Serve però **solo** a chi costruisce l'immagine, ed è una richiesta
+  // esplicita: le piattaforme che tracciano i file per conto loro (Vercel)
+  // con `standalone` non trovano quello che si aspettano e la build muore
+  // dopo aver generato tutte le pagine. Chi vuole l'output autonomo lo dice.
+  output: process.env.BUILD_AUTONOMA === '1' ? 'standalone' : undefined,
   experimental: {
     optimizePackageImports: ['@heroui/react'],
   },

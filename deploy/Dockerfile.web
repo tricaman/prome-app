@@ -30,6 +30,11 @@ ARG NEXT_PUBLIC_URL_API
 ENV NEXT_PUBLIC_URL_API=${NEXT_PUBLIC_URL_API}
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Qui l'output autonomo lo vogliamo davvero: è ciò che la fase successiva
+# copia. Se un giorno sparisse questa riga, la COPY più sotto fallirebbe
+# subito — un guasto rumoroso, non un'immagine grassa che nessuno nota.
+ENV BUILD_AUTONOMA=1
+
 # Un comando solo: la build del web costruisce da sé i pacchetti da cui
 # dipende. Elencarli qui li terrebbe in un secondo posto, e una dipendenza
 # aggiunta domani si ricorderebbe di aggiornarne uno solo.
