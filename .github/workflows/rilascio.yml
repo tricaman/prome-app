@@ -144,37 +144,34 @@ jobs:
             --exclude '.env' \
             deploy/ ${{ secrets.SSH_UTENTE }}@${{ secrets.SSH_HOST }}:/home/deploy/prome/deploy/
 
+      # Il gettone passa dallo stdin di ssh direttamente a `docker login`, così
+      # non compare nella riga di comando — dove chiunque sulla macchina lo
+      # leggerebbe con un `ps`. Dura quanto questo lavoro: sulla macchina non
+      # resta nessun segreto di lunga durata.
+      - name: Credenziali del registro sulla macchina
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+            | ssh -i ~/.ssh/id_rilascio ${{ secrets.SSH_UTENTE }}@${{ secrets.SSH_HOST }} \
+                "sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin"
+
+      # I comandi stanno in `deploy/rilascia.sh`, appena sincronizzato, e non
+      # nello stdin di ssh: `docker compose run` legge lo stdin per conto suo e
+      # si porterebbe via le righe successive: il rilascio finirebbe in verde
+      # senza aver avviato niente. `</dev/null` toglie la tentazione a monte.
       - name: Rilascia
         run: |
-          ssh -i ~/.ssh/id_rilascio ${{ secrets.SSH_UTENTE }}@${{ secrets.SSH_HOST }} bash -s <<'FINE'
-            set -euo pipefail
-            cd /home/deploy/prome/deploy
+          ssh -i ~/.ssh/id_rilascio ${{ secrets.SSH_UTENTE }}@${{ secrets.SSH_HOST }} \
+            "bash /home/deploy/prome/deploy/rilascia.sh \
+               ${{ github.sha }} ${{ env.IMMAGINE_API }} ${{ env.IMMAGINE_WEB }}" \
+            </dev/null
 
-            # Credenziali usa e getta: il gettone dura quanto questo lavoro, e
-            # sulla macchina non resta nessun segreto di lunga durata.
-            echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            # Quale immagine e quale versione: il compose non le indovina, e
-            # senza queste tre righe tirerebbe giù un nome che nel registro
-            # non esiste.
-            export VERSIONE=${{ github.sha }}
-            export IMMAGINE_API=${{ env.IMMAGINE_API }}
-            export IMMAGINE_WEB=${{ env.IMMAGINE_WEB }}
-
-            sudo -E docker compose -f docker-compose.prod.yml pull api web
-            sudo -E docker compose -f docker-compose.prod.yml up -d --no-deps postgres
-
-            # Le migrazioni PRIMA di far girare il codice nuovo, con l'immagine
-            # nuova: uno schema indietro rispetto al codice che lo usa è il
-            # modo più rapido di far cadere tutto.
-            sudo -E docker compose -f docker-compose.prod.yml run --rm api npx prisma migrate deploy
-
-            sudo -E docker compose -f docker-compose.prod.yml up -d
-            sudo docker logout ghcr.io
-
-            # Le immagini vecchie si accumulano: 38 GB si riempiono in fretta.
-            sudo docker image prune -f --filter "until=168h"
-          FINE
+      # Anche quando il rilascio fallisce, anzi soprattutto allora: le
+      # credenziali del registro non devono restare sulla macchina.
+      - name: Togli le credenziali dalla macchina
+        if: always()
+        run: |
+          ssh -i ~/.ssh/id_rilascio ${{ secrets.SSH_UTENTE }}@${{ secrets.SSH_HOST }} \
+            "sudo docker logout ghcr.io" </dev/null
 
       - name: Verifica che risponda davvero
         run: |

@@ -22,22 +22,18 @@ Le due unità dell'API escono dalla **stessa build** e si distinguono per config
 
 ## Pubblicare una versione
 
+**Si pubblica facendo `push` su `main`.** `.github/workflows/rilascio.yml` verifica, costruisce le immagini su ghcr etichettate con lo sha del commit, e le rilascia. Le immagini si costruiscono in CI e non sulla macchina, che ha due core e nel frattempo serve traffico.
+
+A mano, quando serve — per riprovare, o per tornare a una versione precedente:
+
 ```bash
-# dal Mac: sincronizza il sorgente (esclude node_modules, .env, build)
-rsync -az --delete --exclude node_modules --exclude .next --exclude dist \
-  --exclude .git --exclude .env --exclude apps/mobile --exclude documentation \
-  ./ prome-prod:/home/deploy/prome/
-
 ssh prome-prod
-cd /home/deploy/prome
-sudo docker build -f deploy/Dockerfile.api -t prome-api:latest .
-sudo docker build -f deploy/Dockerfile.web \
-  --build-arg NEXT_PUBLIC_URL_API=https://api.prome.app -t prome-web:latest .
-
-cd deploy
-sudo docker compose -f docker-compose.prod.yml up -d
-sudo docker compose -f docker-compose.prod.yml exec -T api npx prisma migrate deploy
+cd /home/deploy/prome/deploy
+sudo docker login ghcr.io -u <utente>          # gettone con lettura dei package
+./rilascia.sh <sha> ghcr.io/tricaman/prome-app/api ghcr.io/tricaman/prome-app/web
 ```
+
+`rilascia.sh` è lo stesso script che usa la pipeline: tira giù le immagini, applica le migrazioni **prima** del codice nuovo, avvia, e alla fine **controlla che i container girino davvero sulla versione richiesta**. Quel controllo non è cerimonia: un rilascio che non sostituisce niente ma finisce in verde è peggio di uno rosso, e ci è già successo.
 
 L'indirizzo dell'API è un **argomento di build** e non una variabile del contenitore: finisce dentro il JavaScript che gira nel browser, quindi cambiarlo dopo non avrebbe effetto.
 
@@ -102,6 +98,5 @@ VERSIONE=2026-08-13-1 sudo docker compose -f docker-compose.prod.yml up -d
 
 - **DNS**: `api.prome.app` e il dominio del sito devono risolvere a `46.224.215.1` **prima** di avviare Caddy, altrimenti la richiesta del certificato fallisce e si finisce nei limiti di frequenza di Let's Encrypt.
 - **SMTP**: senza credenziali nessuno riceve il codice, quindi nessuno entra. Vale qualunque fornitore: l'adattatore è uno solo.
-- **`prome.app` punta ancora a Vercel** (il sistema vecchio). Lo spostamento è il *cutover* previsto dal piano e va fatto di proposito, non di sorpresa.
-- **Nessun controllo di versione**: il repository non è sotto git, quindi pubblicare non ha un punto a cui tornare che non sia una copia del sorgente.
+- **`prome.app` punta ancora a Vercel**, che serve una versione vecchia con dentro `localhost:3600` come indirizzo dell'API: il sito si vede, ma nessuna chiamata arriva da nessuna parte. Finché resta lì servono `NEXT_PUBLIC_URL_API` e `NEXT_PUBLIC_URL_SITO` fra le variabili del progetto Vercel, e `DOMINIO_WEB` sulla macchina deve corrispondere all'origine vera, altrimenti il CORS blocca tutto.
 - **Firewall**: SSH è aperto al mondo e prende migliaia di tentativi al giorno. Restringerlo nel pannello Hetzner al solo IP di chi amministra è più solido di fail2ban, perché blocca prima che sshd veda il pacchetto.
