@@ -25,5 +25,5 @@
 # motori di ricerca ne vedrebbero due copie. Qui `www` non serve niente,
 # rimanda — e lo fa con un 308, che è permanente e non cambia il metodo.
 www.{$DOMINIO_WEB} {
-	redir https://{$DOMINIO_WEB}{uri} permanent
+	redir https://{$DOMINIO_WEB}{uri} 308
 }
