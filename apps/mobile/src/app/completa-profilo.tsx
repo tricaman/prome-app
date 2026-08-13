@@ -4,7 +4,8 @@ import { router } from 'expo-router';
 import { ATENEI } from '@prome/contenuti';
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
-import { useT } from '@/hooks';
+import { completaMioProfilo, type CompletaProfiloDto } from '@prome/api-client';
+import { useApiMutation, useT } from '@/hooks';
 import { Button, Card, Icona, Input, Intestazione, Screen, Text } from '@/components/ui';
 
 const PASSI_TOTALI = 3;
@@ -42,12 +43,29 @@ export default function SchermataProfilo() {
     (passo === 2 && ateneo) ||
     (passo === 3 && corso.trim());
 
+  /**
+   * I passi sono tre, la scrittura è una.
+   *
+   * Il server considera l'onboarding completo se e solo se ci sono tutti e
+   * quattro i dati, quindi non ha senso mandarli man mano: si raccolgono e si
+   * scrivono insieme all'ultimo passo.
+   */
+  const completa = useApiMutation<unknown, CompletaProfiloDto>({
+    mutationFn: (dati: CompletaProfiloDto) => completaMioProfilo(dati),
+    onSuccess: () => router.replace(rotte.bacheca()),
+  });
+
   const avanti = () => {
     if (passo < PASSI_TOTALI) {
       setPasso((corrente) => corrente + 1);
       return;
     }
-    router.replace(rotte.notifiche());
+    completa.mutate({
+      nome: nome.trim(),
+      cognome: cognome.trim(),
+      universita: ateneo ?? '',
+      corso: corso.trim(),
+    });
   };
 
   const indietro = () => {
@@ -140,13 +158,13 @@ export default function SchermataProfilo() {
                 </View>
               ) : (
                 risultati.map((voce, indice) => {
-                  const scelto = voce.slug === ateneo;
+                  const scelto = voce.nome === ateneo;
                   return (
                     <Pressable
                       key={voce.slug}
                       accessibilityRole="radio"
                       accessibilityState={{ selected: scelto }}
-                      onPress={() => setAteneo(voce.slug)}
+                      onPress={() => setAteneo(voce.nome)}
                       style={{
                         flexDirection: 'row',
                         alignItems: 'center',

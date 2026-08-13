@@ -30,11 +30,15 @@ Convenzioni per contribuire: [apps/api/CLAUDE.md](apps/api/CLAUDE.md), [apps/web
 
 **Visibilità** — un'aula studio o un gruppo può essere Privato, Ateneo o Pubblico, e **"Pubblico" vuol dire aperto a tutti gli studenti iscritti**, non al web. Nessun contenuto degli utenti — aule, post, commenti, materiali, profili, gruppi — è raggiungibile senza un account né indicizzato: il sito pubblico racconta il prodotto, l'app contiene i contenuti.
 
-**Accesso** — **unificato, email + codice OTP. Non esistono password**, e non esiste una registrazione separata: si scrive l'email, arriva un codice a sei cifre, si entra; se l'account non c'era nasce lì, e l'onboarding (nome, cognome, università, corso) segue. Niente accessi social, niente "password dimenticata", niente "cambia password" nelle impostazioni — se una schermata li propone, è un residuo da togliere.
+**Accesso** — **unificato, email + codice OTP (Better Auth). Non esistono password**, e non esiste una registrazione separata: si scrive l'email, arriva un codice a sei cifre, si entra; se l'account non c'era nasce lì, e l'onboarding (nome, cognome, università, corso) segue. Niente accessi social, niente "password dimenticata", niente "cambia password" nelle impostazioni — se una schermata li propone, è un residuo da togliere.
 
 **Tema** — chiaro e scuro, entrambi definiti nel disegno. Segue l'impostazione di sistema e si può forzare; i valori stanno una volta sola in `@prome/design-tokens` e diventano CSS per il web e oggetto TS per il mobile.
 
 **Lingua** — italiano e inglese. Il client rileva la lingua da browser o dispositivo e ripiega sull'inglese; la manda a ogni richiesta (`x-lang`) e l'API risponde con messaggi già tradotti. **I client non traducono mai i messaggi del server.**
+
+**Allegati** — si dichiarano tipo e dimensione, si riceve un'autorizzazione firmata, si caricano i byte **direttamente all'archivio** e poi si pubblica citando le chiavi: PDF, immagini e file di testo, fino a 25 MB. Finché il fornitore di archiviazione non è scelto l'adattatore scrive su disco, con lo stesso flusso firmato.
+
+**Bacheca** — post con allegati, modificabili ed eliminabili dal solo autore; commenti piatti, moderati da chi ha scritto il commento e da chi ha scritto il post. Il feed è cronologico, paginato a scorrimento, e **chi vede cosa si decide alla lettura** dalle impostazioni di privacy dell'autore: cambiarle vale subito su tutto ciò che si è già pubblicato.
 
 **Errori** — ogni errore esce dall'API come `{ statusCode, errorCode, message, errorId, timestamp, details? }`: `errorCode` individua il punto esatto nel codice, `errorId` correla la segnalazione dell'utente con i log, `details` porta gli errori di validazione campo per campo (che i form mostrano sotto ai campi giusti).
 
@@ -52,18 +56,18 @@ Postgres 16 con **schemi disgiunti per bounded context** (`profilo`, `bacheca`, 
 pnpm install            # installa tutto il workspace
 cp .env.example .env    # configura l'ambiente (l'API fa fail-fast se manca qualcosa)
 
-pnpm db:up              # Postgres 16 in Docker (localhost:5432, prome/prome)
+pnpm db:up              # Postgres 16 in Docker (localhost:6400, prome/prome)
 pnpm db:migrate         # applica le migration
 
-pnpm dev:api            # API su :3001 (unità "app") — /docs per la documentazione OpenAPI
+pnpm dev:api            # API su :3600 (unità "app") — /docs per la documentazione OpenAPI
 pnpm dev:worker         # unità "worker" (stessa codebase, APP_ROLE=worker)
-pnpm dev:web            # web su :3000
+pnpm dev:web            # web su :3500
 pnpm dev:mobile         # Expo
 
 pnpm api:client         # rigenera il client dall'OpenAPI: DOPO ogni modifica agli endpoint
 pnpm typecheck          # typecheck di tutto il workspace
 pnpm build              # build di tutto il workspace (in ordine di dipendenza)
-pnpm --filter @prome/api test
+pnpm --filter @prome/api test   # richiede il database avviato (pnpm db:up)
 ```
 
 Dopo aver modificato i token del design system: `pnpm --filter @prome/design-tokens build` (rigenera `tokens.css`, che è committato).
@@ -71,7 +75,9 @@ Dopo aver modificato i token del design system: `pnpm --filter @prome/design-tok
 ## Rifiniture rimandate
 
 - Negazione dell'accesso cross-schema a livello di privilegi DB (per ora è una convenzione, non è imposta dal motore).
-- Better Auth, Socket.IO, Cloudflare R2, LiveKit (gate S-audio), provider email (gate S-mail), FCM.
+- Socket.IO, LiveKit
+- **Prodotto di analisi**: i punti di emissione degli eventi esistono e sono provati, ma nessun fornitore è collegato — è sospeso finché non è dimostrabile dove finiscono i dati. (gate S-audio), FCM.
+- **Fornitori esterni**: archiviazione (Cloudflare R2) ed email restano dietro una porta con adattatore locale. **Email**: l'invio del codice OTP passa da una porta con il solo adattatore di sviluppo, che scrive il codice nei log. Lo spike Brevo/Resend è aperto, e in produzione l'avvio si ferma finché non c'è un adattatore vero.
 - Outbox per-schema e recapito fatti E1–E6; catena di cancellazione account.
 - CI, deploy, osservabilità (7 segnali) e allarmi.
 - File definitivi del logo e delle icone (web e app usano un segnaposto che rispetta il marchio).

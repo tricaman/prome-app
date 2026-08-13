@@ -1,4 +1,17 @@
 {
   "DEFAULT": "Operation completed",
-  "HEALTH_OK": "The service is up"
+  "HEALTH_OK": "The service is up",
+  "CODICE_INVIATO": "We emailed you a code",
+  "ACCESSO_EFFETTUATO": "Welcome back to Prome",
+  "USCITA_EFFETTUATA": "You have signed out of Prome",
+  "PROFILO_LETTO": "Profile loaded",
+  "PROFILO_COMPLETATO": "Profile completed",
+  "POST_PUBBLICATO": "Post published",
+  "POST_ELENCATI": "Board loaded",
+  "ALLEGATO_PREAUTORIZZATO": "Upload authorised",
+  "POST_MODIFICATO": "Post updated",
+  "POST_ELIMINATO": "Post deleted",
+  "COMMENTO_PUBBLICATO": "Comment published",
+  "COMMENTO_ELIMINATO": "Comment deleted",
+  "COMMENTI_ELENCATI": "Comments loaded"
 }

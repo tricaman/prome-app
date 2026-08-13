@@ -13,20 +13,260 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["profilo", "bacheca", "gruppo", "aula_studio", "cancellazione"]
+  schemas  = ["accesso", "profilo", "bacheca", "gruppo", "aula_studio", "cancellazione"]
+}
+
+// ---------------------------------------------------------------------------
+// Schema "accesso" — tabelle del fornitore di identità, non del dominio.
+//
+// L'architettura dice che Accesso non è un contesto modellato e non possiede
+// dati di dominio. Queste tabelle non lo contraddicono: sono l'archivio
+// interno del fornitore di identità (account, sessioni, codici in attesa), e
+// il loro vocabolario si ferma qui. Nessun modulo di dominio le legge —
+// l'unico punto di contatto è PortaIdentitàUtente, che da tutto questo estrae
+// un identificativo e nient'altro.
+//
+// Stanno in uno schema loro proprio per la stessa ragione per cui i contesti
+// hanno il proprio: così "nessun dominio legge accesso" è una regola che il
+// motore può imporre, non una promessa.
+//
+// I **nomi dei modelli** sono quelli attesi dal fornitore (User, Session,
+// Account, Verification) e non seguono la nomenclatura del progetto: sono il
+// suo vocabolario, non il nostro, e rinominarli significherebbe mantenere a
+// mano una mappatura che si rompe in silenzio al primo aggiornamento. I nomi
+// delle tabelle invece sono in italiano, perché quelli li legge chi apre il
+// database. Si rigenerano con `pnpm --filter @prome/api accesso:schema`.
+// ---------------------------------------------------------------------------
+
+/// Account autenticato. `name` e `image` appartengono al fornitore: il dominio
+/// non li legge, i dati anagrafici stanno in profilo.Profilo.
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("utente")
+  @@schema("accesso")
+}
+
+/// Sessione attiva. Il token è quello che il client rimanda a ogni richiesta.
+model Session {
+  id        String   @id
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessione")
+  @@schema("accesso")
+}
+
+/// Collegamento a un metodo di ingresso. Oggi ce n'è uno solo — l'email con
+/// codice — ma la tabella regge anche i provider esterni, se torneranno.
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @default(now()) @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("credenziale")
+  @@schema("accesso")
+}
+
+/// Codice OTP in attesa di verifica. Il valore è conservato con hash: chi
+/// legge il database non può usarlo per entrare.
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@index([identifier])
+  @@map("verifica")
+  @@schema("accesso")
 }
 
 /// Identità accademica dell'utente (bounded context Profilo).
-/// utenteId arriva dal provider di identità (UUID), non è generato qui.
+/// utenteId arriva dal fornitore di identità, non è generato qui: è un
+/// identificativo nudo, senza foreign key verso lo schema accesso, perché fra
+/// contesti non si attraversano gli schemi.
 model Profilo {
-  utenteId             String   @id @db.Uuid
+  utenteId             String   @id
   nome                 String?
   cognome              String?
   universita           String?
   corso                String?
   onboardingCompletato Boolean  @default(false)
   creatoIl             DateTime @default(now())
+  aggiornatoIl         DateTime @default(now()) @updatedAt
+
+  impostazioniPrivacy ImpostazioniDiPrivacy?
 
   @@map("profilo")
   @@schema("profilo")
+}
+
+/// Chi può contattarti e chi vede i tuoi contenuti.
+///
+/// Due assi indipendenti, mai riassunti in un "livello di privacy" unico:
+/// il dominio lo vieta esplicitamente (IP3), e ogni combinazione dei due è
+/// legittima. Nascono **nella stessa scrittura del Profilo** e partono dal
+/// valore più chiuso: un default permissivo esporrebbe i contenuti di chi non
+/// ha ancora avuto modo di scegliere.
+model ImpostazioniDiPrivacy {
+  utenteId       String      @id
+  contattabilita Visibilita  @default(PRIVATO)
+  visibilita     Visibilita  @default(PRIVATO)
+  aggiornatoIl   DateTime    @default(now()) @updatedAt
+
+  profilo Profilo @relation(fields: [utenteId], references: [utenteId], onDelete: Cascade)
+
+  @@map("impostazioni_di_privacy")
+  @@schema("profilo")
+}
+
+/// I tre soli valori del linguaggio ubiquo. "Pubblico" significa aperto a
+/// tutti gli studenti iscritti a Prome, mai al web.
+enum Visibilita {
+  PRIVATO
+  ATENEO
+  PUBBLICO
+
+  @@map("visibilita")
+  @@schema("profilo")
+}
+
+// ---------------------------------------------------------------------------
+// Schema "bacheca" — post e allegati.
+// ---------------------------------------------------------------------------
+
+/// Post pubblicato da un Utente.
+///
+/// **Non ha alcun attributo di visibilità** (invariante B5): chi lo vede
+/// discende dalle Impostazioni di privacy dell'autore, lette al momento della
+/// lettura. Una colonna qui sarebbe una copia locale di una decisione che
+/// appartiene a Profilo, e due risposte alla stessa domanda.
+///
+/// `autoreId` è un identificativo nudo: fra contesti non si attraversano gli
+/// schemi, quindi nessuna foreign key verso profilo.
+model Post {
+  id           String   @id @default(uuid())
+  autoreId     String
+  testo        String
+  creatoIl     DateTime @default(now())
+  aggiornatoIl DateTime @default(now()) @updatedAt
+
+  allegati Allegato[]
+
+  @@index([creatoIl(sort: Desc)])
+  @@index([autoreId])
+  @@map("post")
+  @@schema("bacheca")
+}
+
+/// Allegato: entità interna al Post, non aggregato a sé.
+///
+/// Nasce e muore con il contenuto che accompagna, e la cascata qui sotto è
+/// **l'unica dell'intero schema** (invariante B4): un allegato orfano non deve
+/// poter esistere nemmeno per un istante.
+///
+/// `chiave` è opaca al dominio: serve a ritrovare il file attraverso la
+/// capacità di archiviazione, e nient'altro — nessun fornitore è nominato.
+model Allegato {
+  id         String       @id @default(uuid())
+  postId     String
+  chiave     String       @unique
+  nome       String
+  tipo       TipoAllegato
+  dimensione Int
+  creatoIl   DateTime     @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@map("allegato")
+  @@schema("bacheca")
+}
+
+/// I tre tipi ammessi, e nessun altro (invariante B3).
+enum TipoAllegato {
+  PDF
+  IMMAGINE
+  TESTO
+
+  @@map("tipo_allegato")
+  @@schema("bacheca")
+}
+
+/// File caricato ma non ancora legato a un post.
+///
+/// **Non è l'`Allegato` del dominio**: è la prenotazione di una chiave fra la
+/// pre-autorizzazione e la pubblicazione. Sta in una tabella separata proprio
+/// perché B4 dice che un allegato senza post non deve esistere: se vivesse
+/// nella stessa tabella, ogni caricamento abbandonato sarebbe un allegato
+/// orfano. Qui invece è una prenotazione scaduta, e l'unità lavoratrice la
+/// raccoglie insieme al file che nessuno ha adottato.
+model AllegatoInAttesa {
+  id         String       @id @default(uuid())
+  autoreId   String
+  chiave     String       @unique
+  nome       String
+  tipo       TipoAllegato
+  dimensione Int
+  creatoIl   DateTime     @default(now())
+
+  @@index([autoreId])
+  @@index([creatoIl])
+  @@map("allegato_in_attesa")
+  @@schema("bacheca")
+}
+
+/// Commento sotto un Post.
+///
+/// **Aggregato autonomo, non entità interna al Post** — è scritto in
+/// concorrenza da autori diversi, e contenerlo nel Post trasformerebbe ogni
+/// risposta in una modifica del Post stesso.
+///
+/// `postId` è un riferimento **per identità**, senza foreign key: un
+/// riferimento per identità non è un vincolo di esistenza (C3). L'esistenza
+/// del post si verifica quando arriva il comando, su lettura fresca, e la
+/// finestra che resta aperta la chiude l'unità lavoratrice. Una cascata qui
+/// darebbe la garanzia al prezzo di far competere gli autori sulla stessa
+/// riga, che è precisamente ciò che il modello ha rifiutato.
+model Commento {
+  id           String   @id @default(uuid())
+  postId       String
+  autoreId     String
+  testo        String
+  creatoIl     DateTime @default(now())
+  aggiornatoIl DateTime @default(now()) @updatedAt
+
+  @@index([postId, creatoIl])
+  @@index([autoreId])
+  @@map("commento")
+  @@schema("bacheca")
 }

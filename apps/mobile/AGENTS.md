@@ -42,6 +42,14 @@ Un'aula studio o un gruppo può essere Privato, Ateneo o Pubblico, e **"Pubblico
 - Le rotte si costruiscono con `rotte.*` da `@/content`, mai stringhe scritte a mano.
 - Le icone sono in `@prome/design-tokens`: aggiungerne una significa aggiungere un tracciato là, così il segno resta identico sul web.
 
+## Caricare un file
+
+Tre tempi, come sul web: si dichiarano nome, tipo e dimensione a `preautorizzaAllegato`, si mandano i byte **direttamente all'archivio** con `caricaConAvanzamento` (`@prome/app-core`, la stessa funzione del web), poi si pubblica citando le chiavi. I byte non passano dagli endpoint di dominio.
+
+Su React Native il corpo del caricamento è `{ uri, name, type }` e non un `Blob`: il file resta sul disco e lo legge il livello nativo mentre invia, invece di finire tutto in memoria. `XMLHttpRequest` accetta entrambe le forme, ed è il motivo per cui la funzione è una sola.
+
+Il file parte appena scelto e il bottone di pubblicazione resta spento finché un caricamento è a metà: pubblicare allora citerebbe una chiave senza byte.
+
 ## Fare una chiamata
 
 Identico al web, perché gli hook sono gli stessi (`@prome/app-core`):

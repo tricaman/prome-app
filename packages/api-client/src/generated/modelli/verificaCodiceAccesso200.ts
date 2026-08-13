@@ -5,10 +5,10 @@
  * Facciata REST versionata di Prome.
  * OpenAPI spec version: v1
  */
-import type { HealthDto } from './healthDto';
+import type { VerificaCodiceRispostaDto } from './verificaCodiceRispostaDto';
 import type { ResponseMetaDto } from './responseMetaDto';
 
-export type HealthControllerHealth200 = {
-  data: HealthDto;
+export type VerificaCodiceAccesso200 = {
+  data: VerificaCodiceRispostaDto;
   meta: ResponseMetaDto;
 };

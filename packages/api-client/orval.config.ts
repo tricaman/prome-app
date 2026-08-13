@@ -12,7 +12,10 @@ export default defineConfig({
       target: './src/generated/endpoints.ts',
       schemas: './src/generated/modelli',
       client: 'react-query',
-      httpClient: 'fetch',
+      // Nessun `httpClient`: con "fetch" Orval avvolgerebbe la risposta in
+      // { data, status, headers }, mentre il nostro mutator restituisce
+      // direttamente il corpo — cioè l'envelope { data, meta }. Dichiararlo
+      // produrrebbe tipi che non descrivono ciò che arriva davvero.
       clean: true,
       override: {
         mutator: {

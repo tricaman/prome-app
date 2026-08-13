@@ -10,7 +10,26 @@
   "VALIDATION_ERROR": "Validation error",
   "TOO_MANY_REQUESTS": "Too many requests, try again shortly",
   "SERVICE_UNAVAILABLE": "Service temporarily unavailable",
-
   "PROFILO_NOT_FOUND": "Profile not found",
-  "ONBOARDING_INCOMPLETO": "Complete the onboarding to continue"
+  "ONBOARDING_INCOMPLETO": "Complete the onboarding to continue",
+  "CODICE_NON_VALIDO": "Invalid code. Check the digits and try again.",
+  "CODICE_SCADUTO": "The code has expired. Ask for a new one.",
+  "TROPPI_TENTATIVI": "Too many attempts with this code. Ask for a new one.",
+  "ACCESSO_RICHIESTO": "You need to sign in to continue",
+  "INVIO_CODICE_FALLITO": "We couldn't send the code. Try again shortly.",
+  "VERIFICA_FALLITA": "We couldn't verify the code. Try again shortly.",
+  "POST_NOT_FOUND": "Post not found",
+  "POST_TESTO_VUOTO": "Write something before publishing",
+  "POST_TESTO_TROPPO_LUNGO": "The post exceeds {massimo} characters",
+  "ALLEGATO_INCOMPLETO": "Incomplete attachment",
+  "ALLEGATO_DIMENSIONE": "Each attachment must be larger than 0 and at most {massimoMb} MB",
+  "ALLEGATO_SCONOSCIUTO": "Unrecognised attachment: request the upload again",
+  "ALLEGATO_NON_CARICATO": "The file hasn't arrived yet: try uploading it again",
+  "ALLEGATO_GIA_USATO": "This attachment is already used in another post",
+  "TROPPI_ALLEGATI": "You can attach at most {massimo} files per post",
+  "NON_SEI_AUTORE": "You can only edit or delete your own posts",
+  "COMMENTO_NOT_FOUND": "Comment not found",
+  "COMMENTO_TESTO_VUOTO": "Write something before commenting",
+  "COMMENTO_TESTO_TROPPO_LUNGO": "The comment exceeds {massimo} characters",
+  "NON_PUOI_MODERARE": "You can only delete your own comments and those under your posts"
 }

@@ -316,18 +316,23 @@
       "provaTesto": "Ogni settimana 28.000 studenti aprono un'aula studio, condividono appunti e si danno una mano prima degli appelli."
     },
     "onboarding": {
-      "passo": "Passo {corrente} di {totale}",
-      "titolo": "Dove studi?",
-      "sommario": "Serve per mostrarti la bacheca, le aule studio e i gruppi del tuo ateneo. Puoi cambiarlo in qualsiasi momento dal profilo.",
+      "titolo": "Completa il profilo",
+      "sommario": "Quattro dati, una volta sola: servono a mostrarti la bacheca, le aule studio e i gruppi del tuo ateneo. Puoi cambiarli quando vuoi dal profilo.",
       "privacy": "Chiediamo solo il minimo indispensabile: nome, università e corso. Non condividiamo nulla con terzi e non usiamo i tuoi dati per pubblicità.",
       "comeLiUsiamo": "Come li usiamo",
       "universita": "Università",
       "cercaUniversita": "Cerca la tua università",
-      "indietro": "Indietro",
-      "continua": "Continua",
       "nonTrovi": "Non trovi il tuo ateneo?",
       "scrivicelo": "Scrivicelo",
-      "nessunRisultato": "Nessun ateneo con questo nome."
+      "nessunRisultato": "Nessun ateneo con questo nome.",
+      "nome": "Nome",
+      "cognome": "Cognome",
+      "corso": "Corso di studi",
+      "corsoSegnaposto": "Es. Ingegneria informatica",
+      "universitaSceltaAltro": "Scrivi il nome del tuo ateneo",
+      "completa": "Entra in Prome",
+      "indietro": "Indietro",
+      "continua": "Continua"
     },
     "feed": {
       "composer": "Cosa vuoi condividere, {nome}?",
@@ -350,7 +355,11 @@
         "titolo": "Appello di {materia} tra {giorni} giorni",
         "testo": "Ci sono {numero} aule studio di ripasso questa settimana.",
         "azione": "Guarda il calendario"
-      }
+      },
+      "vuoto": "Qui compariranno i post del tuo corso. Comincia tu.",
+      "tipoNonAmmesso": "Puoi allegare PDF, immagini e file di testo",
+      "caricamentoFallito": "Caricamento non riuscito",
+      "caricaAltri": "Carica altri post"
     },
     "post": {
       "indietro": "Torna indietro",
@@ -360,10 +369,18 @@
       "scarica": "Scarica",
       "salvaMateriali": "Salva nei materiali",
       "commenti": "{numero} commenti",
-      "ordine": "Dal più recente",
+      "ordine": "Dal più vecchio",
       "scriviCommento": "Scrivi un commento…",
       "invia": "Invia",
-      "altriPost": "Altri post su {argomento}"
+      "altriPost": "Altri post su {argomento}",
+      "nessunCommento": "Ancora nessun commento. Comincia tu.",
+      "eliminaCommento": "Elimina il commento",
+      "titoloSemplice": "Post",
+      "modifica": "Modifica",
+      "elimina": "Elimina",
+      "salva": "Salva",
+      "annulla": "Annulla",
+      "titoloCommenti": "Commenti"
     },
     "aule": {
       "titolo": "Aule studio",

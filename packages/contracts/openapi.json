@@ -3,7 +3,7 @@
   "paths": {
     "/health": {
       "get": {
-        "operationId": "HealthController_health",
+        "operationId": "statoDelServizio",
         "parameters": [],
         "responses": {
           "200": {
@@ -41,6 +41,846 @@
         "summary": "Stato del servizio",
         "tags": [
           "sistema"
+        ]
+      }
+    },
+    "/accesso/codice": {
+      "post": {
+        "operationId": "richiediCodiceAccesso",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RichiestaCodiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/RichiestaCodiceRispostaDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Manda un codice di accesso a un indirizzo email",
+        "tags": [
+          "accesso"
+        ]
+      }
+    },
+    "/accesso/verifica": {
+      "post": {
+        "operationId": "verificaCodiceAccesso",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerificaCodiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/VerificaCodiceRispostaDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Verifica il codice ed entra (creando l'account al primo ingresso)",
+        "tags": [
+          "accesso"
+        ]
+      }
+    },
+    "/accesso/esci": {
+      "post": {
+        "operationId": "esciDaProme",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sessione chiusa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Chiude la sessione corrente",
+        "tags": [
+          "accesso"
+        ]
+      }
+    },
+    "/profilo/me": {
+      "get": {
+        "operationId": "leggiMioProfilo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ProfiloDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Il profilo di chi ha la sessione",
+        "tags": [
+          "profilo"
+        ]
+      },
+      "put": {
+        "operationId": "completaMioProfilo",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompletaProfiloDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ProfiloDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Completa l'onboarding con nome, cognome, università e corso",
+        "tags": [
+          "profilo"
+        ]
+      }
+    },
+    "/bacheca/allegati/pre-autorizzazione": {
+      "post": {
+        "operationId": "preautorizzaAllegato",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreautorizzaAllegatoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PreautorizzaAllegatoRispostaDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Autorizza il caricamento di un file e prenota la sua chiave",
+        "tags": [
+          "bacheca"
+        ]
+      }
+    },
+    "/bacheca": {
+      "post": {
+        "operationId": "pubblicaPost",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreaPostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PostDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Pubblica un post, con i suoi allegati",
+        "tags": [
+          "bacheca"
+        ]
+      },
+      "get": {
+        "operationId": "elencaPost",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Campo di ordinamento (dipende dalla risorsa)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "asc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PostDto"
+                      }
+                    },
+                    "meta": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ResponseMetaDto"
+                        },
+                        {
+                          "properties": {
+                            "pagination": {
+                              "$ref": "#/components/schemas/PaginationMetaDto"
+                            }
+                          },
+                          "required": [
+                            "pagination"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "La bacheca di chi legge, dal più recente",
+        "tags": [
+          "bacheca"
+        ]
+      }
+    },
+    "/bacheca/{id}": {
+      "get": {
+        "operationId": "leggiPost",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PostDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Un post, se chi legge può vederlo",
+        "tags": [
+          "bacheca"
+        ]
+      },
+      "patch": {
+        "operationId": "modificaPost",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModificaPostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PostDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Corregge il testo di un proprio post",
+        "tags": [
+          "bacheca"
+        ]
+      },
+      "delete": {
+        "operationId": "eliminaPost",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post eliminato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Elimina un proprio post e i suoi allegati",
+        "tags": [
+          "bacheca"
+        ]
+      }
+    },
+    "/bacheca/{id}/commenti": {
+      "get": {
+        "operationId": "elencaCommenti",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Campo di ordinamento (dipende dalla risorsa)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "asc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CommentoDto"
+                      }
+                    },
+                    "meta": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ResponseMetaDto"
+                        },
+                        {
+                          "properties": {
+                            "pagination": {
+                              "$ref": "#/components/schemas/PaginationMetaDto"
+                            }
+                          },
+                          "required": [
+                            "pagination"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "I commenti di un post, dal più vecchio",
+        "tags": [
+          "bacheca"
+        ]
+      },
+      "post": {
+        "operationId": "commentaPost",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreaCommentoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CommentoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Commenta un post",
+        "tags": [
+          "bacheca"
+        ]
+      }
+    },
+    "/bacheca/commenti/{commentoId}": {
+      "delete": {
+        "operationId": "eliminaCommento",
+        "parameters": [
+          {
+            "name": "commentoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Commento eliminato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Elimina un commento: proprio, o sotto un proprio post",
+        "tags": [
+          "bacheca"
         ]
       }
     }
@@ -197,6 +1037,386 @@
           "message",
           "errorId",
           "timestamp"
+        ]
+      },
+      "RichiestaCodiceRispostaDto": {
+        "type": "object",
+        "properties": {
+          "scadeIl": {
+            "type": "string",
+            "example": "2026-08-10T21:40:00.000Z"
+          }
+        },
+        "required": [
+          "scadeIl"
+        ]
+      },
+      "RichiestaCodiceDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "marta.rossi@studenti.unibo.it"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "VerificaCodiceRispostaDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Da rimandare come Authorization: Bearer <token>"
+          },
+          "scadeIl": {
+            "type": "string",
+            "example": "2026-09-09T21:40:00.000Z"
+          },
+          "onboardingCompletato": {
+            "type": "boolean",
+            "description": "Falso finché i quattro dati del profilo non ci sono"
+          }
+        },
+        "required": [
+          "token",
+          "scadeIl",
+          "onboardingCompletato"
+        ]
+      },
+      "VerificaCodiceDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "marta.rossi@studenti.unibo.it"
+          },
+          "codice": {
+            "type": "string",
+            "example": "104729",
+            "description": "6 cifre"
+          }
+        },
+        "required": [
+          "email",
+          "codice"
+        ]
+      },
+      "ImpostazioniDiPrivacyDto": {
+        "type": "object",
+        "properties": {
+          "contattabilita": {
+            "type": "string",
+            "enum": [
+              "PRIVATO",
+              "ATENEO",
+              "PUBBLICO"
+            ],
+            "description": "Chi può scriverti e invitarti"
+          },
+          "visibilita": {
+            "type": "string",
+            "enum": [
+              "PRIVATO",
+              "ATENEO",
+              "PUBBLICO"
+            ],
+            "description": "Chi vede i tuoi contenuti"
+          }
+        },
+        "required": [
+          "contattabilita",
+          "visibilita"
+        ]
+      },
+      "ProfiloDto": {
+        "type": "object",
+        "properties": {
+          "utenteId": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "cognome": {
+            "type": "string",
+            "nullable": true
+          },
+          "universita": {
+            "type": "string",
+            "nullable": true
+          },
+          "corso": {
+            "type": "string",
+            "nullable": true
+          },
+          "onboardingCompletato": {
+            "type": "boolean"
+          },
+          "impostazioniPrivacy": {
+            "$ref": "#/components/schemas/ImpostazioniDiPrivacyDto"
+          }
+        },
+        "required": [
+          "utenteId",
+          "nome",
+          "cognome",
+          "universita",
+          "corso",
+          "onboardingCompletato",
+          "impostazioniPrivacy"
+        ]
+      },
+      "CompletaProfiloDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "example": "Marta"
+          },
+          "cognome": {
+            "type": "string",
+            "example": "Rossi"
+          },
+          "universita": {
+            "type": "string",
+            "example": "Università di Bologna"
+          },
+          "corso": {
+            "type": "string",
+            "example": "Ingegneria informatica"
+          }
+        },
+        "required": [
+          "nome",
+          "cognome",
+          "universita",
+          "corso"
+        ]
+      },
+      "PreautorizzaAllegatoRispostaDto": {
+        "type": "object",
+        "properties": {
+          "chiave": {
+            "type": "string",
+            "description": "Da rimandare alla creazione del post"
+          },
+          "url": {
+            "type": "string",
+            "description": "Dove mandare i byte: non passano dall'API"
+          },
+          "metodo": {
+            "type": "string",
+            "enum": [
+              "PUT"
+            ]
+          },
+          "intestazioni": {
+            "type": "object"
+          },
+          "scadeIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chiave",
+          "url",
+          "metodo",
+          "intestazioni",
+          "scadeIl"
+        ]
+      },
+      "PreautorizzaAllegatoDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "example": "analisi2-esercizi.pdf"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PDF",
+              "IMMAGINE",
+              "TESTO"
+            ]
+          },
+          "dimensione": {
+            "type": "number",
+            "description": "Byte, > 0 e ≤ 25 MB",
+            "example": 1048576
+          }
+        },
+        "required": [
+          "nome",
+          "tipo",
+          "dimensione"
+        ]
+      },
+      "AutoreDto": {
+        "type": "object",
+        "properties": {
+          "utenteId": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "cognome": {
+            "type": "string",
+            "nullable": true
+          },
+          "universita": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "utenteId",
+          "nome",
+          "cognome",
+          "universita"
+        ]
+      },
+      "AllegatoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PDF",
+              "IMMAGINE",
+              "TESTO"
+            ]
+          },
+          "dimensione": {
+            "type": "number"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "tipo",
+          "dimensione",
+          "url"
+        ]
+      },
+      "PostDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "testo": {
+            "type": "string"
+          },
+          "creatoIl": {
+            "type": "string"
+          },
+          "autore": {
+            "$ref": "#/components/schemas/AutoreDto"
+          },
+          "allegati": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllegatoDto"
+            }
+          },
+          "puoModificare": {
+            "type": "boolean",
+            "description": "Se chi legge ne è l'autore: lo decide il server"
+          }
+        },
+        "required": [
+          "id",
+          "testo",
+          "creatoIl",
+          "autore",
+          "allegati",
+          "puoModificare"
+        ]
+      },
+      "CreaPostDto": {
+        "type": "object",
+        "properties": {
+          "testo": {
+            "type": "string",
+            "maxLength": 5000
+          },
+          "allegati": {
+            "description": "Chiavi già caricate",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "testo"
+        ]
+      },
+      "ModificaPostDto": {
+        "type": "object",
+        "properties": {
+          "testo": {
+            "type": "string",
+            "maxLength": 5000
+          }
+        },
+        "required": [
+          "testo"
+        ]
+      },
+      "CommentoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "testo": {
+            "type": "string"
+          },
+          "creatoIl": {
+            "type": "string"
+          },
+          "autore": {
+            "$ref": "#/components/schemas/AutoreDto"
+          },
+          "puoEliminare": {
+            "type": "boolean",
+            "description": "Se chi legge può eliminarlo: lo decide il server"
+          }
+        },
+        "required": [
+          "id",
+          "testo",
+          "creatoIl",
+          "autore",
+          "puoEliminare"
+        ]
+      },
+      "CreaCommentoDto": {
+        "type": "object",
+        "properties": {
+          "testo": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "testo"
         ]
       }
     }

@@ -19,5 +19,6 @@
   "TOO_FEW_ITEMS": "Too few items",
   "TOO_MANY_ITEMS": "Too many items",
   "MUST_BE_POSITIVE": "Must be a positive number",
-  "UNKNOWN_FIELD": "Unexpected field"
+  "UNKNOWN_FIELD": "Unexpected field",
+  "SOLO_CIFRE": "Must contain digits only"
 }

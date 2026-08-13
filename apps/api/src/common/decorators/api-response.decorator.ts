@@ -21,23 +21,32 @@ const ApiErroreComune = () =>
  *
  * Usare SEMPRE questo (o ApiPaginatedResponse) al posto di @ApiOkResponse /
  * @ApiCreatedResponse diretti, che non documentano il wrapping.
+ *
+ * `type` si omette per gli endpoint che non hanno dati da restituire (uscita,
+ * cancellazione): l'envelope resta la stessa, con `data: null`. È diverso da
+ * dichiarare un DTO vuoto, che prometterebbe un oggetto che non arriva mai.
  */
 export const ApiWrappedResponse = <T extends Type>(options: {
-  type: T;
+  type?: T;
   status?: 200 | 201;
   description?: string;
   isArray?: boolean;
 }) => {
   const { type, status = 200, description = 'Successo', isArray = false } = options;
 
-  const schemaDati = isArray
-    ? { type: 'array', items: { $ref: getSchemaPath(type) } }
-    : { $ref: getSchemaPath(type) };
+  // OpenAPI 3.0 non ha il tipo "null": l'assenza di dati si dichiara con uno
+  // schema senza tipo e nullable, altrimenti la spec non passa la validazione
+  // e il generatore del client si ferma.
+  const schemaDati = !type
+    ? { nullable: true, description: 'Nessun dato' }
+    : isArray
+      ? { type: 'array', items: { $ref: getSchemaPath(type) } }
+      : { $ref: getSchemaPath(type) };
 
   const DecoratoreRisposta = status === 201 ? ApiCreatedResponse : ApiOkResponse;
 
   return applyDecorators(
-    ApiExtraModels(ResponseMetaDto, type),
+    ApiExtraModels(...(type ? [ResponseMetaDto, type] : [ResponseMetaDto])),
     DecoratoreRisposta({
       description,
       schema: {

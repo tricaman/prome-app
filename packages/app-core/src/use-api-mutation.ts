@@ -10,7 +10,7 @@ import type { FieldValues, UseFormReturn } from 'react-hook-form';
 import type { ApiEnvelope } from '@prome/contracts';
 import { avvisatore, messaggioSuccessoPredefinito } from './feedback';
 import { codiceErrore, messaggioErrore } from './errori';
-import { applicaErroriDiValidazione } from './form-utils';
+import { applicaErroriDiValidazione, type FormConErrori } from './form-utils';
 
 type Messaggio<T> = string | ((valore: T) => string);
 
@@ -29,7 +29,7 @@ export interface OpzioniApiMutation<TData, TVariabili, TContesto>
    * vengono riportati sui campi corrispondenti invece di restare in un avviso.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  form?: UseFormReturn<any>;
+  form?: FormConErrori;
   onSuccess?: (
     dati: TData,
     variabili: TVariabili,

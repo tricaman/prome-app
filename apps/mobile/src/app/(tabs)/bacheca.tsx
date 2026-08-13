@@ -1,12 +1,14 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { getElencaPostQueryKey } from '@prome/api-client';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BACHECA, UTENTE } from '@prome/contenuti';
+import { UTENTE } from '@prome/contenuti';
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
 import { useT } from '@/hooks';
-import { PostCard } from '@/components/contenuti';
+import { FeedBacheca } from '@/components/contenuti';
 import { AzioneTonda, Avatar, Chip, Icona, Text } from '@/components/ui';
 
 /**
@@ -32,11 +34,17 @@ export default function SchedaBacheca() {
     t('app.feed.filtri.mieiGruppi'),
   ];
 
-  const aggiorna = () => {
+  /**
+   * Il trascinamento rilegge davvero la bacheca.
+   *
+   * L'indicatore resta acceso finché la richiesta non è finita: spegnerlo
+   * prima direbbe che i dati sono nuovi mentre stanno ancora arrivando.
+   */
+  const clienteQuery = useQueryClient();
+  const aggiorna = async () => {
     setInAggiornamento(true);
-    // Finché non c'è l'API il gesto deve comunque rispondere: senza un ritorno
-    // visibile sembra che l'app abbia ignorato il trascinamento.
-    setTimeout(() => setInAggiornamento(false), 900);
+    await clienteQuery.invalidateQueries({ queryKey: getElencaPostQueryKey() });
+    setInAggiornamento(false);
   };
 
   return (
@@ -109,14 +117,12 @@ export default function SchedaBacheca() {
         refreshControl={
           <RefreshControl
             refreshing={inAggiornamento}
-            onRefresh={aggiorna}
+            onRefresh={() => void aggiorna()}
             tintColor={tema.colori.primario}
           />
         }
       >
-        {BACHECA.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
+        <FeedBacheca />
       </ScrollView>
 
       <Pressable

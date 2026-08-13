@@ -19,5 +19,6 @@
   "TOO_FEW_ITEMS": "Troppi pochi elementi",
   "TOO_MANY_ITEMS": "Troppi elementi",
   "MUST_BE_POSITIVE": "Deve essere un numero positivo",
-  "UNKNOWN_FIELD": "Campo non previsto"
+  "UNKNOWN_FIELD": "Campo non previsto",
+  "SOLO_CIFRE": "Deve contenere solo cifre"
 }

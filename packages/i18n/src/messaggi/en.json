@@ -316,18 +316,23 @@
       "provaTesto": "Every week 28,000 students open a study room, share notes and help each other before exams."
     },
     "onboarding": {
-      "passo": "Step {corrente} of {totale}",
-      "titolo": "Where do you study?",
-      "sommario": "We need it to show you the board, study rooms and groups of your university. You can change it any time from your profile.",
+      "titolo": "Complete your profile",
+      "sommario": "Four details, once: they let us show you the board, study rooms and groups of your university. You can change them any time from your profile.",
       "privacy": "We ask only for the essentials: name, university and course. We share nothing with third parties and we do not use your data for advertising.",
       "comeLiUsiamo": "How we use them",
       "universita": "University",
       "cercaUniversita": "Search for your university",
-      "indietro": "Back",
-      "continua": "Continue",
       "nonTrovi": "Can't find your university?",
       "scrivicelo": "Tell us",
-      "nessunRisultato": "No university with that name."
+      "nessunRisultato": "No university with that name.",
+      "nome": "First name",
+      "cognome": "Last name",
+      "corso": "Course of study",
+      "corsoSegnaposto": "E.g. Computer engineering",
+      "universitaSceltaAltro": "Type your university's name",
+      "completa": "Enter Prome",
+      "indietro": "Back",
+      "continua": "Continue"
     },
     "feed": {
       "composer": "What do you want to share, {nome}?",
@@ -350,7 +355,11 @@
         "titolo": "{materia} exam in {giorni} days",
         "testo": "There are {numero} review study rooms this week.",
         "azione": "See the calendar"
-      }
+      },
+      "vuoto": "Posts from your course will appear here. Start it off.",
+      "tipoNonAmmesso": "You can attach PDFs, images and text files",
+      "caricamentoFallito": "Upload failed",
+      "caricaAltri": "Load more posts"
     },
     "post": {
       "indietro": "Go back",
@@ -360,10 +369,18 @@
       "scarica": "Download",
       "salvaMateriali": "Save to materials",
       "commenti": "{numero} comments",
-      "ordine": "Most recent first",
+      "ordine": "Oldest first",
       "scriviCommento": "Write a comment…",
       "invia": "Send",
-      "altriPost": "More posts on {argomento}"
+      "altriPost": "More posts on {argomento}",
+      "nessunCommento": "No comments yet. Be the first.",
+      "eliminaCommento": "Delete comment",
+      "titoloSemplice": "Post",
+      "modifica": "Edit",
+      "elimina": "Delete",
+      "salva": "Save",
+      "annulla": "Cancel",
+      "titoloCommenti": "Comments"
     },
     "aule": {
       "titolo": "Study rooms",

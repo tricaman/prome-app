@@ -4,6 +4,10 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import { LINGUA_DI_RIPIEGO } from '@prome/i18n';
+import { PrismaModule } from './database/prisma.module';
+import { ArchivioFileModule } from './infrastruttura/archivio-file/archivio-file.module';
+import { AvvisiInUscitaModule } from './infrastruttura/avvisi-in-uscita/avvisi-in-uscita.module';
+import { MisurazioniModule } from './infrastruttura/misurazioni/misurazioni.module';
 import { ProfiloModule } from './modules/profilo/profilo.module';
 import { BachecaModule } from './modules/bacheca/bacheca.module';
 import { GruppoModule } from './modules/gruppo/gruppo.module';
@@ -47,6 +51,10 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
         AcceptLanguageResolver,
       ],
     }),
+    PrismaModule,
+    AvvisiInUscitaModule,
+    ArchivioFileModule,
+    MisurazioniModule,
     ProfiloModule,
     BachecaModule,
     GruppoModule,

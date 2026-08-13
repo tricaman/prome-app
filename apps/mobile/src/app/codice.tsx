@@ -2,7 +2,9 @@ import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
-import { useT } from '@/hooks';
+import { apriSessione } from '@prome/app-core';
+import { verificaCodiceAccesso, type VerificaCodiceDto, type VerificaCodiceAccesso200 } from '@prome/api-client';
+import { useApiMutation, useT } from '@/hooks';
 import { CampoCodice } from '@/components/app/campo-codice';
 import { Icona, Intestazione, Screen, Text } from '@/components/ui';
 
@@ -21,6 +23,16 @@ export default function SchermataCodice() {
   const t = useT();
   const { email } = useLocalSearchParams<{ email?: string }>();
 
+  const verifica = useApiMutation<VerificaCodiceAccesso200, VerificaCodiceDto>({
+    mutationFn: (dati: VerificaCodiceDto) => verificaCodiceAccesso(dati),
+    onSuccess: async ({ data }) => {
+      await apriSessione(data.token);
+      // Chi non ha ancora compilato il profilo non entra nella bacheca: da
+      // qui sappiamo già quale delle due strade prendere.
+      router.replace(data.onboardingCompletato ? rotte.bacheca() : rotte.profilo());
+    },
+  });
+
   return (
     <>
       <Intestazione conIndietro />
@@ -34,7 +46,9 @@ export default function SchermataCodice() {
           </Text>
         </View>
 
-        <CampoCodice onCompletato={() => router.push(rotte.profilo())} />
+        <CampoCodice
+          onCompletato={(codice) => verifica.mutate({ email: email ?? '', codice })}
+        />
 
         <View
           style={{

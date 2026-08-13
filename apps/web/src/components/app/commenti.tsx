@@ -2,109 +2,131 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { UTENTE } from '@/content';
-import { Avatar, Button } from '@/components/ui';
-
-interface Commento {
-  id: string;
-  autore: string;
-  quando: string;
-  testo: string;
-}
-
-const INIZIALI: readonly Commento[] = [
-  {
-    id: '1',
-    autore: 'Luca Bianchi',
-    quando: '12 minuti fa',
-    testo:
-      'Sei un mito, mi salvi la sessione. Il tema del 2022 aveva anche la seconda parte sugli integrali doppi?',
-  },
-  {
-    id: '2',
-    autore: 'Sara Conti',
-    quando: '40 minuti fa',
-    testo: 'A pagina 12 credo ci sia un segno sbagliato nel limite, controllo e ti dico.',
-  },
-  {
-    id: '3',
-    autore: 'Marco Villa',
-    quando: '1 ora fa',
-    testo: 'Grazie! Li portiamo giovedì nell’aula studio di ripasso, ci vediamo lì.',
-  },
-  {
-    id: '4',
-    autore: 'Elena Ricci',
-    quando: '2 ore fa',
-    testo: 'Perfetti, avevo solo gli appunti a mano. Aggiungo i miei sulle equazioni differenziali.',
-  },
-];
+import {
+  commentaPost,
+  eliminaCommento,
+  getElencaCommentiQueryKey,
+  useElencaCommenti,
+  type CommentoDto,
+} from '@prome/api-client';
+import { LUNGHEZZA_MASSIMA_COMMENTO } from '@prome/contracts';
+import { useApiMutation } from '@/hooks';
+import { QueryBoundary } from '@/components/feedback';
+import { Avatar, Button, Icona } from '@/components/ui';
 
 /**
- * Commenti di un post, piatti come nel dominio: nessuna risposta annidata.
+ * La discussione sotto un post.
  *
- * Il commento appena scritto compare in cima subito, prima di qualunque
- * conferma dal server: su una discussione è la reazione che l'utente si
- * aspetta, e in caso di errore si può sempre segnalare e rimettere il testo
- * nel campo.
+ * I commenti sono un aggregato a sé, non un campo del post: si leggono con la
+ * loro richiesta e si scrivono con la loro, e il post non viene riscritto ogni
+ * volta che qualcuno risponde. Si leggono dal più vecchio, perché una
+ * discussione ha un ordine.
  */
-export function Commenti() {
+export function Commenti({ postId }: { postId: string }) {
   const t = useTranslations('app.post');
-  const [commenti, setCommenti] = useState<readonly Commento[]>(INIZIALI);
-  const [bozza, setBozza] = useState('');
-
-  const invia = () => {
-    const testo = bozza.trim();
-    if (!testo) return;
-    setCommenti((precedenti) => [
-      { id: `nuovo-${precedenti.length}`, autore: UTENTE.nome, quando: 'ora', testo },
-      ...precedenti,
-    ]);
-    setBozza('');
-  };
+  const commenti = useElencaCommenti(postId, { limit: 50 });
+  const chiave = getElencaCommentiQueryKey(postId, { limit: 50 });
 
   return (
-    <section className="mt-4 rounded-[18px] border border-bordo bg-superficie p-6">
-      <div className="mb-4.5 flex items-center justify-between gap-4">
-        <h2 className="font-display text-[19px] font-extrabold tracking-[-0.02em]">
-          {t('commenti', { numero: commenti.length })}
-        </h2>
-        <span className="text-[12.5px] font-bold text-testo-didascalia">{t('ordine')}</span>
-      </div>
+    <section className="flex flex-col gap-4">
+      <QueryBoundary
+        query={commenti}
+        eVuoto={(risposta) => risposta.data.length === 0}
+        vuoto={<p className="text-sm text-testo-tenue">{t('nessunCommento')}</p>}
+      >
+        {(risposta) => (
+          <ul className="flex flex-col gap-3">
+            {risposta.data.map((commento) => (
+              <li key={commento.id}>
+                <RigaCommento commento={commento} chiaveElenco={chiave} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </QueryBoundary>
 
-      <div className="mb-5 flex items-center gap-3">
-        <Avatar nome={UTENTE.nome} dimensione={40} />
-        <input
-          value={bozza}
-          onChange={(evento) => setBozza(evento.target.value)}
-          onKeyDown={(evento) => {
-            if (evento.key === 'Enter') invia();
-          }}
-          placeholder={t('scriviCommento')}
-          aria-label={t('scriviCommento')}
-          className="h-[46px] min-w-0 flex-1 rounded-[14px] border-2 border-bordo bg-superficie px-4 text-[14.5px] outline-none focus:border-primary-500"
-        />
-        <Button onPress={invia} isDisabled={!bozza.trim()} className="h-[46px] rounded-[14px] px-5">
-          {t('invia')}
-        </Button>
-      </div>
-
-      <ul className="flex flex-col gap-4.5">
-        {commenti.map((commento) => (
-          <li key={commento.id} className="flex gap-3">
-            <Avatar nome={commento.autore} dimensione={38} />
-            <div className="min-w-0 flex-1">
-              <p className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-extrabold text-testo">{commento.autore}</span>
-                <span className="text-[11.5px] text-testo-debole">{commento.quando}</span>
-              </p>
-              <p className="mt-1.5 text-[14.5px] leading-relaxed text-testo-corpo">
-                {commento.testo}
-              </p>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <ModuloCommento postId={postId} chiaveElenco={chiave} />
     </section>
+  );
+}
+
+function RigaCommento({
+  commento,
+  chiaveElenco,
+}: {
+  commento: CommentoDto;
+  chiaveElenco: readonly unknown[];
+}) {
+  const t = useTranslations('app.post');
+  const autore = [commento.autore.nome, commento.autore.cognome].filter(Boolean).join(' ') || '—';
+
+  const elimina = useApiMutation({
+    mutationFn: () => eliminaCommento(commento.id),
+    invalida: [chiaveElenco as never],
+  });
+
+  return (
+    <div className="flex items-start gap-3">
+      <Avatar nome={autore} dimensione={34} />
+      <div className="min-w-0 flex-1 rounded-[16px] border border-bordo bg-superficie-alt px-3.5 py-2.5">
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] font-extrabold text-testo">{autore}</span>
+          {/* Il permesso arriva dal server: ricalcolarlo qui vorrebbe dire
+              tenere due copie della stessa regola, e questa sarebbe aggirabile. */}
+          {commento.puoEliminare ? (
+            <button
+              type="button"
+              onClick={() => elimina.mutate(undefined)}
+              disabled={elimina.isPending}
+              aria-label={t('eliminaCommento')}
+              className="ml-auto text-testo-debole transition-colors hover:text-errore"
+            >
+              <Icona nome="chiudi" dimensione={14} />
+            </button>
+          ) : null}
+        </div>
+        <p className="mt-1 whitespace-pre-wrap text-[14px] leading-relaxed text-testo-corpo">
+          {commento.testo}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ModuloCommento({
+  postId,
+  chiaveElenco,
+}: {
+  postId: string;
+  chiaveElenco: readonly unknown[];
+}) {
+  const t = useTranslations('app.post');
+  const [testo, setTesto] = useState('');
+
+  const invia = useApiMutation({
+    mutationFn: () => commentaPost(postId, { testo }),
+    invalida: [chiaveElenco as never],
+    onSuccess: () => setTesto(''),
+  });
+
+  return (
+    <div className="flex items-end gap-2.5">
+      <textarea
+        rows={2}
+        value={testo}
+        maxLength={LUNGHEZZA_MASSIMA_COMMENTO}
+        onChange={(evento) => setTesto(evento.target.value)}
+        placeholder={t('scriviCommento')}
+        className="flex-1 resize-none rounded-[14px] border-2 border-bordo bg-superficie px-4 py-2.5 text-[14px] outline-none focus:border-primary-500"
+      />
+      <Button
+        className="h-[46px] rounded-[14px] px-5"
+        isDisabled={!testo.trim()}
+        inCaricamento={invia.isPending}
+        onPress={() => invia.mutate(undefined)}
+      >
+        {t('invia')}
+      </Button>
+    </div>
   );
 }

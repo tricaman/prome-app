@@ -9,7 +9,7 @@ export const config = {
   /** Origine pubblica del sito: base di URL canonici, sitemap e anteprime. */
   urlSito: process.env.NEXT_PUBLIC_URL_SITO ?? 'https://prome.app',
   /** Origine dell'API. */
-  urlApi: process.env.NEXT_PUBLIC_URL_API ?? 'http://localhost:3001',
+  urlApi: process.env.NEXT_PUBLIC_URL_API ?? 'http://localhost:3600',
   /** Nome del prodotto, usato nei titoli e nei dati strutturati. */
   nome: 'Prome',
 } as const;

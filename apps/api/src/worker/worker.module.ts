@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from '../database/prisma.module';
+import { BachecaModule } from '../modules/bacheca/bacheca.module';
 import { WorkerService } from './worker.service';
 
 /**
@@ -14,12 +16,15 @@ import { WorkerService } from './worker.service';
  * - RecapitoDeiFattiDiDominio: il recapito affidabile dei fatti di dominio
  *   (pattern outbox) dai contesti che li producono a quelli che li ascoltano.
  *
- * Per ora: solo un log di heartbeat ogni 30 secondi (vedi WorkerService).
+ * Oggi esegue le pulizie della Bacheca: i commenti dei post eliminati e i
+ * caricamenti abbandonati. Il recapito dei fatti arriverà con E3.
  */
 @Module({
   imports: [
     // Il file .env sta alla ROOT del monorepo (cwd in dev = apps/api).
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['../../.env', '.env'] }),
+    PrismaModule,
+    BachecaModule,
   ],
   providers: [WorkerService],
 })

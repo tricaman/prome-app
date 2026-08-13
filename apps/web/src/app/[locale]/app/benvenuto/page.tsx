@@ -5,11 +5,8 @@ import { percorsi } from '@/content';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { Logo } from '@/components/layout';
 import { Heading, Icona } from '@/components/ui';
-import { PassoUniversita } from '@/components/app/passo-universita';
+import { ModuloOnboarding } from '@/components/app/modulo-onboarding';
 import { Link } from '@/i18n/navigazione';
-
-const PASSO_CORRENTE = 2;
-const PASSI_TOTALI = 3;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const lingua = await linguaDeiMetadati(params);
@@ -41,7 +38,6 @@ export default async function PaginaBenvenuto({
   await linguaDellaRotta(params);
   const t = await getTranslations('app.onboarding');
 
-  const avanzamento = Math.round((PASSO_CORRENTE / PASSI_TOTALI) * 100);
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-tinta-menta-velo to-superficie">
@@ -49,34 +45,10 @@ export default async function PaginaBenvenuto({
         <Link href="/" aria-label="Prome" className="text-testo">
           <Logo dimensione={28} />
         </Link>
-        <span className="ml-auto text-[13px] font-bold text-testo-debole">
-          {t('passo', { corrente: PASSO_CORRENTE, totale: PASSI_TOTALI })}
-        </span>
       </header>
 
       <main className="flex flex-1 justify-center px-6 py-12 sm:px-10">
         <div className="w-full max-w-[760px]">
-          {/* Barra continua invece di una lista di spunte: comunica
-              avanzamento senza far sentire l'utente sotto esame. */}
-          <div className="mb-8 flex items-center gap-4">
-            <div
-              role="progressbar"
-              aria-valuenow={PASSO_CORRENTE}
-              aria-valuemin={1}
-              aria-valuemax={PASSI_TOTALI}
-              aria-label={t('passo', { corrente: PASSO_CORRENTE, totale: PASSI_TOTALI })}
-              className="h-2 flex-1 overflow-hidden rounded-full bg-bordo"
-            >
-              <div
-                style={{ width: `${avanzamento}%` }}
-                className="h-full rounded-full bg-gradient-to-r from-primary-500 to-primary-600 transition-[width] duration-500"
-              />
-            </div>
-            <span className="text-[12.5px] font-extrabold text-testo-debole">
-              {PASSO_CORRENTE}/{PASSI_TOTALI}
-            </span>
-          </div>
-
           <Heading livello={1} taglia="xl">
             {t('titolo')}
           </Heading>
@@ -96,7 +68,7 @@ export default async function PaginaBenvenuto({
             </p>
           </div>
 
-          <PassoUniversita />
+          <ModuloOnboarding />
         </div>
       </main>
     </div>

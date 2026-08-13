@@ -9,6 +9,59 @@
 3. **Tutto tradotto lato server**: la lingua viaggia in OGNI richiesta (`?lang` > header `x-lang` > `Accept-Language`, fallback `it`). Il client non traduce mai messaggi del server.
 4. **Grafo moduli = Context Map**: Profilo importabile da Bacheca/Gruppo/AulaStudio; questi tre mai tra loro; nessuno importa la Facciata.
 
+## Accesso (E0.2)
+
+**Un solo modo di entrare: email + codice OTP.** Niente password, niente accessi social, nessuna registrazione separata — chi verifica un codice per la prima volta ottiene account e profilo.
+
+- Il fornitore di identità è **Better Auth**, configurato in `infrastruttura/accesso/better-auth.ts`. **Le sue rotte HTTP non sono montate**: i controller lo chiamano come libreria (`auth.api.signInEmailOTP(...)`), così ingresso e uscita restano quelli del contratto — una envelope sola, un formato d'errore solo, messaggi tradotti. Montare le sue rotte introdurrebbe una seconda forma di risposta nella stessa API.
+- I suoi errori entrano da un punto solo: `infrastruttura/accesso/errori-del-fornitore.ts` li traduce in `AppException`. Ciò che non riconosce diventa un errore spiegato con il dettaglio nei log, mai un 500 muto.
+- Le sue tabelle stanno nello schema **`accesso`**, che non è un contesto di dominio: nessun modulo lo legge. L'unico punto di contatto è `PortaIdentitàUtente`.
+- I **nomi dei modelli Prisma** (`User`, `Session`, `Account`, `Verification`) sono quelli del fornitore e non seguono la nomenclatura del progetto: rinominarli vorrebbe dire mantenere a mano una mappatura che si rompe in silenzio. I nomi delle tabelle restano in italiano.
+
+### PortaIdentitàUtente e la guardia
+
+- `modules/profilo/porta-identita-utente.ts` converte la sessione in `UtenteDiDominio` (**solo un id**). Non passano account, sessione, provider; non si decide chi può fare cosa.
+- `modules/facciata/guardia-accesso.ts` è registrata come **guardia globale**: ogni endpoint nasce protetto. Aprirne uno è un gesto esplicito, `@SenzaAccesso()`, che si vede nella diff — il contrario lascerebbe scoperto ciò che ci si dimentica di proteggere.
+- Nei controller l'utente arriva con `@Utente()`. Su un endpoint protetto c'è sempre: se non ci fosse, la guardia avrebbe già risposto 401 (PR006).
+- I codici errore dell'ingresso stanno fra quelli di **Profilo** (PR003–PR008): Accesso non è un contesto, e chi possiede la porta possiede anche i modi in cui può fallire.
+
+### Invio del codice
+
+`AvvisiInUscita` è una porta (`infrastruttura/avvisi-in-uscita/canale-email.ts`). L'unico adattatore è quello di sviluppo, che **scrive il codice nei log e non manda niente**: in produzione l'avvio si ferma (`CANALE_EMAIL=sviluppo` + `NODE_ENV=production` = fail-fast), perché un codice nei log è un codice regalato. Il fornitore vero è ancora uno spike aperto.
+
+## Bacheca: post con allegato (E0.5)
+
+Le invarianti dell'aggregato vivono in `modules/bacheca/dominio/post.ts`, **non nei DTO**: la validazione dell'ingresso protegge dalla richiesta malformata, il costruttore protegge l'aggregato. Sono due cose diverse, e confonderle lascerebbe il Post scoperto quando nasce da un comando che non passa dalla facciata.
+
+- **B1** testo non vuoto dopo trim, ≤ 5.000 caratteri · **B3** ogni file completo, tipo ∈ {PDF, immagine, testo}, dimensione > 0 e ≤ 25 MB · **B4** post e allegati nella stessa transazione · **B5** il Post **non ha** attributo di visibilità · **B6** senza la prova di onboarding non c'è Post.
+- **B6 in codice**: `ProvaOnboardingCompletato` ha un simbolo non esportato, quindi nessun altro file può fabbricarla — si può solo riceverla da `ProfiloService.provaDiOnboarding()`. Non scrivere una prova finta per riusare il costruttore: se serve solo la regola sul file, c'è `verificaFileArchiviato()`.
+- **B5 in lettura**: `elenca()` risolve chi vede cosa **adesso**, interrogando le Impostazioni di privacy dell'autore. Cambiare le proprie impostazioni ha quindi effetto immediato su ciò che si è già pubblicato. Non aggiungere una colonna di visibilità sul post per fare prima.
+
+### Caricamento dei file
+
+**I byte non attraversano gli endpoint di dominio.** Tre tempi: `POST /bacheca/allegati/pre-autorizzazione` (verifica tipo e dimensione *prima*, prenota la chiave), `PUT /archivio/...` con firma e scadenza nell'indirizzo, poi `POST /bacheca` che cita le chiavi.
+
+- `ArchivioDiFile` è una porta; l'unico adattatore è `ArchivioLocale`, che scrive su disco ma **usa lo stesso flusso firmato** di un fornitore vero: sostituirlo non tocca né i controller né la Bacheca.
+- Le chiavi hanno per prefisso contesto e proprietario logico (`bacheca/allegato/<id>/<nome>`), **mai l'identificativo utente**: sopravvivono alla cancellazione dell'account e finiscono negli indirizzi.
+- `AllegatoInAttesa` è la prenotazione fra pre-autorizzazione e pubblicazione. Sta in una tabella separata proprio per B4: nella tabella degli allegati, ogni caricamento abbandonato sarebbe un allegato orfano.
+- I corpi binari li abilita `registraCorpiBinari()` (`config/fastify.ts`), condivisa fra `main.ts` e i test: senza, Fastify risponde 415 a un PDF.
+
+### Post completi e commenti (E2)
+
+- **Modifica ed eliminazione**: solo l'autore, e il controllo sta nel modulo — mai nella facciata, che attraversa quattro contesti. Post inesistente → 404, post altrui → 403: sono due azioni diverse per chi le riceve.
+- **Eliminare un post** porta via gli allegati nella stessa transazione (B4) e i file dall'archivio **subito dopo**, fuori dalla transazione: un archivio lento non deve tenerne una aperta. I **commenti** spariscono invece in differita — sono aggregati autonomi e nessuno li aspetta.
+- **Il Commento non ha foreign key verso il post** (C3): riferisce il `postId` per identità. L'esistenza si verifica al comando, su lettura fresca, e la finestra che resta la chiude `PuliziaBachecaService` dall'unità lavoratrice. Quando arriverà il recapito dei fatti (E3), quella riconciliazione diventerà la reazione a un fatto.
+- **I permessi li dichiara il server**: `puoModificare` sul post, `puoEliminare` sul commento. Non farli dedurre al client — sarebbero due copie della stessa regola, e quella del client è aggirabile.
+- **Lettura di un singolo post**: post inesistente e post non visibile rispondono entrambi 404. «Esiste ma non puoi vederlo» racconta comunque che esiste.
+
+## Misurazioni di utilizzo (E1.6)
+
+`MisurazioniDiUtilizzo` è una porta **senza fornitore assegnato**, e resta tale finché non è dimostrabile la conformità su regione e trattamento: quello che esiste sono i punti di emissione, provati da `test/misurazioni.spec.ts`. Attaccarci un prodotto sarà un adattatore, non una riscrittura.
+
+- L'elenco degli eventi è **chiuso** (`EventoDiProdotto`): un evento a stringa libera diventa in poche settimane un elenco di nomi simili, e un errore di battitura produce una serie storica che sembra vuota.
+- Le proprietà ammesse sono **un tipo, non una convenzione** (`ProprietaEvento`): ciò che non è dichiarato lì non si può emettere. **Nessun dato personale** — niente email, nomi, testi o nomi di file; l'unico riferimento a una persona è `utenteId`, lo stesso che i log possono portare.
+- Si emette **dopo** che il gesto è riuscito: un accesso fallito non è un accesso, e contarlo gonfierebbe la sola misura su cui il prodotto dovrà decidere qualcosa.
+
 ## Formato delle risposte (tutte, nessuna eccezione)
 
 **Successo** — envelope automatico via `ResponseInterceptor` globale (i controller/service ritornano dati NUDI, mai wrappare a mano):
@@ -74,6 +127,8 @@ throw new AppException(ProfiloErrorCode.NOT_FOUND, 'PROFILO_NOT_FOUND', HttpStat
 
 ## Test
 
-- L'infrastruttura trasversale è coperta da `test/infrastruttura-api.spec.ts`: se tocchi filtro/interceptor/pipe, i test devono passare (`pnpm --filter @prome/api test`).
+- **Serve un database**: `pnpm db:up` prima di `pnpm --filter @prome/api test`. Il percorso di ingresso è un'area a difetti invisibili, e provarlo contro un doppio significherebbe provare il doppio.
+- L'infrastruttura trasversale è coperta da `test/infrastruttura-api.spec.ts`; accesso e profilo da `test/accesso-e-profilo.spec.ts`, che copre anche i percorsi infelici (codice sbagliato, scaduto, troppi tentativi, nessuna sessione, onboarding parziale).
+- Jest trasforma anche il fornitore di identità e la sua catena, pubblicati solo come ESM (`transformIgnorePatterns` in `package.json`): Node li carica da sé, Jest no.
 - I test usano `creaValidationPipe()` (`common/pipes`), la STESSA di `main.ts`: mai duplicare la configurazione della pipe.
 - Aree a difetti invisibili (auth, upload, permessi/visibilità, cancellazione account): test automatici obbligatori, scritti prima del codice.

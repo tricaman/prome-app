@@ -83,6 +83,12 @@ Due aree, due cornici: il sito pubblico usa `SiteShell`, l'app usa `AppShell` (c
 
 Logo e marchio denominativo sono quelli storici del prodotto: `public/logo-prome.svg` per il segno e `components/layout/wordmark.tsx` per la scritta (tracciati originali, non ridisegnati). La scritta usa `currentColor`, quindi non servono varianti per fondo chiaro e scuro. Non sostituirli con testo tipografico.
 
+## Sessione
+
+Il token sta in `localStorage` sul web e nell'archivio cifrato del sistema sull'app; il *comportamento* — chi apre, chi chiude, chi viene avvisato — è uno solo, in `@prome/app-core/sessione`. `lib/api.ts` collega l'archivio e passa il token al client API, che lo mette in `Authorization` a ogni richiesta.
+
+`useSessione()` dice se si è dentro e **se lo si sa già**: sul server la risposta è sempre «non lo sappiamo», così una pagina resa dal server non promette contenuti che il browser potrebbe non avere il diritto di vedere.
+
 ## Fare una chiamata
 
 Gli hook sono generati da OpenAPI (`pnpm api:client` dopo ogni modifica agli endpoint). Le letture passano da `QueryBoundary`, le scritture da `useApiMutation`.
@@ -181,6 +187,14 @@ Le superfici scure non sono la rampa neutra rovesciata ma una scala propria (`sc
 
 - I componenti di `components/ui/` sono l'unico punto che conosce la libreria sottostante: le pagine importano da lì, mai da `@heroui/react`.
 - Un nuovo componente di libreria si aggiunge con un involucro che espone proprietà in linguaggio di prodotto (`variante="primaria"`), non in linguaggio di libreria.
+
+## Pacchetti condivisi: sorgenti, non `dist`
+
+`@prome/app-core`, `@prome/api-client` e `@prome/contenuti` esportano i **sorgenti TypeScript** (`"exports": "./src/index.ts"`), non una cartella compilata.
+
+Non è una scorciatoia. Un pacchetto compilato in CommonJS che importa `@tanstack/react-query` ne ottiene la copia CJS, mentre l'app ne importa la copia ESM: due istanze dello stesso modulo, due contesti React diversi, e un `QueryClientProvider` montato correttamente che produce comunque «No QueryClient set». Lo stesso vale per qualunque libreria basata su contesto. Esportare i sorgenti fa risolvere una copia sola al bundler.
+
+Un pacchetto nuovo consumato da web o mobile segue la stessa regola.
 
 ## Errori e schermate bianche
 

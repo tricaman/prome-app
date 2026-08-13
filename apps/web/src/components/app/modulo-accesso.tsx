@@ -3,7 +3,17 @@
 import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { z } from 'zod';
-import { useForm } from '@/hooks';
+import { apriSessione } from '@prome/app-core';
+import {
+  richiediCodiceAccesso,
+  verificaCodiceAccesso,
+  type RichiestaCodiceDto,
+  type VerificaCodiceDto,
+  type VerificaCodiceAccesso200,
+} from '@prome/api-client';
+import { useApiMutation, useForm } from '@/hooks';
+import { useRouter } from '@/i18n/navigazione';
+import { percorsiApp } from '@/lib/percorsi-app';
 import { Form, FormInput, FormSubmit } from '@/components/form';
 import { Button, Heading } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -58,10 +68,18 @@ function PassoEmail({ onInviato }: { onInviato: (email: string) => void }) {
     defaultValues: { email: '' },
   });
 
+  // L'avviso di esito e gli eventuali errori sui campi sono automatici: qui
+  // resta solo ciò che è proprio di questa schermata, cioè passare al codice.
+  const invio = useApiMutation<unknown, RichiestaCodiceDto>({
+    mutationFn: (dati: RichiestaCodiceDto) => richiediCodiceAccesso(dati),
+    form,
+    onSuccess: (_esito, variabili) => onInviato(variabili.email),
+  });
+
   return (
     <>
       <Intestazione titolo={t('titolo')} sommario={t('sommario')} />
-      <Form form={form} onSubmit={(valori) => onInviato(valori.email)}>
+      <Form form={form} onSubmit={(valori) => invio.mutate(valori)}>
         <FormInput
           name="email"
           tipo="email"
@@ -84,14 +102,50 @@ function PassoEmail({ onInviato }: { onInviato: (email: string) => void }) {
 /** Secondo passo: il codice appena arrivato, con la via di uscita se l'email era sbagliata. */
 function PassoCodice({ email, onCambiaEmail }: { email: string; onCambiaEmail: () => void }) {
   const t = useTranslations('app.accesso');
+  const router = useRouter();
+  const [codice, setCodice] = useState('');
+
+  const verifica = useApiMutation<VerificaCodiceAccesso200, VerificaCodiceDto>({
+    mutationFn: (dati: VerificaCodiceDto) => verificaCodiceAccesso(dati),
+    onSuccess: async ({ data }) => {
+      await apriSessione(data.token);
+      // Chi non ha ancora compilato il profilo non entra nell'app: ci entra
+      // dopo, e da qui sappiamo già quale delle due strade prendere.
+      router.replace(
+        data.onboardingCompletato ? percorsiApp.bacheca() : percorsiApp.benvenuto(),
+      );
+    },
+  });
+
+  const rinvio = useApiMutation<unknown, RichiestaCodiceDto>({
+    mutationFn: (dati: RichiestaCodiceDto) => richiediCodiceAccesso(dati),
+  });
+
+  const entra = (valore = codice) => verifica.mutate({ email, codice: valore });
 
   return (
     <div className="flex flex-col gap-5">
       <Intestazione titolo={t('codiceTitolo')} sommario={t('codiceSommario', { email })} />
 
-      <CampoCodice etichetta={t('codice')} aiuto={t('codiceAiuto')} />
+      <CampoCodice
+        etichetta={t('codice')}
+        aiuto={t('codiceAiuto')}
+        valore={codice}
+        onCambia={setCodice}
+        // Sei cifre complete sono già un invio: chiedere anche il tocco sul
+        // bottone è un gesto in più su un dato che non può essere più completo.
+        // Il codice arriva come argomento e non dallo stato: quando questa
+        // funzione parte il ridisegno non è ancora avvenuto, e leggere lo
+        // stato manderebbe il valore di un istante prima.
+        onCompletato={(completo) => entra(completo)}
+      />
 
-      <Button className="h-[50px] w-full justify-center text-[15.5px] shadow-marchio">
+      <Button
+        onPress={() => entra()}
+        isDisabled={codice.length < LUNGHEZZA_CODICE}
+        inCaricamento={verifica.isPending}
+        className="h-[50px] w-full justify-center text-[15.5px] shadow-marchio"
+      >
         {t('entra')}
       </Button>
 
@@ -105,7 +159,12 @@ function PassoCodice({ email, onCambiaEmail }: { email: string; onCambiaEmail: (
         </button>
         <span className="text-testo-tenue">
           {t('nonArrivato')}{' '}
-          <button type="button" className="font-bold text-primario-collegamento">
+          <button
+            type="button"
+            onClick={() => rinvio.mutate({ email })}
+            disabled={rinvio.isPending}
+            className="font-bold text-primario-collegamento"
+          >
             {t('reinvia')}
           </button>
         </span>
@@ -121,26 +180,44 @@ function PassoCodice({ email, onCambiaEmail }: { email: string; onCambiaEmail: (
  * inserirlo senza guardare la tastiera. Incollare il codice intero riempie
  * tutte le caselle, perché è così che arriva dalla mail.
  */
-function CampoCodice({ etichetta, aiuto }: { etichetta: string; aiuto: string }) {
-  const [cifre, setCifre] = useState<string[]>(Array<string>(LUNGHEZZA_CODICE).fill(''));
+function CampoCodice({
+  etichetta,
+  aiuto,
+  valore,
+  onCambia,
+  onCompletato,
+}: {
+  etichetta: string;
+  aiuto: string;
+  valore: string;
+  onCambia: (codice: string) => void;
+  onCompletato: (codice: string) => void;
+}) {
+  const cifre = Array.from({ length: LUNGHEZZA_CODICE }, (_, i) => valore[i] ?? '');
   const caselle = useRef<(HTMLInputElement | null)[]>([]);
 
-  const scrivi = (indice: number, valore: string) => {
-    const pulito = valore.replace(/\D/g, '');
+  const aggiorna = (prossime: string[]) => {
+    const codice = prossime.join('');
+    onCambia(codice);
+    if (codice.length === LUNGHEZZA_CODICE) onCompletato(codice);
+  };
+
+  const scrivi = (indice: number, testo: string) => {
+    const pulito = testo.replace(/\D/g, '');
+    const prossime = [...cifre];
+
     if (!pulito) {
-      setCifre((precedenti) => precedenti.map((c, i) => (i === indice ? '' : c)));
+      prossime[indice] = '';
+      onCambia(prossime.join('').trimEnd());
       return;
     }
 
-    setCifre((precedenti) => {
-      const prossime = [...precedenti];
-      // Incollando il codice intero si riempiono le caselle da qui in poi.
-      for (let scorrimento = 0; scorrimento < pulito.length; scorrimento += 1) {
-        const posizione = indice + scorrimento;
-        if (posizione < LUNGHEZZA_CODICE) prossime[posizione] = pulito[scorrimento]!;
-      }
-      return prossime;
-    });
+    // Incollando il codice intero si riempiono le caselle da qui in poi.
+    for (let scorrimento = 0; scorrimento < pulito.length; scorrimento += 1) {
+      const posizione = indice + scorrimento;
+      if (posizione < LUNGHEZZA_CODICE) prossime[posizione] = pulito[scorrimento]!;
+    }
+    aggiorna(prossime);
 
     const prossimaVuota = Math.min(indice + pulito.length, LUNGHEZZA_CODICE - 1);
     caselle.current[prossimaVuota]?.focus();

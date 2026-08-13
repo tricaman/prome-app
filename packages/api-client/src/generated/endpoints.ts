@@ -6,23 +6,50 @@
  * OpenAPI spec version: v1
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
+  CommentaPost201,
+  CompletaMioProfilo200,
+  CompletaProfiloDto,
+  CreaCommentoDto,
+  CreaPostDto,
+  ElencaCommenti200,
+  ElencaCommentiParams,
+  ElencaPost200,
+  ElencaPostParams,
+  EliminaCommento200,
+  EliminaPost200,
   ErrorResponseDto,
-  HealthControllerHealth200
+  EsciDaProme200,
+  LeggiMioProfilo200,
+  LeggiPost200,
+  ModificaPost200,
+  ModificaPostDto,
+  PreautorizzaAllegato200,
+  PreautorizzaAllegatoDto,
+  PubblicaPost201,
+  RichiediCodiceAccesso200,
+  RichiestaCodiceDto,
+  StatoDelServizio200,
+  VerificaCodiceAccesso200,
+  VerificaCodiceDto
 } from './modelli';
 
 import { istanzaApi } from '../client/istanza';
@@ -33,111 +60,84 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 /**
  * @summary Stato del servizio
  */
-export type healthControllerHealthResponse200 = {
-  data: HealthControllerHealth200
-  status: 200
-}
-
-export type healthControllerHealthResponse500 = {
-  data: ErrorResponseDto
-  status: 500
-}
+export const statoDelServizio = (
     
-export type healthControllerHealthResponseSuccess = (healthControllerHealthResponse200) & {
-  headers: Headers;
-};
-export type healthControllerHealthResponseError = (healthControllerHealthResponse500) & {
-  headers: Headers;
-};
-
-export type healthControllerHealthResponse = (healthControllerHealthResponseSuccess | healthControllerHealthResponseError)
-
-export const getHealthControllerHealthUrl = () => {
-
-
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<StatoDelServizio200>(
+      {url: `/health`, method: 'GET', signal
+    },
+      options);
+    }
   
 
-  return `/health`
-}
-
-export const healthControllerHealth = async ( options?: RequestInit): Promise<healthControllerHealthResponse> => {
-  
-  return istanzaApi<healthControllerHealthResponse>(getHealthControllerHealthUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
 
 
-
-
-
-export const getHealthControllerHealthQueryKey = () => {
+export const getStatoDelServizioQueryKey = () => {
     return [
     `/health`
     ] as const;
     }
 
     
-export const getHealthControllerHealthQueryOptions = <TData = Awaited<ReturnType<typeof healthControllerHealth>>, TError = ErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerHealth>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+export const getStatoDelServizioQueryOptions = <TData = Awaited<ReturnType<typeof statoDelServizio>>, TError = ErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof statoDelServizio>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getHealthControllerHealthQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getStatoDelServizioQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof healthControllerHealth>>> = ({ signal }) => healthControllerHealth({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof statoDelServizio>>> = ({ signal }) => statoDelServizio(requestOptions, signal);
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof healthControllerHealth>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof statoDelServizio>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
 }
 
-export type HealthControllerHealthQueryResult = NonNullable<Awaited<ReturnType<typeof healthControllerHealth>>>
-export type HealthControllerHealthQueryError = ErrorResponseDto
+export type StatoDelServizioQueryResult = NonNullable<Awaited<ReturnType<typeof statoDelServizio>>>
+export type StatoDelServizioQueryError = ErrorResponseDto
 
 
-export function useHealthControllerHealth<TData = Awaited<ReturnType<typeof healthControllerHealth>>, TError = ErrorResponseDto>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerHealth>>, TError, TData>> & Pick<
+export function useStatoDelServizio<TData = Awaited<ReturnType<typeof statoDelServizio>>, TError = ErrorResponseDto>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof statoDelServizio>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof healthControllerHealth>>,
+          Awaited<ReturnType<typeof statoDelServizio>>,
           TError,
-          Awaited<ReturnType<typeof healthControllerHealth>>
+          Awaited<ReturnType<typeof statoDelServizio>>
         > , 'initialData'
       >, request?: SecondParameter<typeof istanzaApi>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
-export function useHealthControllerHealth<TData = Awaited<ReturnType<typeof healthControllerHealth>>, TError = ErrorResponseDto>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerHealth>>, TError, TData>> & Pick<
+export function useStatoDelServizio<TData = Awaited<ReturnType<typeof statoDelServizio>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof statoDelServizio>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof healthControllerHealth>>,
+          Awaited<ReturnType<typeof statoDelServizio>>,
           TError,
-          Awaited<ReturnType<typeof healthControllerHealth>>
+          Awaited<ReturnType<typeof statoDelServizio>>
         > , 'initialData'
       >, request?: SecondParameter<typeof istanzaApi>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
-export function useHealthControllerHealth<TData = Awaited<ReturnType<typeof healthControllerHealth>>, TError = ErrorResponseDto>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerHealth>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+export function useStatoDelServizio<TData = Awaited<ReturnType<typeof statoDelServizio>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof statoDelServizio>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
 /**
  * @summary Stato del servizio
  */
 
-export function useHealthControllerHealth<TData = Awaited<ReturnType<typeof healthControllerHealth>>, TError = ErrorResponseDto>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerHealth>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+export function useStatoDelServizio<TData = Awaited<ReturnType<typeof statoDelServizio>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof statoDelServizio>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
 
-  const queryOptions = getHealthControllerHealthQueryOptions(options)
+  const queryOptions = getStatoDelServizioQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
 
@@ -145,3 +145,1030 @@ export function useHealthControllerHealth<TData = Awaited<ReturnType<typeof heal
 
   return query;
 }
+
+
+
+
+
+/**
+ * @summary Manda un codice di accesso a un indirizzo email
+ */
+export const richiediCodiceAccesso = (
+    richiestaCodiceDto: RichiestaCodiceDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<RichiediCodiceAccesso200>(
+      {url: `/accesso/codice`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: richiestaCodiceDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getRichiediCodiceAccessoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof richiediCodiceAccesso>>, TError,{data: RichiestaCodiceDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof richiediCodiceAccesso>>, TError,{data: RichiestaCodiceDto}, TContext> => {
+
+const mutationKey = ['richiediCodiceAccesso'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof richiediCodiceAccesso>>, {data: RichiestaCodiceDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  richiediCodiceAccesso(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RichiediCodiceAccessoMutationResult = NonNullable<Awaited<ReturnType<typeof richiediCodiceAccesso>>>
+    export type RichiediCodiceAccessoMutationBody = RichiestaCodiceDto
+    export type RichiediCodiceAccessoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Manda un codice di accesso a un indirizzo email
+ */
+export const useRichiediCodiceAccesso = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof richiediCodiceAccesso>>, TError,{data: RichiestaCodiceDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof richiediCodiceAccesso>>,
+        TError,
+        {data: RichiestaCodiceDto},
+        TContext
+      > => {
+
+      const mutationOptions = getRichiediCodiceAccessoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Verifica il codice ed entra (creando l'account al primo ingresso)
+ */
+export const verificaCodiceAccesso = (
+    verificaCodiceDto: VerificaCodiceDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<VerificaCodiceAccesso200>(
+      {url: `/accesso/verifica`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: verificaCodiceDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getVerificaCodiceAccessoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof verificaCodiceAccesso>>, TError,{data: VerificaCodiceDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof verificaCodiceAccesso>>, TError,{data: VerificaCodiceDto}, TContext> => {
+
+const mutationKey = ['verificaCodiceAccesso'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof verificaCodiceAccesso>>, {data: VerificaCodiceDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  verificaCodiceAccesso(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type VerificaCodiceAccessoMutationResult = NonNullable<Awaited<ReturnType<typeof verificaCodiceAccesso>>>
+    export type VerificaCodiceAccessoMutationBody = VerificaCodiceDto
+    export type VerificaCodiceAccessoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Verifica il codice ed entra (creando l'account al primo ingresso)
+ */
+export const useVerificaCodiceAccesso = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof verificaCodiceAccesso>>, TError,{data: VerificaCodiceDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof verificaCodiceAccesso>>,
+        TError,
+        {data: VerificaCodiceDto},
+        TContext
+      > => {
+
+      const mutationOptions = getVerificaCodiceAccessoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Chiude la sessione corrente
+ */
+export const esciDaProme = (
+    
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<EsciDaProme200>(
+      {url: `/accesso/esci`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getEsciDaPromeMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof esciDaProme>>, TError,void, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof esciDaProme>>, TError,void, TContext> => {
+
+const mutationKey = ['esciDaProme'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof esciDaProme>>, void> = () => {
+          
+
+          return  esciDaProme(requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EsciDaPromeMutationResult = NonNullable<Awaited<ReturnType<typeof esciDaProme>>>
+    
+    export type EsciDaPromeMutationError = ErrorResponseDto
+
+    /**
+ * @summary Chiude la sessione corrente
+ */
+export const useEsciDaProme = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof esciDaProme>>, TError,void, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof esciDaProme>>,
+        TError,
+        void,
+        TContext
+      > => {
+
+      const mutationOptions = getEsciDaPromeMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Il profilo di chi ha la sessione
+ */
+export const leggiMioProfilo = (
+    
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<LeggiMioProfilo200>(
+      {url: `/profilo/me`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getLeggiMioProfiloQueryKey = () => {
+    return [
+    `/profilo/me`
+    ] as const;
+    }
+
+    
+export const getLeggiMioProfiloQueryOptions = <TData = Awaited<ReturnType<typeof leggiMioProfilo>>, TError = ErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiMioProfilo>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getLeggiMioProfiloQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof leggiMioProfilo>>> = ({ signal }) => leggiMioProfilo(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof leggiMioProfilo>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type LeggiMioProfiloQueryResult = NonNullable<Awaited<ReturnType<typeof leggiMioProfilo>>>
+export type LeggiMioProfiloQueryError = ErrorResponseDto
+
+
+export function useLeggiMioProfilo<TData = Awaited<ReturnType<typeof leggiMioProfilo>>, TError = ErrorResponseDto>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiMioProfilo>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiMioProfilo>>,
+          TError,
+          Awaited<ReturnType<typeof leggiMioProfilo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiMioProfilo<TData = Awaited<ReturnType<typeof leggiMioProfilo>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiMioProfilo>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiMioProfilo>>,
+          TError,
+          Awaited<ReturnType<typeof leggiMioProfilo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiMioProfilo<TData = Awaited<ReturnType<typeof leggiMioProfilo>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiMioProfilo>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Il profilo di chi ha la sessione
+ */
+
+export function useLeggiMioProfilo<TData = Awaited<ReturnType<typeof leggiMioProfilo>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiMioProfilo>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getLeggiMioProfiloQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Completa l'onboarding con nome, cognome, università e corso
+ */
+export const completaMioProfilo = (
+    completaProfiloDto: CompletaProfiloDto,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<CompletaMioProfilo200>(
+      {url: `/profilo/me`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: completaProfiloDto
+    },
+      options);
+    }
+  
+
+
+export const getCompletaMioProfiloMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completaMioProfilo>>, TError,{data: CompletaProfiloDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof completaMioProfilo>>, TError,{data: CompletaProfiloDto}, TContext> => {
+
+const mutationKey = ['completaMioProfilo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof completaMioProfilo>>, {data: CompletaProfiloDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  completaMioProfilo(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CompletaMioProfiloMutationResult = NonNullable<Awaited<ReturnType<typeof completaMioProfilo>>>
+    export type CompletaMioProfiloMutationBody = CompletaProfiloDto
+    export type CompletaMioProfiloMutationError = ErrorResponseDto
+
+    /**
+ * @summary Completa l'onboarding con nome, cognome, università e corso
+ */
+export const useCompletaMioProfilo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completaMioProfilo>>, TError,{data: CompletaProfiloDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof completaMioProfilo>>,
+        TError,
+        {data: CompletaProfiloDto},
+        TContext
+      > => {
+
+      const mutationOptions = getCompletaMioProfiloMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Autorizza il caricamento di un file e prenota la sua chiave
+ */
+export const preautorizzaAllegato = (
+    preautorizzaAllegatoDto: PreautorizzaAllegatoDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<PreautorizzaAllegato200>(
+      {url: `/bacheca/allegati/pre-autorizzazione`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: preautorizzaAllegatoDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getPreautorizzaAllegatoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preautorizzaAllegato>>, TError,{data: PreautorizzaAllegatoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof preautorizzaAllegato>>, TError,{data: PreautorizzaAllegatoDto}, TContext> => {
+
+const mutationKey = ['preautorizzaAllegato'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof preautorizzaAllegato>>, {data: PreautorizzaAllegatoDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  preautorizzaAllegato(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PreautorizzaAllegatoMutationResult = NonNullable<Awaited<ReturnType<typeof preautorizzaAllegato>>>
+    export type PreautorizzaAllegatoMutationBody = PreautorizzaAllegatoDto
+    export type PreautorizzaAllegatoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Autorizza il caricamento di un file e prenota la sua chiave
+ */
+export const usePreautorizzaAllegato = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preautorizzaAllegato>>, TError,{data: PreautorizzaAllegatoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof preautorizzaAllegato>>,
+        TError,
+        {data: PreautorizzaAllegatoDto},
+        TContext
+      > => {
+
+      const mutationOptions = getPreautorizzaAllegatoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Pubblica un post, con i suoi allegati
+ */
+export const pubblicaPost = (
+    creaPostDto: CreaPostDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<PubblicaPost201>(
+      {url: `/bacheca`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: creaPostDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getPubblicaPostMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pubblicaPost>>, TError,{data: CreaPostDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof pubblicaPost>>, TError,{data: CreaPostDto}, TContext> => {
+
+const mutationKey = ['pubblicaPost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof pubblicaPost>>, {data: CreaPostDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  pubblicaPost(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PubblicaPostMutationResult = NonNullable<Awaited<ReturnType<typeof pubblicaPost>>>
+    export type PubblicaPostMutationBody = CreaPostDto
+    export type PubblicaPostMutationError = ErrorResponseDto
+
+    /**
+ * @summary Pubblica un post, con i suoi allegati
+ */
+export const usePubblicaPost = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pubblicaPost>>, TError,{data: CreaPostDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof pubblicaPost>>,
+        TError,
+        {data: CreaPostDto},
+        TContext
+      > => {
+
+      const mutationOptions = getPubblicaPostMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary La bacheca di chi legge, dal più recente
+ */
+export const elencaPost = (
+    params?: ElencaPostParams,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ElencaPost200>(
+      {url: `/bacheca`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getElencaPostQueryKey = (params?: ElencaPostParams,) => {
+    return [
+    `/bacheca`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getElencaPostQueryOptions = <TData = Awaited<ReturnType<typeof elencaPost>>, TError = ErrorResponseDto>(params?: ElencaPostParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaPost>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getElencaPostQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof elencaPost>>> = ({ signal }) => elencaPost(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof elencaPost>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ElencaPostQueryResult = NonNullable<Awaited<ReturnType<typeof elencaPost>>>
+export type ElencaPostQueryError = ErrorResponseDto
+
+
+export function useElencaPost<TData = Awaited<ReturnType<typeof elencaPost>>, TError = ErrorResponseDto>(
+ params: undefined |  ElencaPostParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaPost>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaPost>>,
+          TError,
+          Awaited<ReturnType<typeof elencaPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaPost<TData = Awaited<ReturnType<typeof elencaPost>>, TError = ErrorResponseDto>(
+ params?: ElencaPostParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaPost>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaPost>>,
+          TError,
+          Awaited<ReturnType<typeof elencaPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaPost<TData = Awaited<ReturnType<typeof elencaPost>>, TError = ErrorResponseDto>(
+ params?: ElencaPostParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaPost>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary La bacheca di chi legge, dal più recente
+ */
+
+export function useElencaPost<TData = Awaited<ReturnType<typeof elencaPost>>, TError = ErrorResponseDto>(
+ params?: ElencaPostParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaPost>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getElencaPostQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Un post, se chi legge può vederlo
+ */
+export const leggiPost = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<LeggiPost200>(
+      {url: `/bacheca/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getLeggiPostQueryKey = (id?: string,) => {
+    return [
+    `/bacheca/${id}`
+    ] as const;
+    }
+
+    
+export const getLeggiPostQueryOptions = <TData = Awaited<ReturnType<typeof leggiPost>>, TError = ErrorResponseDto>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiPost>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getLeggiPostQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof leggiPost>>> = ({ signal }) => leggiPost(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof leggiPost>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type LeggiPostQueryResult = NonNullable<Awaited<ReturnType<typeof leggiPost>>>
+export type LeggiPostQueryError = ErrorResponseDto
+
+
+export function useLeggiPost<TData = Awaited<ReturnType<typeof leggiPost>>, TError = ErrorResponseDto>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiPost>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiPost>>,
+          TError,
+          Awaited<ReturnType<typeof leggiPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiPost<TData = Awaited<ReturnType<typeof leggiPost>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiPost>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiPost>>,
+          TError,
+          Awaited<ReturnType<typeof leggiPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiPost<TData = Awaited<ReturnType<typeof leggiPost>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiPost>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Un post, se chi legge può vederlo
+ */
+
+export function useLeggiPost<TData = Awaited<ReturnType<typeof leggiPost>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiPost>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getLeggiPostQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Corregge il testo di un proprio post
+ */
+export const modificaPost = (
+    id: string,
+    modificaPostDto: ModificaPostDto,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<ModificaPost200>(
+      {url: `/bacheca/${id}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: modificaPostDto
+    },
+      options);
+    }
+  
+
+
+export const getModificaPostMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modificaPost>>, TError,{id: string;data: ModificaPostDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof modificaPost>>, TError,{id: string;data: ModificaPostDto}, TContext> => {
+
+const mutationKey = ['modificaPost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof modificaPost>>, {id: string;data: ModificaPostDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  modificaPost(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ModificaPostMutationResult = NonNullable<Awaited<ReturnType<typeof modificaPost>>>
+    export type ModificaPostMutationBody = ModificaPostDto
+    export type ModificaPostMutationError = ErrorResponseDto
+
+    /**
+ * @summary Corregge il testo di un proprio post
+ */
+export const useModificaPost = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modificaPost>>, TError,{id: string;data: ModificaPostDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof modificaPost>>,
+        TError,
+        {id: string;data: ModificaPostDto},
+        TContext
+      > => {
+
+      const mutationOptions = getModificaPostMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Elimina un proprio post e i suoi allegati
+ */
+export const eliminaPost = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<EliminaPost200>(
+      {url: `/bacheca/${id}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getEliminaPostMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminaPost>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof eliminaPost>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['eliminaPost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof eliminaPost>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  eliminaPost(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EliminaPostMutationResult = NonNullable<Awaited<ReturnType<typeof eliminaPost>>>
+    
+    export type EliminaPostMutationError = ErrorResponseDto
+
+    /**
+ * @summary Elimina un proprio post e i suoi allegati
+ */
+export const useEliminaPost = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminaPost>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof eliminaPost>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getEliminaPostMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary I commenti di un post, dal più vecchio
+ */
+export const elencaCommenti = (
+    id: string,
+    params?: ElencaCommentiParams,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ElencaCommenti200>(
+      {url: `/bacheca/${id}/commenti`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getElencaCommentiQueryKey = (id?: string,
+    params?: ElencaCommentiParams,) => {
+    return [
+    `/bacheca/${id}/commenti`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getElencaCommentiQueryOptions = <TData = Awaited<ReturnType<typeof elencaCommenti>>, TError = ErrorResponseDto>(id: string,
+    params?: ElencaCommentiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaCommenti>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getElencaCommentiQueryKey(id,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof elencaCommenti>>> = ({ signal }) => elencaCommenti(id,params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof elencaCommenti>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ElencaCommentiQueryResult = NonNullable<Awaited<ReturnType<typeof elencaCommenti>>>
+export type ElencaCommentiQueryError = ErrorResponseDto
+
+
+export function useElencaCommenti<TData = Awaited<ReturnType<typeof elencaCommenti>>, TError = ErrorResponseDto>(
+ id: string,
+    params: undefined |  ElencaCommentiParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaCommenti>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaCommenti>>,
+          TError,
+          Awaited<ReturnType<typeof elencaCommenti>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaCommenti<TData = Awaited<ReturnType<typeof elencaCommenti>>, TError = ErrorResponseDto>(
+ id: string,
+    params?: ElencaCommentiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaCommenti>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaCommenti>>,
+          TError,
+          Awaited<ReturnType<typeof elencaCommenti>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaCommenti<TData = Awaited<ReturnType<typeof elencaCommenti>>, TError = ErrorResponseDto>(
+ id: string,
+    params?: ElencaCommentiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaCommenti>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary I commenti di un post, dal più vecchio
+ */
+
+export function useElencaCommenti<TData = Awaited<ReturnType<typeof elencaCommenti>>, TError = ErrorResponseDto>(
+ id: string,
+    params?: ElencaCommentiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaCommenti>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getElencaCommentiQueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Commenta un post
+ */
+export const commentaPost = (
+    id: string,
+    creaCommentoDto: CreaCommentoDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<CommentaPost201>(
+      {url: `/bacheca/${id}/commenti`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: creaCommentoDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getCommentaPostMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof commentaPost>>, TError,{id: string;data: CreaCommentoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof commentaPost>>, TError,{id: string;data: CreaCommentoDto}, TContext> => {
+
+const mutationKey = ['commentaPost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof commentaPost>>, {id: string;data: CreaCommentoDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  commentaPost(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CommentaPostMutationResult = NonNullable<Awaited<ReturnType<typeof commentaPost>>>
+    export type CommentaPostMutationBody = CreaCommentoDto
+    export type CommentaPostMutationError = ErrorResponseDto
+
+    /**
+ * @summary Commenta un post
+ */
+export const useCommentaPost = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof commentaPost>>, TError,{id: string;data: CreaCommentoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof commentaPost>>,
+        TError,
+        {id: string;data: CreaCommentoDto},
+        TContext
+      > => {
+
+      const mutationOptions = getCommentaPostMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Elimina un commento: proprio, o sotto un proprio post
+ */
+export const eliminaCommento = (
+    commentoId: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<EliminaCommento200>(
+      {url: `/bacheca/commenti/${commentoId}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getEliminaCommentoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminaCommento>>, TError,{commentoId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof eliminaCommento>>, TError,{commentoId: string}, TContext> => {
+
+const mutationKey = ['eliminaCommento'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof eliminaCommento>>, {commentoId: string}> = (props) => {
+          const {commentoId} = props ?? {};
+
+          return  eliminaCommento(commentoId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EliminaCommentoMutationResult = NonNullable<Awaited<ReturnType<typeof eliminaCommento>>>
+    
+    export type EliminaCommentoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Elimina un commento: proprio, o sotto un proprio post
+ */
+export const useEliminaCommento = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminaCommento>>, TError,{commentoId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof eliminaCommento>>,
+        TError,
+        {commentoId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getEliminaCommentoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }

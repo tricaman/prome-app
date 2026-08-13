@@ -10,7 +10,26 @@
   "VALIDATION_ERROR": "Errore di validazione",
   "TOO_MANY_REQUESTS": "Troppe richieste, riprova tra poco",
   "SERVICE_UNAVAILABLE": "Servizio momentaneamente non disponibile",
-
   "PROFILO_NOT_FOUND": "Profilo non trovato",
-  "ONBOARDING_INCOMPLETO": "Completa l'onboarding per continuare"
+  "ONBOARDING_INCOMPLETO": "Completa l'onboarding per continuare",
+  "CODICE_NON_VALIDO": "Codice non valido. Controlla le cifre e riprova.",
+  "CODICE_SCADUTO": "Il codice è scaduto. Chiedine uno nuovo.",
+  "TROPPI_TENTATIVI": "Troppi tentativi con questo codice. Chiedine uno nuovo.",
+  "ACCESSO_RICHIESTO": "Devi accedere per continuare",
+  "INVIO_CODICE_FALLITO": "Non siamo riusciti a mandare il codice. Riprova fra poco.",
+  "VERIFICA_FALLITA": "Non siamo riusciti a verificare il codice. Riprova fra poco.",
+  "POST_NOT_FOUND": "Post non trovato",
+  "POST_TESTO_VUOTO": "Scrivi qualcosa prima di pubblicare",
+  "POST_TESTO_TROPPO_LUNGO": "Il post supera i {massimo} caratteri",
+  "ALLEGATO_INCOMPLETO": "Allegato incompleto",
+  "ALLEGATO_DIMENSIONE": "Ogni allegato deve pesare più di 0 e al massimo {massimoMb} MB",
+  "ALLEGATO_SCONOSCIUTO": "Allegato non riconosciuto: richiedi di nuovo il caricamento",
+  "ALLEGATO_NON_CARICATO": "Il file non è ancora arrivato: riprova a caricarlo",
+  "ALLEGATO_GIA_USATO": "Questo allegato è già stato usato in un altro post",
+  "TROPPI_ALLEGATI": "Puoi allegare al massimo {massimo} file per post",
+  "NON_SEI_AUTORE": "Puoi modificare o eliminare solo i tuoi post",
+  "COMMENTO_NOT_FOUND": "Commento non trovato",
+  "COMMENTO_TESTO_VUOTO": "Scrivi qualcosa prima di commentare",
+  "COMMENTO_TESTO_TROPPO_LUNGO": "Il commento supera i {massimo} caratteri",
+  "NON_PUOI_MODERARE": "Puoi eliminare solo i tuoi commenti e quelli sotto ai tuoi post"
 }

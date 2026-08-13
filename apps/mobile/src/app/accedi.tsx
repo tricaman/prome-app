@@ -1,7 +1,8 @@
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { z } from 'zod';
-import { useForm, useT } from '@/hooks';
+import { richiediCodiceAccesso, type RichiestaCodiceDto } from '@prome/api-client';
+import { useApiMutation, useForm, useT } from '@/hooks';
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
 import { Form, FormInput, FormSubmit } from '@/components/form';
@@ -22,6 +23,14 @@ export default function SchermataAccedi() {
   const form = useForm({
     schema: z.object({ email: z.email() }),
     defaultValues: { email: '' },
+  });
+
+  // Avviso di esito ed errori sui campi sono automatici: qui resta soltanto
+  // il passaggio alla schermata del codice, che è ciò che ha di proprio.
+  const invio = useApiMutation<unknown, RichiestaCodiceDto>({
+    mutationFn: (dati: RichiestaCodiceDto) => richiediCodiceAccesso(dati),
+    form,
+    onSuccess: (_esito, variabili) => router.push(rotte.codice(variabili.email)),
   });
 
   return (
@@ -50,7 +59,7 @@ export default function SchermataAccedi() {
             titolo={t('app.accesso.inviaCodice')}
             dimensione="lg"
             larghezzaPiena
-            onSubmit={(valori) => router.push(rotte.codice(valori.email))}
+            onSubmit={(valori) => invio.mutate(valori as RichiestaCodiceDto)}
           />
         </Form>
 

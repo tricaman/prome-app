@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { AccessoModule } from '../../infrastruttura/accesso/accesso.module';
+import { PortaIdentitaUtente } from './porta-identita-utente';
 import { ProfiloService } from './profilo.service';
 
 /**
@@ -8,10 +10,14 @@ import { ProfiloService } from './profilo.service';
  * Posizione nella Context Map: contesto UPSTREAM condiviso.
  * - PUÒ essere importato da Bacheca, Gruppo e AulaStudio;
  * - NON importa alcun altro contesto di dominio.
- * Esporta il service proprio perché gli altri tre potranno dipenderne.
+ *
+ * Importa `AccessoModule`, che non è un contesto ma la configurazione di un
+ * servizio generico: è la dipendenza `Accesso → Profilo` della Context Map, e
+ * l'unica cosa che la attraversa è PortaIdentitàUtente, posseduta da qui.
  */
 @Module({
-  providers: [ProfiloService],
-  exports: [ProfiloService],
+  imports: [AccessoModule],
+  providers: [ProfiloService, PortaIdentitaUtente],
+  exports: [ProfiloService, PortaIdentitaUtente],
 })
 export class ProfiloModule {}

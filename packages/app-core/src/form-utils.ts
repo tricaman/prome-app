@@ -1,4 +1,19 @@
 import type { FieldValues, Path, UseFormReturn } from 'react-hook-form';
+
+/**
+ * Ciò che serve davvero per riportare gli errori del server su un form.
+ *
+ * Non è l'intero `UseFormReturn`: chiedere tutto costringerebbe ogni chiamante
+ * a combaciare su tre parametri di tipo, e un form tipizzato bene verrebbe
+ * rifiutato per ragioni che non c'entrano con quello che facciamo qui. I
+ * metodi sono dichiarati in forma abbreviata di proposito — è la forma in cui
+ * TypeScript accetta un form con nomi di campo concreti.
+ */
+export interface FormConErrori {
+  getValues(): FieldValues;
+  setError(campo: string, errore: { type: string; message: string }): void;
+  setFocus(campo: string): void;
+}
 import { dettagliValidazione } from './errori';
 
 /**

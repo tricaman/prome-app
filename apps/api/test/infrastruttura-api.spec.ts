@@ -8,6 +8,7 @@ import { creaValidationPipe } from '../src/common/pipes/validation.pipe';
 import { AppException } from '../src/common/exceptions';
 import { ProfiloErrorCode } from '../src/common/constants/error-codes';
 import { ResponseMessage, SkipResponseWrapper } from '../src/common/decorators';
+import { SenzaAccesso } from '../src/modules/facciata/guardia-accesso';
 
 /**
  * Test dell'infrastruttura trasversale della facciata: envelope di successo,
@@ -26,6 +27,9 @@ class CreaProvaDto {
   quantita!: number;
 }
 
+// La guardia della facciata nega per difetto: questi endpoint esistono per
+// provare l'infrastruttura, non risorse da proteggere, e lo dichiarano.
+@SenzaAccesso()
 @Controller('prova')
 class ProvaController {
   @Get('errore-dominio')

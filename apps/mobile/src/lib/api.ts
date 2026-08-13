@@ -1,5 +1,7 @@
 import Constants from 'expo-constants';
+import * as ArchivioSicuro from 'expo-secure-store';
 import { configuraApiClient } from '@prome/api-client';
+import { configuraSessione, tokenSessione } from '@prome/app-core';
 import { LINGUA_DI_RIPIEGO, type Lingua } from '@prome/i18n';
 
 /**
@@ -24,10 +26,24 @@ function urlApiPredefinito(): string {
   if (daAmbiente) return daAmbiente;
 
   const host = Constants.expoConfig?.hostUri?.split(':')[0];
-  return host ? `http://${host}:3001` : 'http://localhost:3001';
+  return host ? `http://${host}:3600` : 'http://localhost:3600';
 }
+
+const CHIAVE_SESSIONE = 'prome.sessione';
+
+/**
+ * Il token sta nell'archivio cifrato del sistema (portachiavi su iOS,
+ * Keystore su Android), non in quello semplice: è la credenziale con cui si
+ * entra nell'account, e su un telefono smarrito la differenza è tutta lì.
+ */
+void configuraSessione({
+  leggi: () => ArchivioSicuro.getItemAsync(CHIAVE_SESSIONE),
+  scrivi: (token) => ArchivioSicuro.setItemAsync(CHIAVE_SESSIONE, token),
+  cancella: () => ArchivioSicuro.deleteItemAsync(CHIAVE_SESSIONE),
+});
 
 configuraApiClient({
   baseUrl: urlApiPredefinito(),
   lingua: () => linguaCorrente,
+  token: () => tokenSessione() ?? undefined,
 });

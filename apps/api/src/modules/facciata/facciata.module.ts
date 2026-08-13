@@ -1,14 +1,36 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { AccessoModule } from '../../infrastruttura/accesso/accesso.module';
+import { ArchivioFileModule } from '../../infrastruttura/archivio-file/archivio-file.module';
+import { BachecaModule } from '../bacheca/bacheca.module';
+import { ProfiloModule } from '../profilo/profilo.module';
+import { AccessoController } from './accesso.controller';
+import { ArchivioController } from './archivio.controller';
+import { BachecaController } from './bacheca.controller';
+import { GuardiaAccesso } from './guardia-accesso';
 import { HealthController } from './health.controller';
+import { ProfiloController } from './profilo.controller';
 
 /**
  * FACCIATA — la facciata REST versionata: unico punto d'ingresso HTTP del
  * monolite. Traduce il contratto client (@prome/contracts, evoluzione solo
  * additiva dentro una versione) nelle operazioni dei bounded context.
- * Nessuna logica di dominio qui: in futuro importerà i moduli di contesto
- * per orchestrare comandi e letture. Per ora espone solo la sonda di salute.
+ * Nessuna logica di dominio qui: la facciata orchestra, i contesti decidono.
+ *
+ * La guardia è registrata come guardia **globale**: ogni endpoint nasce
+ * protetto e va aperto di proposito con `@SenzaAccesso()`. Il contrario —
+ * aperto per difetto — lascerebbe scoperto tutto ciò che ci si dimentica di
+ * proteggere, e ciò che si dimentica non si vede.
  */
 @Module({
-  controllers: [HealthController],
+  imports: [AccessoModule, ProfiloModule, BachecaModule, ArchivioFileModule],
+  controllers: [
+    HealthController,
+    AccessoController,
+    ProfiloController,
+    BachecaController,
+    ArchivioController,
+  ],
+  providers: [{ provide: APP_GUARD, useClass: GuardiaAccesso }],
 })
 export class FacciataModule {}

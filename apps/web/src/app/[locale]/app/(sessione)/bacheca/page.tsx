@@ -1,13 +1,13 @@
 import { getTranslations } from 'next-intl/server';
 import { ARGOMENTI, percorsi } from '@/content';
-import { AULE_IN_CORSO, BACHECA } from '@/content';
+import { AULE_IN_CORSO } from '@/content';
 import { linguaDellaRotta, linguaDeiMetadati } from '@/lib/pagina';
 import { creaMetadata } from '@/lib/seo';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { AppTopbar } from '@/components/app/app-topbar';
 import { Composer } from '@/components/app/composer';
 import { FiltriChip } from '@/components/app/filtri-chip';
-import { PostBacheca } from '@/components/app/post-bacheca';
+import { FeedBacheca } from '@/components/app/feed-bacheca';
 import { RiquadroLaterale } from '@/components/contenuti';
 import { Button, Card, Chip, Heading } from '@/components/ui';
 import { Link } from '@/i18n/navigazione';
@@ -54,9 +54,7 @@ export default async function PaginaBacheca({
         <div className="flex w-full max-w-[640px] flex-none flex-col gap-3.5">
           <Composer />
           <FiltriChip opzioni={filtri} etichetta={t('filtri.perTe')} />
-          {BACHECA.map((post) => (
-            <PostBacheca key={post.id} post={post} />
-          ))}
+          <FeedBacheca />
         </div>
 
         <aside className="hidden w-[300px] flex-none flex-col gap-4 xl:flex">

@@ -6,3 +6,4 @@ export {
 } from './allegato';
 export { PostCard } from './post-card';
 export { AulaCard, AulaProgrammataRiga } from './aula-card';
+export { FeedBacheca } from './feed-bacheca';

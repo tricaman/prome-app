@@ -4,28 +4,51 @@ import {
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
 } from '@nestjs/common';
+import { PuliziaBachecaService } from '../modules/bacheca/pulizia-bacheca.service';
+
+/** Ogni quanto girano le pulizie. */
+const CADENZA_MS = 5 * 60 * 1000;
 
 /**
- * Segnaposto del worker: tiene vivo il processo con un heartbeat ogni 30s.
- * Qui prenderanno posto CadenzaDeiMeccanismiRicorrenti e
- * RecapitoDeiFattiDiDominio (vedi worker.module.ts).
+ * L'unità lavoratrice: dà il tempo ai meccanismi ricorrenti dei contesti.
+ *
+ * Non decide nulla di dominio — chiede a ciascun contesto di fare il proprio
+ * giro. È il posto dove prenderà forma anche RecapitoDeiFattiDiDominio, che
+ * oggi non c'è: finché non c'è, le conseguenze differite sono
+ * riconciliazioni a tempo (vedi PuliziaBachecaService).
  */
 @Injectable()
 export class WorkerService implements OnApplicationBootstrap, OnApplicationShutdown {
   private readonly logger = new Logger('Worker');
-  private heartbeat?: NodeJS.Timeout;
+  private cadenza?: NodeJS.Timeout;
+
+  constructor(private readonly puliziaBacheca: PuliziaBachecaService) {}
 
   onApplicationBootstrap(): void {
-    this.logger.log('Worker attivo: heartbeat ogni 30 secondi (segnaposto)');
-    this.heartbeat = setInterval(() => {
-      this.logger.log('heartbeat — il worker è vivo');
-    }, 30_000);
+    this.logger.log(`Worker attivo: meccanismi ricorrenti ogni ${CADENZA_MS / 1000} secondi`);
+    // Un giro subito all'avvio: dopo un fermo lungo c'è già dell'arretrato, e
+    // aspettare la prima cadenza vorrebbe dire lasciarlo lì per altri minuti.
+    void this.giro();
+    this.cadenza = setInterval(() => void this.giro(), CADENZA_MS);
   }
 
   onApplicationShutdown(): void {
     // Spegnimento pulito: senza clearInterval il processo non terminerebbe.
-    if (this.heartbeat) {
-      clearInterval(this.heartbeat);
+    if (this.cadenza) clearInterval(this.cadenza);
+  }
+
+  /**
+   * Un giro non deve mai far cadere il processo: un errore in un meccanismo
+   * finisce nei log e il prossimo giro riprova.
+   */
+  private async giro(): Promise<void> {
+    try {
+      await this.puliziaBacheca.eseguiGiro();
+    } catch (errore) {
+      this.logger.error(
+        'Un meccanismo ricorrente è fallito: si riprova al prossimo giro',
+        errore instanceof Error ? errore.stack : undefined,
+      );
     }
   }
 }

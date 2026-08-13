@@ -1,4 +1,17 @@
 {
   "DEFAULT": "Operazione completata",
-  "HEALTH_OK": "Il servizio è attivo"
+  "HEALTH_OK": "Il servizio è attivo",
+  "CODICE_INVIATO": "Ti abbiamo mandato un codice via email",
+  "ACCESSO_EFFETTUATO": "Bentornato su Prome",
+  "USCITA_EFFETTUATA": "Sei uscito da Prome",
+  "PROFILO_LETTO": "Profilo caricato",
+  "PROFILO_COMPLETATO": "Profilo completato",
+  "POST_PUBBLICATO": "Post pubblicato",
+  "POST_ELENCATI": "Bacheca caricata",
+  "ALLEGATO_PREAUTORIZZATO": "Caricamento autorizzato",
+  "POST_MODIFICATO": "Post aggiornato",
+  "POST_ELIMINATO": "Post eliminato",
+  "COMMENTO_PUBBLICATO": "Commento pubblicato",
+  "COMMENTO_ELIMINATO": "Commento eliminato",
+  "COMMENTI_ELENCATI": "Commenti caricati"
 }

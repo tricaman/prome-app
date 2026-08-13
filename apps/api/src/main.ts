@@ -4,6 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 // L'import di env esegue la validazione fail-fast PRIMA di qualunque bootstrap Nest.
 import { env } from './config/env';
+import { registraCorpiBinari } from './config/fastify';
 import { configuraSwagger } from './config/swagger';
 import { AppModule } from './app.module';
 import { WorkerModule } from './worker/worker.module';
@@ -34,6 +35,15 @@ async function bootstrap(): Promise<void> {
   // Validazione dell'ingresso: stessa pipe usata dai test (common/pipes).
   // Filtro errori e envelope di risposta sono registrati in AppModule.
   app.useGlobalPipes(creaValidationPipe());
+  registraCorpiBinari(app);
+  // I client stanno su un'altra origine (il sito) o non ne hanno una (l'app):
+  // qui si dichiara chi può chiamare, e con quali intestazioni.
+  app.enableCors({
+    origin: env.ORIGINI_CONSENTITE,
+    allowedHeaders: ['content-type', 'authorization', 'x-lang'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    maxAge: 86_400,
+  });
   if (env.NODE_ENV !== 'production') {
     configuraSwagger(app);
   }
