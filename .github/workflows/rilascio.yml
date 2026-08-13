@@ -140,7 +140,11 @@ jobs:
       # allineati anche quando cambia solo il secondo.
       - name: Aggiorna configurazione sulla macchina
         run: |
-          rsync -az -e "ssh -i ~/.ssh/id_rilascio" \
+          # `--delete` perché la macchina deve corrispondere al commit, non
+          # accumulare: un file di configurazione tolto dal repository ma
+          # rimasto lì continuerebbe a essere caricato. I file esclusi sono
+          # protetti dalla cancellazione, quindi `.env` non rischia niente.
+          rsync -az --delete -e "ssh -i ~/.ssh/id_rilascio" \
             --exclude '.env' \
             deploy/ ${{ secrets.SSH_UTENTE }}@${{ secrets.SSH_HOST }}:/home/deploy/prome/deploy/
 
