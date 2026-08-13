@@ -1,8 +1,11 @@
 # Il sito e l'applicazione web.
 #
 # Questo file NON viene caricato: gli manca l'estensione .caddy di proposito.
-# Rinominarlo in `web.caddy` quando {$DOMINIO_WEB} risolve alla macchina, poi
-# `docker compose restart caddy`.
+# Va rinominato in `web.caddy` **solo quando {$DOMINIO_WEB} risolve già alla
+# macchina**. Acceso prima, Caddy chiede subito il certificato, la validazione
+# fallisce perché il dominio risponde altrove, e i tentativi falliti contano
+# per i limiti di frequenza di Let's Encrypt.
+
 {$DOMINIO_WEB} {
 	encode zstd gzip
 	reverse_proxy web:3000
@@ -14,4 +17,13 @@
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		-Server
 	}
+}
+
+# Un indirizzo solo per ogni pagina. Il sito dichiara come canonico l'apex
+# (`NEXT_PUBLIC_URL_SITO`, che vale `https://prome.app`): se anche `www`
+# servisse gli stessi contenuti, ogni pagina esisterebbe a due indirizzi e i
+# motori di ricerca ne vedrebbero due copie. Qui `www` non serve niente,
+# rimanda — e lo fa con un 308, che è permanente e non cambia il metodo.
+www.{$DOMINIO_WEB} {
+	redir https://{$DOMINIO_WEB}{uri} permanent
 }

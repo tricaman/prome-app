@@ -44,6 +44,14 @@ echo "→ migrazioni"
 echo "→ avvio"
 "${COMPOSE[@]}" up -d
 
+# La configurazione di Caddy arriva da file montati: `up -d` non si accorge che
+# sono cambiati, quindi un dominio nuovo o un'intestazione diversa resterebbero
+# inerti fino a un riavvio a mano — e il repository direbbe una cosa mentre la
+# macchina ne fa un'altra. Il ricaricamento è a caldo: non chiude le
+# connessioni aperte e non ripresenta i certificati.
+echo "→ ricarico la configurazione di Caddy"
+"${COMPOSE[@]}" exec -T caddy caddy reload --config /etc/caddy/Caddyfile </dev/null
+
 # Le immagini vecchie si accumulano: 38 GB si riempiono in fretta.
 sudo docker image prune -f --filter "until=168h" >/dev/null
 
