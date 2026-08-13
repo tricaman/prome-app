@@ -38,8 +38,12 @@ services:
         max-size: '20m'
         max-file: '3'
 
+  # Le immagini arrivano dal registro, costruite dalla pipeline: il nome
+  # predefinito è quello del registro proprio perché, se un giorno la variabile
+  # non arrivasse, il rilascio deve fallire rumorosamente invece di ripartire
+  # in silenzio con una vecchia immagine locale e sembrare riuscito.
   api:
-    image: prome-api:${VERSIONE:-latest}
+    image: ${IMMAGINE_API:-ghcr.io/tricaman/prome-app/api}:${VERSIONE:-latest}
     build:
       context: ..
       dockerfile: deploy/Dockerfile.api
@@ -72,7 +76,7 @@ services:
   # Stessa immagine, stesso codice, avvio diverso: è la seconda unità di
   # esecuzione prevista dall'architettura. Non ascolta su HTTP.
   worker:
-    image: prome-api:${VERSIONE:-latest}
+    image: ${IMMAGINE_API:-ghcr.io/tricaman/prome-app/api}:${VERSIONE:-latest}
     restart: unless-stopped
     depends_on:
       postgres:
@@ -106,7 +110,7 @@ services:
     logging: *log
 
   web:
-    image: prome-web:${VERSIONE:-latest}
+    image: ${IMMAGINE_WEB:-ghcr.io/tricaman/prome-app/web}:${VERSIONE:-latest}
     build:
       context: ..
       dockerfile: deploy/Dockerfile.web
