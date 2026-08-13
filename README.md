@@ -24,6 +24,8 @@ Ogni pacchetto condiviso esiste per non scrivere due volte la stessa cosa: **una
 
 Il grafo dei moduli del backend rispecchia la Context Map del domain model: `profilo`, `bacheca`, `gruppo`, `aula-studio` (core), più `facciata` (REST versionata) e `worker`.
 
+Messa in esercizio: [deploy/README.md](deploy/README.md) — immagini, segreti, backup, ripristino e cosa resta aperto.
+
 Convenzioni per contribuire: [apps/api/CLAUDE.md](apps/api/CLAUDE.md), [apps/web/CLAUDE.md](apps/web/CLAUDE.md), [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md).
 
 ## Scelte trasversali

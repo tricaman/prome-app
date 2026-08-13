@@ -46,7 +46,22 @@ const SchemaEnv = z.object({
    * Il fornitore reale è ancora una decisione aperta — lo spike Brevo/Resend
    * del piano — quindi il valore che lo sceglierà non esiste ancora.
    */
-  CANALE_EMAIL: z.enum(['sviluppo']).default('sviluppo'),
+  CANALE_EMAIL: z.enum(['sviluppo', 'smtp']).default('sviluppo'),
+
+  /**
+   * Credenziali SMTP. Servono solo con `CANALE_EMAIL=smtp`, e in quel caso
+   * sono obbligatorie: il controllo sta più in basso, perché zod da solo non
+   * sa dire "obbligatorio se un'altra variabile vale così".
+   *
+   * Valgono per qualunque fornitore — Brevo, Resend, altri: è il motivo per
+   * cui l'adattatore è uno solo e lo spike non blocca la messa in esercizio.
+   */
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_UTENTE: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
+  /** Mittente visibile, es. "Prome <accesso@prome.app>". */
+  SMTP_MITTENTE: z.string().optional(),
 
   /**
    * Cartella dove l'archivio locale scrive i file.
@@ -93,6 +108,21 @@ if (!esito.success) {
 if (esito.data.NODE_ENV === 'production' && esito.data.CANALE_EMAIL === 'sviluppo') {
   console.error('[prome-api] CANALE_EMAIL=sviluppo scrive i codici OTP nei log: vietato in produzione.');
   process.exit(1);
+}
+
+/**
+ * Scegliere SMTP senza darne le credenziali significa un'applicazione che
+ * parte, accetta richieste di accesso e non manda niente: l'utente aspetta un
+ * codice che non arriverà mai. Meglio non partire.
+ */
+if (esito.data.CANALE_EMAIL === 'smtp') {
+  const mancanti = (['SMTP_HOST', 'SMTP_UTENTE', 'SMTP_PASSWORD', 'SMTP_MITTENTE'] as const).filter(
+    (nome) => !esito.data[nome],
+  );
+  if (mancanti.length) {
+    console.error(`[prome-api] CANALE_EMAIL=smtp richiede: ${mancanti.join(', ')}`);
+    process.exit(1);
+  }
 }
 
 /** Ambiente validato e tipizzato, unico punto d'accesso alle variabili. */

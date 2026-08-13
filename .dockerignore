@@ -1,10 +1,19 @@
-# Contesto di build Docker = root del monorepo (vedi apps/api/Dockerfile):
-# teniamo fuori artefatti locali, segreti e documentazione.
-.git
+# Tutto ciò che non serve dentro l'immagine: meno contesto da spedire al
+# demone Docker, build più veloci, e nessun rischio di far finire un .env
+# dentro un livello dell'immagine.
 node_modules
 **/node_modules
 **/dist
+**/.next
+**/.expo
+.git
+.github
 .env
 .env.*
 !.env.example
+*.log
+.DS_Store
+apps/mobile
 documentation
+**/coverage
+.archivio

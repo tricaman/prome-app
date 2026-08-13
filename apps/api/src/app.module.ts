@@ -1,9 +1,7 @@
-import * as path from 'node:path';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
-import { LINGUA_DI_RIPIEGO } from '@prome/i18n';
+import { registrazioneI18n } from './config/i18n';
 import { PrismaModule } from './database/prisma.module';
 import { ArchivioFileModule } from './infrastruttura/archivio-file/archivio-file.module';
 import { AvvisiInUscitaModule } from './infrastruttura/avvisi-in-uscita/avvisi-in-uscita.module';
@@ -39,18 +37,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
   imports: [
     // Il file .env sta alla ROOT del monorepo (cwd in dev = apps/api).
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['../../.env', '.env'] }),
-    I18nModule.forRoot({
-      fallbackLanguage: LINGUA_DI_RIPIEGO,
-      loaderOptions: {
-        path: path.join(__dirname, '/i18n/'),
-        watch: process.env.NODE_ENV === 'development',
-      },
-      resolvers: [
-        { use: QueryResolver, options: ['lang'] },
-        new HeaderResolver(['x-lang']),
-        AcceptLanguageResolver,
-      ],
-    }),
+    registrazioneI18n,
     PrismaModule,
     AvvisiInUscitaModule,
     ArchivioFileModule,

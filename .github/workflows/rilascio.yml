@@ -1,0 +1,176 @@
+# Rilascio automatico su push in main.
+#
+# Tre fasi in fila, e ognuna può fermare le successive: si verifica, si
+# costruiscono le immagini, si rilascia. Un rilascio che parte prima dei test
+# non è automazione, è un modo più veloce di rompere la produzione.
+#
+# **Le immagini si costruiscono qui, non sulla macchina.** Il server ha due
+# core e serve traffico: una build di Next.js lì dentro toglierebbe CPU a
+# quello che sta rispondendo agli utenti. Qui invece la build è gratuita, e in
+# più ogni immagine resta etichettata con il commit — quindi tornare indietro
+# è cambiare un'etichetta, non ricostruire.
+
+name: Rilascio
+
+on:
+  push:
+    branches: [main]
+  # Per rilasciare a mano lo stesso commit, o per riprovare dopo un guasto.
+  workflow_dispatch:
+
+# Un rilascio per volta: due che si sovrappongono lascerebbero la macchina in
+# uno stato che non corrisponde a nessun commit.
+concurrency:
+  group: rilascio-produzione
+  cancel-in-progress: false
+
+env:
+  REGISTRO: ghcr.io
+  IMMAGINE_API: ghcr.io/${{ github.repository }}/api
+  IMMAGINE_WEB: ghcr.io/${{ github.repository }}/web
+  DOMINIO_API: api.prome.app
+
+jobs:
+  verifica:
+    name: Verifica
+    runs-on: ubuntu-latest
+    services:
+      # I test dell'accesso e della bacheca parlano con un database vero:
+      # provarli contro un doppio significherebbe provare il doppio.
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: prome
+          POSTGRES_PASSWORD: prome
+          POSTGRES_DB: prome
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U prome" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://prome:prome@localhost:5432/prome
+      BETTER_AUTH_SECRET: segreto-di-prova-lungo-abbastanza-per-la-verifica
+      ARCHIVIO_LOCALE_PERCORSO: ./.archivio
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Migrazioni sul database di prova
+        run: pnpm --filter @prome/api exec prisma migrate deploy
+      - run: pnpm -r typecheck
+      - run: pnpm --filter @prome/web lint
+      - run: pnpm --filter @prome/api test
+
+  immagini:
+    name: Immagini
+    needs: verifica
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRO }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Due etichette per immagine: il commit, che identifica esattamente cosa
+      # sta girando, e `latest`, che è solo una comodità. Si rilascia per
+      # commit, mai per `latest`.
+      - name: API
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile.api
+          push: true
+          tags: ${{ env.IMMAGINE_API }}:${{ github.sha }},${{ env.IMMAGINE_API }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Web
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile.web
+          push: true
+          # L'indirizzo dell'API finisce dentro il JavaScript del browser:
+          # è un argomento di build, non una variabile del contenitore.
+          build-args: NEXT_PUBLIC_URL_API=https://${{ env.DOMINIO_API }}
+          tags: ${{ env.IMMAGINE_WEB }}:${{ github.sha }},${{ env.IMMAGINE_WEB }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  rilascio:
+    name: Rilascio
+    needs: immagini
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    environment: produzione
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Chiave di accesso alla macchina
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_CHIAVE }}" > ~/.ssh/id_rilascio
+          chmod 600 ~/.ssh/id_rilascio
+          # L'impronta dell'host è verificata: senza, un rilascio andrebbe a
+          # finire ovunque risponda quell'indirizzo.
+          echo "${{ secrets.SSH_IMPRONTA_HOST }}" > ~/.ssh/known_hosts
+
+      # Il compose e la configurazione di Caddy stanno nel repository, quindi
+      # viaggiano con il commit: il codice e il modo in cui gira restano
+      # allineati anche quando cambia solo il secondo.
+      - name: Aggiorna configurazione sulla macchina
+        run: |
+          rsync -az -e "ssh -i ~/.ssh/id_rilascio" \
+            --exclude '.env' \
+            deploy/ ${{ secrets.SSH_UTENTE }}@${{ secrets.SSH_HOST }}:/home/deploy/prome/deploy/
+
+      - name: Rilascia
+        run: |
+          ssh -i ~/.ssh/id_rilascio ${{ secrets.SSH_UTENTE }}@${{ secrets.SSH_HOST }} bash -s <<'FINE'
+            set -euo pipefail
+            cd /home/deploy/prome/deploy
+
+            # Credenziali usa e getta: il gettone dura quanto questo lavoro, e
+            # sulla macchina non resta nessun segreto di lunga durata.
+            echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            export VERSIONE=${{ github.sha }}
+            sudo -E docker compose -f docker-compose.prod.yml pull api web
+            sudo -E docker compose -f docker-compose.prod.yml up -d --no-deps postgres
+
+            # Le migrazioni PRIMA di far girare il codice nuovo, con l'immagine
+            # nuova: uno schema indietro rispetto al codice che lo usa è il
+            # modo più rapido di far cadere tutto.
+            sudo -E docker compose -f docker-compose.prod.yml run --rm api npx prisma migrate deploy
+
+            sudo -E docker compose -f docker-compose.prod.yml up -d
+            sudo docker logout ghcr.io
+
+            # Le immagini vecchie si accumulano: 38 GB si riempiono in fretta.
+            sudo docker image prune -f --filter "until=168h"
+          FINE
+
+      - name: Verifica che risponda davvero
+        run: |
+          for i in $(seq 1 20); do
+            if curl -fsS "https://${{ env.DOMINIO_API }}/health" > /dev/null; then
+              echo "l'API risponde"
+              curl -s "https://${{ env.DOMINIO_API }}/health"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "l'API non risponde dopo il rilascio" >&2
+          exit 1

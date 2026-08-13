@@ -1,0 +1,76 @@
+# Immagine dell'API — e del worker.
+#
+# **Una sola immagine, due unità di esecuzione.** L'architettura lo chiede
+# esplicitamente: `app` e `worker` escono dalla stessa build e si distinguono
+# per configurazione d'avvio (APP_ROLE). Due immagini vorrebbero dire due cose
+# che possono divergere senza che nessuno se ne accorga.
+#
+# Il contesto di build è la **radice del monorepo**: l'API dipende da pacchetti
+# del workspace (@prome/contracts, @prome/i18n) che non stanno sotto apps/api.
+
+# --- dipendenze ------------------------------------------------------------
+FROM node:22-alpine AS dipendenze
+# Prisma ha bisogno di openssl anche a runtime: senza, il client non parte e
+# l'errore arriva alla prima query invece che alla build.
+RUN apk add --no-cache openssl
+RUN corepack enable
+WORKDIR /app
+
+# Prima i soli manifest: se non cambiano, Docker riusa il livello delle
+# dipendenze anche quando cambia tutto il codice.
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY apps/api/package.json apps/api/
+COPY packages/contracts/package.json packages/contracts/
+COPY packages/i18n/package.json packages/i18n/
+COPY packages/design-tokens/package.json packages/design-tokens/
+COPY packages/app-core/package.json packages/app-core/
+COPY packages/api-client/package.json packages/api-client/
+COPY packages/contenuti/package.json packages/contenuti/
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# --- build -----------------------------------------------------------------
+FROM dipendenze AS build
+COPY . .
+RUN pnpm --filter @prome/contracts build \
+ && pnpm --filter @prome/i18n build \
+ && pnpm --filter @prome/api exec prisma generate \
+ && pnpm --filter @prome/api build
+
+# Si tengono solo le dipendenze di produzione: quelle di sviluppo (typescript,
+# jest, il CLI di nest) non servono a un processo che esegue JavaScript già
+# compilato, e sono la metà del peso.
+# `--legacy` è richiesto da pnpm 10 quando i pacchetti del workspace non sono
+# "injected": senza, si rifiuta di procedere. È la forma documentata, non un
+# aggiramento.
+RUN pnpm --filter @prome/api --prod deploy --legacy /produzione
+
+# Il client generato da Prisma vive in node_modules/.prisma, e `pnpm deploy`
+# ricrea node_modules da zero: quindi non sopravvive alla copia e va
+# rigenerato **dentro** l'albero di produzione. Lo schema e le migration
+# viaggiano con lui, perché `migrate deploy` gira sulla macchina di
+# destinazione e non sulla nostra.
+RUN cp -r /app/apps/api/prisma /produzione/prisma \
+ && cd /produzione && npx prisma generate
+
+# --- esecuzione ------------------------------------------------------------
+FROM node:22-alpine AS esecuzione
+RUN apk add --no-cache openssl
+WORKDIR /app
+
+# Non si gira da root: se un giorno un difetto permette di eseguire qualcosa,
+# lo esegue un utente senza privilegi.
+RUN addgroup -S prome && adduser -S prome -G prome
+
+# `/produzione` contiene già lo schema, le migration e il client generato.
+COPY --from=build --chown=prome:prome /produzione ./
+
+USER prome
+ENV NODE_ENV=production
+EXPOSE 3001
+
+# La sonda parla con l'endpoint vero, non con la porta: una porta aperta dice
+# che il processo è vivo, `/health` che è in grado di rispondere.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3001)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+CMD ["node", "dist/main.js"]

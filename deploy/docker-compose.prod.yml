@@ -1,0 +1,151 @@
+# Prome in esercizio.
+#
+# Cinque contenitori: il database, le due unità di esecuzione dell'API, il web
+# e il reverse proxy che termina TLS. Postgres e le due unità **non pubblicano
+# porte sull'host**: si parlano sulla rete interna, e l'unica cosa esposta al
+# mondo è Caddy.
+#
+# I segreti stanno in `.env` accanto a questo file, sulla macchina e mai nel
+# repository. L'API si ferma all'avvio se ne manca uno (fail-fast), quindi un
+# ambiente configurato a metà non parte invece di partire e sbagliare dopo.
+
+name: prome
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      # I backup e i ripristini sono più leggibili se le date non cambiano
+      # significato fra la macchina e chi le legge.
+      TZ: Europe/Rome
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    logging: &log
+      driver: json-file
+      options:
+        # Conservazione dei log a 14 giorni: qui la si approssima a volume,
+        # perché Docker ruota per dimensione e non per età. Tre file da 20 MB
+        # per servizio sono, ai volumi attesi, molto più di due settimane.
+        max-size: '20m'
+        max-file: '3'
+
+  api:
+    image: prome-api:${VERSIONE:-latest}
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      APP_ROLE: app
+      PORT: 3001
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: https://${DOMINIO_API}
+      CANALE_EMAIL: ${CANALE_EMAIL}
+      # Servono solo con CANALE_EMAIL=smtp, ma vanno passate comunque: se
+      # mancano quando servono, l'API si ferma all'avvio invece di accettare
+      # richieste di accesso e non mandare niente.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_UTENTE: ${SMTP_UTENTE:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_MITTENTE: ${SMTP_MITTENTE:-}
+      ORIGINI_CONSENTITE: https://${DOMINIO_WEB}
+      ARCHIVIO_LOCALE_PERCORSO: /archivio
+    volumes:
+      - archivio_data:/archivio
+    logging: *log
+
+  # Stessa immagine, stesso codice, avvio diverso: è la seconda unità di
+  # esecuzione prevista dall'architettura. Non ascolta su HTTP.
+  worker:
+    image: prome-api:${VERSIONE:-latest}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      APP_ROLE: worker
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: https://${DOMINIO_API}
+      CANALE_EMAIL: ${CANALE_EMAIL}
+      # Servono solo con CANALE_EMAIL=smtp, ma vanno passate comunque: se
+      # mancano quando servono, l'API si ferma all'avvio invece di accettare
+      # richieste di accesso e non mandare niente.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_UTENTE: ${SMTP_UTENTE:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_MITTENTE: ${SMTP_MITTENTE:-}
+      ARCHIVIO_LOCALE_PERCORSO: /archivio
+    # La sonda dell'immagine interroga /health, che qui non esiste: il worker
+    # non ascolta su HTTP, ed è il punto. Lasciarla accesa lo terrebbe
+    # "unhealthy" per sempre, cioè renderebbe muto proprio il segnale che
+    # dovrebbe avvisare quando qualcosa non va davvero.
+    healthcheck:
+      disable: true
+    volumes:
+      # Lo stesso archivio dell'API: il worker raccoglie i file dei caricamenti
+      # abbandonati, e per toglierli deve poterli vedere.
+      - archivio_data:/archivio
+    logging: *log
+
+  web:
+    image: prome-web:${VERSIONE:-latest}
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+      args:
+        NEXT_PUBLIC_URL_API: https://${DOMINIO_API}
+    restart: unless-stopped
+    depends_on:
+      - api
+    logging: *log
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      DOMINIO_WEB: ${DOMINIO_WEB}
+      DOMINIO_API: ${DOMINIO_API}
+      # Indirizzo a cui Let's Encrypt scrive se un rinnovo fallisce: senza,
+      # la direttiva `email` resta senza argomento e Caddy non parte affatto.
+      EMAIL_TLS: ${EMAIL_TLS}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/siti:/etc/caddy/siti:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - api
+    logging: *log
+
+volumes:
+  postgres_data:
+  # I file caricati stanno in un volume finché l'archivio è quello locale.
+  # Quando arriverà il fornitore, questo volume sparisce con l'adattatore.
+  archivio_data:
+  # I certificati: perderli significa richiederli di nuovo e sbattere contro
+  # i limiti di frequenza di Let's Encrypt.
+  caddy_data:
+  caddy_config:

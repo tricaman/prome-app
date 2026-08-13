@@ -1,0 +1,18 @@
+# Opzioni globali e nient'altro.
+#
+# Ogni sito sta in un file suo dentro `siti/`, e Caddy carica quelli che
+# trova. Non è organizzazione fine a sé stessa: un dominio dichiarato qui e
+# non ancora presente nel DNS produce una richiesta di certificato che
+# fallisce, e i tentativi falliti contano verso i limiti di frequenza di
+# Let's Encrypt. Così un sito entra in esercizio quando il suo nome risolve,
+# non prima.
+
+{
+	email {$EMAIL_TLS}
+	log {
+		output stdout
+		format json
+	}
+}
+
+import /etc/caddy/siti/*.caddy

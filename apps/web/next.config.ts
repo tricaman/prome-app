@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
   // con l'app, non trattati come dipendenze già pronte.
   transpilePackages: ['@prome/app-core', '@prome/api-client', '@prome/contenuti', '@prome/contracts', '@prome/i18n'],
   poweredByHeader: false,
+  // Immagine di produzione: Next raccoglie in `.next/standalone` solo i file
+  // che servono davvero a servire il sito, con le sole dipendenze usate.
+  // Senza, il contenitore si porterebbe dietro l'intero node_modules del
+  // monorepo — centinaia di megabyte di roba che non gira mai.
+  output: 'standalone',
   experimental: {
     optimizePackageImports: ['@heroui/react'],
   },

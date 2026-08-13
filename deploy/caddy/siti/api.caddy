@@ -1,0 +1,20 @@
+# L'API.
+{$DOMINIO_API} {
+	encode zstd gzip
+
+	# I caricamenti arrivano fino a 25 MB: il valore predefinito del proxy è
+	# molto più basso e li rifiuterebbe prima che l'API li veda.
+	request_body {
+		max_size 30MB
+	}
+
+	reverse_proxy api:3001
+
+	header {
+		# Il browser non deve indovinare il tipo di un file caricato da un
+		# utente: se sbaglia, un file di testo può diventare uno script.
+		X-Content-Type-Options nosniff
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+}

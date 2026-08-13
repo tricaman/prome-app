@@ -1,0 +1,8 @@
+{
+  "codice": {
+    "oggetto": "{codice} è il tuo codice per entrare in Prome",
+    "titolo": "Il tuo codice di accesso",
+    "istruzioni": "Inseriscilo in Prome entro {minuti} minuti. Dopo scade e ne va chiesto uno nuovo.",
+    "ignora": "Se non hai chiesto tu di entrare, ignora questo messaggio: senza il codice nessuno può accedere."
+  }
+}

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { registrazioneI18n } from '../config/i18n';
 import { PrismaModule } from '../database/prisma.module';
 import { BachecaModule } from '../modules/bacheca/bacheca.module';
 import { WorkerService } from './worker.service';
@@ -23,6 +24,9 @@ import { WorkerService } from './worker.service';
   imports: [
     // Il file .env sta alla ROOT del monorepo (cwd in dev = apps/api).
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['../../.env', '.env'] }),
+    // Anche il worker traduce: manda email, e i testi seguono la stessa
+    // regola del resto — tradotti dal server.
+    registrazioneI18n,
     PrismaModule,
     BachecaModule,
   ],

@@ -1,0 +1,60 @@
+# Immagine del sito e dell'applicazione web.
+#
+# Il contesto di build è la radice del monorepo: il web dipende da pacchetti
+# del workspace (@prome/app-core, @prome/api-client, @prome/i18n, i token del
+# design system) che non stanno sotto apps/web.
+
+# --- dipendenze ------------------------------------------------------------
+FROM node:22-alpine AS dipendenze
+RUN corepack enable
+WORKDIR /app
+
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY apps/web/package.json apps/web/
+COPY packages/contracts/package.json packages/contracts/
+COPY packages/i18n/package.json packages/i18n/
+COPY packages/design-tokens/package.json packages/design-tokens/
+COPY packages/app-core/package.json packages/app-core/
+COPY packages/api-client/package.json packages/api-client/
+COPY packages/contenuti/package.json packages/contenuti/
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# --- build -----------------------------------------------------------------
+FROM dipendenze AS build
+COPY . .
+
+# L'indirizzo dell'API finisce **dentro il bundle** del browser, quindi è un
+# argomento di build e non una variabile d'ambiente del contenitore: cambiarlo
+# dopo non avrebbe effetto sul JavaScript già compilato.
+ARG NEXT_PUBLIC_URL_API
+ENV NEXT_PUBLIC_URL_API=${NEXT_PUBLIC_URL_API}
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN pnpm --filter @prome/contracts build \
+ && pnpm --filter @prome/i18n build \
+ && pnpm --filter @prome/design-tokens build \
+ && pnpm --filter @prome/web build
+
+# --- esecuzione ------------------------------------------------------------
+FROM node:22-alpine AS esecuzione
+WORKDIR /app
+RUN addgroup -S prome && adduser -S prome -G prome
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# `standalone` contiene il server e le sole dipendenze che usa davvero; i file
+# statici e `public` vanno copiati a parte perché Next li tiene fuori.
+COPY --from=build --chown=prome:prome /app/apps/web/.next/standalone ./
+COPY --from=build --chown=prome:prome /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=build --chown=prome:prome /app/apps/web/public ./apps/web/public
+
+USER prome
+EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:3000/it').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+CMD ["node", "apps/web/server.js"]

@@ -1,0 +1,8 @@
+{
+  "codice": {
+    "oggetto": "{codice} is your code to enter Prome",
+    "titolo": "Your access code",
+    "istruzioni": "Enter it in Prome within {minuti} minutes. After that it expires and you need a new one.",
+    "ignora": "If you didn't ask to sign in, ignore this message: without the code nobody can get in."
+  }
+}

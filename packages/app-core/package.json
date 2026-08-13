@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "@prome/api-client": "workspace:*",
-    "@prome/contracts": "workspace:*"
+    "@prome/contracts": "workspace:*",
+    "@standard-schema/spec": "^1.1.0"
   },
   "peerDependencies": {
     "@hookform/resolvers": "^5.0.0",
