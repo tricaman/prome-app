@@ -61,6 +61,14 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Migrazioni sul database di prova
         run: pnpm --filter @prome/api exec prisma migrate deploy
+
+      # I pacchetti condivisi che espongono `dist` vanno costruiti prima di
+      # qualunque cosa li legga: su un checkout pulito quella cartella non
+      # esiste, e senza, typecheck e test cercherebbero moduli che non ci sono.
+      # Costruire qui vuol dire anche che una build rotta si vede subito, e non
+      # dieci minuti dopo dentro la costruzione delle immagini.
+      - run: pnpm -r build
+
       - run: pnpm -r typecheck
       - run: pnpm --filter @prome/web lint
       - run: pnpm --filter @prome/api test

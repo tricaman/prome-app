@@ -31,10 +31,10 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 # --- build -----------------------------------------------------------------
 FROM dipendenze AS build
 COPY . .
-RUN pnpm --filter @prome/contracts build \
- && pnpm --filter @prome/i18n build \
- && pnpm --filter @prome/api exec prisma generate \
- && pnpm --filter @prome/api build
+# La build dell'API costruisce da sé i pacchetti da cui dipende e genera il
+# client di Prisma: elencare qui quei passaggi li terrebbe in un secondo posto,
+# e una dipendenza aggiunta domani si ricorderebbe di aggiornarne uno solo.
+RUN pnpm --filter @prome/api build
 
 # Si tengono solo le dipendenze di produzione: quelle di sviluppo (typescript,
 # jest, il CLI di nest) non servono a un processo che esegue JavaScript già
