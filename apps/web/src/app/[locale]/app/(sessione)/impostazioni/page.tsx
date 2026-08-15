@@ -7,6 +7,7 @@ import { SceltaTema } from '@/components/app/scelta-tema';
 import { SchedaProfilo } from '@/components/app/scheda-profilo';
 import { ImpostazioniPrivacy } from '@/components/app/impostazioni-privacy';
 import { SessioneAccount } from '@/components/app/sessione-account';
+import { ScaricaDati } from '@/components/app/scarica-dati';
 import { EliminaAccount } from '@/components/app/elimina-account';
 import { Card } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -95,6 +96,7 @@ export default async function PaginaImpostazioni({
             <section id="account" className="scroll-mt-6">
               <EtichettaSezione>{t('sessione')}</EtichettaSezione>
               <SessioneAccount />
+              <ScaricaDati />
 
               <EtichettaSezione>{t('account')}</EtichettaSezione>
               <EliminaAccount />

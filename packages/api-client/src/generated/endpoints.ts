@@ -95,6 +95,7 @@ import type {
   RichiestaCodiceDto,
   RimuoviMembro200,
   RimuoviPartecipante200,
+  ScaricaMieiDati200,
   ScriviInAula201,
   StatoDelServizio200,
   VerificaCodiceAccesso200,
@@ -3676,3 +3677,92 @@ export const useRichiediCancellazioneAccount = <TError = ErrorResponseDto,
 
       return useMutation(mutationOptions, queryClient);
     }
+    
+/**
+ * @summary Una copia completa dei propri dati, in formato leggibile
+ */
+export const scaricaMieiDati = (
+    
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ScaricaMieiDati200>(
+      {url: `/account/dati`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getScaricaMieiDatiQueryKey = () => {
+    return [
+    `/account/dati`
+    ] as const;
+    }
+
+    
+export const getScaricaMieiDatiQueryOptions = <TData = Awaited<ReturnType<typeof scaricaMieiDati>>, TError = ErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof scaricaMieiDati>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getScaricaMieiDatiQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof scaricaMieiDati>>> = ({ signal }) => scaricaMieiDati(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof scaricaMieiDati>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ScaricaMieiDatiQueryResult = NonNullable<Awaited<ReturnType<typeof scaricaMieiDati>>>
+export type ScaricaMieiDatiQueryError = ErrorResponseDto
+
+
+export function useScaricaMieiDati<TData = Awaited<ReturnType<typeof scaricaMieiDati>>, TError = ErrorResponseDto>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof scaricaMieiDati>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof scaricaMieiDati>>,
+          TError,
+          Awaited<ReturnType<typeof scaricaMieiDati>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useScaricaMieiDati<TData = Awaited<ReturnType<typeof scaricaMieiDati>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof scaricaMieiDati>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof scaricaMieiDati>>,
+          TError,
+          Awaited<ReturnType<typeof scaricaMieiDati>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useScaricaMieiDati<TData = Awaited<ReturnType<typeof scaricaMieiDati>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof scaricaMieiDati>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Una copia completa dei propri dati, in formato leggibile
+ */
+
+export function useScaricaMieiDati<TData = Awaited<ReturnType<typeof scaricaMieiDati>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof scaricaMieiDati>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getScaricaMieiDatiQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}

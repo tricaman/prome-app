@@ -909,6 +909,53 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     });
   }
 
+  /**
+   * Ciò che questa persona ha fatto nelle aule, per l'esportazione.
+   *
+   * Le partecipazioni, i materiali che **ha caricato** e i messaggi che **ha
+   * scritto**. Non la conversazione intorno: i messaggi degli altri sono loro,
+   * e una copia dei propri dati non è una copia della stanza.
+   */
+  async datiPersonaliDi(utenteId: string) {
+    const [partecipazioni, materiali, messaggi] = await Promise.all([
+      this.prisma.partecipante.findMany({
+        where: { utenteId },
+        orderBy: { ammessoIl: 'asc' },
+        include: { aula: { select: { id: true, titolo: true } } },
+      }),
+      this.prisma.allegatoDiAulaStudio.findMany({
+        where: { caricatoDa: utenteId },
+        orderBy: { creatoIl: 'asc' },
+      }),
+      this.prisma.messaggioDiChat.findMany({
+        where: { autoreId: utenteId },
+        orderBy: { inviatoIl: 'asc' },
+      }),
+    ]);
+
+    return {
+      partecipazioni: partecipazioni.map((partecipante) => ({
+        id: partecipante.aula.id,
+        titolo: partecipante.aula.titolo,
+        moderatore: partecipante.moderatore,
+        ammessoIl: partecipante.ammessoIl.toISOString(),
+      })),
+      materialiCaricati: materiali.map((materiale) => ({
+        nome: materiale.nome,
+        tipo: materiale.tipo as TipoAllegato,
+        dimensione: materiale.dimensione,
+        caricatoIl: materiale.creatoIl.toISOString(),
+        url: this.archivio.urlDiLettura(materiale.chiave),
+      })),
+      messaggi: messaggi.map((messaggio) => ({
+        id: messaggio.id,
+        aulaStudioId: messaggio.aulaStudioId,
+        testo: messaggio.testo,
+        inviatoIl: messaggio.inviatoIl.toISOString(),
+      })),
+    };
+  }
+
   // --- Interni --------------------------------------------------------------
 
   /** Ammissione idempotente: la seconda volta non fa nulla (AS3). */

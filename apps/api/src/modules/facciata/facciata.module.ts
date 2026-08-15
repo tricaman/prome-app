@@ -13,6 +13,7 @@ import { ArchivioController } from './archivio.controller';
 import { AulaStudioController } from './aula-studio.controller';
 import { BachecaController } from './bacheca.controller';
 import { CancellazioneController } from './cancellazione.controller';
+import { EsportazioneController } from './esportazione.controller';
 import { GruppoController, InvitiAlGruppoController } from './gruppo.controller';
 import { InvitiController } from './inviti.controller';
 import { GuardiaAccesso } from './guardia-accesso';
@@ -52,6 +53,7 @@ import { ProfiloController } from './profilo.controller';
     InvitiAlGruppoController,
     ArchivioController,
     CancellazioneController,
+    EsportazioneController,
   ],
   providers: [{ provide: APP_GUARD, useClass: GuardiaAccesso }],
 })

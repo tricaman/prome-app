@@ -565,3 +565,79 @@ export interface InvitoAlGruppoResponse {
 export interface CreaInvitoAlGruppoRequest {
   destinatario: string;
 }
+
+// --- Esportazione dei propri dati -------------------------------------------
+//
+// La privacy policy promette «una copia completa in formato leggibile». Questa
+// è quella copia: **una sola risposta**, che attraversa gli stessi detentori
+// che la cancellazione deve svuotare. I due elenchi vanno tenuti in passo — un
+// detentore che sapesse cancellare ma non esportare produrrebbe una copia
+// incompleta senza che nessuno se ne accorga.
+
+/** Un file dell'utente: i suoi dati, e da dove riprenderlo. */
+export interface FileEsportato {
+  nome: string;
+  tipo: TipoAllegato;
+  dimensione: number;
+  caricatoIl: string;
+  /**
+   * Collegamento firmato, generato al momento dell'esportazione e quindi con
+   * una validità limitata: scaduto, si riscarica l'esportazione. Il file non
+   * viaggia dentro il documento — un JSON con dentro i byte non sarebbe più
+   * «leggibile» da nessuno.
+   */
+  url: string;
+}
+
+export interface EsportazioneDatiResponse {
+  /** Quando è stata prodotta: una copia senza data non si sa a cosa si riferisca. */
+  generataIl: string;
+  account: {
+    utenteId: string;
+    email: string | null;
+  };
+  profilo: {
+    nome: string | null;
+    cognome: string | null;
+    universita: string | null;
+    corso: string | null;
+    onboardingCompletato: boolean;
+    impostazioniPrivacy: ImpostazioniDiPrivacyResponse;
+  };
+  bacheca: {
+    post: {
+      id: string;
+      testo: string;
+      creatoIl: string;
+      aggiornatoIl: string;
+      allegati: FileEsportato[];
+    }[];
+    commenti: {
+      id: string;
+      postId: string;
+      testo: string;
+      creatoIl: string;
+    }[];
+  };
+  gruppi: {
+    id: string;
+    nome: string;
+    moderatore: boolean;
+    entratoIl: string;
+  }[];
+  auleStudio: {
+    partecipazioni: {
+      id: string;
+      titolo: string;
+      moderatore: boolean;
+      ammessoIl: string;
+    }[];
+    materialiCaricati: FileEsportato[];
+    messaggi: {
+      id: string;
+      aulaStudioId: string;
+      testo: string;
+      inviatoIl: string;
+    }[];
+  };
+}

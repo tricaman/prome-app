@@ -3024,6 +3024,49 @@
           "account"
         ]
       }
+    },
+    "/account/dati": {
+      "get": {
+        "operationId": "scaricaMieiDati",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EsportazioneDatiDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Una copia completa dei propri dati, in formato leggibile",
+        "tags": [
+          "account"
+        ]
+      }
     }
   },
   "info": {
@@ -4305,6 +4348,295 @@
           "richiestaIl",
           "riattivabileFinoAl",
           "scadenza"
+        ]
+      },
+      "AccountEsportatoDto": {
+        "type": "object",
+        "properties": {
+          "utenteId": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "utenteId",
+          "email"
+        ]
+      },
+      "ProfiloEsportatoDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "cognome": {
+            "type": "string",
+            "nullable": true
+          },
+          "universita": {
+            "type": "string",
+            "nullable": true
+          },
+          "corso": {
+            "type": "string",
+            "nullable": true
+          },
+          "onboardingCompletato": {
+            "type": "boolean"
+          },
+          "impostazioniPrivacy": {
+            "$ref": "#/components/schemas/ImpostazioniDiPrivacyDto"
+          }
+        },
+        "required": [
+          "nome",
+          "cognome",
+          "universita",
+          "corso",
+          "onboardingCompletato",
+          "impostazioniPrivacy"
+        ]
+      },
+      "FileEsportatoDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PDF",
+              "IMMAGINE",
+              "TESTO"
+            ]
+          },
+          "dimensione": {
+            "type": "number"
+          },
+          "caricatoIl": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "description": "Collegamento firmato, con validità limitata"
+          }
+        },
+        "required": [
+          "nome",
+          "tipo",
+          "dimensione",
+          "caricatoIl",
+          "url"
+        ]
+      },
+      "PostEsportatoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "testo": {
+            "type": "string"
+          },
+          "creatoIl": {
+            "type": "string"
+          },
+          "aggiornatoIl": {
+            "type": "string"
+          },
+          "allegati": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileEsportatoDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "testo",
+          "creatoIl",
+          "aggiornatoIl",
+          "allegati"
+        ]
+      },
+      "CommentoEsportatoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "postId": {
+            "type": "string"
+          },
+          "testo": {
+            "type": "string"
+          },
+          "creatoIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "postId",
+          "testo",
+          "creatoIl"
+        ]
+      },
+      "BachecaEsportataDto": {
+        "type": "object",
+        "properties": {
+          "post": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PostEsportatoDto"
+            }
+          },
+          "commenti": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommentoEsportatoDto"
+            }
+          }
+        },
+        "required": [
+          "post",
+          "commenti"
+        ]
+      },
+      "GruppoEsportatoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "moderatore": {
+            "type": "boolean"
+          },
+          "entratoIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "moderatore",
+          "entratoIl"
+        ]
+      },
+      "PartecipazioneEsportataDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "titolo": {
+            "type": "string"
+          },
+          "moderatore": {
+            "type": "boolean"
+          },
+          "ammessoIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "titolo",
+          "moderatore",
+          "ammessoIl"
+        ]
+      },
+      "MessaggioEsportatoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "aulaStudioId": {
+            "type": "string"
+          },
+          "testo": {
+            "type": "string"
+          },
+          "inviatoIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "aulaStudioId",
+          "testo",
+          "inviatoIl"
+        ]
+      },
+      "AuleEsportateDto": {
+        "type": "object",
+        "properties": {
+          "partecipazioni": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartecipazioneEsportataDto"
+            }
+          },
+          "materialiCaricati": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileEsportatoDto"
+            }
+          },
+          "messaggi": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MessaggioEsportatoDto"
+            }
+          }
+        },
+        "required": [
+          "partecipazioni",
+          "materialiCaricati",
+          "messaggi"
+        ]
+      },
+      "EsportazioneDatiDto": {
+        "type": "object",
+        "properties": {
+          "generataIl": {
+            "type": "string"
+          },
+          "account": {
+            "$ref": "#/components/schemas/AccountEsportatoDto"
+          },
+          "profilo": {
+            "$ref": "#/components/schemas/ProfiloEsportatoDto"
+          },
+          "bacheca": {
+            "$ref": "#/components/schemas/BachecaEsportataDto"
+          },
+          "gruppi": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GruppoEsportatoDto"
+            }
+          },
+          "auleStudio": {
+            "$ref": "#/components/schemas/AuleEsportateDto"
+          }
+        },
+        "required": [
+          "generataIl",
+          "account",
+          "profilo",
+          "bacheca",
+          "gruppi",
+          "auleStudio"
         ]
       }
     }

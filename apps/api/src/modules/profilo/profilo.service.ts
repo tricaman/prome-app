@@ -265,6 +265,40 @@ export class ProfiloService {
     return profili + impostazioni;
   }
 
+  /**
+   * I dati personali di questo utente, per l'esportazione (§«Scarica i tuoi
+   * dati» della privacy policy).
+   *
+   * Li descrive Profilo perché è Profilo a possederli — la stessa regola per
+   * cui è Profilo a saperli cancellare. L'elenco dei detentori che esportano è
+   * lo stesso che deve cancellare: uno che sapesse fare solo una delle due
+   * produrrebbe una copia incompleta, o un residuo.
+   */
+  async datiPersonaliDi(utenteId: string): Promise<{
+    nome: string | null;
+    cognome: string | null;
+    universita: string | null;
+    corso: string | null;
+    onboardingCompletato: boolean;
+    impostazioniPrivacy: { contattabilita: string; visibilita: string };
+  } | null> {
+    const profilo = await this.prisma.profilo.findUnique({
+      where: { utenteId },
+      include: { impostazioniPrivacy: true },
+    });
+    if (!profilo) return null;
+
+    const perIlClient = this.perIlClient(profilo);
+    return {
+      nome: perIlClient.nome,
+      cognome: perIlClient.cognome,
+      universita: perIlClient.universita,
+      corso: perIlClient.corso,
+      onboardingCompletato: perIlClient.onboardingCompletato,
+      impostazioniPrivacy: perIlClient.impostazioniPrivacy,
+    };
+  }
+
   /** Vero quando i quattro dati ci sono: è il solo criterio. */
   async onboardingCompletato(utenteId: string): Promise<boolean> {
     const profilo = await this.prisma.profilo.findUnique({

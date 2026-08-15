@@ -412,6 +412,28 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
     });
   }
 
+  /**
+   * Le appartenenze di questa persona, per l'esportazione.
+   *
+   * Il nome del gruppo c'è perché senza sarebbe un elenco di identificativi
+   * illeggibile, e «formato leggibile» è ciò che la privacy policy promette.
+   * Gli **altri membri no**: non sono un dato di chi esporta.
+   */
+  async datiPersonaliDi(utenteId: string) {
+    const appartenenze = await this.prisma.membro.findMany({
+      where: { utenteId },
+      orderBy: { entratoIl: 'asc' },
+      include: { gruppo: { select: { id: true, nome: true } } },
+    });
+
+    return appartenenze.map((membro) => ({
+      id: membro.gruppo.id,
+      nome: membro.gruppo.nome,
+      moderatore: membro.moderatore,
+      entratoIl: membro.entratoIl.toISOString(),
+    }));
+  }
+
   // --- Cancellazione dell'account (V5) --------------------------------------
 
   /**

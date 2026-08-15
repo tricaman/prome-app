@@ -153,6 +153,17 @@ Componente **trasversale**, non un bounded context: `modules/cancellazione` orch
 - Gli eventi (`cancellazione_richiesta`/`annullata`/`completata`) viaggiano **senza `utenteId`**.
 - I contenuti anonimizzati restano visibili **a ogni iscritto** (`elenca`/`leggi` ammettono la classe `anonimo-`), mai al web; il server manda `rimosso: true` sull'autore e i client mostrano «Utente rimosso».
 
+## «Scarica i tuoi dati» — l'esportazione
+
+`GET /account/dati` risponde con **una copia completa in formato leggibile**: è la funzione che la privacy policy promette **per nome**, e la promessa vale come un requisito anche se nessun documento di `documentation/` la copre.
+
+- **La compone la facciata**, non un modulo nuovo: la cancellazione resta l'unico componente autorizzato ad attraversare tutti i contesti insieme. Qui la facciata orchestra, e **ogni contesto decide cosa dei propri dati è esportabile** (`datiPersonaliDi`), come decide cosa è cancellabile.
+- **I detentori che esportano sono gli stessi che devono cancellare.** Uno che sapesse cancellare ma non esportare produrrebbe una copia incompleta *che si dichiara completa* — invisibile a chi la riceve, perché non ha modo di sapere cosa manca. A ogni nuovo detentore si aggiornano **insieme** `DETENTORI_CENSITI` e `EsportazioneController`.
+- **Solo i propri dati.** Negli spazi condivisi passa la linea più delicata: si esportano la propria appartenenza e i propri messaggi, **mai la conversazione intorno** né gli altri membri. Una copia dei propri dati non è una copia della stanza, e il test lo verifica su un gruppo e un'aula in comune.
+- **Nessuna credenziale, nessun token, nessun codice**: non sono dati dell'utente ma il modo in cui il sistema lo riconosce, e finirebbero in un file nella cartella dei download. Un test cerca il token della sessione stessa dentro il documento.
+- I file non viaggiano nel JSON: ci sono nome, tipo, dimensione e un **URL firmato generato all'esportazione**, quindi con validità limitata — scaduto, si riscarica la copia. È scritto nell'interfaccia, non lasciato scoprire.
+- Nessun evento di misurazione: esercitare un diritto sui propri dati non è un gesto da contare.
+
 ## Misurazioni di utilizzo (E1.6)
 
 `MisurazioniDiUtilizzo` è una porta **senza fornitore assegnato**, e resta tale finché non è dimostrabile la conformità su regione e trattamento: quello che esiste sono i punti di emissione, provati da `test/misurazioni.spec.ts`. Attaccarci un prodotto sarà un adattatore, non una riscrittura.

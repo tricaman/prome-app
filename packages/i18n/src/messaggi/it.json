@@ -543,6 +543,13 @@
       "aspetto": "Aspetto",
       "tema": "Tema",
       "account": "Account",
+      "dati": {
+        "titolo": "Scarica i tuoi dati",
+        "testo": "Una copia di tutto quello che Prome ha di tuo: profilo, post, commenti, gruppi, aule studio e messaggi che hai scritto. È un file JSON, leggibile da te e da un altro programma. I collegamenti ai file che hai caricato valgono per un tempo limitato: se scadono, riscarica la copia.",
+        "azione": "Scarica",
+        "inCorso": "Stiamo preparando la copia…",
+        "nonMiei": "Non contiene i dati di altre persone né le tue credenziali."
+      },
       "sessione": "Sessione",
       "esci": "Esci",
       "esciSub": "Solo da questo browser",

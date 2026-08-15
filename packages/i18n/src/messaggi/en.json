@@ -543,6 +543,13 @@
       "aspetto": "Appearance",
       "tema": "Theme",
       "account": "Account",
+      "dati": {
+        "titolo": "Download your data",
+        "testo": "A copy of everything Prome holds about you: profile, posts, comments, groups, study rooms and the messages you wrote. It is a JSON file, readable by you and by another program. Links to the files you uploaded are valid for a limited time: if they expire, download the copy again.",
+        "azione": "Download",
+        "inCorso": "We are preparing your copy…",
+        "nonMiei": "It contains no one else's data and none of your credentials."
+      },
       "sessione": "Session",
       "esci": "Sign out",
       "esciSub": "This browser only",

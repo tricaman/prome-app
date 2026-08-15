@@ -442,6 +442,49 @@ export class BachecaService {
   }
 
   /**
+   * I contenuti scritti da questa persona, per l'esportazione.
+   *
+   * Solo i suoi: i commenti **ricevuti** sotto i suoi post non sono suoi da
+   * esportare — sono di chi li ha scritti, e finirebbero in una copia che
+   * quella persona non ha chiesto.
+   */
+  async datiPersonaliDi(utenteId: string) {
+    const [post, commenti] = await Promise.all([
+      this.prisma.post.findMany({
+        where: { autoreId: utenteId },
+        orderBy: { creatoIl: 'asc' },
+        include: { allegati: true },
+      }),
+      this.prisma.commento.findMany({
+        where: { autoreId: utenteId },
+        orderBy: { creatoIl: 'asc' },
+      }),
+    ]);
+
+    return {
+      post: post.map((riga) => ({
+        id: riga.id,
+        testo: riga.testo,
+        creatoIl: riga.creatoIl.toISOString(),
+        aggiornatoIl: riga.aggiornatoIl.toISOString(),
+        allegati: riga.allegati.map((allegato) => ({
+          nome: allegato.nome,
+          tipo: allegato.tipo as TipoAllegato,
+          dimensione: allegato.dimensione,
+          caricatoIl: allegato.creatoIl.toISOString(),
+          url: this.archivio.urlDiLettura(allegato.chiave),
+        })),
+      })),
+      commenti: commenti.map((commento) => ({
+        id: commento.id,
+        postId: commento.postId,
+        testo: commento.testo,
+        creatoIl: commento.creatoIl.toISOString(),
+      })),
+    };
+  }
+
+  /**
    * Il post, se esiste e se è di chi lo chiede.
    *
    * Post inesistente e post altrui danno risposte diverse di proposito: il
