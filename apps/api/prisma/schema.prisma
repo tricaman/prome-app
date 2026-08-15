@@ -1,7 +1,7 @@
 // Schema Prisma di Prome — un solo database Postgres, uno schema per bounded
 // context (più "cancellazione" per il registro delle cancellazioni account).
-// Lo schema ancora senza modelli (gruppo) è stato creato vuoto nella
-// migration iniziale (CREATE SCHEMA a mano nel SQL).
+// Tutti gli schemi hanno ora i propri modelli: "gruppo", creato vuoto nella
+// migration iniziale, è stato popolato con E7.
 //
 // Nota: multiSchema è GA in Prisma 6 — il flag previewFeatures non serve più
 // (Prisma emetteva un warning di deprecazione, quindi è stato rimosso).
@@ -276,6 +276,176 @@ model Commento {
   @@index([autoreId])
   @@map("commento")
   @@schema("bacheca")
+}
+
+// ---------------------------------------------------------------------------
+// Schema "gruppo" — lo spazio che resta nel tempo.
+//
+// Un gruppo è un **contenitore di utenti con appartenenza e visibilità**, non
+// un secondo spazio sociale: non ha feed, non ha chat, non ha notifiche
+// proprie. È l'ipotesi in vigore dichiarata dai documenti, e il perimetro di
+// E7 è esattamente quello — ciò che non è appartenenza qui non entra.
+//
+// Il Membro è entità interna del Gruppo, per la stessa ragione per cui il
+// Partecipante sta dentro l'AulaStudio: G2 («esiste sempre almeno un
+// moderatore») è un'affermazione sull'INSIEME dei membri, e nessun membro
+// isolato può sapere se è l'ultimo moderatore. L'InvitoAlGruppo è invece un
+// aggregato autonomo, e non condivide nulla con l'invito d'aula: ciò che si
+// verifica prima di ammettere è diverso, e la duplicazione è già a bilancio.
+//
+// L'AlberoOrganizzativo (le cartelle, A1–A6) NON è qui: non appartiene al
+// perimetro di E7 e non va aggiunto per anticipo.
+// ---------------------------------------------------------------------------
+
+/// Lo spazio persistente di un insieme di persone.
+///
+/// Non possiede contenuti: possiede **chi ne fa parte**. Le aule studio non
+/// stanno dentro il gruppo — sono loro a dichiarare la propria collocazione
+/// (`AulaStudio.gruppoId`, AS9), e il gruppo non le conosce. È la stessa
+/// direzione della dipendenza che l'anti-corruption layer già dichiara: dal
+/// gruppo verso l'aula passa **un booleano**, mai un elenco.
+model Gruppo {
+  id         String          @id @default(uuid())
+  /// G1: non vuoto dopo trim. La regola vive nel costruttore del dominio.
+  nome       String
+  /// G5: sempre valorizzata, mai «non impostata».
+  visibilita VisibilitaGruppo @default(PRIVATO)
+
+  /// Ateneo di riferimento, precompilato dall'università del creatore alla
+  /// creazione e poi CONGELATO (G5): un gruppo non cambia pubblico perché chi
+  /// l'ha creato ha cambiato ateneo. L'università di chi chiede di entrare si
+  /// legge invece sempre fresca dal Profilo.
+  ateneo String?
+
+  /// Chi ha creato il gruppo. Fatto storico: resta vero anche se quella
+  /// persona esce, e non concede nulla di per sé — chi amministra è chi è
+  /// moderatore adesso (G2), non chi ha creato.
+  creatoDa String
+
+  /// Blocco ottimistico, per la stessa ragione dell'aula: G2 è
+  /// un'affermazione sull'insieme dei membri, e due moderatori che si
+  /// retrocedono a vicenda vedrebbero, ciascuno da solo, una situazione
+  /// lecita. Il conflitto lo respinge il confronto di versione.
+  versione Int @default(0)
+
+  creatoIl     DateTime @default(now())
+  aggiornatoIl DateTime @default(now()) @updatedAt
+
+  membri Membro[]
+
+  @@index([creatoIl(sort: Desc)])
+  @@map("gruppo")
+  @@schema("gruppo")
+}
+
+/// I tre valori del linguaggio ubiquo, modellati **di nuovo** in questo
+/// contesto: stessi tre nomi di Profilo e di AulaStudio, tre contesti
+/// distinti. Se un giorno divergessero, divergerebbero senza rompere nulla.
+enum VisibilitaGruppo {
+  PRIVATO
+  ATENEO
+  PUBBLICO
+
+  @@map("visibilita_gruppo")
+  @@schema("gruppo")
+}
+
+/// Entità interna del Gruppo: chi ne fa parte, e con quale ruolo.
+///
+/// Il ruolo di moderatore vale **solo dentro il gruppo**: non produce alcun
+/// permesso in un'aula collocata (AS6). Il core dell'aula non ha modo di
+/// conoscerlo, e non deve averlo — attraversa il confine solo un booleano di
+/// appartenenza.
+model Membro {
+  gruppoId String
+  utenteId String
+
+  /// G2: almeno uno per gruppo, sempre. L'ultimo non si rimuove né si
+  /// retrocede — per uscire deve prima promuovere qualcun altro.
+  moderatore Boolean @default(false)
+
+  entratoIl DateTime @default(now())
+
+  gruppo Gruppo @relation(fields: [gruppoId], references: [id], onDelete: Cascade)
+
+  /// G3: un utente compare al massimo una volta fra i membri. Qui non è
+  /// verificato, è **impossibile** — ed è ciò che rende la seconda aggiunta
+  /// un'operazione senza effetto invece di un errore, e innocua la doppia
+  /// consegna dell'accettazione di un invito.
+  @@id([gruppoId, utenteId])
+  @@index([utenteId])
+  @@map("membro")
+  @@schema("gruppo")
+}
+
+/// Invito a un gruppo. Il destinatario è un INDIRIZZO, non un utente: si
+/// invita anche chi non è ancora iscritto, e l'invito lo aspetta.
+model InvitoAlGruppo {
+  id       String @id @default(uuid())
+  /// IG1: destinatario e gruppo obbligatori e **immutabili**. Un invito non si
+  /// redireziona verso un'altra persona né verso un altro gruppo: se serve
+  /// invitare qualcun altro, si emette un altro invito.
+  gruppoId String
+  destinatario String
+  invitatoDa   String
+  /// IG2: dallo stato iniziale si transita una volta sola, e gli stati
+  /// conclusivi sono terminali. Una seconda accettazione non ha effetto.
+  stato        StatoInvitoAlGruppo @default(IN_ATTESA)
+  /// Calcolato all'emissione (emissione + 7 giorni), come per l'aula.
+  scadeIl      DateTime
+  emessoIl     DateTime            @default(now())
+  chiusoIl     DateTime?
+  /// Valorizzato all'accettazione: serve al fatto che crea il membro, e a
+  /// rispondere a chi sta aspettando.
+  accettatoDa  String?
+
+  @@index([gruppoId])
+  @@index([destinatario])
+  @@index([stato, scadeIl])
+  @@map("invito_al_gruppo")
+  @@schema("gruppo")
+}
+
+/// IG2 in forma di tipo: gli stati conclusivi sono terminali.
+enum StatoInvitoAlGruppo {
+  IN_ATTESA
+  ACCETTATO
+  SCADUTO
+
+  @@map("stato_invito_al_gruppo")
+  @@schema("gruppo")
+}
+
+/// I fatti di dominio in uscita da questo schema (pattern outbox).
+///
+/// **Una tabella per schema, mai una globale**: questa è l'outbox del gruppo,
+/// distinta da quella dell'aula, e il fatto si scrive nella STESSA transazione
+/// dell'aggregato che lo produce. Oggi ne trasporta uno solo —
+/// `MembroRimossoDalGruppo` — ed è il fatto che deve raggiungere chi è già
+/// dentro un'aula collocata: quella persona non farà alcuna nuova richiesta,
+/// quindi l'informazione deve andarle incontro (SE1, pochi secondi).
+model FattoInUscitaDelGruppo {
+  /// Identificativo dell'evento: è la chiave di deduplica sul consumatore.
+  id          String   @id @default(uuid())
+  tipo        String
+  /// Identità dell'aggregato sorgente.
+  aggregatoId String
+  /// Versione del contratto del fatto.
+  versione    Int      @default(1)
+  accadutoIl  DateTime @default(now())
+  payload     Json
+
+  consegnatoIl        DateTime?
+  tentativi           Int       @default(0)
+  prossimoTentativoIl DateTime  @default(now())
+  /// Valorizzato quando i tentativi sono esauriti: è l'unico caso in cui una
+  /// mano umana è prevista.
+  nonConsegnabileIl DateTime?
+
+  @@index([consegnatoIl, prossimoTentativoIl])
+  @@index([accadutoIl])
+  @@map("fatto_in_uscita")
+  @@schema("gruppo")
 }
 
 // ---------------------------------------------------------------------------
