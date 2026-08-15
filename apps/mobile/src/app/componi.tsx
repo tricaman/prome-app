@@ -1,8 +1,7 @@
 import { useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
-import * as SelettoreFile from 'expo-document-picker';
-import { caricaConAvanzamento, pesoLeggibile, tipoAllegatoDa } from '@prome/app-core';
+import { caricaConAvanzamento, pesoLeggibile } from '@prome/app-core';
 import {
   getElencaPostQueryKey,
   preautorizzaAllegato,
@@ -10,6 +9,7 @@ import {
   useLeggiMioProfilo,
 } from '@prome/api-client';
 import { LUNGHEZZA_MASSIMA_POST } from '@prome/contracts';
+import { scegliDocumento, type FileScelto } from '@/lib/scelta-file';
 import { useTema } from '@/theme';
 import { useApiMutation, useT } from '@/hooks';
 import { Avatar, Button, Icona, Input, Screen, Text } from '@/components/ui';
@@ -66,41 +66,36 @@ export default function SchermataComponi() {
   const aggiorna = (id: string, modifiche: Partial<AllegatoInCorso>) =>
     setAllegati((correnti) => correnti.map((a) => (a.id === id ? { ...a, ...modifiche } : a)));
 
-  const scegliFile = async () => {
-    const esito = await SelettoreFile.getDocumentAsync({
-      type: ['application/pdf', 'image/*', 'text/*'],
-      copyToCacheDirectory: true,
-    });
-    if (esito.canceled) return;
-
-    const scelto = esito.assets[0];
-    if (!scelto) return;
-
+  /** Carica un file già scelto: la scelta la fa `scelta-file.ts`, qui si invia. */
+  const caricaAllegato = async (scelto: FileScelto) => {
     const id = `allegato-${(prossimoId.current += 1)}`;
-    const tipo = tipoAllegatoDa(scelto.mimeType);
-    const dimensione = scelto.size ?? 0;
 
-    if (!tipo) {
+    if (!scelto.tipo) {
       setAllegati((correnti) => [
         ...correnti,
-        { id, nome: scelto.name, peso: '', avanzamento: 0, errore: t('app.feed.tipoNonAmmesso') },
+        { id, nome: scelto.nome, peso: '', avanzamento: 0, errore: t('app.feed.tipoNonAmmesso') },
       ]);
       return;
     }
+    const tipo = scelto.tipo;
 
     setAllegati((correnti) => [
       ...correnti,
-      { id, nome: scelto.name, peso: pesoLeggibile(dimensione), avanzamento: 0 },
+      { id, nome: scelto.nome, peso: pesoLeggibile(scelto.dimensione), avanzamento: 0 },
     ]);
 
     try {
-      const { data } = await preautorizzaAllegato({ nome: scelto.name, tipo, dimensione });
+      const { data } = await preautorizzaAllegato({
+        nome: scelto.nome,
+        tipo,
+        dimensione: scelto.dimensione,
+      });
       await caricaConAvanzamento({
         url: data.url,
         // Su React Native il corpo è il riferimento al file locale: i byte non
         // vengono letti in memoria, li legge il livello nativo mentre invia.
-        corpo: { uri: scelto.uri, name: scelto.name, type: scelto.mimeType ?? 'application/octet-stream' },
-        intestazioni: { 'content-type': scelto.mimeType ?? 'application/octet-stream' },
+        corpo: { uri: scelto.uri, name: scelto.nome, type: scelto.mimeType },
+        intestazioni: { 'content-type': scelto.mimeType },
         onAvanzamento: (percentuale) => aggiorna(id, { avanzamento: percentuale }),
       });
       aggiorna(id, { chiave: data.chiave, avanzamento: 100 });
@@ -109,6 +104,11 @@ export default function SchermataComponi() {
       // qui resta la riga in errore, che dice *quale* file non è passato.
       aggiorna(id, { errore: t('app.feed.caricamentoFallito') });
     }
+  };
+
+  const scegliFile = async () => {
+    const scelto = await scegliDocumento();
+    if (scelto) await caricaAllegato(scelto);
   };
 
   return (

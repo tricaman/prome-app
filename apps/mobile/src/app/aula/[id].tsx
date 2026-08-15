@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Linking, Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import * as SelettoreFile from 'expo-document-picker';
-import { caricaConAvanzamento, pesoLeggibile, tipoAllegatoDa } from '@prome/app-core';
+import { caricaConAvanzamento, pesoLeggibile } from '@prome/app-core';
 import { LUNGHEZZA_MASSIMA_MESSAGGIO } from '@prome/contracts';
 import {
   concediPermesso,
@@ -25,6 +24,7 @@ import {
   type SalaDto,
 } from '@prome/api-client';
 import { rotte } from '@/content';
+import { scegliDocumento, type FileScelto } from '@/lib/scelta-file';
 import { useTema } from '@/theme';
 import { useApiMutation, useChatAula, useT } from '@/hooks';
 import { QueryBoundary } from '@/components/feedback';
@@ -256,7 +256,7 @@ function Chat({ aulaId, puoScrivere }: { aulaId: string; puoScrivere: boolean })
  * che si faccia da un telefono — richiedeva di aprire il computer.
  *
  * Il caricamento è lo stesso a tre tempi del composer dei post, con lo stesso
- * `expo-document-picker` e la stessa funzione condivisa: si dichiarano nome,
+ * aiuto di scelta (`lib/scelta-file`) e la stessa funzione condivisa: si dichiarano nome,
  * tipo e dimensione, i byte vanno **diritti all'archivio** senza passare dagli
  * endpoint di dominio, e solo alla fine si cita la chiave. Su React Native il
  * corpo è il riferimento al file locale, così i byte non finiscono in memoria.
@@ -300,47 +300,39 @@ function Materiali({
   });
 
   /**
-   * Sceglie un file e lo porta nell'aula.
+   * Porta nell'aula un file già scelto.
    *
    * Il tipo lo si verifica **prima** di chiedere la pre-autorizzazione: un
    * rifiuto locale è immediato e non consuma una chiave che resterebbe
    * prenotata a vuoto.
    */
-  const scegliFile = async () => {
-    const esito = await SelettoreFile.getDocumentAsync({
-      type: ['application/pdf', 'image/*', 'text/*'],
-      copyToCacheDirectory: true,
-    });
-    if (esito.canceled) return;
-
-    const scelto = esito.assets[0];
-    if (!scelto) return;
-
-    const tipo = tipoAllegatoDa(scelto.mimeType);
-    if (!tipo) return;
+  const caricaMateriale = async (scelto: FileScelto) => {
+    if (!scelto.tipo) return;
+    const tipo = scelto.tipo;
 
     setInCaricamento(true);
     try {
       const { data } = await preautorizzaMaterialeAula(aulaId, {
-        nome: scelto.name,
+        nome: scelto.nome,
         tipo,
-        dimensione: scelto.size ?? 0,
+        dimensione: scelto.dimensione,
       });
       await caricaConAvanzamento({
         url: data.url,
         // Il riferimento al file locale, non i byte: li legge il livello
         // nativo mentre invia.
-        corpo: {
-          uri: scelto.uri,
-          name: scelto.name,
-          type: scelto.mimeType ?? 'application/octet-stream',
-        },
-        intestazioni: { 'content-type': scelto.mimeType ?? 'application/octet-stream' },
+        corpo: { uri: scelto.uri, name: scelto.nome, type: scelto.mimeType },
+        intestazioni: { 'content-type': scelto.mimeType },
       });
       condividi.mutate(data.chiave);
     } finally {
       setInCaricamento(false);
     }
+  };
+
+  const scegliFile = async () => {
+    const scelto = await scegliDocumento();
+    if (scelto) await caricaMateriale(scelto);
   };
 
   const gruppi = sala.argomenti.map((argomento) => ({
