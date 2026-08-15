@@ -389,7 +389,7 @@
         "programma": "Schedule for later",
         "programmaAiuto": "Otherwise the room opens right away",
         "colloca": "Place in a group",
-        "collocaAiuto": "Optional · the room appears in the chosen folder",
+        "collocaAiuto": "Optional · group members join without an invitation",
         "nessuno": "None",
         "nota": "You will be <forte>Moderator</forte>: you can manage Speak, Write and Upload for each participant.",
         "annulla": "Cancel",
@@ -398,7 +398,10 @@
         "visibilita": {
           "privato": "Invite only. It does not appear in searches.",
           "ateneo": "Anyone studying at your university can find and join it.",
-          "pubblico": "Open to every student signed up to Prome."
+          "pubblico": "Open to every student signed up to Prome.",
+          "privatoTitolo": "Private",
+          "ateneoTitolo": "University",
+          "pubblicoTitolo": "Public"
         }
       },
       "nessuna": "You are not in any study room yet: create one and invite the people you study with."
@@ -413,7 +416,8 @@
       "schede": {
         "chat": "Chat",
         "materiali": "Topics and materials",
-        "partecipanti": "Participants"
+        "partecipanti": "Participants",
+        "impostazioni": "Settings"
       },
       "invita": "Invite",
       "apertaDa": "Opened by",
@@ -473,7 +477,27 @@
         "connessione": "Connecting…",
         "connesso": "Live",
         "assente": "Not live: messages are still saved and the conversation realigns on its own."
-      }
+      },
+      "impostazioni": {
+        "titolo": "Room settings",
+        "campoTitolo": "Title",
+        "chiPuoEntrare": "Who can join",
+        "programma": "Start date and time",
+        "senzaData": "No date: the room is always open",
+        "ateneoNonDisponibile": "This room was created without a reference university, so it cannot be restricted to a university.",
+        "gruppo": "Placement",
+        "gruppoAiuto": "Members of the group join this room without needing an invitation.",
+        "nessunGruppo": "No group",
+        "salva": "Save",
+        "elimina": "Delete the room",
+        "eliminaAiuto": "Only a room with no materials and no messages can be deleted: what is inside is not thrown away with one gesture.",
+        "esci": "Leave the room",
+        "esciAiuto": "You leave the participants. If the room is public or from your university you can come back whenever you want.",
+        "retrocedi": "Remove as moderator",
+        "eliminaMateriale": "Delete"
+      },
+      "eliminaMateriale": "Delete the material",
+      "retrocedi": "Remove as moderator"
     },
     "gruppo": {
       "titolo": "Groups",
@@ -497,7 +521,7 @@
       "ultimoModeratore": "You are the only moderator: promote someone else before leaving.",
       "aule": "Group study rooms",
       "nessunAula": "No study room is placed in this group.",
-      "collocaTesto": "A room is placed here from its own screen.",
+      "collocaTesto": "A room is placed here when you create it, or from the room settings.",
       "visibilita": {
         "privato": "Private",
         "ateneo": "University",
@@ -509,7 +533,12 @@
       "invitoTitolo": "You have been invited to a group",
       "invitoEntra": "Join the group",
       "invitoInCorso": "We are adding you to the group…",
-      "invitoScaduto": "This invitation has expired."
+      "invitoScaduto": "This invitation has expired.",
+      "apriAula": "Open",
+      "entraAula": "Join",
+      "impostazioni": "Group settings",
+      "salva": "Save",
+      "ateneoNonDisponibile": "This group was created without a reference university, so it cannot be restricted to a university."
     },
     "impostazioni": {
       "titolo": "Settings",

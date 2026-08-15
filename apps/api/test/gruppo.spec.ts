@@ -575,6 +575,54 @@ describe('Gruppo (E7)', () => {
     });
   });
 
+  describe('trovare le aule del gruppo', () => {
+    it('un membro le vede tutte, comprese quelle in cui non è ancora entrato', async () => {
+      const capo = await utenteCompleto();
+      const gruppo = await creaGruppo(capo.token);
+      // Privata: senza la collocazione non sarebbe visibile a nessun altro.
+      const aula = await creaAula(capo.token, gruppo.id);
+      const membro = await utenteCompleto();
+      await aggiungiAlGruppo(capo, gruppo.id, membro);
+
+      const elenco = await chiedi(`/aule-studio?gruppoId=${gruppo.id}`, {
+        headers: comeUtente(membro.token),
+      });
+
+      // È la ragione per cui si colloca un'aula: senza questo elenco, il
+      // membro non avrebbe modo di trovarla, e il titolo di ammissione che ha
+      // non gli servirebbe a niente.
+      expect(elenco.statusCode).toBe(200);
+      expect(elenco.json().data.map((a: { id: string }) => a.id)).toContain(aula.id);
+      expect(elenco.json().data[0].sonoPartecipante).toBe(false);
+    });
+
+    it('chi non è del gruppo non vede le sue aule private', async () => {
+      const capo = await utenteCompleto();
+      const gruppo = await creaGruppo(capo.token);
+      await creaAula(capo.token, gruppo.id);
+      const estraneo = await utenteCompleto();
+
+      const elenco = await chiedi(`/aule-studio?gruppoId=${gruppo.id}`, {
+        headers: comeUtente(estraneo.token),
+      });
+
+      expect(elenco.statusCode).toBe(200);
+      expect(elenco.json().data).toHaveLength(0);
+    });
+
+    it('senza gruppo l\'elenco resta «le mie aule», non tutte', async () => {
+      const capo = await utenteCompleto();
+      const gruppo = await creaGruppo(capo.token);
+      await creaAula(capo.token, gruppo.id);
+      const membro = await utenteCompleto();
+      await aggiungiAlGruppo(capo, gruppo.id, membro);
+
+      const elenco = await chiedi('/aule-studio', { headers: comeUtente(membro.token) });
+
+      expect(elenco.json().data).toHaveLength(0);
+    });
+  });
+
   describe('la decadenza dell\'appartenenza raggiunge chi è già dentro (SE1)', () => {
     it('chi perde l\'appartenenza sparisce dai partecipanti dell\'aula collocata', async () => {
       const capo = await utenteCompleto();

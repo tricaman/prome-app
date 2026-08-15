@@ -77,13 +77,20 @@ export class AulaStudioController {
   }
 
   @Get()
-  @ApiOperation({ operationId: 'elencaAuleStudio', summary: 'Le aule di cui faccio parte' })
+  @ApiOperation({
+    operationId: 'elencaAuleStudio',
+    summary: 'Le aule di cui faccio parte, o quelle collocate in un gruppo',
+  })
   @ApiPaginatedResponse({ type: AulaStudioDto })
   async elenca(
     @Utente() utente: UtenteDiDominio,
     @Query() query: QueryAuleStudioDto,
   ): Promise<PaginatedResult<AulaStudioResponse>> {
-    return this.aule.elenca(utente.id, { page: query.page, limit: query.limit });
+    return this.aule.elenca(
+      utente.id,
+      { page: query.page, limit: query.limit },
+      query.gruppoId,
+    );
   }
 
   @Get(':id/sala')

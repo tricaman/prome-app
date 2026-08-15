@@ -21,10 +21,10 @@ export interface MembroDelGruppo {
 /**
  * G1 e G5 al momento della nascita.
  *
- * L'ateneo lo porta il gruppo **solo se la visibilità è ristretta all'ateneo**,
- * ed è quello del creatore al momento della creazione: da lì è congelato (G5).
- * L'università di chi chiederà di vederlo si leggerà invece sempre fresca dal
- * Profilo — dato anagrafico propagato, decisione di autorizzazione interrogata.
+ * L'ateneo è quello del creatore **al momento della creazione**, e da lì è
+ * congelato (G5). L'università di chi chiederà di vederlo si leggerà invece
+ * sempre fresca dal Profilo — dato anagrafico propagato, decisione di
+ * autorizzazione interrogata.
  */
 export function costruisciGruppo(dati: {
   nome: string;
@@ -45,7 +45,13 @@ export function costruisciGruppo(dati: {
   return {
     nome,
     visibilita,
-    ateneo: visibilita === 'ATENEO' ? dati.universitaDelCreatore : null,
+    // Si salva **sempre**, anche per un gruppo che nasce privato: G5 dice «alla
+    // creazione», e quello è il momento in cui il valore si prende. Salvarlo
+    // solo per i gruppi già aperti all'ateneo renderebbe impossibile aprirli
+    // dopo — la regola confronta questo campo con l'università di chi legge, e
+    // un campo vuoto non corrisponde a nessuno. Non cambia alcun
+    // comportamento: si consulta solo quando la visibilità è ATENEO.
+    ateneo: dati.universitaDelCreatore,
   };
 }
 

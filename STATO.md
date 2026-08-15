@@ -50,7 +50,7 @@ Le due unità dell'API escono dalla stessa build e si distinguono solo per confi
 
 **Si pubblica facendo `push` su `main`.** Il resto è automatico e sta in [`.github/workflows/rilascio.yml`](.github/workflows/rilascio.yml):
 
-1. **Verifica** — database vero come servizio, migrazioni, `pnpm -r build`, typecheck, lint, 247 test dell'API.
+1. **Verifica** — database vero come servizio, migrazioni, `pnpm -r build`, typecheck, lint, 252 test dell'API.
 2. **Immagini** — costruite in CI (non sulla macchina, che ha due core e serve traffico) e pubblicate su `ghcr.io` etichettate con lo sha del commit.
 3. **Rilascio** — rsync della configurazione (`--delete`, così la macchina corrisponde al commit), poi [`deploy/rilascia.sh`](deploy/rilascia.sh) via SSH.
 
@@ -108,6 +108,16 @@ Un gruppo è un **contenitore di utenti con appartenenza e visibilità**: nessun
 **Nella stessa giornata sono spariti gli ultimi dati inventati.** Erano tutti sulle due schermate più usate: i quattro filtri del feed che cambiavano solo colore (non sono in nessun work package — «filtro» non compare in tutto il piano, e «i miei gruppi» avrebbe richiesto un arco Bacheca → Gruppo che la Context Map vieta); «Salva», «Condividi» e «···» su post veri, senza gestore; il conteggio dei commenti sempre `0`, scritto a mano nel client; il riquadro «Appello di Analisi 2 fra 9 giorni · 3 aule studio» con i numeri nel JSX; e il tab profilo del telefono, finto per intero — identità inventata, contatori `86/23/41` costanti e, come «i tuoi contenuti», **il post di un'altra persona**.
 
 Il modulo dei dati dimostrativi dell'area privata (`packages/contenuti/src/sessione.ts`) **non contiene più dati**: resta il solo tipo della scheda del post. Nessuna schermata può più importare per sbaglio una persona che non esiste.
+
+### Gli spazi si governano ✅
+
+Controllando **quali comandi dell'API avessero un modo per essere raggiunti**, sei non ne avevano nessuno: modificare un'aula, eliminarla, entrarci, retrocedere un moderatore, eliminare un materiale, e modificare un gruppo. Esistevano da agosto, erano provati dai test, e non avevano un bottone. Le conseguenze non erano teoriche: **la visibilità di un'aula si decideva una volta per sempre**, un'aula aperta per sbaglio restava lì, e **chi entrava in un'aula pubblica non ne usciva più**.
+
+Ora la sala ha una scheda «Impostazioni» — titolo, visibilità, data, collocazione in un gruppo, eliminazione per chi modera; **uscita per chiunque**, che è la sola di queste che riguardi ogni partecipante. Il gruppo si rinomina e cambia visibilità. Un materiale si elimina, da chi l'ha portato o da chi modera. La retrocessione da moderatore c'è su entrambi i lati.
+
+**Le aule di un gruppo si trovano**: `GET /aule-studio?gruppoId=…` risponde con quelle collocate lì che chi chiede può vedere, comprese le private se ne è membro. Senza, la collocazione introdotta con E7 non sarebbe servita a niente — la pagina del gruppo mostrava solo le aule in cui si era già dentro, e non c'era modo di entrare nelle altre.
+
+**Un difetto silenzioso corretto nel dominio**: l'ateneo dello spazio si salvava solo se la visibilità nasceva `ATENEO`, quindi un'aula nata privata che fosse stata aperta all'ateneo sarebbe diventata visibile **a nessuno**. Ora si salva sempre alla creazione, che è ciò che AS7 e G5 dicono; si consulta solo quando serve, quindi non cambia nulla di ciò che esiste.
 
 ### Mobile (Expo) — parziale
 
@@ -202,7 +212,7 @@ pnpm db:up                              # Postgres locale, porta 6400
 pnpm --filter @prome/api exec prisma migrate deploy
 pnpm dev:api                            # API
 pnpm dev:web                            # sito, porta 3500
-pnpm --filter @prome/api test           # 247 test, serve il database
+pnpm --filter @prome/api test           # 252 test, serve il database
 pnpm api:client                         # rigenera il client dopo OGNI modifica agli endpoint
 ```
 

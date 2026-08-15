@@ -115,6 +115,11 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       universitaDelCreatore: chiSono.universita,
     });
 
+    // Un'aula può nascere già collocata (AS9), ma solo in un gruppo di cui chi
+    // la crea fa parte **adesso**: la stessa verifica della collocazione
+    // successiva, perché è la stessa decisione.
+    if (dati.gruppoId) await this.esigiMembroDelGruppo(utenteId, dati.gruppoId);
+
     // AS2 e AS5 alla nascita: chi crea è moderatore, e un moderatore ha i tre
     // permessi. L'aula nasce già governabile, e non esiste l'istante in cui
     // esiste senza nessuno che possa moderarla.
@@ -124,6 +129,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
         visibilita: daScrivere.visibilita,
         ateneo: daScrivere.ateneo,
         dataOraInizio: daScrivere.dataOraInizio,
+        ...(dati.gruppoId ? { gruppoId: dati.gruppoId } : {}),
         partecipanti: {
           create: {
             utenteId: daScrivere.creatoreId,
@@ -140,12 +146,80 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     return this.aulaPerIlClient(aula, aula.partecipanti, utenteId);
   }
 
-  /** Le aule di cui si è partecipanti, dalla più recente. */
+  /**
+   * Le aule di cui si è partecipanti, dalla più recente.
+   *
+   * Con `gruppoId` cambia domanda: **le aule collocate in quel gruppo che
+   * questa persona può vedere**, anche quelle in cui non è ancora entrata.
+   * Senza, la collocazione non servirebbe a niente — un membro non avrebbe
+   * modo di trovare le aule del proprio gruppo, che è la sola ragione per cui
+   * un'aula viene collocata.
+   *
+   * Il titolo per vederle si risolve **adesso** e con le regole di sempre:
+   * chi è già partecipante, oppure l'aula è pubblica, oppure è dell'ateneo di
+   * chi legge, oppure chi legge è membro del gruppo in cui è collocata. Non è
+   * una regola nuova: è la stessa che decide l'ammissione, applicata alla
+   * lettura di un elenco.
+   */
   async elenca(
     utenteId: string,
     pagina: { page: number; limit: number },
+    gruppoId?: string,
   ): Promise<PaginatedResult<AulaStudioResponse>> {
+    if (gruppoId) return this.elencaDelGruppo(utenteId, gruppoId, pagina);
+
     const dove = { partecipanti: { some: { utenteId } } };
+
+    const [totale, righe] = await Promise.all([
+      this.prisma.aulaStudio.count({ where: dove }),
+      this.prisma.aulaStudio.findMany({
+        where: dove,
+        orderBy: { creatoIl: 'desc' },
+        skip: (pagina.page - 1) * pagina.limit,
+        take: pagina.limit,
+        include: { partecipanti: true },
+      }),
+    ]);
+
+    return {
+      data: righe.map((riga) => this.aulaPerIlClient(riga, riga.partecipanti, utenteId)),
+      meta: {
+        total: totale,
+        page: pagina.page,
+        limit: pagina.limit,
+        totalPages: Math.max(1, Math.ceil(totale / pagina.limit)),
+      },
+    };
+  }
+
+  /**
+   * Le aule collocate in un gruppo, per chi può vederle.
+   *
+   * L'appartenenza al gruppo si chiede una volta sola e vale per tutte le aule
+   * dell'elenco: è la stessa interrogazione su dato fresco dell'ammissione
+   * (IA4), non una copia.
+   */
+  private async elencaDelGruppo(
+    utenteId: string,
+    gruppoId: string,
+    pagina: { page: number; limit: number },
+  ): Promise<PaginatedResult<AulaStudioResponse>> {
+    const [membro, chiSono] = await Promise.all([
+      this.appartenenza.eAmmessoPerAppartenenza(utenteId, gruppoId),
+      this.profilo.perUtente(utenteId),
+    ]);
+
+    const visibili: Array<Record<string, unknown>> = [
+      { partecipanti: { some: { utenteId } } },
+      { visibilita: 'PUBBLICO' },
+    ];
+    if (chiSono.universita) {
+      visibili.push({ visibilita: 'ATENEO', ateneo: chiSono.universita });
+    }
+    // Chi è del gruppo vede tutte le aule collocate lì, comprese le private:
+    // è il titolo che la collocazione gli dà, ed è ciò che rende utile
+    // collocare un'aula.
+    const dove = membro ? { gruppoId } : { gruppoId, OR: visibili };
 
     const [totale, righe] = await Promise.all([
       this.prisma.aulaStudio.count({ where: dove }),
@@ -252,16 +326,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     // membro del gruppo **adesso** — altrimenti si aprirebbe la propria aula a
     // uno spazio di cui non fa parte, e i suoi membri entrerebbero senza che
     // nessuno di loro l'abbia chiesto.
-    if (dati.gruppoId) {
-      const membro = await this.appartenenza.eAmmessoPerAppartenenza(utenteId, dati.gruppoId);
-      if (!membro) {
-        throw new AppException(
-          AulaStudioErrorCode.COLLOCAZIONE_NEGATA,
-          'AULA_COLLOCAZIONE_NEGATA',
-          HttpStatus.FORBIDDEN,
-        );
-      }
-    }
+    if (dati.gruppoId) await this.esigiMembroDelGruppo(utenteId, dati.gruppoId);
 
     const aggiornata = await this.prisma.aulaStudio.update({
       where: { id: aulaId },
@@ -957,6 +1022,23 @@ export class AulaStudioService implements ConsumatoreDiFatti {
   }
 
   // --- Interni --------------------------------------------------------------
+
+  /**
+   * Chi colloca un'aula in un gruppo dev'essere membro di quel gruppo, adesso.
+   *
+   * Altrimenti aprirebbe la propria aula a uno spazio di cui non fa parte, e i
+   * membri di quello spazio ci entrerebbero senza che nessuno di loro l'abbia
+   * chiesto. Sta in un posto solo perché la decisione è la stessa alla
+   * creazione e alla modifica.
+   */
+  private async esigiMembroDelGruppo(utenteId: string, gruppoId: string): Promise<void> {
+    if (await this.appartenenza.eAmmessoPerAppartenenza(utenteId, gruppoId)) return;
+    throw new AppException(
+      AulaStudioErrorCode.COLLOCAZIONE_NEGATA,
+      'AULA_COLLOCAZIONE_NEGATA',
+      HttpStatus.FORBIDDEN,
+    );
+  }
 
   /** Ammissione idempotente: la seconda volta non fa nulla (AS3). */
   private async ammetti(aulaId: string, utenteId: string): Promise<void> {

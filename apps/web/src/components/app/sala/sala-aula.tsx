@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useApriSalaAulaStudio, type SalaDto } from '@prome/api-client';
+import { useApriSalaAulaStudio, useLeggiMioProfilo, type SalaDto } from '@prome/api-client';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { Link } from '@/i18n/navigazione';
 import { Avatar, Chip, Icona } from '@/components/ui';
@@ -12,8 +12,9 @@ import { ChatAula } from './chat-aula';
 import { MaterialiAula } from './materiali-aula';
 import { TabellaPermessi } from './tabella-permessi';
 import { InvitaInAula } from './invita-in-aula';
+import { EsciDallAula, ImpostazioniAula } from './impostazioni-aula';
 
-type Scheda = 'chat' | 'materiali' | 'partecipanti';
+type Scheda = 'chat' | 'materiali' | 'partecipanti' | 'impostazioni';
 
 /**
  * La sala di un'aula studio.
@@ -32,6 +33,8 @@ export function SalaAula({ aulaId }: { aulaId: string }) {
   const tComune = useTranslations('comune');
   const [scheda, setScheda] = useState<Scheda>('chat');
   const sala = useApriSalaAulaStudio(aulaId);
+  // Serve per sapere quale riga dei partecipanti sono io, e quindi per uscire.
+  const io = useLeggiMioProfilo();
 
   return (
     <QueryBoundary query={sala}>
@@ -65,6 +68,16 @@ export function SalaAula({ aulaId }: { aulaId: string }) {
                     partecipanti={data.partecipanti}
                     sonoModeratore={data.sonoModeratore}
                   />
+                </div>
+              ) : null}
+              {scheda === 'impostazioni' ? (
+                <div className="flex-1 overflow-y-auto bg-sfondo px-6 py-5">
+                  {/* Le impostazioni le vede chi modera; l'uscita chiunque:
+                      è la sola operazione che riguarda ogni partecipante. */}
+                  {data.sonoModeratore ? <ImpostazioniAula aula={data.aula} /> : null}
+                  {io.data ? (
+                    <EsciDallAula aulaId={aulaId} utenteId={io.data.data.utenteId} />
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -130,6 +143,7 @@ function Intestazione({
     { chiave: 'chat', conteggio: null },
     { chiave: 'materiali', conteggio: sala.allegati.length },
     { chiave: 'partecipanti', conteggio: sala.partecipanti.length },
+    { chiave: 'impostazioni', conteggio: null },
   ];
 
   return (

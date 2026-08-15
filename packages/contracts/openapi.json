@@ -1078,6 +1078,15 @@
                 "desc"
               ]
             }
+          },
+          {
+            "name": "gruppoId",
+            "required": false,
+            "in": "query",
+            "description": "Aule collocate in questo gruppo",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1130,7 +1139,7 @@
             }
           }
         },
-        "summary": "Le aule di cui faccio parte",
+        "summary": "Le aule di cui faccio parte, o quelle collocate in un gruppo",
         "tags": [
           "aule studio"
         ]
@@ -3710,6 +3719,10 @@
           "dataOraInizio": {
             "type": "string",
             "description": "Assente = aula estemporanea"
+          },
+          "gruppoId": {
+            "type": "string",
+            "description": "Gruppo in cui collocarla fin da subito"
           }
         },
         "required": [
@@ -3903,11 +3916,11 @@
             ]
           },
           "dataOraInizio": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "gruppoId": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Gruppo in cui collocare l'aula"
           }

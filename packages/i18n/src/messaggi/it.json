@@ -389,7 +389,7 @@
         "programma": "Programma per più tardi",
         "programmaAiuto": "Altrimenti l'aula si apre subito",
         "colloca": "Colloca in un gruppo",
-        "collocaAiuto": "Opzionale · l'aula appare nella cartella scelta",
+        "collocaAiuto": "Opzionale · chi fa parte del gruppo entra senza invito",
         "nessuno": "Nessuno",
         "nota": "Sarai <forte>Moderatore</forte>: potrai gestire Parlare, Scrivere e Caricare per ogni partecipante.",
         "annulla": "Annulla",
@@ -398,7 +398,10 @@
         "visibilita": {
           "privato": "Solo su invito. Non compare nelle ricerche.",
           "ateneo": "Chi studia nel tuo ateneo può trovarla ed entrare.",
-          "pubblico": "Aperta a tutti gli studenti iscritti a Prome."
+          "pubblico": "Aperta a tutti gli studenti iscritti a Prome.",
+          "privatoTitolo": "Privato",
+          "ateneoTitolo": "Ateneo",
+          "pubblicoTitolo": "Pubblico"
         }
       },
       "nessuna": "Non sei ancora in nessuna aula studio: creane una e invita chi studia con te."
@@ -413,7 +416,8 @@
       "schede": {
         "chat": "Chat",
         "materiali": "Argomenti e materiali",
-        "partecipanti": "Partecipanti"
+        "partecipanti": "Partecipanti",
+        "impostazioni": "Impostazioni"
       },
       "invita": "Invita",
       "apertaDa": "Aperta da",
@@ -473,7 +477,27 @@
         "connessione": "Connessione in corso…",
         "connesso": "In tempo reale",
         "assente": "Fuori tempo reale: i messaggi restano salvati e la conversazione si riallinea da sola."
-      }
+      },
+      "impostazioni": {
+        "titolo": "Impostazioni dell'aula",
+        "campoTitolo": "Titolo",
+        "chiPuoEntrare": "Chi può entrare",
+        "programma": "Data e ora di inizio",
+        "senzaData": "Nessuna data: l'aula è sempre aperta",
+        "ateneoNonDisponibile": "Questa aula è nata senza un ateneo di riferimento, quindi non può essere riservata all'ateneo.",
+        "gruppo": "Collocazione",
+        "gruppoAiuto": "Chi fa parte del gruppo entra in quest'aula senza bisogno di un invito.",
+        "nessunGruppo": "Nessun gruppo",
+        "salva": "Salva",
+        "elimina": "Elimina l'aula",
+        "eliminaAiuto": "Si può eliminare solo un'aula senza materiali e senza messaggi: quello che c'è dentro non si butta via con un gesto.",
+        "esci": "Esci dall'aula",
+        "esciAiuto": "Esci dai partecipanti. Se l'aula è pubblica o del tuo ateneo puoi rientrare quando vuoi.",
+        "retrocedi": "Togli da moderatore",
+        "eliminaMateriale": "Elimina"
+      },
+      "eliminaMateriale": "Elimina il materiale",
+      "retrocedi": "Non moderatore"
     },
     "gruppo": {
       "titolo": "Gruppi",
@@ -497,7 +521,7 @@
       "ultimoModeratore": "Sei l’unico moderatore: promuovi qualcun altro prima di uscire.",
       "aule": "Aule studio del gruppo",
       "nessunAula": "Nessuna aula studio è collocata in questo gruppo.",
-      "collocaTesto": "Un’aula si colloca qui dalla sua schermata.",
+      "collocaTesto": "Un'aula si colloca qui quando la crei, o dalle impostazioni dell'aula.",
       "visibilita": {
         "privato": "Privato",
         "ateneo": "Ateneo",
@@ -509,7 +533,12 @@
       "invitoTitolo": "Sei stato invitato in un gruppo",
       "invitoEntra": "Entra nel gruppo",
       "invitoInCorso": "Ti stiamo aggiungendo al gruppo…",
-      "invitoScaduto": "Questo invito è scaduto."
+      "invitoScaduto": "Questo invito è scaduto.",
+      "apriAula": "Apri",
+      "entraAula": "Entra",
+      "impostazioni": "Impostazioni del gruppo",
+      "salva": "Salva",
+      "ateneoNonDisponibile": "Questo gruppo è nato senza un ateneo di riferimento, quindi non può essere riservato all'ateneo."
     },
     "impostazioni": {
       "titolo": "Impostazioni",

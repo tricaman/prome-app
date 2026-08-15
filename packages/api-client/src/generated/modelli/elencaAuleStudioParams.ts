@@ -22,4 +22,8 @@ limit?: number;
  */
 sortBy?: string;
 sortOrder?: ElencaAuleStudioSortOrder;
+/**
+ * Aule collocate in questo gruppo
+ */
+gruppoId?: string;
 };

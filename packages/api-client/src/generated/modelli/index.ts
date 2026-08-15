@@ -121,8 +121,6 @@ export * from './messaggioDiChatDto';
 export * from './messaggioEsportatoDto';
 export * from './modificaAulaStudio200';
 export * from './modificaAulaStudioDto';
-export * from './modificaAulaStudioDtoDataOraInizio';
-export * from './modificaAulaStudioDtoGruppoId';
 export * from './modificaAulaStudioDtoVisibilita';
 export * from './modificaGruppo200';
 export * from './modificaGruppoDto';

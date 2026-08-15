@@ -82,9 +82,21 @@ export function costruisciAula(
   return {
     titolo,
     visibilita,
-    // AS7: precompilato dall'università del creatore e poi congelato. Se il
-    // creatore cambierà ateneo, lo spazio non cambierà pubblico.
-    ateneo: visibilita === 'ATENEO' ? dati.universitaDelCreatore : null,
+    // AS7: precompilato dall'università del creatore **alla creazione** e da lì
+    // congelato. Se il creatore cambierà ateneo, lo spazio non cambierà
+    // pubblico.
+    //
+    // Si salva **sempre**, anche per un'aula che nasce privata, ed è la lettura
+    // fedele dell'invariante: il momento in cui si prende il valore è la
+    // creazione, non il primo uso. Salvarlo solo per le aule già aperte
+    // all'ateneo renderebbe impossibile aprirle dopo — la regola confronta
+    // questo campo con l'università di chi legge, e un campo vuoto non
+    // corrisponde a nessuno. L'aula diventerebbe «riservata all'ateneo» e
+    // visibile a nessuno, in silenzio.
+    //
+    // Non cambia alcun comportamento: l'ateneo si consulta soltanto quando la
+    // visibilità è ATENEO.
+    ateneo: dati.universitaDelCreatore,
     dataOraInizio,
     creatoreId: prova.utenteId,
   };

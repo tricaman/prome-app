@@ -1416,7 +1416,7 @@ export const useCreaAulaStudio = <TError = ErrorResponseDto,
     }
     
 /**
- * @summary Le aule di cui faccio parte
+ * @summary Le aule di cui faccio parte, o quelle collocate in un gruppo
  */
 export const elencaAuleStudio = (
     params?: ElencaAuleStudioParams,
@@ -1488,7 +1488,7 @@ export function useElencaAuleStudio<TData = Awaited<ReturnType<typeof elencaAule
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
 /**
- * @summary Le aule di cui faccio parte
+ * @summary Le aule di cui faccio parte, o quelle collocate in un gruppo
  */
 
 export function useElencaAuleStudio<TData = Awaited<ReturnType<typeof elencaAuleStudio>>, TError = ErrorResponseDto>(

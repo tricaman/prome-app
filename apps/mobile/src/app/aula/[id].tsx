@@ -1,17 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { pesoLeggibile } from '@prome/app-core';
 import { LUNGHEZZA_MASSIMA_MESSAGGIO } from '@prome/contracts';
 import {
   concediPermesso,
   getApriSalaAulaStudioQueryKey,
+  getElencaAuleStudioQueryKey,
   revocaPermesso,
+  rimuoviPartecipante,
   useApriSalaAulaStudio,
+  useLeggiMioProfilo,
   type MaterialeDto,
   type PartecipanteDto,
   type SalaDto,
 } from '@prome/api-client';
+import { rotte } from '@/content';
 import { useTema } from '@/theme';
 import { useApiMutation, useChatAula, useT } from '@/hooks';
 import { QueryBoundary } from '@/components/feedback';
@@ -307,6 +311,21 @@ function RigaMateriale({ file, ultima }: { file: MaterialeDto; ultima: boolean }
 function Partecipanti({ aulaId, sala }: { aulaId: string; sala: SalaDto }) {
   const tema = useTema();
   const t = useT();
+  const io = useLeggiMioProfilo();
+
+  /**
+   * Uscire dall'aula.
+   *
+   * Era l'unica operazione mancante che riguardasse ogni partecipante e non
+   * chi amministra: si entrava in un'aula pubblica dal telefono e non se ne
+   * usciva più. L'ultimo moderatore lo ferma il server (AS2), con il messaggio
+   * che dice cosa fare.
+   */
+  const esci = useApiMutation({
+    mutationFn: (utenteId: string) => rimuoviPartecipante(aulaId, utenteId),
+    invalida: [getElencaAuleStudioQueryKey() as never],
+    onSuccess: () => router.replace(rotte.auleStudio()),
+  });
 
   const cambia = useApiMutation({
     mutationFn: ({
@@ -339,6 +358,20 @@ function Partecipanti({ aulaId, sala }: { aulaId: string; sala: SalaDto }) {
       <Text variante="didascalia" style={{ marginTop: tema.spaziatura[2] }}>
         {t('app.sala.tuoiPermessiTesto')}
       </Text>
+
+      {io.data ? (
+        <Card style={{ gap: tema.spaziatura[2], marginTop: tema.spaziatura[3] }}>
+          <Text variante="etichetta">{t('app.sala.impostazioni.esci')}</Text>
+          <Text variante="didascalia">{t('app.sala.impostazioni.esciAiuto')}</Text>
+          <Button
+            titolo={t('app.sala.impostazioni.esci')}
+            variante="contorno"
+            larghezzaPiena
+            inCaricamento={esci.isPending}
+            onPress={() => esci.mutate(io.data!.data.utenteId)}
+          />
+        </Card>
+      ) : null}
     </Screen>
   );
 }

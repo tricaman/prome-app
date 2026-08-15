@@ -5,6 +5,7 @@ import {
   concediPermesso,
   getApriSalaAulaStudioQueryKey,
   promuoviAModeratore,
+  retrocediDaModeratore,
   revocaPermesso,
   rimuoviPartecipante,
   type PartecipanteDto,
@@ -61,6 +62,11 @@ export function TabellaPermessi({ aulaId, partecipanti, sonoModeratore }: Tabell
     invalida: [chiaveSala as never],
   });
 
+  const retrocedi = useApiMutation({
+    mutationFn: (utenteId: string) => retrocediDaModeratore(aulaId, utenteId),
+    invalida: [chiaveSala as never],
+  });
+
   const rimuovi = useApiMutation({
     mutationFn: (utenteId: string) => rimuoviPartecipante(aulaId, utenteId),
     invalida: [chiaveSala as never],
@@ -76,7 +82,7 @@ export function TabellaPermessi({ aulaId, partecipanti, sonoModeratore }: Tabell
             {t(`tabella.${permesso}`)}
           </span>
         ))}
-        {sonoModeratore ? <span className="w-[120px]" /> : null}
+        {sonoModeratore ? <span className="w-[160px]" /> : null}
       </div>
 
       <ul>
@@ -131,8 +137,19 @@ export function TabellaPermessi({ aulaId, partecipanti, sonoModeratore }: Tabell
               ))}
 
               {sonoModeratore ? (
-                <span className="flex w-[120px] justify-end gap-2">
-                  {partecipante.moderatore ? null : (
+                <span className="flex w-[160px] justify-end gap-2">
+                  {partecipante.moderatore ? (
+                    // Mancava del tutto: si promuoveva e non si poteva più
+                    // tornare indietro. L'ultimo moderatore lo ferma il server
+                    // (AS2), con il messaggio che dice cosa fare.
+                    <Button
+                      variante="contorno"
+                      className="h-9 rounded-xl px-3 text-[12px]"
+                      onPress={() => retrocedi.mutate(partecipante.utenteId)}
+                    >
+                      {t('retrocedi')}
+                    </Button>
+                  ) : (
                     <Button
                       variante="contorno"
                       className="h-9 rounded-xl px-3 text-[12px]"

@@ -6,13 +6,14 @@ import { z } from 'zod';
 import {
   creaAulaStudio,
   getElencaAuleStudioQueryKey,
+  useElencaMieiGruppi,
   type CreaAulaStudioDtoVisibilita,
 } from '@prome/api-client';
 import { useApiMutation, useForm } from '@/hooks';
 import { useRouter } from '@/i18n/navigazione';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { Form, FormInput } from '@/components/form';
-import { Button, Icona, Switch } from '@/components/ui';
+import { Button, Switch } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
 const VISIBILITA: readonly {
@@ -42,6 +43,10 @@ export function ModaleCreaAula({ onChiudi }: { onChiudi: () => void }) {
   const [visibilita, setVisibilita] = useState<CreaAulaStudioDtoVisibilita>('PRIVATO');
   const [programmata, setProgrammata] = useState(false);
   const [quando, setQuando] = useState('');
+  const [gruppoId, setGruppoId] = useState('');
+  // Solo i gruppi di cui si fa parte: l'API esige l'appartenenza, quindi
+  // proporne altri sarebbe un rifiuto annunciato.
+  const gruppi = useElencaMieiGruppi({ limit: 50 });
 
   const schema = z.object({
     titolo: z.string().min(1).max(200),
@@ -56,6 +61,7 @@ export function ModaleCreaAula({ onChiudi }: { onChiudi: () => void }) {
         // Assente = estemporanea: è la sola differenza fra le due, e non
         // esiste alcuno stato dietro.
         ...(programmata && quando ? { dataOraInizio: new Date(quando).toISOString() } : {}),
+        ...(gruppoId ? { gruppoId } : {}),
       }),
     invalida: [getElencaAuleStudioQueryKey() as never],
     form,
@@ -165,15 +171,29 @@ export function ModaleCreaAula({ onChiudi }: { onChiudi: () => void }) {
             </div>
           ) : null}
 
-          <div className="mt-3 flex items-center gap-4 rounded-2xl border border-bordo bg-superficie-alt px-4 py-4">
-            <span className="min-w-0 flex-1">
+          {/* Era un riquadro con l'aria di essere cliccabile e non lo era:
+              un div con dentro «Nessuno» e una freccia. Ora colloca davvero, e
+              propone solo i gruppi di cui si fa parte — gli altri sarebbero un
+              rifiuto annunciato, perché l'API esige l'appartenenza. */}
+          <div className="mt-3 rounded-2xl border border-bordo bg-superficie-alt px-4 py-4">
+            <label className="block">
               <span className="block text-sm font-extrabold text-testo">{t('colloca')}</span>
-              <span className="mt-0.5 block text-xs text-testo-tenue">{t('collocaAiuto')}</span>
-            </span>
-            <span className="flex flex-none items-center gap-1.5 text-[13px] font-extrabold text-primario-collegamento">
-              {t('nessuno')}
-              <Icona nome="avanti" dimensione={15} />
-            </span>
+              <span className="mb-2.5 mt-0.5 block text-xs text-testo-tenue">
+                {t('collocaAiuto')}
+              </span>
+              <select
+                value={gruppoId}
+                onChange={(evento) => setGruppoId(evento.target.value)}
+                className="h-[42px] w-full rounded-xl border-2 border-bordo bg-superficie px-3 text-[14px] outline-none focus:border-primary-500"
+              >
+                <option value="">{t('nessuno')}</option>
+                {(gruppi.data?.data ?? []).map((gruppo) => (
+                  <option key={gruppo.id} value={gruppo.id}>
+                    {gruppo.nome}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
 
           <p className="mt-3.5 px-0.5 text-[11.5px] leading-relaxed text-testo-debole">

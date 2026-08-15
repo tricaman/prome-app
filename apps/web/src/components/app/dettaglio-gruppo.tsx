@@ -5,6 +5,9 @@ import { useTranslations } from 'next-intl';
 import { z } from 'zod';
 import {
   eliminaGruppo,
+  entraInAulaStudio,
+  getElencaAuleStudioQueryKey,
+  modificaGruppo,
   getElencaMieiGruppiQueryKey,
   getLeggiGruppoQueryKey,
   invitaNelGruppo,
@@ -14,17 +17,20 @@ import {
   useElencaAuleStudio,
   useLeggiGruppo,
   useLeggiMioProfilo,
+  type AulaStudioDto,
   type DettaglioGruppoDto,
+  type GruppoDto,
   type MembroDto,
 } from '@prome/api-client';
 import { useApiMutation, useForm } from '@/hooks';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { Link, useRouter } from '@/i18n/navigazione';
 import { Form, FormInput } from '@/components/form';
-import { Avatar, Button, Card, Chip, Icona } from '@/components/ui';
+import { Avatar, Button, Card, Chip, Icona, Input } from '@/components/ui';
 import { QueryBoundary } from '@/components/feedback';
 import { cn } from '@/lib/utils';
 import { etichettaVisibilita } from './elenco-gruppi';
+import { SceltaVisibilitaGruppo } from './scelta-visibilita-gruppo';
 
 /**
  * Un gruppo visto da dentro: chi ne fa parte, e le aule collocate qui.
@@ -90,6 +96,7 @@ function Contenuto({
         </div>
       </Card>
 
+      {gruppo.sonoModeratore ? <ImpostazioniGruppo gruppo={gruppo} /> : null}
       {gruppo.sonoModeratore ? <Invito gruppoId={gruppoId} /> : null}
 
       <EtichettaSezione>{t('membri', { numero: gruppo.membri })}</EtichettaSezione>
@@ -224,6 +231,55 @@ function RigaMembro({
   );
 }
 
+/**
+ * Nome e visibilità del gruppo, per chi lo modera.
+ *
+ * Si sceglievano una volta alla creazione e non si toccavano più: `modificaGruppo`
+ * esisteva nell'API e nessun client la chiamava.
+ *
+ * L'ateneo non c'è, ed è congelato alla creazione (G5). Un gruppo nato senza
+ * ateneo non può essere riservato all'ateneo, e la scelta non viene offerta:
+ * sarebbe un gruppo «di ateneo» visibile a nessuno.
+ */
+function ImpostazioniGruppo({ gruppo }: { gruppo: GruppoDto }) {
+  const t = useTranslations('app.gruppo');
+  const [nome, setNome] = useState(gruppo.nome);
+  const [visibilita, setVisibilita] = useState(gruppo.visibilita);
+
+  const salva = useApiMutation({
+    mutationFn: () => modificaGruppo(gruppo.id, { nome, visibilita }),
+    invalida: [
+      getLeggiGruppoQueryKey(gruppo.id) as never,
+      getElencaMieiGruppiQueryKey() as never,
+    ],
+  });
+
+  return (
+    <Card padding="md" className="mb-6">
+      <p className="mb-3 text-[15px] font-extrabold text-testo">{t('impostazioni')}</p>
+
+      <Input etichetta={t('nome')} valore={nome} onChange={setNome} />
+
+      <p className="mb-2 mt-4 text-[12.5px] font-extrabold text-testo-tenue">{t('chiPuoVederlo')}</p>
+      <SceltaVisibilitaGruppo
+        valore={visibilita}
+        onScegli={setVisibilita}
+        senzaAteneo={!gruppo.ateneo}
+      />
+
+      <div className="mt-4 flex justify-end">
+        <Button
+          className="h-11 rounded-xl px-5"
+          inCaricamento={salva.isPending}
+          onPress={() => salva.mutate(undefined)}
+        >
+          {t('salva')}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
 const schemaInvito = z.object({ destinatario: z.string().email() });
 
 function Invito({ gruppoId }: { gruppoId: string }) {
@@ -273,14 +329,17 @@ function Invito({ gruppoId }: { gruppoId: string }) {
  */
 function AuleDelGruppo({ gruppoId }: { gruppoId: string }) {
   const t = useTranslations('app.gruppo');
-  const aule = useElencaAuleStudio({ limit: 50 });
+  // Le aule **del gruppo**, non le mie: comprese quelle in cui non sono ancora
+  // entrato. Senza questa domanda la collocazione non servirebbe a niente —
+  // un membro non avrebbe modo di trovarle.
+  const aule = useElencaAuleStudio({ gruppoId, limit: 50 });
 
   return (
     <>
       <EtichettaSezione>{t('aule')}</EtichettaSezione>
       <QueryBoundary query={aule} caricamento={<span />}>
         {(risposta) => {
-          const nostre = risposta.data.filter((aula) => aula.gruppoId === gruppoId);
+          const nostre = risposta.data;
           if (!nostre.length) {
             return (
               <Card padding="md" className="mb-6">
@@ -298,16 +357,7 @@ function AuleDelGruppo({ gruppoId }: { gruppoId: string }) {
                     key={aula.id}
                     className={cn(indice < nostre.length - 1 && 'border-b border-superficie-alt-2')}
                   >
-                    <Link
-                      href={percorsiApp.aulaStudio(aula.id)}
-                      className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-superficie-alt"
-                    >
-                      <Icona nome="aule" dimensione={18} className="text-testo-debole" />
-                      <span className="min-w-0 flex-1 truncate text-sm font-bold text-testo">
-                        {aula.titolo}
-                      </span>
-                      <Icona nome="avanti" dimensione={16} className="text-testo-debole" />
-                    </Link>
+                    <RigaAula aula={aula} />
                   </li>
                 ))}
               </ul>
@@ -316,6 +366,48 @@ function AuleDelGruppo({ gruppoId }: { gruppoId: string }) {
         }}
       </QueryBoundary>
     </>
+  );
+}
+
+/**
+ * Una riga dell'elenco: si apre se ci si è già dentro, si entra se no.
+ *
+ * `entraInAulaStudio` non era chiamata da nessun client: esisteva il titolo di
+ * ammissione e non esisteva il gesto per usarlo.
+ */
+function RigaAula({ aula }: { aula: AulaStudioDto }) {
+  const t = useTranslations('app.gruppo');
+  const router = useRouter();
+
+  const entra = useApiMutation({
+    mutationFn: () => entraInAulaStudio(aula.id),
+    invalida: [getElencaAuleStudioQueryKey() as never],
+    onSuccess: () => router.push(percorsiApp.aulaStudio(aula.id)),
+  });
+
+  return (
+    <div className="flex items-center gap-3 px-5 py-3.5">
+      <Icona nome="aule" dimensione={18} className="text-testo-debole" />
+      <span className="min-w-0 flex-1 truncate text-sm font-bold text-testo">{aula.titolo}</span>
+
+      {aula.sonoPartecipante ? (
+        <Link
+          href={percorsiApp.aulaStudio(aula.id)}
+          className="flex-none text-[12.5px] font-extrabold text-primario-collegamento"
+        >
+          {t('apriAula')}
+        </Link>
+      ) : (
+        <Button
+          variante="tenue"
+          className="h-9 flex-none rounded-[11px] px-3 text-[12.5px]"
+          inCaricamento={entra.isPending}
+          onPress={() => entra.mutate(undefined)}
+        >
+          {t('entraAula')}
+        </Button>
+      )}
+    </div>
   );
 }
 

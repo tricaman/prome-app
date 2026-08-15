@@ -108,6 +108,14 @@ Un gruppo è un **contenitore di utenti con appartenenza e visibilità**: niente
 - **G5 — l'ateneo è congelato alla creazione** dall'università del creatore. Se seguisse il profilo, un gruppo cambierebbe pubblico perché una persona si è trasferita. L'università di chi legge si interroga invece **fresca**: dato anagrafico propagato, decisione di autorizzazione interrogata.
 - **`gruppo` ha la propria outbox** (`FattoInUscitaDelGruppo`), gemella di quella dell'aula: una tabella per schema, perché il fatto va scritto nella stessa transazione dell'aggregato che lo produce. Porta tre fatti — invito accettato, membro rimosso, gruppo eliminato — e gira sulla **stessa corsia rapida da 1 s**: di là qualcuno aspetta davanti allo schermo, di qua qualcuno sta leggendo ciò che non dovrebbe più.
 
+### L'ateneo dello spazio si salva sempre, si consulta quando serve
+
+`costruisciAula` e `costruisciGruppo` scrivono l'ateneo del creatore **anche quando lo spazio nasce privato**. AS7 e G5 dicono «precompilato dall'`Università` del creatore **alla creazione** e da lì immutabile»: il momento in cui si prende il valore è la creazione, non il primo uso.
+
+Salvarlo solo per gli spazi già aperti all'ateneo li avrebbe resi **impossibili da aprire dopo**: la regola confronta quel campo con l'università di chi legge, e un campo vuoto non corrisponde a nessuno — lo spazio sarebbe diventato «riservato all'ateneo» e visibile a nessuno, in silenzio. Non cambia alcun comportamento, perché l'ateneo si consulta soltanto quando la visibilità è `ATENEO`.
+
+Gli spazi creati prima di questa correzione hanno ateneo nullo e restano tali: il valore andrebbe preso «alla creazione», e quel momento è passato. Per loro i client non offrono la visibilità `ATENEO`.
+
 ### L'università si interroga all'ingresso, non insegue chi è dentro
 
 I quattro dati del profilo **si correggono** (P3: «modificabili ma mai svuotabili»), e `PUT /profilo/me` è la stessa scrittura dell'onboarding — non esiste un aggiornamento parziale, perché i quattro dati sono un dato solo.
@@ -129,6 +137,14 @@ Provato in `test/accesso-e-profilo.spec.ts`, sezione «correggere il profilo (P3
 - Chi è **connesso** va tolto anche dalla stanza (`allontanaDallaStanza`): la riga smette di ammetterlo alla richiesta successiva, ma una connessione aperta non ne fa nessuna e continuerebbe a ricevere i messaggi. Il trasporto continua a non decidere niente — esegue una decisione già presa.
 - **Eliminare un gruppo non elimina alcuna aula**: le collocate tornano sciolte, in differita e per fatto. Cancellare un riferimento non cancella mai la cosa riferita, come per gli argomenti.
 - **Chi cancella l'account** esce da tutti i gruppi; dove lascerebbe uno spazio senza moderatori il ruolo passa al **membro più anziano**, perché qui non c'è più nessuno che possa promuovere, e un gruppo ingovernabile danneggia gli altri. Un gruppo rimasto vuoto si elimina. `gruppo` è ora fra i `DETENTORI_CENSITI`.
+
+### Trovare le aule di un gruppo
+
+`GET /aule-studio?gruppoId=…` cambia domanda: non «le mie aule» ma **le aule collocate in quel gruppo che chi chiede può vedere**, comprese quelle in cui non è ancora entrato. Senza, la collocazione non servirebbe a niente — un membro non avrebbe modo di trovarle, e il titolo di ammissione che possiede resterebbe inutilizzabile.
+
+Il titolo si risolve **adesso** e con le regole di sempre: partecipante, aula pubblica, aula del proprio ateneo, oppure membro del gruppo in cui è collocata. Non è una regola nuova: è quella dell'ammissione, applicata alla lettura di un elenco. Chi è del gruppo vede anche le aule **private** collocate lì: è esattamente ciò che la collocazione gli concede.
+
+**Chi colloca dev'essere membro del gruppo**, alla creazione come alla modifica, e la verifica sta in un posto solo (`esigiMembroDelGruppo`): è la stessa decisione nei due momenti. Altrimenti si aprirebbe la propria aula a uno spazio di cui non si fa parte, e i suoi membri ci entrerebbero senza che nessuno di loro l'abbia chiesto.
 
 ## Chat dell'aula (E4)
 

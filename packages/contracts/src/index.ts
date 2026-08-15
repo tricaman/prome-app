@@ -413,6 +413,11 @@ export interface CreaAulaStudioRequest {
   visibilita?: VisibilitaAulaStudio;
   /** Se presente, alla creazione deve essere futura. */
   dataOraInizio?: string;
+  /**
+   * Gruppo in cui collocare l'aula fin dalla nascita (AS9: al più uno). Chi
+   * la crea dev'esserne membro nell'istante del gesto.
+   */
+  gruppoId?: string;
 }
 
 export interface ModificaAulaStudioRequest {

@@ -63,6 +63,11 @@ export class CreaAulaStudioDto implements CreaAulaStudioRequest {
   @IsOptional()
   @IsISO8601()
   dataOraInizio?: string;
+
+  @ApiPropertyOptional({ type: String, description: 'Gruppo in cui collocarla fin da subito' })
+  @IsOptional()
+  @IsUUID()
+  gruppoId?: string;
 }
 
 export class ModificaAulaStudioDto implements ModificaAulaStudioRequest {
@@ -78,20 +83,33 @@ export class ModificaAulaStudioDto implements ModificaAulaStudioRequest {
   @IsEnum(VISIBILITA)
   visibilita?: VisibilitaAulaStudio;
 
-  @ApiPropertyOptional({ nullable: true })
+  // Il tipo va dichiarato: senza, lo schema OpenAPI esce senza `type` e il
+  // generatore del client lo legge come un oggetto qualunque. Era già così su
+  // questo campo, e non se n'era accorto nessuno perché nessun client lo
+  // mandava.
+  @ApiPropertyOptional({ type: String, nullable: true })
   @IsOptional()
   @IsISO8601()
   dataOraInizio?: string | null;
 
   /** `null` scioglie la collocazione; un id la stabilisce (AS9). */
-  @ApiPropertyOptional({ nullable: true, description: 'Gruppo in cui collocare l\'aula' })
+  @ApiPropertyOptional({ type: String, nullable: true, description: 'Gruppo in cui collocare l\'aula' })
   @IsOptional()
   @ValidateIf((_oggetto, valore) => valore !== null)
   @IsUUID()
   gruppoId?: string | null;
 }
 
-export class QueryAuleStudioDto extends PaginationDto {}
+export class QueryAuleStudioDto extends PaginationDto {
+  /**
+   * Con un gruppo la domanda cambia: non «le mie aule» ma **le aule collocate
+   * lì che posso vedere**, comprese quelle in cui non sono ancora entrato.
+   */
+  @ApiPropertyOptional({ description: 'Aule collocate in questo gruppo' })
+  @IsOptional()
+  @IsUUID()
+  gruppoId?: string;
+}
 
 export class CreaArgomentoDto implements CreaArgomentoRequest {
   @ApiProperty({ example: 'Limiti e continuità' })

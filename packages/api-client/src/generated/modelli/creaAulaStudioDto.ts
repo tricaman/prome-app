@@ -13,4 +13,6 @@ export interface CreaAulaStudioDto {
   visibilita?: CreaAulaStudioDtoVisibilita;
   /** Assente = aula estemporanea */
   dataOraInizio?: string;
+  /** Gruppo in cui collocarla fin da subito */
+  gruppoId?: string;
 }

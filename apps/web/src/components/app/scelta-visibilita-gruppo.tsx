@@ -25,23 +25,28 @@ export function SceltaVisibilitaGruppo({
   valore,
   onScegli,
   disabilitato = false,
+  senzaAteneo = false,
 }: {
   valore: CreaGruppoDtoVisibilita;
   onScegli: (valore: CreaGruppoDtoVisibilita) => void;
   disabilitato?: boolean;
+  /** Il gruppo è nato senza ateneo (G5): quella scelta non avrebbe effetto. */
+  senzaAteneo?: boolean;
 }) {
   const t = useTranslations('app.gruppo.visibilita');
+  const tGruppo = useTranslations('app.gruppo');
 
   return (
     <div className="grid gap-2.5 sm:grid-cols-3">
       {OPZIONI.map((opzione) => {
         const scelta = opzione.valore === valore;
+        const impossibile = senzaAteneo && opzione.valore === 'ATENEO';
         return (
           <button
             key={opzione.valore}
             type="button"
             aria-pressed={scelta}
-            disabled={disabilitato}
+            disabled={disabilitato || impossibile}
             onClick={() => !scelta && onScegli(opzione.valore)}
             className={cn(
               'rounded-[14px] border-2 p-3.5 text-left transition-colors',
@@ -49,6 +54,7 @@ export function SceltaVisibilitaGruppo({
                 ? 'border-primary-500 bg-tinta-menta-velo'
                 : 'border-bordo bg-superficie hover:border-tinta-menta-bordo',
               disabilitato && 'cursor-progress opacity-60',
+              impossibile && 'cursor-not-allowed opacity-50',
             )}
           >
             <span className="mb-1.5 flex items-center gap-2">
@@ -69,6 +75,11 @@ export function SceltaVisibilitaGruppo({
           </button>
         );
       })}
+      {senzaAteneo ? (
+        <p className="text-[11.5px] text-testo-debole sm:col-span-3">
+          {tGruppo('ateneoNonDisponibile')}
+        </p>
+      ) : null}
     </div>
   );
 }

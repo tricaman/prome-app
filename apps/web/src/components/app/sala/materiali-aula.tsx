@@ -7,7 +7,9 @@ import {
   condividiMaterialeAula,
   creaArgomento,
   eliminaArgomento,
+  eliminaMaterialeAula,
   getApriSalaAulaStudioQueryKey,
+  useLeggiMioProfilo,
   preautorizzaMaterialeAula,
   type ArgomentoDto,
   type MaterialeDto,
@@ -55,6 +57,16 @@ export function MaterialiAula({
     mutationFn: (argomentoId: string) => eliminaArgomento(aulaId, argomentoId),
     invalida: [chiaveSala as never],
   });
+
+  // Un materiale si caricava e non si toglieva più: `eliminaMaterialeAula`
+  // esisteva nell'API e nessun client la chiamava.
+  const eliminaFile = useApiMutation({
+    mutationFn: (materialeId: string) => eliminaMaterialeAula(aulaId, materialeId),
+    invalida: [chiaveSala as never],
+  });
+
+  const io = useLeggiMioProfilo();
+  const mioId = io.data?.data.utenteId;
 
   /**
    * Tre tempi, come per gli allegati dei post: si dichiara il file, i byte
@@ -182,6 +194,19 @@ export function MaterialiAula({
                         {pesoLeggibile(file.dimensione)}
                       </span>
                     </span>
+                    {/* Lo toglie chi l'ha portato, e chi modera l'aula: la
+                        stessa regola del server, dichiarata da lui. */}
+                    {sonoModeratore || file.caricatoDa === mioId ? (
+                      <button
+                        type="button"
+                        aria-label={t('eliminaMateriale')}
+                        disabled={eliminaFile.isPending}
+                        onClick={() => eliminaFile.mutate(file.id)}
+                        className="flex-none rounded-lg p-1.5 text-testo-debole transition-colors hover:bg-superficie-alt hover:text-errore"
+                      >
+                        <Icona nome="cestino" dimensione={17} />
+                      </button>
+                    ) : null}
                   </li>
                 ))}
                 {gruppo.file.length === 0 ? (

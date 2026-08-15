@@ -261,6 +261,41 @@ describe('Aula studio (E3)', () => {
       expect(dopo!.ateneo).toBe('Università di Padova');
     });
 
+    it('lo congela anche per un\'aula privata, così potrà essere aperta dopo', async () => {
+      const creatore = await utenteCompleto('Università di Padova');
+      const aula = await creaAula(creatore.token);
+
+      // Il valore si prende alla creazione, che è ciò che dice AS7. Salvarlo
+      // solo per le aule già aperte all'ateneo renderebbe impossibile aprirle
+      // in seguito: la regola confronta questo campo con l'università di chi
+      // legge, e un campo vuoto non corrisponde a nessuno.
+      const riga = await prisma.aulaStudio.findUnique({ where: { id: aula.id } });
+      expect(riga!.ateneo).toBe('Università di Padova');
+      // Finché è privata non produce alcun effetto: si consulta solo quando la
+      // visibilità è ATENEO.
+      expect(riga!.visibilita).toBe('PRIVATO');
+    });
+
+    it('un\'aula privata aperta all\'ateneo diventa visibile ai compagni, subito', async () => {
+      const creatore = await utenteCompleto('Università di Padova');
+      const aula = await creaAula(creatore.token);
+      const compagno = await utenteCompleto('Università di Padova');
+
+      const prima = await sala(compagno.token, aula.id);
+      expect(prima.statusCode).toBe(404);
+
+      await chiedi(`/aule-studio/${aula.id}`, {
+        method: 'PATCH',
+        headers: comeUtente(creatore.token),
+        payload: { visibilita: 'ATENEO' },
+      });
+
+      const dopo = await sala(compagno.token, aula.id);
+      expect(dopo.statusCode).toBe(200);
+      // E l'ingresso, di conseguenza, è ammesso.
+      expect((await ammetti(aula.id, compagno)).statusCode).toBe(200);
+    });
+
     it('rifiuta chi non ha completato l\'onboarding', async () => {
       const incompleto = await utenteSenzaOnboarding();
       const risposta = await chiedi('/aule-studio', {
