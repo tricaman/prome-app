@@ -62,9 +62,10 @@ function Intestazione({ titolo, sommario }: { titolo: string; sommario: string }
 /** Primo passo: l'unica cosa che chiediamo per entrare. */
 function PassoEmail({ onInviato }: { onInviato: (email: string) => void }) {
   const t = useTranslations('app.accesso');
+  const tValidazione = useTranslations('validazione');
 
   const form = useForm({
-    schema: z.object({ email: z.email({ message: 'validation.INVALID_EMAIL' }) }),
+    schema: z.object({ email: z.email({ message: tValidazione('emailNonValida') }) }),
     defaultValues: { email: '' },
   });
 

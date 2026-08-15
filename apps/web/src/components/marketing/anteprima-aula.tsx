@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { TarghettaAllegato } from '@/components/contenuti';
-import { Avatar } from '@/components/ui';
+import { Avatar, AvatarParlante } from '@/components/ui';
 
 /**
  * Illustrazione di un'aula studio, mostrata nella pagina iniziale.
@@ -25,13 +25,7 @@ export function AnteprimaAula() {
       className="m-0 overflow-hidden rounded-[20px] border border-bordo bg-superficie shadow-xl"
     >
       <div className="flex items-center gap-3 bg-superficie-inversa px-4 py-3.5">
-        <span className="relative flex-none">
-          <Avatar nome={nome} dimensione={34} soloColore className="animate-pulse" />
-          <span
-            aria-hidden
-            className="absolute -inset-[3px] rounded-full border-2 border-primary-500"
-          />
-        </span>
+        <AvatarParlante nome={nome} dimensione={34} soloColore pulsa />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-extrabold text-superficie-inversa-testo">
             {t('chiParla')}

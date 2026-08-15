@@ -26,14 +26,16 @@ import { cn } from '@/lib/utils';
  */
 export function ModuloOnboarding() {
   const t = useTranslations('app.onboarding');
+  const tValidazione = useTranslations('validazione');
   const router = useRouter();
 
+  const obbligatorio = { message: tValidazione('obbligatorio') };
   const form = useForm({
     schema: z.object({
-      nome: z.string().min(1, { message: 'validation.REQUIRED' }),
-      cognome: z.string().min(1, { message: 'validation.REQUIRED' }),
-      universita: z.string().min(2, { message: 'validation.REQUIRED' }),
-      corso: z.string().min(2, { message: 'validation.REQUIRED' }),
+      nome: z.string().min(1, obbligatorio),
+      cognome: z.string().min(1, obbligatorio),
+      universita: z.string().min(2, obbligatorio),
+      corso: z.string().min(2, obbligatorio),
     }),
     defaultValues: { nome: '', cognome: '', universita: '', corso: '' },
   });

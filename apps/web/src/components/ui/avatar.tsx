@@ -72,6 +72,53 @@ export function Avatar({ nome, dimensione = 38, soloColore = false, className }:
   );
 }
 
+export interface AvatarParlanteProps {
+  nome: string;
+  dimensione?: number;
+  /** Nasconde le iniziali: per i gruppi decorativi di avatar. */
+  soloColore?: boolean;
+  /** Fa pulsare il riempimento: la persona sta parlando proprio ora. */
+  pulsa?: boolean;
+  className?: string;
+}
+
+/**
+ * Avatar di chi sta parlando: il ritratto con l'anello del marchio intorno.
+ *
+ * L'anello sta su un contenitore quadrato di misura esplicita: ancorato a un
+ * contenitore senza misura prenderebbe l'altezza della riga di testo — più
+ * alta dell'avatar per lo spazio dei discendenti — e verrebbe ovale.
+ */
+export function AvatarParlante({
+  nome,
+  dimensione = 38,
+  soloColore = false,
+  pulsa = false,
+  className,
+}: AvatarParlanteProps) {
+  // Sugli avatar grandi un tratto da 2px si perde: l'anello cresce con loro.
+  const spessore = dimensione >= 40 ? 2.5 : 2;
+
+  return (
+    <span
+      style={{ width: dimensione, height: dimensione }}
+      className={cn('relative flex flex-none', className)}
+    >
+      <Avatar
+        nome={nome}
+        dimensione={dimensione}
+        soloColore={soloColore}
+        className={cn(pulsa && 'animate-pulse')}
+      />
+      <span
+        aria-hidden
+        style={{ borderWidth: spessore }}
+        className="absolute -inset-0.75 rounded-full border-primary-500"
+      />
+    </span>
+  );
+}
+
 export interface AvatarGroupProps {
   nomi: readonly string[];
   dimensione?: number;

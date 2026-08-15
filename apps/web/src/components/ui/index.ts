@@ -6,7 +6,14 @@ export { Select, type SelectProps, type OpzioneSelect } from './select';
 export { Checkbox, type CheckboxProps } from './checkbox';
 export { Card, SectionLabel, type CardProps } from './card';
 export { Chip, type ChipProps, type TonoChip } from './chip';
-export { Avatar, AvatarGroup, type AvatarProps, type AvatarGroupProps } from './avatar';
+export {
+  Avatar,
+  AvatarGroup,
+  AvatarParlante,
+  type AvatarProps,
+  type AvatarGroupProps,
+  type AvatarParlanteProps,
+} from './avatar';
 export { Heading, type HeadingProps } from './heading';
 export { Switch, type SwitchProps } from './switch';
 export { Segmented, type SegmentedProps, type OpzioneSegmento } from './segmented';

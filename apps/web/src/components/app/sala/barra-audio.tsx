@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Avatar, Icona } from '@/components/ui';
+import { Avatar, AvatarParlante, Icona } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
 export interface BarraAudioProps {
@@ -47,13 +47,7 @@ export function BarraAudio({
 
   return (
     <div className="flex flex-none flex-wrap items-center gap-4 bg-superficie-inversa px-6 py-3.5">
-      <span className="relative flex-none">
-        <Avatar nome={personeInAudio[0] ?? 'Giulia Ferrari'} dimensione={42} soloColore />
-        <span
-          aria-hidden
-          className="absolute -inset-[3px] rounded-full border-[2.5px] border-primary-500"
-        />
-      </span>
+      <AvatarParlante nome={personeInAudio[0] ?? 'Giulia Ferrari'} dimensione={42} soloColore />
 
       <div className="min-w-0">
         <p className="flex items-center gap-2.5">
@@ -66,15 +60,13 @@ export function BarraAudio({
       </div>
 
       <span className="ml-4 hidden items-center gap-2 sm:flex">
-        {personeInAudio.map((nome, indice) => (
-          <Avatar
-            key={nome}
-            nome={nome}
-            dimensione={32}
-            soloColore
-            className={indice === 0 ? 'ring-[2.5px] ring-primary-500' : undefined}
-          />
-        ))}
+        {personeInAudio.map((nome, indice) =>
+          indice === 0 ? (
+            <AvatarParlante key={nome} nome={nome} dimensione={32} soloColore />
+          ) : (
+            <Avatar key={nome} nome={nome} dimensione={32} soloColore />
+          ),
+        )}
       </span>
 
       <div className="ml-auto flex flex-none items-center gap-2.5">
