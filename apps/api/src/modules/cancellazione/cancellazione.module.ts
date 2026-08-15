@@ -3,6 +3,7 @@ import { AccessoModule } from '../../infrastruttura/accesso/accesso.module';
 import { AulaStudioModule } from '../aula-studio/aula-studio.module';
 import { BachecaModule } from '../bacheca/bacheca.module';
 import { GruppoModule } from '../gruppo/gruppo.module';
+import { SegnalazioneModule } from '../segnalazione/segnalazione.module';
 import { ProfiloModule } from '../profilo/profilo.module';
 import { CancellazioneService } from './cancellazione.service';
 
@@ -22,7 +23,7 @@ import { CancellazioneService } from './cancellazione.service';
  * ogni detentore nuovo (vedi DETENTORI_CENSITI nel service).
  */
 @Module({
-  imports: [ProfiloModule, BachecaModule, GruppoModule, AulaStudioModule, AccessoModule],
+  imports: [ProfiloModule, BachecaModule, GruppoModule, AulaStudioModule, AccessoModule, SegnalazioneModule],
   providers: [CancellazioneService],
   exports: [CancellazioneService],
 })

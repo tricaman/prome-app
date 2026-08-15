@@ -672,6 +672,11 @@ export interface EsportazioneDatiResponse {
     corso: string | null;
     onboardingCompletato: boolean;
     impostazioniPrivacy: ImpostazioniDiPrivacyResponse;
+    preferenzeDiNotifica: { commenti: boolean; inviti: boolean };
+    /** Senza il token: è il modo di raggiungere l'apparecchio, non un dato suo. */
+    dispositiviRegistrati: { piattaforma: string; registratoIl: string }[];
+    /** Chi HO bloccato, senza nomi. Chi ha bloccato me non è un mio dato. */
+    bloccati: { utenteId: string; bloccatoIl: string }[];
   };
   bacheca: {
     post: {
@@ -709,4 +714,6 @@ export interface EsportazioneDatiResponse {
       inviatoIl: string;
     }[];
   };
+  /** Le proprie segnalazioni: mai il contenuto segnalato, che è di un altro. */
+  segnalazioni: SegnalazioneResponse[];
 }

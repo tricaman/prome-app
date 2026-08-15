@@ -26,6 +26,8 @@ export const BachecaErrorCode = {
   COMMENTO_TESTO_VUOTO: 'BA012',
   COMMENTO_TESTO_TROPPO_LUNGO: 'BA013',
   NON_PUOI_MODERARE: 'BA014',
+  /** Lettura per la segnalazione: commento inesistente o non visibile, stessa risposta. */
+  COMMENTO_NON_VISIBILE: 'BA015',
 } as const;
 
 export type BachecaErrorCode = (typeof BachecaErrorCode)[keyof typeof BachecaErrorCode];

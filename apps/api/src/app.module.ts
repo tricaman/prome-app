@@ -8,6 +8,7 @@ import { AvvisiInUscitaModule } from './infrastruttura/avvisi-in-uscita/avvisi-i
 import { MisurazioniModule } from './infrastruttura/misurazioni/misurazioni.module';
 import { ProfiloModule } from './modules/profilo/profilo.module';
 import { BachecaModule } from './modules/bacheca/bacheca.module';
+import { SegnalazioneModule } from './modules/segnalazione/segnalazione.module';
 import { CancellazioneModule } from './modules/cancellazione/cancellazione.module';
 import { GruppoModule } from './modules/gruppo/gruppo.module';
 import { AulaStudioModule } from './modules/aula-studio/aula-studio.module';
@@ -47,6 +48,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
     BachecaModule,
     GruppoModule,
     AulaStudioModule,
+    SegnalazioneModule,
     CancellazioneModule,
     FacciataModule,
   ],

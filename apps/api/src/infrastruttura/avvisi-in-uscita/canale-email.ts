@@ -34,6 +34,21 @@ export interface InvitoAlGruppoDaRecapitare {
   scadeIl: Date;
 }
 
+/**
+ * Una segnalazione da recapitare al supporto: è la «coda che qualcuno guarda»
+ * nella sua forma minima. L'estratto è già troncato da chi chiama (≤300
+ * caratteri) e attraversa SOLO questa email: non viene mai conservato, perché
+ * una copia del contenuto altrui dentro lo schema segnalazione sarebbe un
+ * detentore di dati personali senza via di cancellazione.
+ */
+export interface SegnalazioneDaRecapitare {
+  tipo: string;
+  motivo: string;
+  soggettoId: string;
+  segnalanteId: string;
+  estratto: string;
+}
+
 export interface CanaleEmail {
   inviaCodiceAccesso(destinatario: string, codice: string, lingua: string): Promise<void>;
   inviaInvitoAulaStudio(
@@ -44,6 +59,12 @@ export interface CanaleEmail {
   inviaInvitoAlGruppo(
     destinatario: string,
     invito: InvitoAlGruppoDaRecapitare,
+    lingua: string,
+  ): Promise<void>;
+  /** Al supporto, non a un utente: il destinatario è EMAIL_SUPPORTO. */
+  inviaSegnalazione(
+    destinatario: string,
+    segnalazione: SegnalazioneDaRecapitare,
     lingua: string,
   ): Promise<void>;
 }

@@ -500,6 +500,40 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
   }
 
   /**
+   * Un commento, se chi legge può vederlo: serve alla segnalazione, che passa
+   * dal contesto proprietario per verificare il soggetto — *si segnala ciò
+   * che si vede*. Tre condizioni insieme: il commento esiste, il suo post è
+   * visibile, e l'autore del commento è visibile (privacy sui commenti e
+   * blocchi valgono anche qui). Inesistente e invisibile danno la stessa
+   * risposta, come sempre.
+   */
+  async commentoVisibilePer(
+    lettoreId: string,
+    commentoId: string,
+  ): Promise<{ testo: string; postId: string }> {
+    const commento = await this.prisma.commento.findUnique({ where: { id: commentoId } });
+    if (!commento) {
+      throw new AppException(
+        BachecaErrorCode.COMMENTO_NON_VISIBILE,
+        'COMMENTO_NOT_FOUND',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const { visibili } = await this.postVisibilePer(lettoreId, commento.postId);
+    const anonimo = commento.autoreId.startsWith(PREFISSO_AUTORE_ANONIMO);
+    if (!visibili.includes(commento.autoreId) && !anonimo) {
+      throw new AppException(
+        BachecaErrorCode.COMMENTO_NON_VISIBILE,
+        'COMMENTO_NOT_FOUND',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return { testo: commento.testo, postId: commento.postId };
+  }
+
+  /**
    * Elimina un commento.
    *
    * Possono farlo in due: chi l'ha scritto, e l'autore del post — che modera

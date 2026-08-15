@@ -3,6 +3,7 @@ import type {
   CanaleEmail,
   InvitoAlGruppoDaRecapitare,
   InvitoDaRecapitare,
+  SegnalazioneDaRecapitare,
 } from './canale-email';
 
 /**
@@ -27,6 +28,12 @@ export class CanaleEmailSviluppo implements CanaleEmail {
   private readonly ultimiInviti = new Map<string, InvitoDaRecapitare>();
 
   private readonly ultimiInvitiAlGruppo = new Map<string, InvitoAlGruppoDaRecapitare>();
+
+  /**
+   * Ad array e non per destinatario: le segnalazioni vanno tutte allo stesso
+   * indirizzo di supporto, e i test le filtrano per soggetto.
+   */
+  private readonly segnalazioni: SegnalazioneDaRecapitare[] = [];
 
   inviaCodiceAccesso(destinatario: string, codice: string, lingua: string): Promise<void> {
     this.ultimiCodici.set(destinatario.toLowerCase(), codice);
@@ -58,6 +65,25 @@ export class CanaleEmailSviluppo implements CanaleEmail {
       `[SVILUPPO] Invito al gruppo «${invito.nomeGruppo}» per ${destinatario} (lingua ${lingua}): ${invito.collegamento} — nessuna email inviata.`,
     );
     return Promise.resolve();
+  }
+
+  inviaSegnalazione(
+    destinatario: string,
+    segnalazione: SegnalazioneDaRecapitare,
+    lingua: string,
+  ): Promise<void> {
+    this.segnalazioni.push(segnalazione);
+    // Nel log niente estratto: è contenuto di un utente, e i log non ne
+    // portano mai. Chi sviluppa lo legge nell'anteprima email, non qui.
+    this.logger.warn(
+      `[SVILUPPO] Segnalazione ${segnalazione.tipo}/${segnalazione.motivo} su ${segnalazione.soggettoId} per ${destinatario} (lingua ${lingua}) — nessuna email inviata.`,
+    );
+    return Promise.resolve();
+  }
+
+  /** Solo per i test: le segnalazioni che sarebbero partite per quel soggetto. */
+  segnalazioniPer(soggettoId: string): SegnalazioneDaRecapitare[] {
+    return this.segnalazioni.filter((s) => s.soggettoId === soggettoId);
   }
 
   /** Solo per i test: l'ultimo codice mandato a quell'indirizzo. */

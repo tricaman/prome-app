@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Prisma, type RichiestaDiCancellazione } from '@prisma/client';
 import type { CancellazioneAccountResponse } from '@prome/contracts';
 import { PrismaService } from '../../database/prisma.service';
+import { SegnalazioneService } from '../segnalazione/segnalazione.service';
 import { CancellazioneAccesso } from '../../infrastruttura/accesso/cancellazione-accesso';
 import {
   MISURAZIONI,
@@ -36,13 +37,16 @@ const GIORNO_MS = 24 * 60 * 60 * 1000;
  * aula_studio.partecipante (rimosso onorando AS2), aula_studio.invito
  * (eliminato), aula_studio.allegato_di_aula_studio (`caricatoDa` anonimizzato,
  * **file conservato**), aula_studio.messaggio_di_chat (anonimizzato),
- * aula_studio.fatto_in_uscita (payload con l'id).
+ * aula_studio.fatto_in_uscita (payload con l'id), profilo.blocco (cascata con
+ * il profilo, in **entrambe** le direzioni — e contati comunque),
+ * segnalazione.segnalazione (eliminate per segnalanteId: il contenuto
+ * segnalato non è mai stato qui).
  * Il registro stesso è l'eccezione sancita: conserva utente_id per progetto.
  *
  * Domani: gruppo.*, altre tabelle outbox, log solo se la loro conservazione
  * supererà i 14 giorni.
  */
-const DETENTORI_CENSITI = ['accesso', 'profilo', 'bacheca', 'gruppo', 'aula_studio'] as const;
+const DETENTORI_CENSITI = ['accesso', 'profilo', 'bacheca', 'gruppo', 'aula_studio', 'segnalazione'] as const;
 
 /**
  * CancellazioneDellAccount — componente TRASVERSALE, non un contesto di
@@ -67,6 +71,7 @@ export class CancellazioneService {
     private readonly gruppi: GruppoService,
     private readonly aule: CancellazioneAulaStudioService,
     private readonly accesso: CancellazioneAccesso,
+    private readonly segnalazioni: SegnalazioneService,
     @Inject(MISURAZIONI) private readonly misurazioni: MisurazioniDiUtilizzo,
   ) {}
 
@@ -289,6 +294,19 @@ export class CancellazioneService {
       );
     }
 
+    // Segnalazione: le segnalazioni fatte spariscono con chi le ha fatte. I
+    // blocchi non hanno un passo: cadono in cascata col profilo, nelle due
+    // direzioni — e la verifica del residuo li conta comunque.
+    try {
+      await this.segnalazioni.eliminaDi(utenteId);
+      if (!voce.segnalazioniEliminateIl) marca.segnalazioniEliminateIl = new Date();
+    } catch (errore) {
+      this.logger.warn(
+        `Passo segnalazione fallito per l'utente ${utenteId}: si riprova al prossimo giro`,
+        errore instanceof Error ? errore.stack : undefined,
+      );
+    }
+
     // Aula studio: il partecipante esce onorando AS2, gli inviti spariscono, e
     // il materiale resta con il solo caricatore anonimizzato — è la sola
     // eccezione alla cancellazione, dichiarata nell'informativa.
@@ -353,15 +371,16 @@ export class CancellazioneService {
     // I proprietari, insieme: l'elenco è DETENTORI_CENSITI.
     void DETENTORI_CENSITI;
     const indirizzo = await this.accesso.indirizzoDi(utenteId);
-    const [accesso, profilo, bacheca, gruppi, aule] = await Promise.all([
+    const [accesso, profilo, bacheca, gruppi, aule, segnalazioni] = await Promise.all([
       this.accesso.contaResiduiDi(utenteId),
       this.profilo.contaResiduiDi(utenteId),
       this.bacheca.contaResiduiDi(utenteId),
       this.gruppi.contaResiduiDi(utenteId),
       this.aule.contaResiduiDi(utenteId, indirizzo),
+      this.segnalazioni.contaResiduiDi(utenteId),
     ]);
     return {
-      record: accesso + profilo + bacheca.record + gruppi + aule,
+      record: accesso + profilo + bacheca.record + gruppi + aule + segnalazioni,
       file: bacheca.file,
     };
   }

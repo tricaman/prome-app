@@ -79,6 +79,33 @@ async function genera(): Promise<void> {
       },
       lingua,
     );
+
+    nomeCorrente = `invito-gruppo.${lingua}`;
+    await canale.inviaInvitoAlGruppo(
+      'anteprima@prome.app',
+      {
+        nomeGruppo: 'Matricole di Ingegneria',
+        invitatoDa: 'Marta',
+        collegamento: 'https://prome.app/app/inviti-gruppo/anteprima',
+        scadeIl: scadenza,
+      },
+      lingua,
+    );
+
+    nomeCorrente = `segnalazione.${lingua}`;
+    await canale.inviaSegnalazione(
+      'supporto@prome.app',
+      {
+        tipo: 'POST',
+        motivo: 'SPAM',
+        soggettoId: '3f6b2c1a-anteprima',
+        segnalanteId: 'utente-anteprima',
+        // Con i marcatori dentro, di proposito: l'anteprima deve mostrare che
+        // il testo di un utente resta testo.
+        estratto: 'Vendo appunti <a href="https://esempio.test">clicca qui</a> a metà prezzo…',
+      },
+      lingua,
+    );
   }
 
   fs.rmSync(DESTINAZIONE, { recursive: true, force: true });

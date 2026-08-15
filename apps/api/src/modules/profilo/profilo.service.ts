@@ -426,10 +426,16 @@ export class ProfiloService {
     impostazioniPrivacy: { contattabilita: string; visibilita: string };
     preferenzeDiNotifica: { commenti: boolean; inviti: boolean };
     dispositiviRegistrati: Array<{ piattaforma: string; registratoIl: Date }>;
+    bloccati: Array<{ utenteId: string; bloccatoIl: Date }>;
   } | null> {
     const profilo = await this.prisma.profilo.findUnique({
       where: { utenteId },
-      include: { impostazioniPrivacy: true, preferenzeNotifiche: true, dispositivi: true },
+      include: {
+        impostazioniPrivacy: true,
+        preferenzeNotifiche: true,
+        dispositivi: true,
+        blocchiFatti: true,
+      },
     });
     if (!profilo) return null;
 
@@ -453,6 +459,14 @@ export class ProfiloService {
       dispositiviRegistrati: profilo.dispositivi.map((dispositivo) => ({
         piattaforma: dispositivo.piattaforma,
         registratoIl: dispositivo.creatoIl,
+      })),
+      // Chi HO bloccato: l'identificativo senza il nome, che è un dato suo.
+      // Chi ha bloccato ME non è un mio dato — è una scelta altrui — e non
+      // compare in alcuna esportazione. La cancellazione invece conta e porta
+      // via entrambe le direzioni: asimmetria deliberata, non dimenticanza.
+      bloccati: profilo.blocchiFatti.map((blocco) => ({
+        utenteId: blocco.bloccatoId,
+        bloccatoIl: blocco.creatoIl,
       })),
     };
   }

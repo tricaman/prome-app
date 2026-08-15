@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { EsportazioneDatiResponse, FileEsportato, TipoAllegato } from '@prome/contracts';
+import type {
+  MotivoDiSegnalazione,
+  SegnalazioneResponse,
+  TipoDiSoggettoSegnalato, EsportazioneDatiResponse, FileEsportato, TipoAllegato } from '@prome/contracts';
 import { ImpostazioniDiPrivacyDto } from './profilo.dto';
 
 const TIPI = ['PDF', 'IMMAGINE', 'TESTO'] as const;
@@ -91,6 +94,19 @@ class DispositivoEsportatoDto {
   @ApiProperty() registratoIl!: string;
 }
 
+class BloccoEsportatoDto {
+  @ApiProperty() utenteId!: string;
+  @ApiProperty() bloccatoIl!: string;
+}
+
+class SegnalazioneEsportataDto implements SegnalazioneResponse {
+  @ApiProperty({ enum: ['POST', 'COMMENTO'] }) tipo!: TipoDiSoggettoSegnalato;
+  @ApiProperty() soggettoId!: string;
+  @ApiProperty({ enum: ['SPAM', 'MOLESTIE', 'CONTENUTO_INAPPROPRIATO'] })
+  motivo!: MotivoDiSegnalazione;
+  @ApiProperty() creatoIl!: string;
+}
+
 class ProfiloEsportatoDto {
   @ApiProperty({ nullable: true, type: String }) nome!: string | null;
   @ApiProperty({ nullable: true, type: String }) cognome!: string | null;
@@ -105,6 +121,9 @@ class ProfiloEsportatoDto {
 
   @ApiProperty({ type: [DispositivoEsportatoDto] })
   dispositiviRegistrati!: DispositivoEsportatoDto[];
+
+  @ApiProperty({ type: [BloccoEsportatoDto], description: 'Chi hai bloccato. Chi ha bloccato te non è un tuo dato.' })
+  bloccati!: BloccoEsportatoDto[];
 }
 
 /**
@@ -122,4 +141,6 @@ export class EsportazioneDatiDto implements EsportazioneDatiResponse {
   @ApiProperty({ type: BachecaEsportataDto }) bacheca!: BachecaEsportataDto;
   @ApiProperty({ type: [GruppoEsportatoDto] }) gruppi!: GruppoEsportatoDto[];
   @ApiProperty({ type: AuleEsportateDto }) auleStudio!: AuleEsportateDto;
+  @ApiProperty({ type: [SegnalazioneEsportataDto] })
+  segnalazioni!: SegnalazioneEsportataDto[];
 }

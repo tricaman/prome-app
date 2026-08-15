@@ -28,5 +28,16 @@
     "scadenza": "The invitation is valid until {scadenza}.",
     "azione": "Join the group",
     "ignora": "If you do not know who invited you, ignore this message: nobody joins without your acceptance."
+  },
+  "segnalazione": {
+    "oggetto": "New report on Prome",
+    "anteprima": "A piece of content has been reported: review within 24 hours.",
+    "titolo": "Reported content",
+    "istruzioni": "Someone reported a piece of content. The guidelines promise a response within 24 hours: review it, and remove it if it breaks the rules.",
+    "tipo": "Type",
+    "motivo": "Reason",
+    "soggetto": "Content identifier",
+    "segnalante": "Reporter identifier",
+    "estratto": "Excerpt of the reported content (first 300 characters):"
   }
 }

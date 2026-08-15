@@ -294,27 +294,31 @@ describe('Segnalazioni e blocchi', () => {
         method: 'POST',
         headers: comeUtente(bruno.token),
       });
-      expect(ingresso.statusCode).toBe(201);
+      expect(ingresso.statusCode).toBe(200);
+      // Scrive Anna, che modera: chi entra è in sola lettura finché un
+      // permesso non viene concesso (AS4), e qui l'aula serve da spazio
+      // condiviso, non da prova dei permessi.
       await chiedi(`/aule-studio/${aulaId}/messaggi`, {
         method: 'POST',
-        headers: comeUtente(bruno.token),
-        payload: { testo: 'Ci sono anche io' },
+        headers: comeUtente(anna.token),
+        payload: { testo: 'Benvenuti in aula' },
       });
 
       await blocca(anna, bruno.utenteId);
 
       // Dentro lo spazio scelto da entrambi il blocco non decide niente:
       // lì restano l'uscita e la moderazione. Confine dichiarato, e provato
-      // perché non venga «sistemato» in silenzio.
-      const sala = await chiedi(`/aule-studio/${aulaId}`, { headers: comeUtente(anna.token) });
+      // perché non venga «sistemato» in silenzio — nelle due direzioni: Anna
+      // vede ancora Bruno fra i partecipanti, Bruno legge ancora Anna.
+      const sala = await chiedi(`/aule-studio/${aulaId}/sala`, { headers: comeUtente(anna.token) });
       const partecipanti = sala.json().data.partecipanti as Array<{ utenteId: string }>;
       expect(partecipanti.some((p) => p.utenteId === bruno.utenteId)).toBe(true);
 
       const messaggi = await chiedi(`/aule-studio/${aulaId}/messaggi`, {
-        headers: comeUtente(anna.token),
+        headers: comeUtente(bruno.token),
       });
       const testi = (messaggi.json().data as Array<{ testo: string }>).map((m) => m.testo);
-      expect(testi).toContain('Ci sono anche io');
+      expect(testi).toContain('Benvenuti in aula');
     });
 
     it('nessun avviso da chi è in coppia bloccata: l\'invito non suona', async () => {
@@ -559,14 +563,17 @@ describe('Segnalazioni e blocchi', () => {
       const anna = await utentePubblico();
       const bruno = await utentePubblico();
       const carla = await utentePubblico();
-      await blocca(anna, bruno.utenteId); // anna bloccante
-      await blocca(carla, anna.utenteId); // anna bloccata
+      // La segnalazione prima del blocco: un contenuto di chi hai bloccato
+      // non è più segnalabile, perché non lo vedi.
       const post = await pubblicaPost(bruno, 'Post');
-      await chiedi('/segnalazioni', {
+      const segnalato = await chiedi('/segnalazioni', {
         method: 'POST',
         headers: comeUtente(anna.token),
         payload: { tipo: 'POST', soggettoId: post.id, motivo: 'SPAM' },
       });
+      expect(segnalato.statusCode).toBe(201);
+      await blocca(anna, bruno.utenteId); // anna bloccante
+      await blocca(carla, anna.utenteId); // anna bloccata
 
       await chiedi('/account/cancellazione', { method: 'POST', headers: comeUtente(anna.token) });
       // Si invecchia la richiesta oltre la grazia invece di aspettare 14
@@ -591,14 +598,15 @@ describe('Segnalazioni e blocchi', () => {
       const anna = await utentePubblico();
       const bruno = await utentePubblico();
       const carla = await utentePubblico();
-      await blocca(anna, bruno.utenteId);
-      await blocca(carla, anna.utenteId);
       const post = await pubblicaPost(bruno, 'Post');
-      await chiedi('/segnalazioni', {
+      const segnalato = await chiedi('/segnalazioni', {
         method: 'POST',
         headers: comeUtente(anna.token),
         payload: { tipo: 'POST', soggettoId: post.id, motivo: 'MOLESTIE' },
       });
+      expect(segnalato.statusCode).toBe(201);
+      await blocca(anna, bruno.utenteId);
+      await blocca(carla, anna.utenteId);
 
       const risposta = await chiedi('/account/dati', { headers: comeUtente(anna.token) });
       expect(risposta.statusCode).toBe(200);

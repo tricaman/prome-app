@@ -49,6 +49,13 @@ const SchemaEnv = z.object({
   CANALE_EMAIL: z.enum(['sviluppo', 'smtp']).default('sviluppo'),
 
   /**
+   * Dove arrivano le email di segnalazione dei contenuti. Dev'essere una
+   * casella letta davvero: le linee guida promettono una risposta entro 24
+   * ore, e una segnalazione che non arriva a nessuno è una promessa falsa.
+   */
+  EMAIL_SUPPORTO: z.email().optional(),
+
+  /**
    * Credenziali SMTP. Servono solo con `CANALE_EMAIL=smtp`, e in quel caso
    * sono obbligatorie: il controllo sta più in basso, perché zod da solo non
    * sa dire "obbligatorio se un'altra variabile vale così".
@@ -125,6 +132,16 @@ if (!esito.success) {
  */
 if (esito.data.NODE_ENV === 'production' && esito.data.CANALE_EMAIL === 'sviluppo') {
   console.error('[prome-api] CANALE_EMAIL=sviluppo scrive i codici OTP nei log: vietato in produzione.');
+  process.exit(1);
+}
+
+/**
+ * Una segnalazione che non arriva a nessuno ringrazia lo stesso chi l'ha
+ * fatta: l'endpoint c'è comunque, e senza una casella dietro la promessa di
+ * risposta è falsa dal primo giorno. Meglio non partire.
+ */
+if (esito.data.NODE_ENV === 'production' && !esito.data.EMAIL_SUPPORTO) {
+  console.error('[prome-api] EMAIL_SUPPORTO mancante: le segnalazioni non avrebbero una casella.');
   process.exit(1);
 }
 

@@ -6,12 +6,14 @@ import { DURATA_CODICE_SECONDI } from '../accesso/better-auth';
 import type {
   CanaleEmail,
   InvitoAlGruppoDaRecapitare,
+  SegnalazioneDaRecapitare,
   InvitoDaRecapitare,
 } from './canale-email';
 import {
   azione,
   codice as bloccoCodice,
   componiEmail,
+  dettagli,
   nota,
   paragrafo,
   separatore,
@@ -138,6 +140,38 @@ export class CanaleEmailSmtp implements CanaleEmail {
     });
 
     this.logger.log(`Invito al gruppo inviato (lingua ${lingua})`);
+  }
+
+  async inviaSegnalazione(
+    destinatario: string,
+    segnalazione: SegnalazioneDaRecapitare,
+    lingua: string,
+  ): Promise<void> {
+    const t = (chiave: string) => this.traduci(`email.segnalazione.${chiave}`, lingua, {});
+
+    await this.recapita(destinatario, lingua, {
+      oggetto: t('oggetto'),
+      anteprima: t('anteprima'),
+      blocchi: [
+        titolo(t('titolo')),
+        paragrafo(t('istruzioni')),
+        // I riferimenti tecnici: bastano a ritrovare il contenuto nel
+        // database, che è dove l'operatore agisce (non esiste un pannello).
+        dettagli([
+          { etichetta: t('tipo'), valore: segnalazione.tipo },
+          { etichetta: t('motivo'), valore: segnalazione.motivo },
+          { etichetta: t('soggetto'), valore: segnalazione.soggettoId },
+          { etichetta: t('segnalante'), valore: segnalazione.segnalanteId },
+        ]),
+        separatore(),
+        // L'estratto è testo di un utente: la fuga dei marcatori la fa la
+        // catena dei blocchi (sicurezza.ts), come per tutto il resto.
+        nota(t('estratto')),
+        paragrafo(segnalazione.estratto),
+      ],
+    });
+
+    this.logger.log('Segnalazione inoltrata al supporto');
   }
 
   /**

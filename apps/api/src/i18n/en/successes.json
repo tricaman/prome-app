@@ -47,5 +47,6 @@
   "DISPOSITIVO_DIMENTICATO": "We will no longer send notices to this device",
   "PREFERENZE_AGGIORNATE": "Preferences updated",
   "UTENTE_BLOCCATO": "User blocked: you will no longer see each other’s content",
-  "UTENTE_SBLOCCATO": "User unblocked"
+  "UTENTE_SBLOCCATO": "User unblocked",
+  "SEGNALAZIONE_RICEVUTA": "Thanks for the report: we will review it within 24 hours"
 }

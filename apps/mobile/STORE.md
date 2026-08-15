@@ -185,6 +185,8 @@ chi la legge, ed è il difetto peggiore possibile in questo documento.
 | `aula_studio.*` | titolo, argomenti, partecipanti, permessi, messaggi, materiali | il prodotto | no |
 | `aula_studio.invito` / `gruppo.invito_al_gruppo` | **indirizzo email di chi inviti** | mandargli l'invito | all'invio, verso il relay SMTP |
 | `gruppo.*` | nome del gruppo, membri, ruoli | il prodotto | no |
+| `profilo.blocco` | chi ha bloccato chi | non mostrarvi più l'uno i contenuti dell'altro in bacheca | no |
+| `segnalazione.segnalazione` | chi ha segnalato quale contenuto e perché (mai il contenuto) | la coda di moderazione | **sì**: all'invio, email al supporto (`EMAIL_SUPPORTO`) via relay SMTP, con un estratto ≤300 caratteri del contenuto segnalato |
 | `cancellazione.richiesta_di_cancellazione` | solo `utente_id`, istanti ed esiti | ri-applicare la cancellazione dopo un ripristino di backup | no |
 
 **Cosa non c'è, e non è una dimenticanza**: nessun SDK pubblicitario, nessun prodotto di analitica

@@ -28,5 +28,16 @@
     "scadenza": "L’invito vale fino al {scadenza}.",
     "azione": "Entra nel gruppo",
     "ignora": "Se non conosci chi ti ha invitato, ignora questo messaggio: senza la tua accettazione non entra nessuno."
+  },
+  "segnalazione": {
+    "oggetto": "Nuova segnalazione su Prome",
+    "anteprima": "Un contenuto è stato segnalato: da guardare entro 24 ore.",
+    "titolo": "Contenuto segnalato",
+    "istruzioni": "Una persona ha segnalato un contenuto. Le linee guida promettono una risposta entro 24 ore: il contenuto va guardato, e se viola le regole va rimosso.",
+    "tipo": "Tipo",
+    "motivo": "Motivo",
+    "soggetto": "Identificativo del contenuto",
+    "segnalante": "Identificativo di chi segnala",
+    "estratto": "Estratto del contenuto segnalato (primi 300 caratteri):"
   }
 }

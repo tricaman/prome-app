@@ -2,6 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { EsportazioneDatiResponse } from '@prome/contracts';
 import { ApiWrappedResponse } from '../../common/decorators';
+import { SegnalazioneService } from '../segnalazione/segnalazione.service';
 import { AulaStudioService } from '../aula-studio/aula-studio.service';
 import { BachecaService } from '../bacheca/bacheca.service';
 import { GruppoService } from '../gruppo/gruppo.service';
@@ -38,6 +39,7 @@ export class EsportazioneController {
     private readonly bacheca: BachecaService,
     private readonly gruppi: GruppoService,
     private readonly aule: AulaStudioService,
+    private readonly segnalazioni: SegnalazioneService,
   ) {}
 
   @Get('dati')
@@ -47,12 +49,13 @@ export class EsportazioneController {
   })
   @ApiWrappedResponse({ type: EsportazioneDatiDto })
   async esporta(@Utente() utente: UtenteDiDominio): Promise<EsportazioneDatiResponse> {
-    const [email, profilo, bacheca, gruppi, aule] = await Promise.all([
+    const [email, profilo, bacheca, gruppi, aule, segnalazioni] = await Promise.all([
       this.identita.indirizzoDi(utente.id),
       this.profilo.datiPersonaliDi(utente.id),
       this.bacheca.datiPersonaliDi(utente.id),
       this.gruppi.datiPersonaliDi(utente.id),
       this.aule.datiPersonaliDi(utente.id),
+      this.segnalazioni.datiPersonaliDi(utente.id),
     ]);
 
     return {
@@ -61,19 +64,35 @@ export class EsportazioneController {
       // Il profilo può non esserci solo per un difetto (P1 dice che esiste
       // sempre): in quel caso si esporta ciò che c'è invece di rifiutare, che
       // per chi esercita un diritto è la risposta peggiore.
-      profilo: profilo ?? {
-        nome: null,
-        cognome: null,
-        universita: null,
-        corso: null,
-        onboardingCompletato: false,
-        impostazioniPrivacy: { contattabilita: 'PRIVATO', visibilita: 'PRIVATO' },
-        preferenzeDiNotifica: { commenti: true, inviti: true },
-        dispositiviRegistrati: [],
-      },
+      profilo: profilo
+        ? {
+            ...profilo,
+            dispositiviRegistrati: profilo.dispositiviRegistrati.map((dispositivo) => ({
+              piattaforma: dispositivo.piattaforma,
+              registratoIl: dispositivo.registratoIl.toISOString(),
+            })),
+            bloccati: profilo.bloccati.map((blocco) => ({
+              utenteId: blocco.utenteId,
+              bloccatoIl: blocco.bloccatoIl.toISOString(),
+            })),
+          }
+        : {
+            nome: null,
+            cognome: null,
+            universita: null,
+            corso: null,
+            onboardingCompletato: false,
+            impostazioniPrivacy: { contattabilita: 'PRIVATO', visibilita: 'PRIVATO' },
+            preferenzeDiNotifica: { commenti: true, inviti: true },
+            dispositiviRegistrati: [],
+            bloccati: [],
+          },
       bacheca,
       gruppi,
       auleStudio: aule,
+      // Le proprie segnalazioni: cosa, quando, perché — mai il contenuto
+      // segnalato, che è di un altro.
+      segnalazioni,
     } as EsportazioneDatiResponse;
   }
 }
