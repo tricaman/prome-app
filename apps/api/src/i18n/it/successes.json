@@ -14,5 +14,21 @@
   "COMMENTO_PUBBLICATO": "Commento pubblicato",
   "COMMENTO_ELIMINATO": "Commento eliminato",
   "COMMENTI_ELENCATI": "Commenti caricati",
-  "CANCELLAZIONE_RICHIESTA": "Richiesta di cancellazione ricevuta: hai 14 giorni per ripensarci rientrando"
+  "CANCELLAZIONE_RICHIESTA": "Richiesta di cancellazione ricevuta: hai 14 giorni per ripensarci rientrando",
+  "AULA_CREATA": "Aula studio creata",
+  "AULA_MODIFICATA": "Aula studio aggiornata",
+  "AULA_ELIMINATA": "Aula studio eliminata",
+  "AULA_INGRESSO": "Sei entrato nell’aula studio",
+  "AULA_USCITA": "Sei uscito dall’aula studio",
+  "PARTECIPANTE_RIMOSSO": "Partecipante rimosso",
+  "PERMESSO_CONCESSO": "Permesso concesso",
+  "PERMESSO_REVOCATO": "Permesso revocato",
+  "MODERAZIONE_CONCESSA": "Ora è moderatore",
+  "MODERAZIONE_REVOCATA": "Non è più moderatore",
+  "INVITO_EMESSO": "Invito inviato",
+  "INVITO_ACCETTATO": "Invito accettato: stiamo aprendo l’aula",
+  "ARGOMENTO_CREATO": "Argomento creato",
+  "ARGOMENTO_ELIMINATO": "Argomento eliminato: i materiali restano nell’aula",
+  "MATERIALE_CARICATO": "Materiale condiviso",
+  "MATERIALE_ELIMINATO": "Materiale eliminato"
 }

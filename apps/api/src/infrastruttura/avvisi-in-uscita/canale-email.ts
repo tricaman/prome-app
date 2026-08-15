@@ -11,8 +11,22 @@
  * che il messaggio sia arrivato — ed è corretto, perché non lo sa nemmeno il
  * fornitore nell'istante in cui risponde.
  */
+/** Ciò che serve a chi riceve un invito per decidere se accettarlo. */
+export interface InvitoDaRecapitare {
+  titoloAula: string;
+  invitatoDa: string;
+  /** Indirizzo su cui atterra chi accetta, anche se deve ancora registrarsi. */
+  collegamento: string;
+  scadeIl: Date;
+}
+
 export interface CanaleEmail {
   inviaCodiceAccesso(destinatario: string, codice: string, lingua: string): Promise<void>;
+  inviaInvitoAulaStudio(
+    destinatario: string,
+    invito: InvitoDaRecapitare,
+    lingua: string,
+  ): Promise<void>;
 }
 
 /** Gettone di iniezione: l'interfaccia è un tipo, e a runtime non esiste. */

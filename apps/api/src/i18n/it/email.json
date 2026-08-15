@@ -4,5 +4,13 @@
     "titolo": "Il tuo codice di accesso",
     "istruzioni": "Inseriscilo in Prome entro {minuti} minuti. Dopo scade e ne va chiesto uno nuovo.",
     "ignora": "Se non hai chiesto tu di entrare, ignora questo messaggio: senza il codice nessuno può accedere."
+  },
+  "invitoAula": {
+    "oggetto": "{invitante} ti invita in aula studio su Prome",
+    "titolo": "Sei stato invitato in un’aula studio",
+    "istruzioni": "{invitante} ti ha invitato in «{titoloAula}». Apri l’invito per entrare: se non hai ancora un account, te ne bastano un indirizzo email e un minuto.",
+    "scadenza": "L’invito vale fino al {scadenza}.",
+    "azione": "Entra nell’aula",
+    "ignora": "Se non conosci chi ti ha invitato, ignora questo messaggio: senza la tua accettazione non entra nessuno."
   }
 }

@@ -50,6 +50,15 @@ export class ArchivioLocale implements ArchivioDiFile {
     }
   }
 
+  async dimensioneDi(chiave: string): Promise<number | null> {
+    try {
+      const stato = await fs.stat(this.percorsoDi(chiave));
+      return stato.isFile() ? stato.size : null;
+    } catch {
+      return null;
+    }
+  }
+
   urlDiLettura(chiave: string): string {
     return `${env.BETTER_AUTH_URL}/archivio/${chiave}`;
   }

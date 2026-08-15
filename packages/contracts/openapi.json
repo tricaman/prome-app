@@ -884,6 +884,1170 @@
         ]
       }
     },
+    "/aule-studio": {
+      "post": {
+        "operationId": "creaAulaStudio",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreaAulaStudioDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AulaStudioDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Crea un'aula studio",
+        "tags": [
+          "aule studio"
+        ]
+      },
+      "get": {
+        "operationId": "elencaAuleStudio",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Campo di ordinamento (dipende dalla risorsa)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "asc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AulaStudioDto"
+                      }
+                    },
+                    "meta": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ResponseMetaDto"
+                        },
+                        {
+                          "properties": {
+                            "pagination": {
+                              "$ref": "#/components/schemas/PaginationMetaDto"
+                            }
+                          },
+                          "required": [
+                            "pagination"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Le aule di cui faccio parte",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
+    "/aule-studio/{id}/sala": {
+      "get": {
+        "operationId": "apriSalaAulaStudio",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/SalaDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Apre l'aula: partecipanti, argomenti e materiali in una sola risposta",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
+    "/aule-studio/{id}": {
+      "patch": {
+        "operationId": "modificaAulaStudio",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModificaAulaStudioDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AulaStudioDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Modifica un'aula studio",
+        "tags": [
+          "aule studio"
+        ]
+      },
+      "delete": {
+        "operationId": "eliminaAulaStudio",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Aula eliminata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Elimina un'aula studio vuota",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
+    "/aule-studio/{id}/ingresso": {
+      "post": {
+        "operationId": "entraInAulaStudio",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ingresso effettuato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Chiede di entrare: il titolo di ammissione è risolto su dato fresco",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
+    "/aule-studio/{id}/partecipanti/{utenteId}": {
+      "delete": {
+        "operationId": "rimuoviPartecipante",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "utenteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partecipante rimosso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Esce dall'aula, o rimuove qualcuno se si modera",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
+    "/aule-studio/{id}/partecipanti/{utenteId}/moderazione": {
+      "post": {
+        "operationId": "promuoviAModeratore",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "utenteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ora è moderatore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Promuove a moderatore",
+        "tags": [
+          "aule studio"
+        ]
+      },
+      "delete": {
+        "operationId": "retrocediDaModeratore",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "utenteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Non è più moderatore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Toglie il ruolo di moderatore",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
+    "/aule-studio/{id}/partecipanti/{utenteId}/permessi/{permesso}": {
+      "post": {
+        "operationId": "concediPermesso",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "utenteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "permesso",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Permesso concesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Concede UN permesso",
+        "tags": [
+          "aule studio"
+        ]
+      },
+      "delete": {
+        "operationId": "revocaPermesso",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "utenteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "permesso",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Permesso revocato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Revoca UN permesso",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
+    "/aule-studio/{id}/inviti": {
+      "post": {
+        "operationId": "invitaInAulaStudio",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreaInvitoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/InvitoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Invita qualcuno via email",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
+    "/aule-studio/{id}/argomenti": {
+      "post": {
+        "operationId": "creaArgomento",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreaArgomentoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArgomentoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Crea un argomento nell'aula",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
+    "/aule-studio/{id}/argomenti/{argomentoId}": {
+      "delete": {
+        "operationId": "eliminaArgomento",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "argomentoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Argomento eliminato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Elimina un argomento: i materiali restano e tornano sciolti",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
+    "/aule-studio/{id}/allegati/pre-autorizzazione": {
+      "post": {
+        "operationId": "preautorizzaMaterialeAula",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreautorizzaMaterialeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PreautorizzazioneMaterialeDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Autorizza il caricamento di un materiale (i byte non passano di qui)",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
+    "/aule-studio/{id}/allegati": {
+      "post": {
+        "operationId": "condividiMaterialeAula",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreaMaterialeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MaterialeDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Condivide un materiale",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
+    "/aule-studio/{id}/allegati/{materialeId}": {
+      "delete": {
+        "operationId": "eliminaMaterialeAula",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "materialeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Materiale eliminato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Elimina un materiale",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
+    "/inviti/{id}": {
+      "get": {
+        "operationId": "leggiInvito",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/InvitoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Stato dell'invito, incluso se il partecipante è ormai comparso",
+        "tags": [
+          "inviti"
+        ]
+      }
+    },
+    "/inviti/{id}/accettazione": {
+      "post": {
+        "operationId": "accettaInvito",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/InvitoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Accetta l'invito: l'ingresso è preso in carico",
+        "tags": [
+          "inviti"
+        ]
+      }
+    },
     "/account/cancellazione": {
       "post": {
         "operationId": "richiediCancellazioneAccount",
@@ -1468,6 +2632,425 @@
         },
         "required": [
           "testo"
+        ]
+      },
+      "AulaStudioDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "titolo": {
+            "type": "string"
+          },
+          "visibilita": {
+            "type": "string",
+            "enum": [
+              "PRIVATO",
+              "ATENEO",
+              "PUBBLICO"
+            ]
+          },
+          "ateneo": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataOraInizio": {
+            "type": "string",
+            "nullable": true,
+            "description": "Assente = estemporanea"
+          },
+          "gruppoId": {
+            "type": "string",
+            "nullable": true
+          },
+          "creatoIl": {
+            "type": "string"
+          },
+          "partecipanti": {
+            "type": "number"
+          },
+          "sonoModeratore": {
+            "type": "boolean"
+          },
+          "sonoPartecipante": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "titolo",
+          "visibilita",
+          "ateneo",
+          "dataOraInizio",
+          "gruppoId",
+          "creatoIl",
+          "partecipanti",
+          "sonoModeratore",
+          "sonoPartecipante"
+        ]
+      },
+      "CreaAulaStudioDto": {
+        "type": "object",
+        "properties": {
+          "titolo": {
+            "type": "string",
+            "example": "Analisi 1 – giovedì",
+            "maxLength": 200
+          },
+          "visibilita": {
+            "type": "string",
+            "enum": [
+              "PRIVATO",
+              "ATENEO",
+              "PUBBLICO"
+            ],
+            "default": "PRIVATO"
+          },
+          "dataOraInizio": {
+            "type": "string",
+            "description": "Assente = aula estemporanea"
+          }
+        },
+        "required": [
+          "titolo"
+        ]
+      },
+      "PermessiDto": {
+        "type": "object",
+        "properties": {
+          "parlare": {
+            "type": "boolean"
+          },
+          "scrivere": {
+            "type": "boolean"
+          },
+          "caricare": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "parlare",
+          "scrivere",
+          "caricare"
+        ]
+      },
+      "PartecipanteDto": {
+        "type": "object",
+        "properties": {
+          "utenteId": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "cognome": {
+            "type": "string",
+            "nullable": true
+          },
+          "universita": {
+            "type": "string",
+            "nullable": true
+          },
+          "rimosso": {
+            "type": "boolean",
+            "description": "Account non più esistente: «Utente rimosso»"
+          },
+          "moderatore": {
+            "type": "boolean"
+          },
+          "permessi": {
+            "$ref": "#/components/schemas/PermessiDto"
+          },
+          "solaLettura": {
+            "type": "boolean",
+            "description": "Nessun permesso: stato legittimo, non un errore"
+          }
+        },
+        "required": [
+          "utenteId",
+          "nome",
+          "cognome",
+          "universita",
+          "moderatore",
+          "permessi",
+          "solaLettura"
+        ]
+      },
+      "ArgomentoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "titolo": {
+            "type": "string"
+          },
+          "testo": {
+            "type": "string",
+            "nullable": true
+          },
+          "creatoIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "titolo",
+          "testo",
+          "creatoIl"
+        ]
+      },
+      "MaterialeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PDF",
+              "IMMAGINE",
+              "TESTO"
+            ]
+          },
+          "dimensione": {
+            "type": "number"
+          },
+          "url": {
+            "type": "string"
+          },
+          "argomentoId": {
+            "type": "string",
+            "nullable": true
+          },
+          "caricatoDa": {
+            "type": "string"
+          },
+          "creatoIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "tipo",
+          "dimensione",
+          "url",
+          "argomentoId",
+          "caricatoDa",
+          "creatoIl"
+        ]
+      },
+      "SalaDto": {
+        "type": "object",
+        "properties": {
+          "aula": {
+            "$ref": "#/components/schemas/AulaStudioDto"
+          },
+          "partecipanti": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartecipanteDto"
+            }
+          },
+          "argomenti": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArgomentoDto"
+            }
+          },
+          "allegati": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MaterialeDto"
+            }
+          },
+          "sonoModeratore": {
+            "type": "boolean"
+          },
+          "mieiPermessi": {
+            "$ref": "#/components/schemas/PermessiDto"
+          }
+        },
+        "required": [
+          "aula",
+          "partecipanti",
+          "argomenti",
+          "allegati",
+          "sonoModeratore",
+          "mieiPermessi"
+        ]
+      },
+      "ModificaAulaStudioDto": {
+        "type": "object",
+        "properties": {
+          "titolo": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "visibilita": {
+            "type": "string",
+            "enum": [
+              "PRIVATO",
+              "ATENEO",
+              "PUBBLICO"
+            ]
+          },
+          "dataOraInizio": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "InvitoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "aulaStudioId": {
+            "type": "string"
+          },
+          "titoloAula": {
+            "type": "string"
+          },
+          "destinatario": {
+            "type": "string"
+          },
+          "stato": {
+            "type": "string",
+            "enum": [
+              "IN_ATTESA",
+              "ACCETTATO",
+              "SCADUTO"
+            ]
+          },
+          "scadeIl": {
+            "type": "string"
+          },
+          "emessoIl": {
+            "type": "string"
+          },
+          "partecipanteCreato": {
+            "type": "boolean",
+            "description": "Falso subito dopo l'accettazione: compare entro pochi secondi"
+          }
+        },
+        "required": [
+          "id",
+          "aulaStudioId",
+          "titoloAula",
+          "destinatario",
+          "stato",
+          "scadeIl",
+          "emessoIl",
+          "partecipanteCreato"
+        ]
+      },
+      "CreaInvitoDto": {
+        "type": "object",
+        "properties": {
+          "destinatario": {
+            "type": "string",
+            "example": "compagno@studenti.unibo.it"
+          }
+        },
+        "required": [
+          "destinatario"
+        ]
+      },
+      "CreaArgomentoDto": {
+        "type": "object",
+        "properties": {
+          "titolo": {
+            "type": "string",
+            "example": "Limiti e continuità"
+          },
+          "testo": {
+            "type": "string",
+            "maxLength": 20000
+          }
+        },
+        "required": [
+          "titolo"
+        ]
+      },
+      "PreautorizzazioneMaterialeDto": {
+        "type": "object",
+        "properties": {
+          "chiave": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "metodo": {
+            "type": "string",
+            "example": "PUT"
+          },
+          "intestazioni": {
+            "type": "object"
+          },
+          "scadeIl": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chiave",
+          "url",
+          "metodo",
+          "intestazioni",
+          "scadeIl"
+        ]
+      },
+      "PreautorizzaMaterialeDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "example": "dispense.pdf"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PDF",
+              "IMMAGINE",
+              "TESTO"
+            ]
+          },
+          "dimensione": {
+            "type": "number",
+            "example": 128000,
+            "maximum": 26214400
+          }
+        },
+        "required": [
+          "nome",
+          "tipo",
+          "dimensione"
+        ]
+      },
+      "CreaMaterialeDto": {
+        "type": "object",
+        "properties": {
+          "chiave": {
+            "type": "string",
+            "description": "Chiave ottenuta dalla pre-autorizzazione"
+          },
+          "argomentoId": {
+            "type": "string",
+            "description": "Assente = materiale sciolto, stato normale"
+          }
+        },
+        "required": [
+          "chiave"
         ]
       },
       "CancellazioneRichiestaRispostaDto": {

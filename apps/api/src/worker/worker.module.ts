@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { registrazioneI18n } from '../config/i18n';
 import { PrismaModule } from '../database/prisma.module';
 import { MisurazioniModule } from '../infrastruttura/misurazioni/misurazioni.module';
+import { AulaStudioModule } from '../modules/aula-studio/aula-studio.module';
 import { BachecaModule } from '../modules/bacheca/bacheca.module';
 import { CancellazioneModule } from '../modules/cancellazione/cancellazione.module';
 import { WorkerService } from './worker.service';
@@ -36,6 +37,7 @@ import { WorkerService } from './worker.service';
     // contesto: senza, la catena non potrebbe contare i completamenti.
     MisurazioniModule,
     BachecaModule,
+    AulaStudioModule,
     CancellazioneModule,
   ],
   providers: [WorkerService],

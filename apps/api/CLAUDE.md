@@ -54,6 +54,31 @@ Le invarianti dell'aggregato vivono in `modules/bacheca/dominio/post.ts`, **non 
 - **I permessi li dichiara il server**: `puoModificare` sul post, `puoEliminare` sul commento. Non farli dedurre al client — sarebbero due copie della stessa regola, e quella del client è aggirabile.
 - **Lettura di un singolo post**: post inesistente e post non visibile rispondono entrambi 404. «Esiste ma non puoi vederlo» racconta comunque che esiste.
 
+## Aula studio (E3) — il contesto core
+
+Cinque aggregati (`AulaStudio`, `Argomento`, `AllegatoDiAulaStudio`, `Invito`, e in E4 il messaggio) e **una sola entità interna**, il `Partecipante`: sta dentro l'aula perché AS2–AS5 sono affermazioni sull'**insieme** dei partecipanti, e solo chi li vede tutti insieme può garantirle al commit.
+
+- **AS8 — nessuno stato di ciclo di vita.** Non esiste «programmata», «in corso», «conclusa»: la sola differenza è la presenza di `dataOraInizio`, e quella data **non apre né chiude nulla**. L'etichetta la deriva il client. Aggiungere un campo di stato qui è la violazione più facile da introdurre e la meno visibile: il materiale sopravvive all'incontro proprio perché non c'è niente che lo chiuda.
+- **AS4 — i permessi si concedono e si revocano UNO PER UNO** (`POST|DELETE /aule-studio/:id/partecipanti/:utenteId/permessi/:permesso`). Non esiste un gesto «dai tutti i permessi», e **non esiste un endpoint per la sola lettura**: quella si raggiunge per revoche successive. L'insieme vuoto è uno stato legittimo, non un errore.
+- **AS5 in un solo verso**: un moderatore ha sempre i tre permessi (`permessiEffettivi` lo rende vero in lettura, così nessuno deve ricordarselo), ma **avere i tre permessi non fa moderatore**.
+- **AS2** — l'ultimo moderatore non si rimuove né si retrocede. Il caso concorrente (due moderatori che si retrocedono a vicenda, ciascuno vedendo una situazione lecita) lo respinge il **blocco ottimistico**: `versione` sull'aula, incrementata dentro la transazione che cambia l'insieme.
+- **AS7** — l'ateneo è **congelato** alla creazione dall'università del creatore; l'ateneo di chi chiede di entrare si legge **fresco dal Profilo**. Dato anagrafico propagato, decisione di autorizzazione interrogata: la linea non si attraversa mai.
+- **AL4 / permessi al gesto**: il permesso di caricare si legge **nell'istante del caricamento**, mai da una copia presa all'ingresso. E il già caricato **resta** se il permesso viene revocato: si governa il presente, non si riscrive il passato.
+- **Eliminare un argomento non cancella alcun file**: i materiali tornano sciolti (`argomentoId = null`), in differita. È l'opposto di ciò che accade ai post — riorganizzare non distrugge.
+- **Chiavi archivio `aula-studio/{aulaId}/...`**, mai l'id utente: i file d'aula sopravvivono alla cancellazione dell'account, e una chiave che nominasse l'utente sarebbe un dato personale non cancellabile.
+- **`PortaAppartenenzaGruppo`** è l'anti-corruption layer verso il Gruppo: passa **un booleano** tradotto in titolo di ammissione, e **la parola «Membro» non entra nel core**. Oggi risponde sempre di no; E7 si attaccherà lì senza toccare l'ammissione.
+- Codici errore: prefisso **AS**. Il contesto ha **due sole dipendenze di dominio** (Profilo e, in futuro, l'appartenenza al Gruppo): una terza è una modifica della Context Map, non un dettaglio interno.
+
+## Fatti di dominio (outbox)
+
+`modules/aula-studio/recapito-fatti.service.ts`. **Una tabella per schema, mai globale**: il fatto si scrive nella **stessa transazione dell'aggregato che lo produce** — la firma di `pubblica()` esige la transazione proprio per rendere impossibile pubblicare fuori da essa.
+
+- Consegna **at-least-once**, elaborazione effectively-once per **deduplica sull'id dell'evento**, applicata **sempre** anche dove un'invariante la renderebbe superflua: un meccanismo solo vale più di sei ragionamenti caso per caso.
+- **Corsia rapida a 1 s** nel worker, separata dai 5 minuti delle riconciliazioni, perché il suo unico fatto ha qualcuno che aspetta davanti allo schermo. Lotti da 200, ritentativi con attesa crescente e jitter, poi il fatto è **non consegnabile** (`logger.error`: è l'unico caso in cui è prevista una mano umana).
+- **Purga dei consegnati a 7 giorni**: non è igiene di spazio, è che un payload può trasportare dati personali.
+- **`POST /inviti/:id/accettazione` risponde 202, non 201**: l'accettazione non crea il partecipante nella stessa transazione (IA3), e dire 201 sarebbe mentire su un'entità che ancora non esiste.
+- Le scadenze (inviti a 7 giorni) **non passano di qui**: lavorano per interrogazione dello stato, quindi dopo un'interruzione non hanno arretrati da recuperare — hanno una query che trova più righe.
+
 ## Cancellazione dell'account (V5/SE3)
 
 Componente **trasversale**, non un bounded context: `modules/cancellazione` orchestra e verifica, ma **non decide alcuna sorte** — la sorte la decide il modulo proprietario del dato. È l'unico modulo autorizzato a importare più contesti insieme; nessun modulo lo importa (solo Facciata, App e Worker) e **nessun modulo legge lo schema `cancellazione`**.
@@ -107,7 +132,7 @@ throw new AppException(ProfiloErrorCode.NOT_FOUND, 'PROFILO_NOT_FOUND', HttpStat
 ```
 
 - `messageKey` è TIPIZZATA da `src/i18n/it/errors.json` (autocomplete; una chiave inesistente non compila).
-- Codici per contesto: **Profilo PR001-999, Bacheca BA, Gruppo GR, Aula studio AS, Cancellazione CA** (`modules/{contesto}/constants/error-codes.ts`); sistema S/V/H in `common/constants/error-codes.ts`. Stesso messaggio, punti diversi → codici diversi.
+- Codici per contesto: **Profilo PR001-999, Bacheca BA, Aula studio AS, Gruppo GR, Cancellazione CA** (`modules/{contesto}/constants/error-codes.ts`); sistema S/V/H in `common/constants/error-codes.ts`. Stesso messaggio, punti diversi → codici diversi.
 - Nuovo errore: aggiungi il codice nel contesto, la chiave in **entrambi** `i18n/it/errors.json` e `i18n/en/errors.json` (la parità è verificata a compile time), poi lancia.
 - Nuovo contesto: crea `constants/error-codes.ts` col suo prefisso e aggiungilo alla union `ErrorCode` in `common/constants/error-codes.ts`.
 - I 5xx non intenzionali sono mascherati dal filtro: il dettaglio resta SOLO nei log (mai nomi o contenuti utente nei log — solo `utente_id`).

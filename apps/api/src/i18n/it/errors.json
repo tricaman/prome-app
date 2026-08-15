@@ -32,5 +32,22 @@
   "COMMENTO_TESTO_VUOTO": "Scrivi qualcosa prima di commentare",
   "COMMENTO_TESTO_TROPPO_LUNGO": "Il commento supera i {massimo} caratteri",
   "NON_PUOI_MODERARE": "Puoi eliminare solo i tuoi commenti e quelli sotto ai tuoi post",
-  "ACCOUNT_IN_CANCELLAZIONE": "Questo account è in cancellazione e non è più utilizzabile"
+  "ACCOUNT_IN_CANCELLAZIONE": "Questo account è in cancellazione e non è più utilizzabile",
+  "AULA_NOT_FOUND": "Aula studio non trovata",
+  "AULA_TITOLO_VUOTO": "Dai un titolo all’aula studio",
+  "AULA_DATA_NEL_PASSATO": "La data di inizio deve essere futura",
+  "AULA_NON_SEI_MODERATORE": "Solo un moderatore dell’aula può farlo",
+  "AULA_NON_SEI_PARTECIPANTE": "Devi essere nell’aula per farlo",
+  "AULA_ULTIMO_MODERATORE": "Sei l’ultimo moderatore: promuovi qualcun altro prima di uscire",
+  "AULA_NON_VUOTA": "L’aula contiene materiali: non può essere eliminata",
+  "INVITO_NOT_FOUND": "Invito non trovato",
+  "INVITO_SCADUTO": "Questo invito è scaduto",
+  "INVITO_GIA_CHIUSO": "Questo invito è già stato usato",
+  "INVITO_DI_UN_ALTRO": "Questo invito non è per te",
+  "AULA_AMMISSIONE_NEGATA": "Non puoi entrare in questa aula studio",
+  "ARGOMENTO_NON_VALIDO": "Questo argomento non appartiene all’aula",
+  "AULA_ALLEGATO_NOT_FOUND": "Materiale non trovato",
+  "AULA_FILE_NON_VALIDO": "Il file non è utilizzabile: controlla tipo e dimensione",
+  "AULA_NON_PUOI_CARICARE": "Non hai il permesso di caricare materiali in quest’aula",
+  "AULA_CONFLITTO_DI_VERSIONE": "Qualcun altro ha appena modificato l’aula: riprova"
 }

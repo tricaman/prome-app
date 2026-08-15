@@ -32,5 +32,22 @@
   "COMMENTO_TESTO_VUOTO": "Write something before commenting",
   "COMMENTO_TESTO_TROPPO_LUNGO": "The comment exceeds {massimo} characters",
   "NON_PUOI_MODERARE": "You can only delete your own comments and those under your posts",
-  "ACCOUNT_IN_CANCELLAZIONE": "This account is being deleted and can no longer be used"
+  "ACCOUNT_IN_CANCELLAZIONE": "This account is being deleted and can no longer be used",
+  "AULA_NOT_FOUND": "Study room not found",
+  "AULA_TITOLO_VUOTO": "Give the study room a title",
+  "AULA_DATA_NEL_PASSATO": "The start time must be in the future",
+  "AULA_NON_SEI_MODERATORE": "Only a room moderator can do this",
+  "AULA_NON_SEI_PARTECIPANTE": "You must be in the room to do this",
+  "AULA_ULTIMO_MODERATORE": "You are the last moderator: promote someone else before leaving",
+  "AULA_NON_VUOTA": "The room still holds materials: it cannot be deleted",
+  "INVITO_NOT_FOUND": "Invitation not found",
+  "INVITO_SCADUTO": "This invitation has expired",
+  "INVITO_GIA_CHIUSO": "This invitation has already been used",
+  "INVITO_DI_UN_ALTRO": "This invitation is not for you",
+  "AULA_AMMISSIONE_NEGATA": "You cannot join this study room",
+  "ARGOMENTO_NON_VALIDO": "This topic does not belong to the room",
+  "AULA_ALLEGATO_NOT_FOUND": "Material not found",
+  "AULA_FILE_NON_VALIDO": "The file cannot be used: check its type and size",
+  "AULA_NON_PUOI_CARICARE": "You do not have permission to upload materials in this room",
+  "AULA_CONFLITTO_DI_VERSIONE": "Someone just changed the room: try again"
 }

@@ -14,5 +14,21 @@
   "COMMENTO_PUBBLICATO": "Comment published",
   "COMMENTO_ELIMINATO": "Comment deleted",
   "COMMENTI_ELENCATI": "Comments loaded",
-  "CANCELLAZIONE_RICHIESTA": "Deletion request received: sign in again within 14 days to undo it"
+  "CANCELLAZIONE_RICHIESTA": "Deletion request received: sign in again within 14 days to undo it",
+  "AULA_CREATA": "Study room created",
+  "AULA_MODIFICATA": "Study room updated",
+  "AULA_ELIMINATA": "Study room deleted",
+  "AULA_INGRESSO": "You joined the study room",
+  "AULA_USCITA": "You left the study room",
+  "PARTECIPANTE_RIMOSSO": "Participant removed",
+  "PERMESSO_CONCESSO": "Permission granted",
+  "PERMESSO_REVOCATO": "Permission revoked",
+  "MODERAZIONE_CONCESSA": "Now a moderator",
+  "MODERAZIONE_REVOCATA": "No longer a moderator",
+  "INVITO_EMESSO": "Invitation sent",
+  "INVITO_ACCETTATO": "Invitation accepted: we are opening the room",
+  "ARGOMENTO_CREATO": "Topic created",
+  "ARGOMENTO_ELIMINATO": "Topic deleted: the materials stay in the room",
+  "MATERIALE_CARICATO": "Material shared",
+  "MATERIALE_ELIMINATO": "Material deleted"
 }

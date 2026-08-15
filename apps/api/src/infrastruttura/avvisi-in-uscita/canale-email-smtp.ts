@@ -3,7 +3,7 @@ import { createTransport, type Transporter } from 'nodemailer';
 import { I18nService } from 'nestjs-i18n';
 import { env } from '../../config/env';
 import { DURATA_CODICE_SECONDI } from '../accesso/better-auth';
-import type { CanaleEmail } from './canale-email';
+import type { CanaleEmail, InvitoDaRecapitare } from './canale-email';
 
 /**
  * Invio via SMTP.
@@ -57,6 +57,41 @@ export class CanaleEmailSmtp implements CanaleEmail {
     this.logger.log(`Codice di accesso inviato (lingua ${lingua})`);
   }
 
+  async inviaInvitoAulaStudio(
+    destinatario: string,
+    invito: InvitoDaRecapitare,
+    lingua: string,
+  ): Promise<void> {
+    const scadenza = invito.scadeIl.toLocaleDateString(lingua === 'en' ? 'en-GB' : 'it-IT', {
+      day: 'numeric',
+      month: 'long',
+    });
+    const argomenti = {
+      invitante: invito.invitatoDa,
+      titoloAula: invito.titoloAula,
+      scadenza,
+    };
+    const testi = {
+      oggetto: this.traduci('email.invitoAula.oggetto', lingua, argomenti),
+      titolo: this.traduci('email.invitoAula.titolo', lingua),
+      istruzioni: this.traduci('email.invitoAula.istruzioni', lingua, argomenti),
+      scadenza: this.traduci('email.invitoAula.scadenza', lingua, argomenti),
+      azione: this.traduci('email.invitoAula.azione', lingua),
+      ignora: this.traduci('email.invitoAula.ignora', lingua),
+    };
+
+    await this.trasporto.sendMail({
+      from: env.SMTP_MITTENTE,
+      to: destinatario,
+      subject: testi.oggetto,
+      text: `${testi.titolo}\n\n${testi.istruzioni}\n\n${invito.collegamento}\n\n${testi.scadenza}\n\n${testi.ignora}`,
+      html: corpoInvito(invito.collegamento, testi),
+    });
+
+    // Nel log finisce che è partito, mai chi ha invitato chi.
+    this.logger.log(`Invito all'aula studio inviato (lingua ${lingua})`);
+  }
+
   /**
    * Anche l'email è tradotta lato server, come tutto il resto: la lingua
    * arriva dalla richiesta che ha chiesto il codice.
@@ -64,6 +99,25 @@ export class CanaleEmailSmtp implements CanaleEmail {
   private traduci(chiave: string, lingua: string, args?: Record<string, unknown>): string {
     return this.i18n.translate(chiave, { lang: lingua, args }) as string;
   }
+}
+
+/** Stessa forma del codice di accesso: una tabella, nessun foglio esterno. */
+function corpoInvito(
+  collegamento: string,
+  testi: { titolo: string; istruzioni: string; scadenza: string; azione: string; ignora: string },
+): string {
+  return `<!doctype html><html><body style="margin:0;background:#F7F9FB;font-family:-apple-system,Segoe UI,Roboto,sans-serif">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
+    <table role="presentation" width="100%" style="max-width:480px;background:#fff;border:1px solid #E6EAF0;border-radius:20px" cellpadding="0" cellspacing="0">
+      <tr><td style="padding:32px">
+        <p style="margin:0 0 20px;font-size:20px;font-weight:800;color:#181D25">${testi.titolo}</p>
+        <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#5A6C87">${testi.istruzioni}</p>
+        <p style="margin:0 0 24px"><a href="${collegamento}" style="display:inline-block;padding:12px 22px;background:#0A705F;color:#fff;text-decoration:none;border-radius:999px;font-size:14px;font-weight:800">${testi.azione}</a></p>
+        <p style="margin:0;font-size:12.5px;line-height:1.6;color:#6C809D">${testi.scadenza}</p>
+        <p style="margin:16px 0 0;font-size:12.5px;line-height:1.6;color:#6C809D">${testi.ignora}</p>
+      </td></tr>
+    </table>
+  </td></tr></table></body></html>`;
 }
 
 /** Corpo HTML: una tabella e nessun foglio di stile esterno, come vuole la posta. */

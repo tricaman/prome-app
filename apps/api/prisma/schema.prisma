@@ -1,7 +1,7 @@
 // Schema Prisma di Prome — un solo database Postgres, uno schema per bounded
 // context (più "cancellazione" per il registro delle cancellazioni account).
-// Gli schemi ancora senza modelli (gruppo, aula_studio) sono stati creati
-// vuoti nella migration iniziale (CREATE SCHEMA a mano nel SQL).
+// Lo schema ancora senza modelli (gruppo) è stato creato vuoto nella
+// migration iniziale (CREATE SCHEMA a mano nel SQL).
 //
 // Nota: multiSchema è GA in Prisma 6 — il flag previewFeatures non serve più
 // (Prisma emetteva un warning di deprecazione, quindi è stato rimosso).
@@ -279,6 +279,234 @@ model Commento {
 }
 
 // ---------------------------------------------------------------------------
+// Schema "aula_studio" — il contesto CORE: l'incontro di studio.
+//
+// Cinque aggregati e una sola entità interna. Il Partecipante sta DENTRO
+// l'AulaStudio perché le invarianti che lo riguardano (AS2, AS3, AS4, AS5)
+// sono affermazioni sull'INSIEME dei partecipanti: solo un aggregato che li
+// vede tutti insieme può garantirle al commit. Argomento, Allegato, Invito e
+// (in E4) MessaggioDiChat sono invece aggregati autonomi.
+// ---------------------------------------------------------------------------
+
+/// L'incontro di studio.
+///
+/// **Non ha alcuno stato di ciclo di vita** (AS8): non esiste «programmata»,
+/// «in corso», «conclusa». La sola differenza fra un'aula programmata e una
+/// estemporanea è la presenza di `dataOraInizio`, e quella data **non apre né
+/// chiude nulla** — l'aula resta consultabile con i suoi argomenti e materiali
+/// prima e dopo l'incontro. Aggiungere qui un campo di stato è la violazione
+/// più facile da introdurre e la meno visibile: non farlo.
+model AulaStudio {
+  id         String              @id @default(uuid())
+  titolo     String
+  visibilita VisibilitaAulaStudio @default(PRIVATO)
+
+  /// Ateneo di riferimento, precompilato dall'università del creatore alla
+  /// creazione e poi CONGELATO (AS7): lo spazio non cambia pubblico perché il
+  /// suo creatore ha cambiato ateneo. L'università di chi chiede di entrare si
+  /// legge invece sempre fresca dal Profilo.
+  ateneo String?
+
+  /// Opzionale; se presente, alla creazione deve essere futura (AS8).
+  dataOraInizio DateTime?
+
+  /// CollocazioneNelGruppo: al più una, mai due (AS9). Identificativo nudo,
+  /// nessuna foreign key: fra contesti non si attraversano gli schemi.
+  gruppoId String?
+
+  /// Blocco ottimistico. Serve perché AS2 è un'affermazione sull'insieme dei
+  /// partecipanti: due moderatori che retrocedono contemporaneamente l'ultimo
+  /// moderatore vedrebbero, ciascuno da solo, una situazione lecita. Il
+  /// conflitto è respinto dal confronto di versione.
+  versione Int @default(0)
+
+  creatoIl     DateTime @default(now())
+  aggiornatoIl DateTime @default(now()) @updatedAt
+
+  partecipanti Partecipante[]
+
+  @@index([creatoIl(sort: Desc)])
+  @@index([gruppoId])
+  @@map("aula_studio")
+  @@schema("aula_studio")
+}
+
+/// I tre valori del linguaggio ubiquo, modellati **di nuovo** in questo
+/// contesto e non condivisi con Profilo: stessi tre nomi, due contesti
+/// distinti. Se un giorno divergessero, divergerebbero senza rompere nulla.
+enum VisibilitaAulaStudio {
+  PRIVATO
+  ATENEO
+  PUBBLICO
+
+  @@map("visibilita_aula_studio")
+  @@schema("aula_studio")
+}
+
+/// Entità interna dell'AulaStudio: chi è ammesso all'incontro, con il suo
+/// ruolo e i suoi permessi.
+///
+/// I tre permessi sono un value object del Partecipante, non un aggregato:
+/// non hanno identità né storia propria e non si consultano indipendentemente
+/// da chi li possiede. **L'insieme vuoto è la Sola lettura** (AS4): uno stato
+/// legittimo e normale, non un errore da correggere né un ruolo separato.
+model Partecipante {
+  aulaStudioId String
+  utenteId     String
+
+  /// AS5: un moderatore ha SEMPRE i tre permessi, non revocabili finché dura
+  /// il ruolo. Non vale il contrario — avere i tre permessi non fa moderatore.
+  moderatore Boolean @default(false)
+
+  parlare  Boolean @default(false)
+  scrivere Boolean @default(false)
+  caricare Boolean @default(false)
+
+  ammessoIl DateTime @default(now())
+
+  aula AulaStudio @relation(fields: [aulaStudioId], references: [id], onDelete: Cascade)
+
+  /// AS3: un utente compare al massimo una volta fra i partecipanti. È anche
+  /// ciò che rende innocua la doppia consegna dell'accettazione di un invito.
+  @@id([aulaStudioId, utenteId])
+  @@index([utenteId])
+  @@map("partecipante")
+  @@schema("aula_studio")
+}
+
+/// Contenitore di materiale legato a UN incontro preciso: nasce lì e resta lì
+/// (AR1, legame immutabile). Aggregato autonomo, non entità interna.
+model Argomento {
+  id           String   @id @default(uuid())
+  aulaStudioId String
+  titolo       String
+  /// AR2: facoltativo, massimo 20.000 caratteri. È il posto dove si scrive di
+  /// un tema di studio, non un'etichetta.
+  testo        String?
+  creatoIl     DateTime @default(now())
+  aggiornatoIl DateTime @default(now()) @updatedAt
+
+  @@index([aulaStudioId, creatoIl])
+  @@map("argomento")
+  @@schema("aula_studio")
+}
+
+/// Materiale condiviso nell'aula. Aggregato autonomo — ed è la differenza
+/// sostanziale con l'Allegato del Post, che invece muore con lui (B4).
+///
+/// `argomentoId` è facoltativo: essere «sciolto» è uno stato normale, non un
+/// ripiego, e non serve alcun argomento di default. Eliminare un argomento
+/// **non cancella alcun file**: gli allegati tornano sciolti.
+model AllegatoDiAulaStudio {
+  id           String       @id @default(uuid())
+  aulaStudioId String
+  /// AL3: se valorizzato, l'argomento appartiene alla stessa aula — condizione
+  /// verificata al comando, non garantita al commit.
+  argomentoId  String?
+  /// AL2: chi ha portato il materiale è un fatto storico e immutabile. Resta
+  /// valido anche quando quel partecipante lascia l'aula, e sopravvive alla
+  /// cancellazione dell'account con il solo riferimento anonimizzato.
+  caricatoDa   String
+  chiave       String                   @unique
+  nome         String
+  tipo         TipoAllegatoAulaStudio
+  dimensione   Int
+  creatoIl     DateTime                 @default(now())
+
+  @@index([aulaStudioId, creatoIl])
+  @@index([argomentoId])
+  @@index([caricatoDa])
+  @@map("allegato_di_aula_studio")
+  @@schema("aula_studio")
+}
+
+/// Gli stessi tre tipi ammessi dalla Bacheca (B3), enunciati **di nuovo** e
+/// non condivisi: Bacheca e Aula studio stanno in separate ways. Se un giorno
+/// il limite cambiasse per il materiale d'aula e non per gli allegati dei
+/// post, i due enunciati divergerebbero senza rompere nulla — ed è esattamente
+/// il grado di indipendenza voluto.
+enum TipoAllegatoAulaStudio {
+  PDF
+  IMMAGINE
+  TESTO
+
+  @@map("tipo_allegato_aula_studio")
+  @@schema("aula_studio")
+}
+
+/// Invito a un'aula studio. Il destinatario è un INDIRIZZO, non un utente: si
+/// invita anche chi non è ancora iscritto, e l'invito lo aspetta (IA2).
+model Invito {
+  id           String      @id @default(uuid())
+  aulaStudioId String
+  /// Immutabile (IA1): un invito non si redireziona verso un'altra persona.
+  destinatario String
+  invitatoDa   String
+  stato        StatoInvito @default(IN_ATTESA)
+  /// Calcolato all'emissione (emissione + 7 giorni) e trasportato nel payload
+  /// degli eventi: chi consuma il fatto sa quando scade senza conoscere la
+  /// regola dei 7 giorni.
+  scadeIl      DateTime
+  emessoIl     DateTime    @default(now())
+  chiusoIl     DateTime?
+  /// Valorizzato all'accettazione: chi ha accettato. Serve al fatto che crea
+  /// il partecipante, e a rispondere al client che sta aspettando.
+  accettatoDa  String?
+
+  @@index([aulaStudioId])
+  @@index([destinatario])
+  @@index([stato, scadeIl])
+  @@map("invito")
+  @@schema("aula_studio")
+}
+
+/// IA1: dallo stato iniziale si transita una volta sola, e gli stati
+/// conclusivi sono terminali. Una seconda accettazione non ha effetto.
+enum StatoInvito {
+  IN_ATTESA
+  ACCETTATO
+  SCADUTO
+
+  @@map("stato_invito")
+  @@schema("aula_studio")
+}
+
+/// I fatti di dominio in uscita da questo schema (pattern outbox).
+///
+/// **Una tabella per schema, mai una globale**: il fatto è scritto nella
+/// STESSA transazione dell'aggregato che lo produce — o esistono entrambi, o
+/// nessuno dei due. È la condizione senza la quale «0 perdite» non è
+/// dimostrabile: un fatto pubblicato fuori dalla transazione è un fatto che
+/// può mancare quando la scrittura riesce, o esistere quando fallisce.
+///
+/// I fatti consegnati si purgano dopo 7 giorni: i payload possono trasportare
+/// dati personali, e una tabella conservata indefinitamente sarebbe una
+/// replica priva di percorso di cancellazione.
+model FattoInUscita {
+  /// Identificativo dell'evento: è la chiave di deduplica sul consumatore.
+  id          String   @id @default(uuid())
+  tipo        String
+  /// Identità dell'aggregato sorgente.
+  aggregatoId String
+  /// Versione del contratto del fatto.
+  versione    Int      @default(1)
+  accadutoIl  DateTime @default(now())
+  payload     Json
+
+  consegnatoIl        DateTime?
+  tentativi           Int       @default(0)
+  prossimoTentativoIl DateTime  @default(now())
+  /// Valorizzato quando i tentativi sono esauriti: è l'unico caso in cui una
+  /// mano umana è prevista.
+  nonConsegnabileIl   DateTime?
+
+  @@index([consegnatoIl, prossimoTentativoIl])
+  @@index([accadutoIl])
+  @@map("fatto_in_uscita")
+  @@schema("aula_studio")
+}
+
+// ---------------------------------------------------------------------------
 // Schema "cancellazione" — il registro delle cancellazioni account (V5/SE3).
 // ---------------------------------------------------------------------------
 
@@ -313,6 +541,7 @@ model RichiestaDiCancellazione {
   // la prima volta. Un timestamp è insieme stato e traccia.
   // >>> PUNTO DA AGGIORNARE A OGNI NUOVO DETENTORE (con DETENTORI_CENSITI) <<<
   bachecaAnonimizzataIl DateTime?
+  auleStudioLiberateIl  DateTime?
   profiloEliminatoIl    DateTime?
   accessoEliminatoIl    DateTime?
 

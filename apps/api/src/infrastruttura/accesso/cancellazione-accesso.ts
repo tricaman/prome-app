@@ -58,6 +58,21 @@ export class CancellazioneAccesso {
   }
 
   /**
+   * L'indirizzo dell'utente, finché esiste.
+   *
+   * Serve ai detentori che conservano un'email invece di un identificativo —
+   * gli inviti sono rivolti a un indirizzo — e la lettura passa da qui perché
+   * questo resta l'unico punto in cui la catena tocca lo schema del fornitore.
+   */
+  async indirizzoDi(utenteId: string): Promise<string | null> {
+    const utente = await this.prisma.user.findUnique({
+      where: { id: utenteId },
+      select: { email: true },
+    });
+    return utente?.email.toLowerCase() ?? null;
+  }
+
+  /**
    * Purga delle verifiche OTP scadute, di chiunque siano.
    *
    * È la rete per il caso in cui l'email non è più nota: una riga risorta da

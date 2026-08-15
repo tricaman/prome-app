@@ -4,5 +4,13 @@
     "titolo": "Your access code",
     "istruzioni": "Enter it in Prome within {minuti} minutes. After that it expires and you need a new one.",
     "ignora": "If you didn't ask to sign in, ignore this message: without the code nobody can get in."
+  },
+  "invitoAula": {
+    "oggetto": "{invitante} invites you to a study room on Prome",
+    "titolo": "You have been invited to a study room",
+    "istruzioni": "{invitante} invited you to “{titoloAula}”. Open the invitation to join: if you do not have an account yet, all it takes is an email address and a minute.",
+    "scadenza": "The invitation is valid until {scadenza}.",
+    "azione": "Join the room",
+    "ignora": "If you do not know who invited you, ignore this message: nobody joins without your acceptance."
   }
 }

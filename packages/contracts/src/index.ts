@@ -300,3 +300,144 @@ export interface CreaCommentoRequest {
 export interface ModificaPostRequest {
   testo: string;
 }
+
+// --- Aula studio ------------------------------------------------------------
+//
+// L'aula NON ha stati di ciclo di vita: non esiste «programmata», «in corso»,
+// «conclusa». La sola differenza fra un'aula programmata e una estemporanea è
+// la presenza di `dataOraInizio`, e quella data non apre né chiude nulla — il
+// client deriva l'etichetta da mostrare, il server non la decide.
+
+/** Gli stessi tre valori della privacy, ma di questo contesto. */
+export type VisibilitaAulaStudio = 'PRIVATO' | 'ATENEO' | 'PUBBLICO';
+
+/** I tre soli permessi, e nessun altro. */
+export type PermessoAulaStudio = 'parlare' | 'scrivere' | 'caricare';
+
+/**
+ * I permessi di un partecipante.
+ *
+ * Si concedono e si revocano **uno per uno**: non esiste il gesto «dai tutti i
+ * permessi». L'insieme vuoto è la Sola lettura — uno stato legittimo, non un
+ * errore da correggere né un ruolo separato.
+ */
+export interface PermessiResponse {
+  parlare: boolean;
+  scrivere: boolean;
+  caricare: boolean;
+}
+
+export interface PartecipanteResponse {
+  utenteId: string;
+  nome: string | null;
+  cognome: string | null;
+  universita: string | null;
+  /** Vero quando l'account non esiste più: il client mostra «Utente rimosso». */
+  rimosso?: boolean;
+  moderatore: boolean;
+  permessi: PermessiResponse;
+  /** Derivato: nessun permesso. Lo dichiara il server per non farlo dedurre. */
+  solaLettura: boolean;
+}
+
+export interface AulaStudioResponse {
+  id: string;
+  titolo: string;
+  visibilita: VisibilitaAulaStudio;
+  /** Congelato alla creazione dall'università del creatore, se visibilità ATENEO. */
+  ateneo: string | null;
+  /** Assente = aula estemporanea. Nessuno stato dietro. */
+  dataOraInizio: string | null;
+  gruppoId: string | null;
+  creatoIl: string;
+  partecipanti: number;
+  /** Permessi di chi legge, dichiarati dal server. */
+  sonoModeratore: boolean;
+  sonoPartecipante: boolean;
+}
+
+export interface ArgomentoResponse {
+  id: string;
+  titolo: string;
+  testo: string | null;
+  creatoIl: string;
+}
+
+export interface AllegatoDiAulaStudioResponse {
+  id: string;
+  nome: string;
+  tipo: TipoAllegato;
+  dimensione: number;
+  url: string;
+  /** Argomento in cui è collocato; assente = sciolto, stato normale. */
+  argomentoId: string | null;
+  caricatoDa: string;
+  creatoIl: string;
+}
+
+/**
+ * L'apertura della sala: tutto ciò che serve per entrare, in **una sola
+ * risposta composta**. Non una sequenza di chiamate.
+ */
+export interface SalaResponse {
+  aula: AulaStudioResponse;
+  partecipanti: PartecipanteResponse[];
+  argomenti: ArgomentoResponse[];
+  allegati: AllegatoDiAulaStudioResponse[];
+  sonoModeratore: boolean;
+  mieiPermessi: PermessiResponse;
+}
+
+/** 200 caratteri, non vuoto dopo il trim. */
+export const LUNGHEZZA_MASSIMA_TITOLO_AULA = 200;
+/** 20.000 caratteri: è il posto dove si scrive di un tema, non un'etichetta. */
+export const LUNGHEZZA_MASSIMA_TESTO_ARGOMENTO = 20_000;
+
+export interface CreaAulaStudioRequest {
+  titolo: string;
+  visibilita?: VisibilitaAulaStudio;
+  /** Se presente, alla creazione deve essere futura. */
+  dataOraInizio?: string;
+}
+
+export interface ModificaAulaStudioRequest {
+  titolo?: string;
+  visibilita?: VisibilitaAulaStudio;
+  dataOraInizio?: string | null;
+}
+
+export interface CreaArgomentoRequest {
+  titolo: string;
+  testo?: string;
+}
+
+export interface CreaAllegatoDiAulaStudioRequest {
+  /** Chiave ottenuta dalla pre-autorizzazione, già caricata. */
+  chiave: string;
+  /** Facoltativo: essere sciolto è uno stato normale. */
+  argomentoId?: string;
+}
+
+// --- Inviti all'aula studio -------------------------------------------------
+
+export type StatoInvito = 'IN_ATTESA' | 'ACCETTATO' | 'SCADUTO';
+
+export interface InvitoResponse {
+  id: string;
+  aulaStudioId: string;
+  titoloAula: string;
+  destinatario: string;
+  stato: StatoInvito;
+  scadeIl: string;
+  emessoIl: string;
+  /**
+   * Falso subito dopo l'accettazione: il partecipante non nasce nella stessa
+   * transazione, compare entro pochi secondi. È la finestra che il dominio
+   * dichiara, esposta al client invece di essere nascosta.
+   */
+  partecipanteCreato: boolean;
+}
+
+export interface CreaInvitoRequest {
+  destinatario: string;
+}

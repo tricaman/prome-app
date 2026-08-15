@@ -7,6 +7,7 @@ import {
   MISURAZIONI,
   type MisurazioniDiUtilizzo,
 } from '../../infrastruttura/misurazioni/misurazioni';
+import { CancellazioneAulaStudioService } from '../aula-studio/cancellazione-aula-studio.service';
 import { CancellazioneBachecaService } from '../bacheca/cancellazione-bacheca.service';
 import { ProfiloService } from '../profilo/profilo.service';
 
@@ -30,13 +31,16 @@ const GIORNO_MS = 24 * 60 * 60 * 1000;
  * transazione unica + purga delle scadute), profilo.profilo,
  * profilo.impostazioni_di_privacy (cascata), bacheca.post.autoreId e
  * bacheca.commento.autoreId (anonimizzati), bacheca.allegato (segue il post,
- * file conservato), bacheca.allegato_in_attesa (+ file in archivio, eliminati).
+ * file conservato), bacheca.allegato_in_attesa (+ file in archivio, eliminati),
+ * aula_studio.partecipante (rimosso onorando AS2), aula_studio.invito
+ * (eliminato), aula_studio.allegato_di_aula_studio (`caricatoDa` anonimizzato,
+ * **file conservato**), aula_studio.fatto_in_uscita (payload con l'id).
  * Il registro stesso è l'eccezione sancita: conserva utente_id per progetto.
  *
- * Domani: gruppo.*, aula_studio.*, tabelle outbox dei fatti (E3), log solo se
- * la loro conservazione supererà i 14 giorni.
+ * Domani: gruppo.*, altre tabelle outbox, log solo se la loro conservazione
+ * supererà i 14 giorni.
  */
-const DETENTORI_CENSITI = ['accesso', 'profilo', 'bacheca'] as const;
+const DETENTORI_CENSITI = ['accesso', 'profilo', 'bacheca', 'aula_studio'] as const;
 
 /**
  * CancellazioneDellAccount — componente TRASVERSALE, non un contesto di
@@ -58,6 +62,7 @@ export class CancellazioneService {
     private readonly prisma: PrismaService,
     private readonly profilo: ProfiloService,
     private readonly bacheca: CancellazioneBachecaService,
+    private readonly aule: CancellazioneAulaStudioService,
     private readonly accesso: CancellazioneAccesso,
     @Inject(MISURAZIONI) private readonly misurazioni: MisurazioniDiUtilizzo,
   ) {}
@@ -268,6 +273,26 @@ export class CancellazioneService {
       );
     }
 
+    // Aula studio: il partecipante esce onorando AS2, gli inviti spariscono, e
+    // il materiale resta con il solo caricatore anonimizzato — è la sola
+    // eccezione alla cancellazione, dichiarata nell'informativa.
+    let auleComplete = false;
+    try {
+      const indirizzo = await this.accesso.indirizzoDi(utenteId);
+      await this.aule.rimuoviPartecipazioniDi(utenteId);
+      await this.aule.eliminaInvitiDi(utenteId, indirizzo);
+      await this.aule.anonimizzaMaterialiDi(utenteId);
+      await this.aule.eliminaFattiDi(utenteId);
+      auleComplete = true;
+      if (!voce.auleStudioLiberateIl) marca.auleStudioLiberateIl = new Date();
+    } catch (errore) {
+      this.logger.warn(
+        `Passo aula studio fallito per l'utente ${utenteId}: si riprova al prossimo giro`,
+        errore instanceof Error ? errore.stack : undefined,
+      );
+    }
+    void auleComplete;
+
     // Il profilo cade SOLO a bacheca anonimizzata: eliminarlo prima aprirebbe
     // la finestra in cui un post con l'id reale appare «senza profilo», cioè
     // visibile a tutti e collegabile.
@@ -308,14 +333,16 @@ export class CancellazioneService {
    * esito parziale che si spaccia per totale è il difetto peggiore possibile.
    */
   private async contaResiduo(utenteId: string): Promise<{ record: number; file: number }> {
-    // I tre proprietari, insieme: l'elenco è DETENTORI_CENSITI.
+    // I proprietari, insieme: l'elenco è DETENTORI_CENSITI.
     void DETENTORI_CENSITI;
-    const [accesso, profilo, bacheca] = await Promise.all([
+    const indirizzo = await this.accesso.indirizzoDi(utenteId);
+    const [accesso, profilo, bacheca, aule] = await Promise.all([
       this.accesso.contaResiduiDi(utenteId),
       this.profilo.contaResiduiDi(utenteId),
       this.bacheca.contaResiduiDi(utenteId),
+      this.aule.contaResiduiDi(utenteId, indirizzo),
     ]);
-    return { record: accesso + profilo + bacheca.record, file: bacheca.file };
+    return { record: accesso + profilo + bacheca.record + aule, file: bacheca.file };
   }
 
   private async registraEsito(

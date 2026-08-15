@@ -1,0 +1,220 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import {
+  IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsInt,
+  IsISO8601,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Length,
+  Max,
+  Min,
+} from 'class-validator';
+import {
+  DIMENSIONE_MASSIMA_ALLEGATO,
+  LUNGHEZZA_MASSIMA_TESTO_ARGOMENTO,
+  LUNGHEZZA_MASSIMA_TITOLO_AULA,
+  type AllegatoDiAulaStudioResponse,
+  type ArgomentoResponse,
+  type AulaStudioResponse,
+  type CreaAllegatoDiAulaStudioRequest,
+  type CreaArgomentoRequest,
+  type CreaAulaStudioRequest,
+  type CreaInvitoRequest,
+  type InvitoResponse,
+  type ModificaAulaStudioRequest,
+  type PartecipanteResponse,
+  type PermessiResponse,
+  type SalaResponse,
+  type StatoInvito,
+  type TipoAllegato,
+  type VisibilitaAulaStudio,
+} from '@prome/contracts';
+import { PaginationDto } from '../../../common/dto';
+
+const VISIBILITA: VisibilitaAulaStudio[] = ['PRIVATO', 'ATENEO', 'PUBBLICO'];
+const TIPI: TipoAllegato[] = ['PDF', 'IMMAGINE', 'TESTO'];
+
+const ripulisci = ({ value }: { value: unknown }): unknown =>
+  typeof value === 'string' ? value.trim() : value;
+
+// --- Ingresso ---------------------------------------------------------------
+
+export class CreaAulaStudioDto implements CreaAulaStudioRequest {
+  @ApiProperty({ example: 'Analisi 1 – giovedì', maxLength: LUNGHEZZA_MASSIMA_TITOLO_AULA })
+  @Transform(ripulisci)
+  @IsString()
+  @Length(1, LUNGHEZZA_MASSIMA_TITOLO_AULA)
+  titolo!: string;
+
+  @ApiPropertyOptional({ enum: VISIBILITA, default: 'PRIVATO' })
+  @IsOptional()
+  @IsEnum(VISIBILITA)
+  visibilita?: VisibilitaAulaStudio;
+
+  @ApiPropertyOptional({ description: 'Assente = aula estemporanea' })
+  @IsOptional()
+  @IsISO8601()
+  dataOraInizio?: string;
+}
+
+export class ModificaAulaStudioDto implements ModificaAulaStudioRequest {
+  @ApiPropertyOptional({ maxLength: LUNGHEZZA_MASSIMA_TITOLO_AULA })
+  @IsOptional()
+  @Transform(ripulisci)
+  @IsString()
+  @Length(1, LUNGHEZZA_MASSIMA_TITOLO_AULA)
+  titolo?: string;
+
+  @ApiPropertyOptional({ enum: VISIBILITA })
+  @IsOptional()
+  @IsEnum(VISIBILITA)
+  visibilita?: VisibilitaAulaStudio;
+
+  @ApiPropertyOptional({ nullable: true })
+  @IsOptional()
+  @IsISO8601()
+  dataOraInizio?: string | null;
+}
+
+export class QueryAuleStudioDto extends PaginationDto {}
+
+export class CreaArgomentoDto implements CreaArgomentoRequest {
+  @ApiProperty({ example: 'Limiti e continuità' })
+  @Transform(ripulisci)
+  @IsString()
+  @Length(1, LUNGHEZZA_MASSIMA_TITOLO_AULA)
+  titolo!: string;
+
+  @ApiPropertyOptional({ maxLength: LUNGHEZZA_MASSIMA_TESTO_ARGOMENTO })
+  @IsOptional()
+  @Transform(ripulisci)
+  @IsString()
+  @Length(0, LUNGHEZZA_MASSIMA_TESTO_ARGOMENTO)
+  testo?: string;
+}
+
+export class PreautorizzaMaterialeDto {
+  @ApiProperty({ example: 'dispense.pdf' })
+  @Transform(ripulisci)
+  @IsString()
+  @Length(1, 255)
+  nome!: string;
+
+  @ApiProperty({ enum: TIPI })
+  @IsEnum(TIPI)
+  tipo!: TipoAllegato;
+
+  @ApiProperty({ example: 128_000, maximum: DIMENSIONE_MASSIMA_ALLEGATO })
+  @IsInt()
+  @Min(1)
+  dimensione!: number;
+}
+
+export class CreaMaterialeDto implements CreaAllegatoDiAulaStudioRequest {
+  @ApiProperty({ description: 'Chiave ottenuta dalla pre-autorizzazione' })
+  @IsString()
+  chiave!: string;
+
+  @ApiPropertyOptional({ description: 'Assente = materiale sciolto, stato normale' })
+  @IsOptional()
+  @IsUUID()
+  argomentoId?: string;
+}
+
+export class CreaInvitoDto implements CreaInvitoRequest {
+  @ApiProperty({ example: 'compagno@studenti.unibo.it' })
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
+  @IsEmail()
+  destinatario!: string;
+}
+
+// --- Uscita -----------------------------------------------------------------
+
+export class PermessiDto implements PermessiResponse {
+  @ApiProperty() @IsBoolean() parlare!: boolean;
+  @ApiProperty() @IsBoolean() scrivere!: boolean;
+  @ApiProperty() @IsBoolean() caricare!: boolean;
+}
+
+export class PartecipanteDto implements PartecipanteResponse {
+  @ApiProperty() utenteId!: string;
+  @ApiProperty({ nullable: true, type: String }) nome!: string | null;
+  @ApiProperty({ nullable: true, type: String }) cognome!: string | null;
+  @ApiProperty({ nullable: true, type: String }) universita!: string | null;
+  @ApiPropertyOptional({ description: 'Account non più esistente: «Utente rimosso»' })
+  rimosso?: boolean;
+  @ApiProperty() moderatore!: boolean;
+  @ApiProperty({ type: PermessiDto }) permessi!: PermessiDto;
+  @ApiProperty({ description: 'Nessun permesso: stato legittimo, non un errore' })
+  solaLettura!: boolean;
+}
+
+export class AulaStudioDto implements AulaStudioResponse {
+  @ApiProperty() id!: string;
+  @ApiProperty() titolo!: string;
+  @ApiProperty({ enum: VISIBILITA }) visibilita!: VisibilitaAulaStudio;
+  @ApiProperty({ nullable: true, type: String }) ateneo!: string | null;
+  @ApiProperty({ nullable: true, type: String, description: 'Assente = estemporanea' })
+  dataOraInizio!: string | null;
+  @ApiProperty({ nullable: true, type: String }) gruppoId!: string | null;
+  @ApiProperty() creatoIl!: string;
+  @ApiProperty() partecipanti!: number;
+  @ApiProperty() sonoModeratore!: boolean;
+  @ApiProperty() sonoPartecipante!: boolean;
+}
+
+export class ArgomentoDto implements ArgomentoResponse {
+  @ApiProperty() id!: string;
+  @ApiProperty() titolo!: string;
+  @ApiProperty({ nullable: true, type: String }) testo!: string | null;
+  @ApiProperty() creatoIl!: string;
+}
+
+export class MaterialeDto implements AllegatoDiAulaStudioResponse {
+  @ApiProperty() id!: string;
+  @ApiProperty() nome!: string;
+  @ApiProperty({ enum: TIPI }) tipo!: TipoAllegato;
+  @ApiProperty() dimensione!: number;
+  @ApiProperty() url!: string;
+  @ApiProperty({ nullable: true, type: String }) argomentoId!: string | null;
+  @ApiProperty() caricatoDa!: string;
+  @ApiProperty() creatoIl!: string;
+}
+
+export class SalaDto implements SalaResponse {
+  @ApiProperty({ type: AulaStudioDto }) aula!: AulaStudioDto;
+  @ApiProperty({ type: [PartecipanteDto] }) partecipanti!: PartecipanteDto[];
+  @ApiProperty({ type: [ArgomentoDto] }) argomenti!: ArgomentoDto[];
+  @ApiProperty({ type: [MaterialeDto] }) allegati!: MaterialeDto[];
+  @ApiProperty() sonoModeratore!: boolean;
+  @ApiProperty({ type: PermessiDto }) mieiPermessi!: PermessiDto;
+}
+
+export class PreautorizzazioneMaterialeDto {
+  @ApiProperty() chiave!: string;
+  @ApiProperty() url!: string;
+  @ApiProperty({ example: 'PUT' }) metodo!: 'PUT';
+  @ApiProperty({ type: Object }) intestazioni!: Record<string, string>;
+  @ApiProperty() scadeIl!: Date;
+}
+
+export class InvitoDto implements InvitoResponse {
+  @ApiProperty() id!: string;
+  @ApiProperty() aulaStudioId!: string;
+  @ApiProperty() titoloAula!: string;
+  @ApiProperty() destinatario!: string;
+  @ApiProperty({ enum: ['IN_ATTESA', 'ACCETTATO', 'SCADUTO'] }) stato!: StatoInvito;
+  @ApiProperty() scadeIl!: string;
+  @ApiProperty() emessoIl!: string;
+  @ApiProperty({ description: 'Falso subito dopo l\'accettazione: compare entro pochi secondi' })
+  partecipanteCreato!: boolean;
+}
+
+/** Massimo consentito, ri-dichiarato qui per la documentazione. */
+export const DIMENSIONE_MASSIMA_MATERIALE = DIMENSIONE_MASSIMA_ALLEGATO;

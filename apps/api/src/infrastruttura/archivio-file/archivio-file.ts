@@ -35,6 +35,15 @@ export interface ArchivioDiFile {
   /** Vero se i byte sono davvero arrivati. */
   eStatoCaricato(chiave: string): Promise<boolean>;
 
+  /**
+   * Quanto pesa davvero il file, o null se non c'è.
+   *
+   * La dimensione dichiarata dal client serve a rifiutare *prima* di caricare;
+   * questa serve a registrare il vero. Sono due numeri diversi, e fidarsi del
+   * primo per scriverlo nel dominio significherebbe credere al client.
+   */
+  dimensioneDi(chiave: string): Promise<number | null>;
+
   /** Indirizzo da cui leggere il file. */
   urlDiLettura(chiave: string): string;
 
@@ -54,6 +63,22 @@ export const ARCHIVIO_DI_FILE = Symbol('ArchivioDiFile');
  */
 export function chiaveAllegato(allegatoId: string, nomeFile: string): string {
   return `bacheca/allegato/${allegatoId}/${nomeSicuro(nomeFile)}`;
+}
+
+/**
+ * La chiave di un materiale d'aula: per aula, mai per utente.
+ *
+ * Qui la regola pesa più che altrove. I file caricati in un'aula **restano
+ * anche quando chi li ha portati cancella l'account**, con il solo caricatore
+ * anonimizzato: una chiave che contenesse il suo identificativo sarebbe essa
+ * stessa un dato personale non cancellabile.
+ */
+export function chiaveMaterialeAula(
+  aulaStudioId: string,
+  materialeId: string,
+  nomeFile: string,
+): string {
+  return `aula-studio/${aulaStudioId}/${materialeId}/${nomeSicuro(nomeFile)}`;
 }
 
 /**

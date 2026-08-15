@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { CanaleEmail } from './canale-email';
+import type { CanaleEmail, InvitoDaRecapitare } from './canale-email';
 
 /**
  * Canale email di sviluppo: scrive il codice nei log e non manda niente.
@@ -19,6 +19,9 @@ export class CanaleEmailSviluppo implements CanaleEmail {
   /** Ultimo codice per destinatario: lo leggono i test, non il codice di produzione. */
   private readonly ultimiCodici = new Map<string, string>();
 
+  /** Ultimo invito per destinatario, con lo stesso scopo. */
+  private readonly ultimiInviti = new Map<string, InvitoDaRecapitare>();
+
   inviaCodiceAccesso(destinatario: string, codice: string, lingua: string): Promise<void> {
     this.ultimiCodici.set(destinatario.toLowerCase(), codice);
     this.logger.warn(
@@ -27,8 +30,25 @@ export class CanaleEmailSviluppo implements CanaleEmail {
     return Promise.resolve();
   }
 
+  inviaInvitoAulaStudio(
+    destinatario: string,
+    invito: InvitoDaRecapitare,
+    lingua: string,
+  ): Promise<void> {
+    this.ultimiInviti.set(destinatario.toLowerCase(), invito);
+    this.logger.warn(
+      `[SVILUPPO] Invito all'aula «${invito.titoloAula}» per ${destinatario} (lingua ${lingua}): ${invito.collegamento} — nessuna email inviata.`,
+    );
+    return Promise.resolve();
+  }
+
   /** Solo per i test: l'ultimo codice mandato a quell'indirizzo. */
   ultimoCodicePer(destinatario: string): string | undefined {
     return this.ultimiCodici.get(destinatario.toLowerCase());
+  }
+
+  /** Solo per i test: l'ultimo invito mandato a quell'indirizzo. */
+  ultimoInvitoPer(destinatario: string): InvitoDaRecapitare | undefined {
+    return this.ultimiInviti.get(destinatario.toLowerCase());
   }
 }

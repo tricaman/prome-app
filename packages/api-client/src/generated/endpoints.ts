@@ -25,29 +25,55 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AccettaInvito200,
+  ApriSalaAulaStudio200,
   CommentaPost201,
   CompletaMioProfilo200,
   CompletaProfiloDto,
+  ConcediPermesso200,
+  CondividiMaterialeAula201,
+  CreaArgomento201,
+  CreaArgomentoDto,
+  CreaAulaStudio201,
+  CreaAulaStudioDto,
   CreaCommentoDto,
+  CreaInvitoDto,
+  CreaMaterialeDto,
   CreaPostDto,
+  ElencaAuleStudio200,
+  ElencaAuleStudioParams,
   ElencaCommenti200,
   ElencaCommentiParams,
   ElencaPost200,
   ElencaPostParams,
+  EliminaArgomento200,
+  EliminaAulaStudio200,
   EliminaCommento200,
+  EliminaMaterialeAula200,
   EliminaPost200,
+  EntraInAulaStudio200,
   ErrorResponseDto,
   EsciDaProme200,
+  InvitaInAulaStudio201,
+  LeggiInvito200,
   LeggiMioProfilo200,
   LeggiPost200,
+  ModificaAulaStudio200,
+  ModificaAulaStudioDto,
   ModificaPost200,
   ModificaPostDto,
   PreautorizzaAllegato200,
   PreautorizzaAllegatoDto,
+  PreautorizzaMaterialeAula201,
+  PreautorizzaMaterialeDto,
+  PromuoviAModeratore200,
   PubblicaPost201,
+  RetrocediDaModeratore200,
+  RevocaPermesso200,
   RichiediCancellazioneAccount200,
   RichiediCodiceAccesso200,
   RichiestaCodiceDto,
+  RimuoviPartecipante200,
   StatoDelServizio200,
   VerificaCodiceAccesso200,
   VerificaCodiceDto
@@ -1170,6 +1196,1313 @@ export const useEliminaCommento = <TError = ErrorResponseDto,
       > => {
 
       const mutationOptions = getEliminaCommentoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Crea un'aula studio
+ */
+export const creaAulaStudio = (
+    creaAulaStudioDto: CreaAulaStudioDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<CreaAulaStudio201>(
+      {url: `/aule-studio`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: creaAulaStudioDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getCreaAulaStudioMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creaAulaStudio>>, TError,{data: CreaAulaStudioDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof creaAulaStudio>>, TError,{data: CreaAulaStudioDto}, TContext> => {
+
+const mutationKey = ['creaAulaStudio'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof creaAulaStudio>>, {data: CreaAulaStudioDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  creaAulaStudio(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreaAulaStudioMutationResult = NonNullable<Awaited<ReturnType<typeof creaAulaStudio>>>
+    export type CreaAulaStudioMutationBody = CreaAulaStudioDto
+    export type CreaAulaStudioMutationError = ErrorResponseDto
+
+    /**
+ * @summary Crea un'aula studio
+ */
+export const useCreaAulaStudio = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creaAulaStudio>>, TError,{data: CreaAulaStudioDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof creaAulaStudio>>,
+        TError,
+        {data: CreaAulaStudioDto},
+        TContext
+      > => {
+
+      const mutationOptions = getCreaAulaStudioMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Le aule di cui faccio parte
+ */
+export const elencaAuleStudio = (
+    params?: ElencaAuleStudioParams,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ElencaAuleStudio200>(
+      {url: `/aule-studio`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getElencaAuleStudioQueryKey = (params?: ElencaAuleStudioParams,) => {
+    return [
+    `/aule-studio`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getElencaAuleStudioQueryOptions = <TData = Awaited<ReturnType<typeof elencaAuleStudio>>, TError = ErrorResponseDto>(params?: ElencaAuleStudioParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaAuleStudio>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getElencaAuleStudioQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof elencaAuleStudio>>> = ({ signal }) => elencaAuleStudio(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof elencaAuleStudio>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ElencaAuleStudioQueryResult = NonNullable<Awaited<ReturnType<typeof elencaAuleStudio>>>
+export type ElencaAuleStudioQueryError = ErrorResponseDto
+
+
+export function useElencaAuleStudio<TData = Awaited<ReturnType<typeof elencaAuleStudio>>, TError = ErrorResponseDto>(
+ params: undefined |  ElencaAuleStudioParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaAuleStudio>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaAuleStudio>>,
+          TError,
+          Awaited<ReturnType<typeof elencaAuleStudio>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaAuleStudio<TData = Awaited<ReturnType<typeof elencaAuleStudio>>, TError = ErrorResponseDto>(
+ params?: ElencaAuleStudioParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaAuleStudio>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaAuleStudio>>,
+          TError,
+          Awaited<ReturnType<typeof elencaAuleStudio>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaAuleStudio<TData = Awaited<ReturnType<typeof elencaAuleStudio>>, TError = ErrorResponseDto>(
+ params?: ElencaAuleStudioParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaAuleStudio>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Le aule di cui faccio parte
+ */
+
+export function useElencaAuleStudio<TData = Awaited<ReturnType<typeof elencaAuleStudio>>, TError = ErrorResponseDto>(
+ params?: ElencaAuleStudioParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaAuleStudio>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getElencaAuleStudioQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Apre l'aula: partecipanti, argomenti e materiali in una sola risposta
+ */
+export const apriSalaAulaStudio = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ApriSalaAulaStudio200>(
+      {url: `/aule-studio/${id}/sala`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getApriSalaAulaStudioQueryKey = (id?: string,) => {
+    return [
+    `/aule-studio/${id}/sala`
+    ] as const;
+    }
+
+    
+export const getApriSalaAulaStudioQueryOptions = <TData = Awaited<ReturnType<typeof apriSalaAulaStudio>>, TError = ErrorResponseDto>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof apriSalaAulaStudio>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getApriSalaAulaStudioQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof apriSalaAulaStudio>>> = ({ signal }) => apriSalaAulaStudio(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof apriSalaAulaStudio>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ApriSalaAulaStudioQueryResult = NonNullable<Awaited<ReturnType<typeof apriSalaAulaStudio>>>
+export type ApriSalaAulaStudioQueryError = ErrorResponseDto
+
+
+export function useApriSalaAulaStudio<TData = Awaited<ReturnType<typeof apriSalaAulaStudio>>, TError = ErrorResponseDto>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof apriSalaAulaStudio>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof apriSalaAulaStudio>>,
+          TError,
+          Awaited<ReturnType<typeof apriSalaAulaStudio>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useApriSalaAulaStudio<TData = Awaited<ReturnType<typeof apriSalaAulaStudio>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof apriSalaAulaStudio>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof apriSalaAulaStudio>>,
+          TError,
+          Awaited<ReturnType<typeof apriSalaAulaStudio>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useApriSalaAulaStudio<TData = Awaited<ReturnType<typeof apriSalaAulaStudio>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof apriSalaAulaStudio>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Apre l'aula: partecipanti, argomenti e materiali in una sola risposta
+ */
+
+export function useApriSalaAulaStudio<TData = Awaited<ReturnType<typeof apriSalaAulaStudio>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof apriSalaAulaStudio>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getApriSalaAulaStudioQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Modifica un'aula studio
+ */
+export const modificaAulaStudio = (
+    id: string,
+    modificaAulaStudioDto: ModificaAulaStudioDto,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<ModificaAulaStudio200>(
+      {url: `/aule-studio/${id}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: modificaAulaStudioDto
+    },
+      options);
+    }
+  
+
+
+export const getModificaAulaStudioMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modificaAulaStudio>>, TError,{id: string;data: ModificaAulaStudioDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof modificaAulaStudio>>, TError,{id: string;data: ModificaAulaStudioDto}, TContext> => {
+
+const mutationKey = ['modificaAulaStudio'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof modificaAulaStudio>>, {id: string;data: ModificaAulaStudioDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  modificaAulaStudio(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ModificaAulaStudioMutationResult = NonNullable<Awaited<ReturnType<typeof modificaAulaStudio>>>
+    export type ModificaAulaStudioMutationBody = ModificaAulaStudioDto
+    export type ModificaAulaStudioMutationError = ErrorResponseDto
+
+    /**
+ * @summary Modifica un'aula studio
+ */
+export const useModificaAulaStudio = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modificaAulaStudio>>, TError,{id: string;data: ModificaAulaStudioDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof modificaAulaStudio>>,
+        TError,
+        {id: string;data: ModificaAulaStudioDto},
+        TContext
+      > => {
+
+      const mutationOptions = getModificaAulaStudioMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Elimina un'aula studio vuota
+ */
+export const eliminaAulaStudio = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<EliminaAulaStudio200>(
+      {url: `/aule-studio/${id}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getEliminaAulaStudioMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminaAulaStudio>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof eliminaAulaStudio>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['eliminaAulaStudio'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof eliminaAulaStudio>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  eliminaAulaStudio(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EliminaAulaStudioMutationResult = NonNullable<Awaited<ReturnType<typeof eliminaAulaStudio>>>
+    
+    export type EliminaAulaStudioMutationError = ErrorResponseDto
+
+    /**
+ * @summary Elimina un'aula studio vuota
+ */
+export const useEliminaAulaStudio = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminaAulaStudio>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof eliminaAulaStudio>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getEliminaAulaStudioMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Chiede di entrare: il titolo di ammissione è risolto su dato fresco
+ */
+export const entraInAulaStudio = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<EntraInAulaStudio200>(
+      {url: `/aule-studio/${id}/ingresso`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getEntraInAulaStudioMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof entraInAulaStudio>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof entraInAulaStudio>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['entraInAulaStudio'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof entraInAulaStudio>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  entraInAulaStudio(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EntraInAulaStudioMutationResult = NonNullable<Awaited<ReturnType<typeof entraInAulaStudio>>>
+    
+    export type EntraInAulaStudioMutationError = ErrorResponseDto
+
+    /**
+ * @summary Chiede di entrare: il titolo di ammissione è risolto su dato fresco
+ */
+export const useEntraInAulaStudio = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof entraInAulaStudio>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof entraInAulaStudio>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getEntraInAulaStudioMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Esce dall'aula, o rimuove qualcuno se si modera
+ */
+export const rimuoviPartecipante = (
+    id: string,
+    utenteId: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<RimuoviPartecipante200>(
+      {url: `/aule-studio/${id}/partecipanti/${utenteId}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getRimuoviPartecipanteMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rimuoviPartecipante>>, TError,{id: string;utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof rimuoviPartecipante>>, TError,{id: string;utenteId: string}, TContext> => {
+
+const mutationKey = ['rimuoviPartecipante'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rimuoviPartecipante>>, {id: string;utenteId: string}> = (props) => {
+          const {id,utenteId} = props ?? {};
+
+          return  rimuoviPartecipante(id,utenteId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RimuoviPartecipanteMutationResult = NonNullable<Awaited<ReturnType<typeof rimuoviPartecipante>>>
+    
+    export type RimuoviPartecipanteMutationError = ErrorResponseDto
+
+    /**
+ * @summary Esce dall'aula, o rimuove qualcuno se si modera
+ */
+export const useRimuoviPartecipante = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rimuoviPartecipante>>, TError,{id: string;utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof rimuoviPartecipante>>,
+        TError,
+        {id: string;utenteId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getRimuoviPartecipanteMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Promuove a moderatore
+ */
+export const promuoviAModeratore = (
+    id: string,
+    utenteId: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<PromuoviAModeratore200>(
+      {url: `/aule-studio/${id}/partecipanti/${utenteId}/moderazione`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getPromuoviAModeratoreMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof promuoviAModeratore>>, TError,{id: string;utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof promuoviAModeratore>>, TError,{id: string;utenteId: string}, TContext> => {
+
+const mutationKey = ['promuoviAModeratore'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof promuoviAModeratore>>, {id: string;utenteId: string}> = (props) => {
+          const {id,utenteId} = props ?? {};
+
+          return  promuoviAModeratore(id,utenteId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PromuoviAModeratoreMutationResult = NonNullable<Awaited<ReturnType<typeof promuoviAModeratore>>>
+    
+    export type PromuoviAModeratoreMutationError = ErrorResponseDto
+
+    /**
+ * @summary Promuove a moderatore
+ */
+export const usePromuoviAModeratore = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof promuoviAModeratore>>, TError,{id: string;utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof promuoviAModeratore>>,
+        TError,
+        {id: string;utenteId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getPromuoviAModeratoreMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Toglie il ruolo di moderatore
+ */
+export const retrocediDaModeratore = (
+    id: string,
+    utenteId: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<RetrocediDaModeratore200>(
+      {url: `/aule-studio/${id}/partecipanti/${utenteId}/moderazione`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getRetrocediDaModeratoreMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retrocediDaModeratore>>, TError,{id: string;utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof retrocediDaModeratore>>, TError,{id: string;utenteId: string}, TContext> => {
+
+const mutationKey = ['retrocediDaModeratore'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof retrocediDaModeratore>>, {id: string;utenteId: string}> = (props) => {
+          const {id,utenteId} = props ?? {};
+
+          return  retrocediDaModeratore(id,utenteId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RetrocediDaModeratoreMutationResult = NonNullable<Awaited<ReturnType<typeof retrocediDaModeratore>>>
+    
+    export type RetrocediDaModeratoreMutationError = ErrorResponseDto
+
+    /**
+ * @summary Toglie il ruolo di moderatore
+ */
+export const useRetrocediDaModeratore = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retrocediDaModeratore>>, TError,{id: string;utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof retrocediDaModeratore>>,
+        TError,
+        {id: string;utenteId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getRetrocediDaModeratoreMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Concede UN permesso
+ */
+export const concediPermesso = (
+    id: string,
+    utenteId: string,
+    permesso: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ConcediPermesso200>(
+      {url: `/aule-studio/${id}/partecipanti/${utenteId}/permessi/${permesso}`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getConcediPermessoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof concediPermesso>>, TError,{id: string;utenteId: string;permesso: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof concediPermesso>>, TError,{id: string;utenteId: string;permesso: string}, TContext> => {
+
+const mutationKey = ['concediPermesso'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof concediPermesso>>, {id: string;utenteId: string;permesso: string}> = (props) => {
+          const {id,utenteId,permesso} = props ?? {};
+
+          return  concediPermesso(id,utenteId,permesso,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConcediPermessoMutationResult = NonNullable<Awaited<ReturnType<typeof concediPermesso>>>
+    
+    export type ConcediPermessoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Concede UN permesso
+ */
+export const useConcediPermesso = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof concediPermesso>>, TError,{id: string;utenteId: string;permesso: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof concediPermesso>>,
+        TError,
+        {id: string;utenteId: string;permesso: string},
+        TContext
+      > => {
+
+      const mutationOptions = getConcediPermessoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Revoca UN permesso
+ */
+export const revocaPermesso = (
+    id: string,
+    utenteId: string,
+    permesso: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<RevocaPermesso200>(
+      {url: `/aule-studio/${id}/partecipanti/${utenteId}/permessi/${permesso}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getRevocaPermessoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revocaPermesso>>, TError,{id: string;utenteId: string;permesso: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof revocaPermesso>>, TError,{id: string;utenteId: string;permesso: string}, TContext> => {
+
+const mutationKey = ['revocaPermesso'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revocaPermesso>>, {id: string;utenteId: string;permesso: string}> = (props) => {
+          const {id,utenteId,permesso} = props ?? {};
+
+          return  revocaPermesso(id,utenteId,permesso,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevocaPermessoMutationResult = NonNullable<Awaited<ReturnType<typeof revocaPermesso>>>
+    
+    export type RevocaPermessoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Revoca UN permesso
+ */
+export const useRevocaPermesso = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revocaPermesso>>, TError,{id: string;utenteId: string;permesso: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof revocaPermesso>>,
+        TError,
+        {id: string;utenteId: string;permesso: string},
+        TContext
+      > => {
+
+      const mutationOptions = getRevocaPermessoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Invita qualcuno via email
+ */
+export const invitaInAulaStudio = (
+    id: string,
+    creaInvitoDto: CreaInvitoDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<InvitaInAulaStudio201>(
+      {url: `/aule-studio/${id}/inviti`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: creaInvitoDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getInvitaInAulaStudioMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof invitaInAulaStudio>>, TError,{id: string;data: CreaInvitoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof invitaInAulaStudio>>, TError,{id: string;data: CreaInvitoDto}, TContext> => {
+
+const mutationKey = ['invitaInAulaStudio'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof invitaInAulaStudio>>, {id: string;data: CreaInvitoDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  invitaInAulaStudio(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type InvitaInAulaStudioMutationResult = NonNullable<Awaited<ReturnType<typeof invitaInAulaStudio>>>
+    export type InvitaInAulaStudioMutationBody = CreaInvitoDto
+    export type InvitaInAulaStudioMutationError = ErrorResponseDto
+
+    /**
+ * @summary Invita qualcuno via email
+ */
+export const useInvitaInAulaStudio = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof invitaInAulaStudio>>, TError,{id: string;data: CreaInvitoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof invitaInAulaStudio>>,
+        TError,
+        {id: string;data: CreaInvitoDto},
+        TContext
+      > => {
+
+      const mutationOptions = getInvitaInAulaStudioMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Crea un argomento nell'aula
+ */
+export const creaArgomento = (
+    id: string,
+    creaArgomentoDto: CreaArgomentoDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<CreaArgomento201>(
+      {url: `/aule-studio/${id}/argomenti`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: creaArgomentoDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getCreaArgomentoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creaArgomento>>, TError,{id: string;data: CreaArgomentoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof creaArgomento>>, TError,{id: string;data: CreaArgomentoDto}, TContext> => {
+
+const mutationKey = ['creaArgomento'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof creaArgomento>>, {id: string;data: CreaArgomentoDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  creaArgomento(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreaArgomentoMutationResult = NonNullable<Awaited<ReturnType<typeof creaArgomento>>>
+    export type CreaArgomentoMutationBody = CreaArgomentoDto
+    export type CreaArgomentoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Crea un argomento nell'aula
+ */
+export const useCreaArgomento = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creaArgomento>>, TError,{id: string;data: CreaArgomentoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof creaArgomento>>,
+        TError,
+        {id: string;data: CreaArgomentoDto},
+        TContext
+      > => {
+
+      const mutationOptions = getCreaArgomentoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Elimina un argomento: i materiali restano e tornano sciolti
+ */
+export const eliminaArgomento = (
+    id: string,
+    argomentoId: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<EliminaArgomento200>(
+      {url: `/aule-studio/${id}/argomenti/${argomentoId}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getEliminaArgomentoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminaArgomento>>, TError,{id: string;argomentoId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof eliminaArgomento>>, TError,{id: string;argomentoId: string}, TContext> => {
+
+const mutationKey = ['eliminaArgomento'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof eliminaArgomento>>, {id: string;argomentoId: string}> = (props) => {
+          const {id,argomentoId} = props ?? {};
+
+          return  eliminaArgomento(id,argomentoId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EliminaArgomentoMutationResult = NonNullable<Awaited<ReturnType<typeof eliminaArgomento>>>
+    
+    export type EliminaArgomentoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Elimina un argomento: i materiali restano e tornano sciolti
+ */
+export const useEliminaArgomento = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminaArgomento>>, TError,{id: string;argomentoId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof eliminaArgomento>>,
+        TError,
+        {id: string;argomentoId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getEliminaArgomentoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Autorizza il caricamento di un materiale (i byte non passano di qui)
+ */
+export const preautorizzaMaterialeAula = (
+    id: string,
+    preautorizzaMaterialeDto: PreautorizzaMaterialeDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<PreautorizzaMaterialeAula201>(
+      {url: `/aule-studio/${id}/allegati/pre-autorizzazione`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: preautorizzaMaterialeDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getPreautorizzaMaterialeAulaMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preautorizzaMaterialeAula>>, TError,{id: string;data: PreautorizzaMaterialeDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof preautorizzaMaterialeAula>>, TError,{id: string;data: PreautorizzaMaterialeDto}, TContext> => {
+
+const mutationKey = ['preautorizzaMaterialeAula'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof preautorizzaMaterialeAula>>, {id: string;data: PreautorizzaMaterialeDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  preautorizzaMaterialeAula(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PreautorizzaMaterialeAulaMutationResult = NonNullable<Awaited<ReturnType<typeof preautorizzaMaterialeAula>>>
+    export type PreautorizzaMaterialeAulaMutationBody = PreautorizzaMaterialeDto
+    export type PreautorizzaMaterialeAulaMutationError = ErrorResponseDto
+
+    /**
+ * @summary Autorizza il caricamento di un materiale (i byte non passano di qui)
+ */
+export const usePreautorizzaMaterialeAula = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preautorizzaMaterialeAula>>, TError,{id: string;data: PreautorizzaMaterialeDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof preautorizzaMaterialeAula>>,
+        TError,
+        {id: string;data: PreautorizzaMaterialeDto},
+        TContext
+      > => {
+
+      const mutationOptions = getPreautorizzaMaterialeAulaMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Condivide un materiale
+ */
+export const condividiMaterialeAula = (
+    id: string,
+    creaMaterialeDto: CreaMaterialeDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<CondividiMaterialeAula201>(
+      {url: `/aule-studio/${id}/allegati`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: creaMaterialeDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getCondividiMaterialeAulaMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof condividiMaterialeAula>>, TError,{id: string;data: CreaMaterialeDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof condividiMaterialeAula>>, TError,{id: string;data: CreaMaterialeDto}, TContext> => {
+
+const mutationKey = ['condividiMaterialeAula'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof condividiMaterialeAula>>, {id: string;data: CreaMaterialeDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  condividiMaterialeAula(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CondividiMaterialeAulaMutationResult = NonNullable<Awaited<ReturnType<typeof condividiMaterialeAula>>>
+    export type CondividiMaterialeAulaMutationBody = CreaMaterialeDto
+    export type CondividiMaterialeAulaMutationError = ErrorResponseDto
+
+    /**
+ * @summary Condivide un materiale
+ */
+export const useCondividiMaterialeAula = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof condividiMaterialeAula>>, TError,{id: string;data: CreaMaterialeDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof condividiMaterialeAula>>,
+        TError,
+        {id: string;data: CreaMaterialeDto},
+        TContext
+      > => {
+
+      const mutationOptions = getCondividiMaterialeAulaMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Elimina un materiale
+ */
+export const eliminaMaterialeAula = (
+    id: string,
+    materialeId: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<EliminaMaterialeAula200>(
+      {url: `/aule-studio/${id}/allegati/${materialeId}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getEliminaMaterialeAulaMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminaMaterialeAula>>, TError,{id: string;materialeId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof eliminaMaterialeAula>>, TError,{id: string;materialeId: string}, TContext> => {
+
+const mutationKey = ['eliminaMaterialeAula'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof eliminaMaterialeAula>>, {id: string;materialeId: string}> = (props) => {
+          const {id,materialeId} = props ?? {};
+
+          return  eliminaMaterialeAula(id,materialeId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EliminaMaterialeAulaMutationResult = NonNullable<Awaited<ReturnType<typeof eliminaMaterialeAula>>>
+    
+    export type EliminaMaterialeAulaMutationError = ErrorResponseDto
+
+    /**
+ * @summary Elimina un materiale
+ */
+export const useEliminaMaterialeAula = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminaMaterialeAula>>, TError,{id: string;materialeId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof eliminaMaterialeAula>>,
+        TError,
+        {id: string;materialeId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getEliminaMaterialeAulaMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Stato dell'invito, incluso se il partecipante è ormai comparso
+ */
+export const leggiInvito = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<LeggiInvito200>(
+      {url: `/inviti/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getLeggiInvitoQueryKey = (id?: string,) => {
+    return [
+    `/inviti/${id}`
+    ] as const;
+    }
+
+    
+export const getLeggiInvitoQueryOptions = <TData = Awaited<ReturnType<typeof leggiInvito>>, TError = ErrorResponseDto>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiInvito>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getLeggiInvitoQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof leggiInvito>>> = ({ signal }) => leggiInvito(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof leggiInvito>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type LeggiInvitoQueryResult = NonNullable<Awaited<ReturnType<typeof leggiInvito>>>
+export type LeggiInvitoQueryError = ErrorResponseDto
+
+
+export function useLeggiInvito<TData = Awaited<ReturnType<typeof leggiInvito>>, TError = ErrorResponseDto>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiInvito>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiInvito>>,
+          TError,
+          Awaited<ReturnType<typeof leggiInvito>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiInvito<TData = Awaited<ReturnType<typeof leggiInvito>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiInvito>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiInvito>>,
+          TError,
+          Awaited<ReturnType<typeof leggiInvito>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiInvito<TData = Awaited<ReturnType<typeof leggiInvito>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiInvito>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Stato dell'invito, incluso se il partecipante è ormai comparso
+ */
+
+export function useLeggiInvito<TData = Awaited<ReturnType<typeof leggiInvito>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiInvito>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getLeggiInvitoQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Accetta l'invito: l'ingresso è preso in carico
+ */
+export const accettaInvito = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<AccettaInvito200>(
+      {url: `/inviti/${id}/accettazione`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getAccettaInvitoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof accettaInvito>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof accettaInvito>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['accettaInvito'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof accettaInvito>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  accettaInvito(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AccettaInvitoMutationResult = NonNullable<Awaited<ReturnType<typeof accettaInvito>>>
+    
+    export type AccettaInvitoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Accetta l'invito: l'ingresso è preso in carico
+ */
+export const useAccettaInvito = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof accettaInvito>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof accettaInvito>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getAccettaInvitoMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

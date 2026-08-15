@@ -82,6 +82,15 @@ const SchemaEnv = z.object({
     .string()
     .default('http://localhost:3500')
     .transform((valore) => valore.split(',').map((o) => o.trim()).filter(Boolean)),
+
+  /**
+   * Dove vive il sito, per i collegamenti che finiscono nelle email.
+   *
+   * Un invito porta chi lo riceve dentro l'applicazione, non dentro l'API: il
+   * suo indirizzo è quello del web, ed è l'unico punto in cui il server deve
+   * sapere dove il client è pubblicato.
+   */
+  URL_APP_WEB: z.url().default('http://localhost:3500'),
 });
 
 export type Env = z.infer<typeof SchemaEnv>;
