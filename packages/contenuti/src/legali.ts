@@ -59,7 +59,7 @@ export const PRIVACY_SEZIONI: readonly SezioneLegale[] = [
     id: 'conservazione',
     titolo: '5. Per quanto tempo li conserviamo',
     corpo:
-      'Finché il tuo account è attivo. Quando elimini l’account, il profilo scompare immediatamente, i tuoi post e commenti vengono anonimizzati e attribuiti a “Utente rimosso”, e i dati personali sono rimossi anche dai backup entro 30 giorni.',
+      'Finché il tuo account è attivo. Quando elimini l’account, il profilo scompare immediatamente, i tuoi post e commenti vengono anonimizzati e attribuiti a “Utente rimosso”, e i dati personali sono rimossi anche dai backup entro 30 giorni. Un materiale che hai caricato in un’aula studio resta invece accessibile a chi studia con te, con il solo nome di chi lo ha caricato reso anonimo: il contributo alla comunità sopravvive, il riferimento alla persona no.',
   },
   {
     id: 'diritti',
