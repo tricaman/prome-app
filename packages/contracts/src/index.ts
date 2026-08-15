@@ -183,6 +183,21 @@ export interface ProfiloResponse {
  * l'onboarding è completo se e solo se ci sono tutti e quattro. L'università è
  * autodichiarata e non viene verificata.
  */
+/**
+ * Cambio delle regole di privacy.
+ *
+ * I due assi sono **indipendenti** e si cambiano uno alla volta: non esiste un
+ * «livello di privacy» unico, e nessuna combinazione dei due è un errore da
+ * correggere. Almeno uno dei due campi dev'essere presente; quello omesso resta
+ * al valore che aveva — non esiste lo stato «non impostato».
+ */
+export interface AggiornaImpostazioniPrivacyRequest {
+  /** Chi può contattarti e invitarti. */
+  contattabilita?: Visibilita;
+  /** Chi vede i tuoi contenuti. */
+  visibilita?: Visibilita;
+}
+
 export interface CompletaProfiloRequest {
   nome: string;
   cognome: string;

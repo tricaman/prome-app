@@ -26,6 +26,8 @@ import type {
 
 import type {
   AccettaInvito200,
+  AggiornaMiaPrivacy200,
+  AggiornaPrivacyDto,
   ApriSalaAulaStudio200,
   CommentaPost201,
   CompletaMioProfilo200,
@@ -527,6 +529,70 @@ export const useCompletaMioProfilo = <TError = ErrorResponseDto,
       > => {
 
       const mutationOptions = getCompletaMioProfiloMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Cambia chi può contattarti e chi vede i tuoi contenuti
+ */
+export const aggiornaMiaPrivacy = (
+    aggiornaPrivacyDto: AggiornaPrivacyDto,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<AggiornaMiaPrivacy200>(
+      {url: `/profilo/me/privacy`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: aggiornaPrivacyDto
+    },
+      options);
+    }
+  
+
+
+export const getAggiornaMiaPrivacyMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof aggiornaMiaPrivacy>>, TError,{data: AggiornaPrivacyDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof aggiornaMiaPrivacy>>, TError,{data: AggiornaPrivacyDto}, TContext> => {
+
+const mutationKey = ['aggiornaMiaPrivacy'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof aggiornaMiaPrivacy>>, {data: AggiornaPrivacyDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  aggiornaMiaPrivacy(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AggiornaMiaPrivacyMutationResult = NonNullable<Awaited<ReturnType<typeof aggiornaMiaPrivacy>>>
+    export type AggiornaMiaPrivacyMutationBody = AggiornaPrivacyDto
+    export type AggiornaMiaPrivacyMutationError = ErrorResponseDto
+
+    /**
+ * @summary Cambia chi può contattarti e chi vede i tuoi contenuti
+ */
+export const useAggiornaMiaPrivacy = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof aggiornaMiaPrivacy>>, TError,{data: AggiornaPrivacyDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof aggiornaMiaPrivacy>>,
+        TError,
+        {data: AggiornaPrivacyDto},
+        TContext
+      > => {
+
+      const mutationOptions = getAggiornaMiaPrivacyMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

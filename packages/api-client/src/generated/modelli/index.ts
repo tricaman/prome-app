@@ -7,6 +7,10 @@
  */
 
 export * from './accettaInvito200';
+export * from './aggiornaMiaPrivacy200';
+export * from './aggiornaPrivacyDto';
+export * from './aggiornaPrivacyDtoContattabilita';
+export * from './aggiornaPrivacyDtoVisibilita';
 export * from './allegatoDto';
 export * from './allegatoDtoTipo';
 export * from './apriSalaAulaStudio200';

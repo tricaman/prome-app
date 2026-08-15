@@ -5,7 +5,7 @@ import { ApiWrappedResponse, ResponseMessage } from '../../common/decorators';
 import { ProfiloService } from '../profilo/profilo.service';
 import { MISURAZIONI, type MisurazioniDiUtilizzo } from '../../infrastruttura/misurazioni/misurazioni';
 import type { UtenteDiDominio } from '../profilo/porta-identita-utente';
-import { CompletaProfiloDto, ProfiloDto } from './dtos/profilo.dto';
+import { AggiornaPrivacyDto, CompletaProfiloDto, ProfiloDto } from './dtos/profilo.dto';
 import { Utente } from './guardia-accesso';
 
 /**
@@ -47,5 +47,27 @@ export class ProfiloController {
     // misura di prodotto.
     this.misurazioni.registra('onboarding_completato', { utenteId: utente.id });
     return profilo;
+  }
+
+  /**
+   * Le regole di privacy: il solo gesto che le cambia.
+   *
+   * Nessun evento di misurazione. Quante persone aprono i propri contenuti
+   * sarebbe una domanda legittima, ma l'elenco degli eventi è chiuso per
+   * scelta, e una decisione di privacy contata è una decisione che comincia a
+   * lasciare una traccia altrove.
+   */
+  @Put('me/privacy')
+  @ApiOperation({
+    operationId: 'aggiornaMiaPrivacy',
+    summary: 'Cambia chi può contattarti e chi vede i tuoi contenuti',
+  })
+  @ApiWrappedResponse({ type: ProfiloDto })
+  @ResponseMessage('successes.PRIVACY_AGGIORNATA')
+  aggiornaPrivacy(
+    @Utente() utente: UtenteDiDominio,
+    @Body() corpo: AggiornaPrivacyDto,
+  ): Promise<ProfiloResponse> {
+    return this.profilo.aggiornaImpostazioni(utente.id, corpo);
   }
 }

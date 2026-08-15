@@ -29,6 +29,17 @@
 
 `AvvisiInUscita` è una porta (`infrastruttura/avvisi-in-uscita/canale-email.ts`) con due adattatori, scelti da `CANALE_EMAIL`. Quello di sviluppo **scrive il codice nei log e non manda niente**: in produzione l'avvio si ferma (`CANALE_EMAIL=sviluppo` + `NODE_ENV=production` = fail-fast), perché un codice nei log è un codice regalato. Quello SMTP parla con un fornitore qualunque — Brevo, Resend, altri: lo spike che deve sceglierne uno cambia quattro valori nel file dei segreti, non una riga di codice.
 
+## Impostazioni di privacy (E6.1)
+
+Profilo e Impostazioni di privacy **nascono nella stessa scrittura**, al valore più chiuso: fra le due non esiste un istante in cui il profilo c'è e le sue regole no, perché in quell'istante non si saprebbe chi vede cosa (IP1). Non esiste lo stato «non impostato», e `PUT /profilo/me/privacy` è **l'unico gesto che le cambia**.
+
+- **IP2 senza doverselo ricordare**: l'aggiornamento tocca **solo gli assi indicati**, quindi l'asse omesso resta al valore che aveva e non può essere azzerato. Una richiesta con nessuno dei due campi non è malformata, è un cambio che non cambia niente: `PR009`, 422, e la regola vive nel modulo — non nel DTO.
+- **IP3 — i due assi sono indipendenti**: nessun vincolo di coerenza fra `contattabilita` e `visibilita`, ogni combinazione è legittima. Non introdurre un «livello di privacy» unico: sarebbe esattamente il modello che il dominio ha rifiutato.
+- **IP4 — nessun altro le tocca**: pubblicare un post o entrare in un'aula non le cambia come effetto collaterale.
+- **Nessun evento emesso, e non è una dimenticanza.** Se nessun altro le modifica non c'è nulla da propagare, e una decisione di privacy replicata sarebbe una decisione presa su un dato vecchio: chi deve saperle le interroga alla lettura (`autoriVisibiliA`). È lo stesso motivo per cui il cambio vale subito, senza finestra (SE2). Non emettere nemmeno una misurazione: contare quante persone aprono i propri contenuti è una domanda legittima, ma è anche una decisione di privacy che comincia a lasciare una traccia altrove.
+- **`contattabilita` oggi non è applicata da nessuna regola**, ed è scritto qui perché non si scopra leggendo il codice: gli inviti viaggiano per **indirizzo email**, che può non avere un account, e verificarla lì direbbe a chi invita se quella persona è iscritta a Prome — un oracolo di esistenza in cambio di una funzione che ancora non c'è. Per questo i client non la mostrano: l'API la accetta e la conserva, l'interfaccia non promette una protezione che non esiste.
+- I test stanno in `test/privacy.spec.ts` e provano il difetto invisibile per definizione: che il post di un nuovo iscritto **non si veda**, che passando a `PUBBLICO` compaia alla lettura successiva e che tornando a `PRIVATO` sparisca dal feed **e dal link diretto** — i due punti separatamente, perché sparire da uno solo è il modo tipico in cui quest'area si rompe.
+
 ## Email transazionali: un involucro solo
 
 **In `canale-email-smtp.ts` non si scrive HTML.** Un'email si dichiara come una sequenza di **blocchi** (`modello-email/blocchi.ts`) e passa da `componiEmail`, che le dà l'involucro comune: stessa scheda, stessa larghezza, stesso marchio in testa, stesso piè di pagina. Non è una convenzione da ricordare, è l'unica strada — chi aggiunge un'email non ha modo di ottenere un involucro diverso, che è la sola forma di coerenza che non si consuma nel tempo.

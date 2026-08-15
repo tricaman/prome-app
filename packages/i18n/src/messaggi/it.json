@@ -509,19 +509,17 @@
       "modificaProfilo": "Modifica profilo",
       "cambiaFoto": "Cambia foto",
       "privacy": "Privacy",
-      "contatto": {
-        "titolo": "Chi può contattarti",
-        "testo": "Chi può scriverti in privato e invitarti in aule studio e gruppi.",
-        "privato": "Solo chi è già nei tuoi gruppi",
-        "ateneo": "Chi studia nel tuo ateneo",
-        "pubblico": "Qualunque studente su Prome"
-      },
       "contenuti": {
-        "titolo": "Chi può vedere i tuoi contenuti",
-        "testo": "Chi vede i tuoi post in bacheca, i materiali che carichi e il tuo profilo pubblico su prome.app.",
-        "privato": "Solo i tuoi gruppi.",
+        "titolo": "Chi vede quello che scrivi",
+        "testo": "Vale per i post e i commenti che pubblichi in bacheca, compresi quelli già scritti: quello che scegli qui cambia subito anche il passato. I materiali di un'aula studio seguono le regole dell'aula, non questa.",
+        "privato": "Solo tu",
         "ateneo": "Solo chi studia nel tuo ateneo",
-        "pubblico": "Tutti gli studenti iscritti a Prome"
+        "pubblico": "Tutti gli studenti iscritti a Prome, mai il web"
+      },
+      "visibilita": {
+        "privato": "Privato",
+        "ateneo": "Ateneo",
+        "pubblico": "Pubblico"
       },
       "aspetto": "Aspetto e notifiche",
       "tema": "Tema",

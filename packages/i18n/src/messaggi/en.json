@@ -509,19 +509,17 @@
       "modificaProfilo": "Edit profile",
       "cambiaFoto": "Change photo",
       "privacy": "Privacy",
-      "contatto": {
-        "titolo": "Who can contact you",
-        "testo": "Who can message you privately and invite you to study rooms and groups.",
-        "privato": "Only people already in your groups",
-        "ateneo": "Anyone studying at your university",
-        "pubblico": "Any student on Prome"
-      },
       "contenuti": {
-        "titolo": "Who can see your content",
-        "testo": "Who sees your posts on the board, the materials you upload and your public profile on prome.app.",
-        "privato": "Only your groups.",
+        "titolo": "Who sees what you write",
+        "testo": "It covers the posts and comments you publish on the board, including the ones already written: what you choose here changes the past too, straight away. Materials in a study room follow the room's own rules, not this one.",
+        "privato": "Only you",
         "ateneo": "Only people studying at your university",
-        "pubblico": "Every student signed up to Prome"
+        "pubblico": "Every student signed up to Prome, never the open web"
+      },
+      "visibilita": {
+        "privato": "Private",
+        "ateneo": "University",
+        "pubblico": "Public"
       },
       "aspetto": "Appearance and notifications",
       "tema": "Theme",

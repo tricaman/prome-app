@@ -19,6 +19,8 @@ export const ProfiloErrorCode = {
   ACCESSO_RICHIESTO: 'PR006',
   INVIO_CODICE_FALLITO: 'PR007',
   VERIFICA_FALLITA: 'PR008',
+  /** IP2: si cambia un asse o l'altro, ma una richiesta vuota non è un cambio. */
+  PRIVACY_SENZA_MODIFICHE: 'PR009',
 } as const;
 
 export type ProfiloErrorCode = (typeof ProfiloErrorCode)[keyof typeof ProfiloErrorCode];

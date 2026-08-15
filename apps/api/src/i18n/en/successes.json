@@ -32,5 +32,6 @@
   "MATERIALE_CARICATO": "Material shared",
   "MATERIALE_ELIMINATO": "Material deleted",
   "MESSAGGIO_INVIATO": "Message sent",
-  "MESSAGGI_ELENCATI": "Conversation loaded"
+  "MESSAGGI_ELENCATI": "Conversation loaded",
+  "PRIVACY_AGGIORNATA": "Privacy settings updated"
 }

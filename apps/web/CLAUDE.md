@@ -79,6 +79,12 @@ Due aree, due cornici: il sito pubblico usa `SiteShell`, l'app usa `AppShell` (c
 - I dati della sessione dimostrativa vivono in `content/sessione.ts`: quando arriverà l'autenticazione, quel file sparisce e le schermate leggono la sessione reale senza cambiare forma.
 - I permessi di un'aula studio si gestiscono con `components/app/sala/permessi.ts`: tre permessi indipendenti, insieme vuoto = sola lettura, e un Moderatore li ha sempre tutti e tre (`bloccatoAcceso` sullo `Switch`, non nascosto).
 
+### Impostazioni di privacy
+
+Le regole di privacy si mostrano **solo come il server le ha confermate**: `impostazioni-privacy.tsx` legge il profilo e scrive con `useApiMutation`, senza alcuno stato locale. Niente aggiornamento ottimistico qui, mai — un valore a schermo che non è stato salvato è la bugia peggiore che questa schermata possa dire, perché chi legge «Pubblico» crede di essere visibile e nessuno lo smentirà. I valori sono quelli del contratto (`PRIVATO|ATENEO|PUBBLICO`); le etichette e le descrizioni stanno in i18n e devono descrivere **ciò che il server applica davvero**, non il modello di dominio nella sua interezza.
+
+Per lo stesso motivo l'interfaccia mostra un asse solo, la visibilità dei contenuti: la contattabilità è un valore vero e salvato, ma **nessuna regola la legge ancora** (vedi `apps/api/CLAUDE.md`), e un interruttore che non protegge da niente è peggio di un interruttore che manca. Quando qualcosa la applicherà, il riquadro torna.
+
 ## Marchio
 
 Logo e marchio denominativo sono quelli storici del prodotto: `public/logo-prome.svg` per il segno e `components/layout/wordmark.tsx` per la scritta (tracciati originali, non ridisegnati). La scritta usa `currentColor`, quindi non servono varianti per fondo chiaro e scuro. Non sostituirli con testo tipografico.

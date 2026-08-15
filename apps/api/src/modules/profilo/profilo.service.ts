@@ -1,5 +1,9 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import type { CompletaProfiloRequest, ProfiloResponse } from '@prome/contracts';
+import type {
+  AggiornaImpostazioniPrivacyRequest,
+  CompletaProfiloRequest,
+  ProfiloResponse,
+} from '@prome/contracts';
 import { PrismaService } from '../../database/prisma.service';
 import { AppException } from '../../common/exceptions';
 import { ProfiloErrorCode } from './constants/error-codes';
@@ -93,6 +97,54 @@ export class ProfiloService {
         universita: dati.universita.trim(),
         corso: dati.corso.trim(),
         onboardingCompletato: true,
+      },
+      include: { impostazioniPrivacy: true },
+    });
+
+    return this.perIlClient(profilo);
+  }
+
+  /**
+   * Cambia le regole di privacy: l'unico gesto che le tocca (IP4).
+   *
+   * Si aggiornano **solo gli assi indicati**, ed è ciò che rende vero IP2 senza
+   * doverselo ricordare: l'asse omesso resta al valore che aveva, e non esiste
+   * lo stato «non impostato». I due assi non si vincolano a vicenda (IP3), per
+   * cui qui non c'è alcuna regola di coerenza da applicare — ogni combinazione
+   * è legittima, e introdurne una reintrodurrebbe il «livello di privacy» che
+   * il modello ha rifiutato.
+   *
+   * Non emette alcun evento: se nessun altro le modifica, non c'è nulla da
+   * propagare — e una decisione di privacy replicata sarebbe una decisione
+   * presa su un dato vecchio. Chi deve saperle le interroga alla lettura, che
+   * è anche il motivo per cui il cambio vale subito, senza finestra (SE2).
+   */
+  async aggiornaImpostazioni(
+    utenteId: string,
+    dati: AggiornaImpostazioniPrivacyRequest,
+  ): Promise<ProfiloResponse> {
+    if (!dati.contattabilita && !dati.visibilita) {
+      throw new AppException(
+        ProfiloErrorCode.PRIVACY_SENZA_MODIFICHE,
+        'PRIVACY_SENZA_MODIFICHE',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    // Che il profilo esista è responsabilità del primo ingresso; le
+    // impostazioni nascono con lui, quindi qui c'è sempre qualcosa da
+    // aggiornare (IP1).
+    await this.perUtente(utenteId);
+
+    const profilo = await this.prisma.profilo.update({
+      where: { utenteId },
+      data: {
+        impostazioniPrivacy: {
+          update: {
+            ...(dati.contattabilita ? { contattabilita: dati.contattabilita } : {}),
+            ...(dati.visibilita ? { visibilita: dati.visibilita } : {}),
+          },
+        },
       },
       include: { impostazioniPrivacy: true },
     });

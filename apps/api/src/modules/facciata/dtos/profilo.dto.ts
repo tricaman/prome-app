@@ -1,7 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, Length } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsOptional, IsString, Length } from 'class-validator';
 import { Transform } from 'class-transformer';
 import type {
+  AggiornaImpostazioniPrivacyRequest,
   CompletaProfiloRequest,
   ImpostazioniDiPrivacyResponse,
   ProfiloResponse,
@@ -74,4 +75,25 @@ export class CompletaProfiloDto implements CompletaProfiloRequest {
   @IsString()
   @Length(2, 160)
   corso!: string;
+}
+
+/**
+ * Il cambio delle regole di privacy.
+ *
+ * Entrambi i campi sono facoltativi perché **i due assi si cambiano uno alla
+ * volta e non si vincolano a vicenda** (IP3): quello omesso resta al valore
+ * che aveva. Che almeno uno sia presente non è una regola di forma ma di
+ * dominio, e vive nel modulo — una richiesta vuota non è malformata, è un
+ * cambio che non cambia niente.
+ */
+export class AggiornaPrivacyDto implements AggiornaImpostazioniPrivacyRequest {
+  @ApiPropertyOptional({ enum: VISIBILITA, description: 'Chi può scriverti e invitarti' })
+  @IsOptional()
+  @IsEnum(VISIBILITA)
+  contattabilita?: Visibilita;
+
+  @ApiPropertyOptional({ enum: VISIBILITA, description: 'Chi vede i tuoi contenuti' })
+  @IsOptional()
+  @IsEnum(VISIBILITA)
+  visibilita?: Visibilita;
 }

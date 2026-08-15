@@ -288,6 +288,59 @@
         ]
       }
     },
+    "/profilo/me/privacy": {
+      "put": {
+        "operationId": "aggiornaMiaPrivacy",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AggiornaPrivacyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ProfiloDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cambia chi può contattarti e chi vede i tuoi contenuti",
+        "tags": [
+          "profilo"
+        ]
+      }
+    },
     "/bacheca/allegati/pre-autorizzazione": {
       "post": {
         "operationId": "preautorizzaAllegato",
@@ -2578,6 +2631,29 @@
           "universita",
           "corso"
         ]
+      },
+      "AggiornaPrivacyDto": {
+        "type": "object",
+        "properties": {
+          "contattabilita": {
+            "type": "string",
+            "enum": [
+              "PRIVATO",
+              "ATENEO",
+              "PUBBLICO"
+            ],
+            "description": "Chi può scriverti e invitarti"
+          },
+          "visibilita": {
+            "type": "string",
+            "enum": [
+              "PRIVATO",
+              "ATENEO",
+              "PUBBLICO"
+            ],
+            "description": "Chi vede i tuoi contenuti"
+          }
+        }
       },
       "PreautorizzaAllegatoRispostaDto": {
         "type": "object",
