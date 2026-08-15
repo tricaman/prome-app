@@ -105,6 +105,12 @@ function PassoCodice({ email, onCambiaEmail }: { email: string; onCambiaEmail: (
   const t = useTranslations('app.accesso');
   const router = useRouter();
   const [codice, setCodice] = useState('');
+  /**
+   * Cambia a ogni tentativo fallito e rimonta il campo: è il modo di
+   * riportarlo vuoto e col fuoco sulla prima casella senza dargli una seconda
+   * memoria da tenere allineata.
+   */
+  const [tentativo, setTentativo] = useState(0);
 
   const verifica = useApiMutation<VerificaCodiceAccesso200, VerificaCodiceDto>({
     mutationFn: (dati: VerificaCodiceDto) => verificaCodiceAccesso(dati),
@@ -120,10 +126,22 @@ function PassoCodice({ email, onCambiaEmail }: { email: string; onCambiaEmail: (
       const riattivato = data.cancellazioneAnnullata === true;
       if (riattivato) avvisatore().info(t('riattivato'));
     },
+    // Il messaggio lo mostra già l'avviso, tradotto dal server. Qui resta da
+    // svuotare il campo: lasciarlo pieno, con le caselle nello stato di chi ha
+    // compilato bene, farebbe cercare il problema altrove — e ripremere
+    // «Entra» brucerebbe un altro dei tre tentativi.
+    onError: () => {
+      setCodice('');
+      setTentativo((precedente) => precedente + 1);
+    },
   });
 
   const rinvio = useApiMutation<unknown, RichiestaCodiceDto>({
     mutationFn: (dati: RichiestaCodiceDto) => richiediCodiceAccesso(dati),
+    onSuccess: () => {
+      setCodice('');
+      setTentativo((precedente) => precedente + 1);
+    },
   });
 
   const entra = (valore = codice) => verifica.mutate({ email, codice: valore });
@@ -133,6 +151,7 @@ function PassoCodice({ email, onCambiaEmail }: { email: string; onCambiaEmail: (
       <Intestazione titolo={t('codiceTitolo')} sommario={t('codiceSommario', { email })} />
 
       <CampoCodice
+        key={tentativo}
         etichetta={t('codice')}
         aiuto={t('codiceAiuto')}
         valore={codice}

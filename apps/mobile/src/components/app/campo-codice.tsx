@@ -24,23 +24,26 @@ export function CampoCodice({ onCompletato }: { onCompletato?: (codice: string) 
   const scrivi = (indice: number, valore: string) => {
     const pulito = valore.replace(/\D/g, '');
 
-    setCifre((precedenti) => {
-      const prossime = [...precedenti];
-      if (!pulito) {
-        prossime[indice] = '';
-        return prossime;
-      }
+    // Le prossime cifre si calcolano **fuori** dall'aggiornamento di stato.
+    // Dentro, la chiamata a `onCompletato` renderebbe l'aggiornamento non
+    // puro, e React lo esegue due volte in sviluppo: partirebbero due
+    // verifiche per una sola digitazione, cioè due tentativi bruciati su tre.
+    const prossime = [...cifre];
+    if (!pulito) {
+      prossime[indice] = '';
+    } else {
       // Incollando il codice intero si riempiono le caselle da qui in poi.
       for (let scorrimento = 0; scorrimento < pulito.length; scorrimento += 1) {
         const posizione = indice + scorrimento;
         if (posizione < LUNGHEZZA) prossime[posizione] = pulito[scorrimento]!;
       }
-      if (prossime.every((cifra) => cifra)) onCompletato?.(prossime.join(''));
-      return prossime;
-    });
+    }
+
+    setCifre(prossime);
 
     if (pulito) {
       caselle.current[Math.min(indice + pulito.length, LUNGHEZZA - 1)]?.focus();
+      if (prossime.every((cifra) => cifra)) onCompletato?.(prossime.join(''));
     }
   };
 
@@ -50,6 +53,7 @@ export function CampoCodice({ onCompletato }: { onCompletato?: (codice: string) 
         {cifre.map((cifra, indice) => (
           <TextInput
             key={indice}
+            autoFocus={indice === 0}
             ref={(elemento) => {
               caselle.current[indice] = elemento;
             }}
