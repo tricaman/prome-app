@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Linking, Pressable, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { pesoLeggibile } from '@prome/app-core';
 import {
   commentaPost,
   eliminaCommento,
   getElencaCommentiQueryKey,
+  getElencaPostQueryKey,
   useElencaCommenti,
+  useLeggiMioProfilo,
   useLeggiPost,
   type AllegatoDto,
   type CommentoDto,
@@ -15,6 +17,7 @@ import { LUNGHEZZA_MASSIMA_COMMENTO } from '@prome/contracts';
 import { useTema } from '@/theme';
 import { useApiMutation, useT } from '@/hooks';
 import { TarghettaAllegato } from '@/components/contenuti';
+import { SegnalaEBlocca } from '@/components/app/segnala-e-blocca';
 import { QueryBoundary } from '@/components/feedback';
 import { Avatar, Button, Card, Icona, Input, Intestazione, Screen, Text } from '@/components/ui';
 
@@ -70,6 +73,23 @@ export default function SchermataPost() {
                   {data.allegati.map((allegato) => (
                     <RigaAllegato key={allegato.id} allegato={allegato} />
                   ))}
+
+                  {/* Sui contenuti altrui, mai sui propri né su un autore
+                      rimosso: da qui ci si difende (linea guida 1.2). */}
+                  {!data.puoModificare && !data.autore.rimosso ? (
+                    <View style={{ marginTop: tema.spaziatura[3] }}>
+                      <SegnalaEBlocca
+                        tipo="POST"
+                        soggettoId={data.id}
+                        autore={{ utenteId: data.autore.utenteId, nome: autore }}
+                        invalidaAlBlocco={[getElencaPostQueryKey()]}
+                        // Bloccato l'autore, il post non esiste più per chi
+                        // guarda: restare qui mostrerebbe un errore per una
+                        // cosa riuscita.
+                        onBloccato={() => router.back()}
+                      />
+                    </View>
+                  ) : null}
                 </Card>
 
                 <Commenti postId={id} />
@@ -182,6 +202,7 @@ function RigaCommento({
 }) {
   const tema = useTema();
   const t = useT();
+  const profilo = useLeggiMioProfilo();
   const autore =
     [commento.autore.nome, commento.autore.cognome].filter(Boolean).join(' ') ||
     t('comune.utenteRimosso');
@@ -190,6 +211,13 @@ function RigaCommento({
     mutationFn: () => eliminaCommento(commento.id),
     invalida: [chiaveElenco as never],
   });
+
+  // Sui commenti degli ALTRI, non dove manca il permesso di eliminare:
+  // `puoEliminare` è vero anche per il proprietario del post sui commenti
+  // altrui — che è esattamente chi deve potersi difendere. X e «Segnala»
+  // convivono.
+  const mio = profilo.data?.data.utenteId === commento.autore.utenteId;
+  const segnalabile = !mio && !commento.autore.rimosso;
 
   return (
     <View style={{ flexDirection: 'row', gap: tema.spaziatura[3] }}>
@@ -222,6 +250,19 @@ function RigaCommento({
         <Text variante="corpo" style={{ marginTop: 4 }}>
           {commento.testo}
         </Text>
+        {segnalabile ? (
+          <View style={{ marginTop: tema.spaziatura[2] }}>
+            <SegnalaEBlocca
+              tipo="COMMENTO"
+              soggettoId={commento.id}
+              autore={{ utenteId: commento.autore.utenteId, nome: autore }}
+              variante="compatta"
+              // Bloccato l'autore del commento, spariscono i suoi commenti
+              // qui e i suoi post dal feed.
+              invalidaAlBlocco={[chiaveElenco, getElencaPostQueryKey()]}
+            />
+          </View>
+        ) : null}
       </View>
     </View>
   );

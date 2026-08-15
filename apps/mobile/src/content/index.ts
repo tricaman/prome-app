@@ -34,5 +34,6 @@ export const rotte = {
   gruppo: (id: string): Href => ({ pathname: '/gruppo/[id]', params: { id } }),
   impostazioni: (): Href => '/impostazioni',
   eliminaAccount: (): Href => '/impostazioni/elimina-account',
+  utentiBloccati: (): Href => '/impostazioni/utenti-bloccati',
 } as const;
 

@@ -9,32 +9,28 @@
 
 ## 1. Due cose bloccano la sottomissione, e non sono materiale
 
-### 1.1 Segnalazione e blocco non esistono — Apple rifiuterà (linea guida 1.2)
+### 1.1 Segnalazione e blocco esistono (15 agosto 2026) — la linea guida 1.2 è coperta
 
-Prome è un'app con **contenuti generati dagli utenti**: post, commenti, messaggi d'aula, materiali.
-La linea guida 1.2 di App Store Review chiede quattro cose a chi li ospita:
+Prome ospita **contenuti generati dagli utenti**, e la linea guida 1.2 di App Store Review chiede
+quattro cose. Dove stanno, oggi:
 
-1. un **filtro** dei contenuti offensivi;
-2. un modo per **segnalare** un contenuto, con risposta tempestiva;
-3. la possibilità di **bloccare** chi abusa;
-4. **contatti pubblici** pubblicati.
+1. **regole pubbliche con tolleranza zero** → https://prome.app/linee-guida, con l'impegno di
+   risposta **entro 24 ore**;
+2. **segnalare un contenuto** → azione «Segnala» su ogni post e commento altrui (web e app), motivo
+   da elenco chiuso; la segnalazione scrive una riga e manda un'email a `EMAIL_SUPPORTO`;
+3. **bloccare chi abusa** → «Blocca {nome}» nello stesso pannello: bidirezionale in bacheca, spegne
+   le notifiche push di quella persona; elenco e sblocco in Impostazioni;
+4. **contatti pubblici** → «Chi siamo» e privacy policy sul sito.
 
-Oggi nel prodotto non esiste nulla di tutto questo: non c'è una chiave di traduzione, un endpoint o
-un bottone che riguardi la segnalazione o il blocco. Il punto 4 è coperto (il sito ha «Chi siamo» e
-la privacy policy), i primi tre no.
+**L'impegno delle 24 ore è operativo, non decorativo**: l'email di segnalazione arriva alla casella
+`EMAIL_SUPPORTO` (obbligatoria in produzione: senza, l'API non parte) e le linee guida promettono
+rimozione dei contenuti che violano le regole entro un giorno. La rimozione la fa l'operatore via
+database — non esiste un pannello admin, ed è una scelta: la riga di segnalazione porta
+l'identificativo del contenuto, e l'email un estratto di 300 caratteri per decidere.
 
-**Non è materiale da compilare, è una funzione da costruire**, e non è in nessun work package del
-piano. La forma minima che soddisfa la linea guida senza inventare un prodotto di moderazione:
-
-- `POST /segnalazioni` con soggetto (post, commento, messaggio) e motivo da un **elenco chiuso** —
-  un campo di testo libero diventa un canale di comunicazione da presidiare;
-- una lista di **blocchi** posseduta da Profilo, applicata **in lettura** dove già si risolve la
-  visibilità (`elenca`, `leggi`, la cronologia dell'aula): chi blocca non vede più, e non è visto;
-- una coda che qualcuno guarda. Senza questa terza parte le prime due sono una promessa falsa, ed è
-  esattamente il tipo di riga che questo progetto ha già tolto due volte dalle impostazioni.
-
-Google Play ha una policy analoga sui contenuti generati dagli utenti, applicata con meno rigore in
-revisione ma con lo stesso esito quando arriva una segnalazione.
+Confini dichiarati: il blocco vale per la bacheca (la superficie non scelta) e non filtra aule o
+gruppi già condivisi, dove restano uscita e moderazione; si segnalano post e commenti, non i
+messaggi d'aula (spazi a moderazione propria).
 
 ### 1.2 Gli account esterni sono tuoi
 
@@ -298,6 +294,12 @@ Come provare le funzioni principali:
 
 L'app non chiede alcun permesso di sistema: non usa fotocamera, microfono, posizione, rubrica
 né notifiche. Non contiene SDK pubblicitari né di analitica.
+
+Contenuti generati dagli utenti (linea guida 1.2): ogni post e commento di altri ha
+un'azione «Segnala» con motivi predefiniti (la esaminiamo entro 24 ore) e, nello stesso
+pannello, «Blocca»: chi blocchi sparisce dalla tua bacheca e tu dalla sua. L'elenco dei
+bloccati è in Impostazioni → Utenti bloccati. Le regole della community sono pubbliche:
+https://prome.app/linee-guida
 ```
 
 **Account di prova**: da creare prima della sottomissione, con dati non riferibili a una persona

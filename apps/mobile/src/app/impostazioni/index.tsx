@@ -79,6 +79,13 @@ export default function SchermataImpostazioni() {
           )}
         </QueryBoundary>
 
+        <Button
+          titolo={t('app.impostazioni.bloccati.titolo')}
+          variante="contorno"
+          larghezzaPiena
+          onPress={() => router.push(rotte.utentiBloccati())}
+        />
+
         <SessioneAccount />
 
         <Button
