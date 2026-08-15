@@ -95,6 +95,9 @@ function Navigazione() {
         {/* La composizione di un post arriva dal basso: è un'azione che si
             apre sopra la bacheca e si chiude tornando dov'eri. */}
         <Stack.Screen name="componi" options={{ presentation: 'modal' }} />
+        {/* Aprire un'aula è la stessa cosa: un'azione che si apre sopra
+            l'elenco e si chiude tornando dov'eri. */}
+        <Stack.Screen name="crea-aula" options={{ presentation: 'modal' }} />
       </Stack>
     </>
   );

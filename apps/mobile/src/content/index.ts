@@ -26,6 +26,7 @@ export const rotte = {
   auleStudio: (): Href => '/aule-studio',
   mioProfilo: (): Href => '/profilo',
   componi: (): Href => '/componi',
+  creaAula: (): Href => '/crea-aula',
   post: (id: string): Href => ({ pathname: '/post/[id]', params: { id } }),
   aula: (id: string): Href => ({ pathname: '/aula/[id]', params: { id } }),
   impostazioni: (): Href => '/impostazioni',

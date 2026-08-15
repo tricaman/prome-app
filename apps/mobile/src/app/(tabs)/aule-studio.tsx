@@ -1,10 +1,12 @@
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { router } from 'expo-router';
 import { useElencaAuleStudio, type AulaStudioDto } from '@prome/api-client';
+import { rotte } from '@/content';
 import { useTema } from '@/theme';
 import { useT } from '@/hooks';
 import { AulaCard, AulaProgrammataRiga } from '@/components/contenuti';
 import { QueryBoundary } from '@/components/feedback';
-import { Card, Intestazione, Screen, Text } from '@/components/ui';
+import { Card, Icona, Intestazione, Screen, Text } from '@/components/ui';
 
 /**
  * Aule studio.
@@ -23,9 +25,11 @@ export default function SchedaAuleStudio() {
   const aule = useElencaAuleStudio({ limit: 50 });
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
       <Intestazione titolo={t('app.aule.titolo')} />
-      <Screen scorrevole>
+      {/* Spazio in fondo: senza, il pulsante fluttuante coprirebbe
+          l'ultima scheda dell'elenco. */}
+      <Screen scorrevole style={{ paddingBottom: tema.spaziatura[20] }}>
         <QueryBoundary
           query={aule}
           eVuoto={(risposta) => risposta.data.length === 0}
@@ -63,7 +67,36 @@ export default function SchedaAuleStudio() {
           }}
         </QueryBoundary>
       </Screen>
-    </>
+
+      {/* Come in bacheca: l'azione principale sta sotto il pollice, non in
+          cima allo scorrimento. Da qui si apre un'aula anche avendo soltanto
+          il telefono — prima non si poteva affatto. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('app.aule.crea')}
+        onPress={() => router.push(rotte.creaAula())}
+        style={[
+          {
+            position: 'absolute',
+            right: tema.spaziatura[5],
+            bottom: tema.spaziatura[6],
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: tema.spaziatura[2],
+            height: 56,
+            paddingHorizontal: tema.spaziatura[5],
+            borderRadius: tema.raggio.full,
+            backgroundColor: tema.colori.primario,
+          },
+          tema.ombra.lg,
+        ]}
+      >
+        <Icona nome="piu" dimensione={22} colore="primarioTesto" />
+        <Text variante="etichetta" style={{ color: tema.colori.primarioTesto }}>
+          {t('app.aule.crea')}
+        </Text>
+      </Pressable>
+    </View>
   );
 }
 

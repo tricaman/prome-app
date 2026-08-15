@@ -402,7 +402,8 @@
           "privatoTitolo": "Private",
           "ateneoTitolo": "University",
           "pubblicoTitolo": "Public"
-        }
+        },
+        "senzaData": "On the phone the room opens right away. To schedule it for later, use Prome from a browser."
       },
       "nessuna": "You are not in any study room yet: create one and invite the people you study with."
     },

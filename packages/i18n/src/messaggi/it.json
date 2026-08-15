@@ -402,7 +402,8 @@
           "privatoTitolo": "Privato",
           "ateneoTitolo": "Ateneo",
           "pubblicoTitolo": "Pubblico"
-        }
+        },
+        "senzaData": "Sul telefono l'aula si apre subito. Per programmarla per più tardi, usa Prome dal browser."
       },
       "nessuna": "Non sei ancora in nessuna aula studio: creane una e invita chi studia con te."
     },
