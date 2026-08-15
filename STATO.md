@@ -100,7 +100,7 @@ Esistono e funzionano: accesso, inserimento del codice, completamento del profil
 
 **Attenzione a una trappola**: nel web e nel mobile esistono schermate per aule studio, gruppi e materiali. **Leggono dati finti.** Sembrano funzionanti e non lo sono.
 
-**La cancellazione dell'account non è implementata.** Lo schema `cancellazione` esiste vuoto, il mobile ha una schermata `impostazioni/elimina-account`, ma non c'è nessun endpoint dietro. Il piano la considera **condizione di chiusura della prima milestone** — è il debito più serio, perché è la contropartita dell'apertura al pubblico.
+**La cancellazione dell'account è implementata (15 agosto 2026).** `POST /account/cancellazione` apre una **grazia di 14 giorni**: sessioni revocate subito, profilo nascosto subito (flag su Profilo, impostazioni intatte), e un nuovo accesso OTP entro la grazia annulla la richiesta; oltre, l'accesso risponde 403. La catena esegue nell'unità lavoratrice — post e commenti **anonimizzati** con id `anonimo-<uuid>` **diverso per record** (nessuna mappa), allegati dei post conservati, profilo e account eliminati — e la **verifica del residuo** (0 record, 0 file su tutti i detentori censiti) finisce nel registro dello schema `cancellazione`, che sopravvive al completamento: dopo un ripristino da backup la ri-applicazione è automatica (ri-verifica oraria + giro d'avvio del worker). Allerta nei log oltre il 25° giorno senza esito totale. Le schermate web e mobile sono collegate (conferma con parola digitata, «Utente rimosso» sui contenuti anonimi, messaggio di riattivazione al rientro); il bottone «Disattiva temporaneamente», mai definito da nessun documento, è stato rimosso. Le regole nuove (percorso privilegiato R12, detentori censiti, prefisso errori `CA`) sono in `apps/api/CLAUDE.md`; i test in `apps/api/test/cancellazione.spec.ts` (37 casi, scritti prima del codice).
 
 **Le impostazioni di privacy si leggono ma non si scrivono**: nascono restrittive e non c'è modo di cambiarle dall'API. È materia di E6.
 
@@ -141,7 +141,7 @@ Vale la pena conoscerli, perché sono tutti della stessa famiglia: cose che in s
 
 ## Aperto, in ordine di importanza
 
-1. **La cancellazione dell'account non esiste.** È condizione di chiusura della prima milestone.
+1. ~~La cancellazione dell'account non esiste.~~ **Fatta** (15 agosto 2026, vedi sopra). Resta da correggere il testo dell'informativa quando arriveranno le aule studio (E1.5: «un materiale caricato in aula resta accessibile anche dopo la cancellazione»), e «Scarica i tuoi dati» promesso dalla policy non è ancora implementato.
 2. **L'`MX` di `prome.app` punta alla macchina**, che non ha un server di posta: chi risponde all'email di accesso scrive nel vuoto. Mandare i codici funziona lo stesso.
 3. **SSH è aperto al mondo** e prende migliaia di tentativi al giorno. Restringerlo nel pannello Hetzner è più solido di fail2ban, perché blocca prima che sshd veda il pacchetto.
 4. **L'archivio dei file è locale**, su un volume della macchina. Quando arriverà un fornitore con regione UE dichiarata, sarà un adattatore: `ArchivioLocale` usa già lo stesso flusso firmato di un fornitore vero.
