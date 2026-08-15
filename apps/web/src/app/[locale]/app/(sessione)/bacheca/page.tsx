@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
 import { ARGOMENTI, percorsi } from '@/content';
-import { AULE_IN_CORSO } from '@/content';
 import { linguaDellaRotta, linguaDeiMetadati } from '@/lib/pagina';
 import { creaMetadata } from '@/lib/seo';
 import { percorsiApp } from '@/lib/percorsi-app';
@@ -8,6 +7,7 @@ import { AppTopbar } from '@/components/app/app-topbar';
 import { Composer } from '@/components/app/composer';
 import { FiltriChip } from '@/components/app/filtri-chip';
 import { FeedBacheca } from '@/components/app/feed-bacheca';
+import { AuleInCorsoLaterale } from '@/components/app/aule-in-corso-laterale';
 import { RiquadroLaterale } from '@/components/contenuti';
 import { Button, Card, Chip, Heading } from '@/components/ui';
 import { Link } from '@/i18n/navigazione';
@@ -58,42 +58,7 @@ export default async function PaginaBacheca({
         </div>
 
         <aside className="hidden w-[300px] flex-none flex-col gap-4 xl:flex">
-          <Card padding="sm">
-            <div className="mb-3.5 flex items-center justify-between">
-              <span className="text-[11px] font-extrabold uppercase tracking-[0.08em] text-testo-debole">
-                {t('auleOra')}
-              </span>
-              <Link
-                href={percorsiApp.auleStudio()}
-                className="text-[11.5px] font-extrabold text-primario-collegamento"
-              >
-                {t('tutte')}
-              </Link>
-            </div>
-            <ul className="flex flex-col gap-3.5">
-              {AULE_IN_CORSO.slice(0, 3).map((aula) => (
-                <li key={aula.id} className="flex items-start gap-3">
-                  <span
-                    aria-hidden
-                    className="mt-1.5 size-2 flex-none rounded-full bg-primary-600"
-                  />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[13px] font-extrabold leading-snug text-testo">
-                      {aula.titolo}
-                    </span>
-                    <span className="mt-0.5 block truncate text-[11.5px] text-testo-didascalia">
-                      {aula.partecipanti} · {aula.visibilita}
-                    </span>
-                  </span>
-                  <Link href={percorsiApp.aulaStudio(aula.id)} className="flex-none">
-                    <Chip tono="menta" className="normal-case">
-                      {t('entra')}
-                    </Chip>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Card>
+          <AuleInCorsoLaterale />
 
           <RiquadroLaterale titolo={t('argomentiCorso')}>
             <div className="flex flex-wrap gap-2">

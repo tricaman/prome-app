@@ -1,5 +1,4 @@
-import { notFound } from 'next/navigation';
-import { AULE_IN_CORSO } from '@/content';
+import { getTranslations } from 'next-intl/server';
 import { linguaDellaRotta, linguaDeiMetadati } from '@/lib/pagina';
 import { creaMetadata } from '@/lib/seo';
 import { percorsiApp } from '@/lib/percorsi-app';
@@ -7,20 +6,20 @@ import { SalaAula } from '@/components/app/sala/sala-aula';
 
 type Parametri = { locale: string; id: string };
 
-export function generateStaticParams() {
-  return AULE_IN_CORSO.map((aula) => ({ id: aula.id }));
-}
-
+/**
+ * Nessun `generateStaticParams`: le aule sono contenuti degli utenti, non
+ * pagine del sito. Ogni indirizzo si risolve a richiesta, e chi non può
+ * vederla riceve dal server la stessa risposta di un'aula che non esiste.
+ */
 export async function generateMetadata({ params }: { params: Promise<Parametri> }) {
   const lingua = await linguaDeiMetadati(params);
   const { id } = await params;
-  const aula = AULE_IN_CORSO.find((voce) => voce.id === id);
-  if (!aula) notFound();
+  const t = await getTranslations({ locale: lingua, namespace: 'app.aule' });
 
   return creaMetadata({
     lingua,
     percorso: percorsiApp.aulaStudio(id),
-    titolo: aula.titolo,
+    titolo: t('titolo'),
     noIndex: true,
   });
 }
@@ -29,18 +28,6 @@ export async function generateMetadata({ params }: { params: Promise<Parametri> 
 export default async function PaginaSala({ params }: { params: Promise<Parametri> }) {
   await linguaDellaRotta(params);
   const { id } = await params;
-  const aula = AULE_IN_CORSO.find((voce) => voce.id === id);
-  if (!aula) notFound();
 
-  return (
-    <SalaAula
-      titolo={aula.titolo}
-      contesto={`${aula.contesto} · ${aula.partecipanti}`}
-      gruppo={
-        aula.gruppo
-          ? { nome: aula.gruppo, slug: 'ingegneria-informatica-2026' }
-          : undefined
-      }
-    />
-  );
+  return <SalaAula aulaId={id} />;
 }

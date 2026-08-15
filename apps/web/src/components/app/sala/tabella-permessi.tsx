@@ -1,140 +1,159 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { PARTECIPANTI } from '@/content';
-import { Avatar, Button, Card, Chip, Icona, Switch } from '@/components/ui';
+import {
+  concediPermesso,
+  getApriSalaAulaStudioQueryKey,
+  promuoviAModeratore,
+  revocaPermesso,
+  rimuoviPartecipante,
+  type PartecipanteDto,
+} from '@prome/api-client';
+import { useApiMutation } from '@/hooks';
+import { Avatar, Button, Card, Chip, Switch } from '@/components/ui';
 import { cn } from '@/lib/utils';
-import { eSolaLettura, PERMESSI, permessiDi, type NomePermesso, type Permessi } from './permessi';
+
+/** I tre permessi, nell'ordine in cui il dominio li nomina. */
+const PERMESSI = ['parlare', 'scrivere', 'caricare'] as const;
+type NomePermesso = (typeof PERMESSI)[number];
 
 export interface TabellaPermessiProps {
-  permessi: Record<string, Permessi>;
-  onCambia: (idPartecipante: string, permesso: NomePermesso, attivo: boolean) => void;
+  aulaId: string;
+  partecipanti: PartecipanteDto[];
+  sonoModeratore: boolean;
 }
 
 /**
  * Gestione dei permessi dei partecipanti.
  *
  * Una riga per persona e tre interruttori indipendenti, perché nel dominio i
- * permessi si concedono e si revocano uno alla volta: non esiste un livello
- * "collaboratore" che li accende in blocco.
+ * permessi si concedono e si revocano **uno alla volta**: non esiste un
+ * livello «collaboratore» che li accende in blocco, e ogni interruttore è una
+ * chiamata a sé.
  *
- * Le righe dei Moderatori mostrano gli interruttori accesi e non modificabili:
- * è più onesto che nasconderli, perché spiega la regola invece di far
- * sembrare la funzione rotta.
+ * Le righe dei moderatori mostrano gli interruttori accesi e non modificabili:
+ * è più onesto che nasconderli, perché spiega la regola — un moderatore ha
+ * sempre i tre permessi — invece di far sembrare la funzione rotta.
  */
-export function TabellaPermessi({ permessi, onCambia }: TabellaPermessiProps) {
+export function TabellaPermessi({ aulaId, partecipanti, sonoModeratore }: TabellaPermessiProps) {
   const t = useTranslations('app.sala');
+  const tComune = useTranslations('comune');
+  const chiaveSala = getApriSalaAulaStudioQueryKey(aulaId);
 
-  const solaLettura = PARTECIPANTI.filter(
-    (partecipante) =>
-      !partecipante.moderatore && eSolaLettura(permessiDi(partecipante, permessi)),
-  ).map((partecipante) => partecipante.nome);
+  const cambia = useApiMutation({
+    mutationFn: ({
+      utenteId,
+      permesso,
+      concedi,
+    }: {
+      utenteId: string;
+      permesso: NomePermesso;
+      concedi: boolean;
+    }) =>
+      concedi
+        ? concediPermesso(aulaId, utenteId, permesso)
+        : revocaPermesso(aulaId, utenteId, permesso),
+    invalida: [chiaveSala as never],
+  });
+
+  const promuovi = useApiMutation({
+    mutationFn: (utenteId: string) => promuoviAModeratore(aulaId, utenteId),
+    invalida: [chiaveSala as never],
+  });
+
+  const rimuovi = useApiMutation({
+    mutationFn: (utenteId: string) => rimuoviPartecipante(aulaId, utenteId),
+    invalida: [chiaveSala as never],
+  });
 
   return (
-    <div>
-      <div className="mb-5 flex flex-wrap items-center gap-3.5 rounded-2xl border border-tinta-menta-bordo bg-gradient-to-br from-tinta-menta to-tinta-menta-velo px-5 py-4">
-        <span className="grid size-[42px] flex-none place-items-center rounded-[14px] bg-superficie text-primario-accento">
-          <Icona nome="collegamento" dimensione={20} />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-extrabold text-tinta-menta-testo">{t('linkInvito')}</span>
-          <span className="mt-0.5 block truncate text-[12.5px] text-primario-accento">
-            prome.app/a/9fk2 · {t('scadeIl', { data: '30 settembre' })}
+    <Card padding="nessuno" className="overflow-hidden">
+      {/* Intestazione visibile solo dove c'è spazio per le tre colonne. */}
+      <div className="hidden items-center gap-3.5 border-b border-bordo bg-superficie-alt px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.06em] text-testo-debole lg:flex">
+        <span className="flex-1">{t('tabella.partecipante')}</span>
+        {PERMESSI.map((permesso) => (
+          <span key={permesso} className="w-[88px] text-center">
+            {t(`tabella.${permesso}`)}
           </span>
-        </span>
-        <Button className="h-10 rounded-xl px-4 text-[13px]">{t('copiaLink')}</Button>
-        <Button
-          variante="contorno"
-          className="h-10 rounded-xl border-primary-300 bg-superficie/70 px-4 text-[13px] text-primario-accento"
-        >
-          {t('rigenera')}
-        </Button>
+        ))}
+        {sonoModeratore ? <span className="w-[120px]" /> : null}
       </div>
 
-      <Card padding="nessuno" className="overflow-hidden">
-        {/* Intestazione visibile solo dove c'è spazio per le tre colonne. */}
-        <div className="hidden items-center gap-3.5 border-b border-bordo bg-superficie-alt px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.06em] text-testo-debole lg:flex">
-          <span className="flex-1">{t('tabella.partecipante')}</span>
-          {PERMESSI.map((permesso) => (
-            <span key={permesso} className="w-[88px] text-center">
-              {t(`tabella.${permesso}`)}
-            </span>
-          ))}
-          <span className="w-[100px]" />
-        </div>
+      <ul>
+        {partecipanti.map((partecipante, indice) => {
+          const nome =
+            [partecipante.nome, partecipante.cognome].filter(Boolean).join(' ') ||
+            tComune('utenteRimosso');
 
-        <ul>
-          {PARTECIPANTI.map((partecipante, indice) => {
-            const suoi = permessiDi(partecipante, permessi);
-            return (
-              <li
-                key={partecipante.id}
-                className={cn(
-                  'flex flex-wrap items-center gap-3.5 px-5 py-3.5',
-                  indice < PARTECIPANTI.length - 1 && 'border-b border-superficie-alt-2',
-                  partecipante.sonoIo && 'bg-superficie-alt',
-                )}
-              >
-                <span className="flex min-w-0 flex-1 items-center gap-3">
-                  <Avatar
-                    nome={partecipante.nome}
-                    dimensione={38}
-                    className={partecipante.attivo ? 'ring-[2.5px] ring-primary-500' : undefined}
-                  />
-                  <span className="min-w-0">
-                    <span className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-extrabold text-testo">
-                        {partecipante.nome}
-                      </span>
-                      {partecipante.moderatore ? (
-                        <Chip tono="menta">{t('moderatore')}</Chip>
-                      ) : null}
-                    </span>
-                    <span className="mt-0.5 block truncate text-[11.5px] text-testo-didascalia">
-                      {partecipante.contesto}
-                    </span>
+          return (
+            <li
+              key={partecipante.utenteId}
+              className={cn(
+                'flex flex-wrap items-center gap-3.5 px-5 py-3.5',
+                indice < partecipanti.length - 1 && 'border-b border-superficie-alt-2',
+              )}
+            >
+              <span className="flex min-w-0 flex-1 items-center gap-3">
+                <Avatar nome={nome} dimensione={36} />
+                <span className="min-w-0">
+                  <span className="flex items-center gap-2">
+                    <span className="truncate text-sm font-extrabold text-testo">{nome}</span>
+                    {partecipante.moderatore ? (
+                      <Chip tono="menta">{t('ruoli.moderatore')}</Chip>
+                    ) : null}
+                    {partecipante.solaLettura ? <Chip>{t('ruoli.solaLettura')}</Chip> : null}
                   </span>
+                  {partecipante.universita ? (
+                    <span className="mt-0.5 block truncate text-[12px] text-testo-didascalia">
+                      {partecipante.universita}
+                    </span>
+                  ) : null}
                 </span>
+              </span>
 
-                {PERMESSI.map((permesso) => (
-                  <span key={permesso} className="flex w-[88px] justify-center">
-                    <Switch
-                      etichetta={`${t(`tabella.${permesso}`)} — ${partecipante.nome}`}
-                      attivo={suoi[permesso]}
-                      bloccatoAcceso={partecipante.moderatore}
-                      onChange={(attivo) => onCambia(partecipante.id, permesso, attivo)}
-                    />
-                  </span>
-                ))}
+              {PERMESSI.map((permesso) => (
+                <span key={permesso} className="flex w-[88px] justify-center">
+                  <Switch
+                    etichetta={`${t(`tabella.${permesso}`)} — ${nome}`}
+                    attivo={partecipante.permessi[permesso]}
+                    // Un moderatore ha sempre i tre permessi finché dura il
+                    // ruolo: l'interruttore resta acceso e bloccato.
+                    bloccatoAcceso={partecipante.moderatore}
+                    onChange={(attivo) =>
+                      cambia.mutate({
+                        utenteId: partecipante.utenteId,
+                        permesso,
+                        concedi: attivo,
+                      })
+                    }
+                  />
+                </span>
+              ))}
 
-                <span className="flex w-[100px] justify-end gap-2">
-                  {!partecipante.moderatore ? (
-                    <button
-                      type="button"
-                      className="text-[11.5px] font-extrabold text-primario-collegamento hover:text-primario-accento"
+              {sonoModeratore ? (
+                <span className="flex w-[120px] justify-end gap-2">
+                  {partecipante.moderatore ? null : (
+                    <Button
+                      variante="contorno"
+                      className="h-9 rounded-xl px-3 text-[12px]"
+                      onPress={() => promuovi.mutate(partecipante.utenteId)}
                     >
                       {t('promuovi')}
-                    </button>
-                  ) : null}
-                  <span aria-hidden className="font-extrabold text-testo-debole">
-                    ···
-                  </span>
+                    </Button>
+                  )}
+                  <Button
+                    variante="fantasma"
+                    className="h-9 rounded-xl px-3 text-[12px] text-errore"
+                    onPress={() => rimuovi.mutate(partecipante.utenteId)}
+                  >
+                    {tComune('elimina')}
+                  </Button>
                 </span>
-              </li>
-            );
-          })}
-        </ul>
-      </Card>
-
-      {/* Il riepilogo cambia con lo stato: dice cosa comporta davvero ciò che
-          si è appena impostato, invece di ripetere una regola generica. */}
-      <p className="mt-3.5 px-1 text-xs leading-relaxed text-testo-debole">
-        {solaLettura.length === 0
-          ? t('notaPermessi')
-          : solaLettura.length === 1
-            ? t('solaLettura', { nomi: solaLettura[0]! })
-            : t('solaLetturaPlurale', { nomi: solaLettura.join(', ') })}
-      </p>
-    </div>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </Card>
   );
 }

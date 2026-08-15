@@ -1,85 +1,196 @@
+'use client';
+
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { MATERIALI_AULA, type FileDiAula } from '@/content';
+import { caricaConAvanzamento, pesoLeggibile } from '@prome/app-core';
+import {
+  condividiMaterialeAula,
+  creaArgomento,
+  eliminaArgomento,
+  getApriSalaAulaStudioQueryKey,
+  preautorizzaMaterialeAula,
+  type ArgomentoDto,
+  type MaterialeDto,
+} from '@prome/api-client';
+import { useApiMutation } from '@/hooks';
 import { Button, Card, Icona } from '@/components/ui';
-import { SIGLA_ALLEGATO, TONO_ALLEGATO } from '@/components/contenuti';
+import { SIGLA_ALLEGATO } from '@/components/contenuti';
 import { cn } from '@/lib/utils';
 
-const ANTEPRIME = {
-  rosa: 'bg-gradient-to-br from-tinta-rosa to-tinta-rosa-bordo text-tinta-rosa-testo',
-  blu: 'bg-gradient-to-br from-tinta-blu to-tinta-blu-bordo text-tinta-blu-testo',
-  menta: 'bg-gradient-to-br from-tinta-menta to-tinta-menta-bordo text-tinta-menta-testo',
-  ambra: 'bg-gradient-to-br from-tinta-ambra to-tinta-ambra-bordo text-tinta-ambra-testo',
-  verde: 'bg-gradient-to-br from-tinta-verde to-tinta-verde-bordo text-tinta-verde-testo',
-  neutro: 'bg-superficie-alt-2 text-testo-tenue',
-} as const;
+export interface MaterialiAulaProps {
+  aulaId: string;
+  argomenti: ArgomentoDto[];
+  allegati: MaterialeDto[];
+  puoCaricare: boolean;
+  sonoModeratore: boolean;
+}
 
 /**
- * Materiali dell'aula studio, raggruppati per Argomento.
+ * Materiali dell'aula, raggruppati per argomento.
  *
- * L'ultimo gruppo è "senza argomento": i file caricati in fretta durante una
- * sessione finiscono lì e restano usabili: obbligare a scegliere un argomento
- * al momento del caricamento farebbe smettere di caricare.
+ * L'ultimo gruppo è «senza argomento»: i file caricati in fretta durante una
+ * sessione finiscono lì e restano usabili. Obbligare a scegliere un argomento
+ * al momento del caricamento farebbe smettere di caricare — ed è anche il
+ * motivo per cui eliminare un argomento non cancella niente: i materiali
+ * tornano semplicemente sciolti.
  */
-export function MaterialiAula() {
+export function MaterialiAula({
+  aulaId,
+  argomenti,
+  allegati,
+  puoCaricare,
+  sonoModeratore,
+}: MaterialiAulaProps) {
   const t = useTranslations('app.sala');
-  const totale = MATERIALI_AULA.reduce((somma, gruppo) => somma + gruppo.file.length, 0);
+  const [nuovoArgomento, setNuovoArgomento] = useState('');
+  const chiaveSala = getApriSalaAulaStudioQueryKey(aulaId);
+
+  const aggiungiArgomento = useApiMutation({
+    mutationFn: (titolo: string) => creaArgomento(aulaId, { titolo }),
+    invalida: [chiaveSala as never],
+    onSuccess: () => setNuovoArgomento(''),
+  });
+
+  const togliArgomento = useApiMutation({
+    mutationFn: (argomentoId: string) => eliminaArgomento(aulaId, argomentoId),
+    invalida: [chiaveSala as never],
+  });
+
+  /**
+   * Tre tempi, come per gli allegati dei post: si dichiara il file, i byte
+   * vanno **direttamente all'archivio**, poi si comunica la chiave. I byte non
+   * passano dagli endpoint di dominio.
+   */
+  const carica = useApiMutation({
+    mutationFn: async (file: File) => {
+      const preautorizzazione = await preautorizzaMaterialeAula(aulaId, {
+        nome: file.name,
+        tipo: tipoDi(file),
+        dimensione: file.size,
+      });
+      const { chiave, url } = preautorizzazione.data;
+      // Il tipo lo dichiara il browser: è più preciso del generico che
+      // l'archivio si aspetterebbe.
+      await caricaConAvanzamento({
+        url,
+        corpo: file,
+        intestazioni: { 'content-type': file.type },
+      });
+      return condividiMaterialeAula(aulaId, { chiave });
+    },
+    invalida: [chiaveSala as never],
+  });
+
+  const gruppi = raggruppa(argomenti, allegati);
 
   return (
     <div className="flex-1 overflow-y-auto bg-sfondo px-6 py-5">
       <div className="mb-5 flex flex-wrap items-center gap-3">
-        <Button
-          className="h-[42px] rounded-[14px] px-4 text-[13.5px]"
-          iconaSinistra={<Icona nome="carica" dimensione={17} />}
-        >
-          {t('caricaMateriale')}
-        </Button>
-        <Button variante="contorno" className="h-[42px] rounded-[14px] px-4 text-[13.5px]">
-          + {t('nuovoArgomento')}
-        </Button>
+        {puoCaricare ? (
+          <label className="inline-flex h-[42px] cursor-pointer items-center gap-2 rounded-[14px] bg-primario px-4 text-[13.5px] font-semibold text-primario-testo">
+            <Icona nome="carica" dimensione={17} />
+            {carica.isPending ? t('caricamentoInCorso') : t('caricaMateriale')}
+            <input
+              type="file"
+              className="sr-only"
+              onChange={(evento) => {
+                const file = evento.target.files?.[0];
+                if (file) carica.mutate(file);
+                evento.target.value = '';
+              }}
+            />
+          </label>
+        ) : null}
+
+        {sonoModeratore ? (
+          <span className="flex items-center gap-2">
+            <input
+              value={nuovoArgomento}
+              onChange={(evento) => setNuovoArgomento(evento.target.value)}
+              placeholder={t('nuovoArgomento')}
+              aria-label={t('nuovoArgomento')}
+              className="h-[42px] rounded-[14px] border-2 border-bordo bg-superficie px-3.5 text-[13.5px] text-testo"
+            />
+            <Button
+              variante="contorno"
+              className="h-[42px] rounded-[14px] px-4 text-[13.5px]"
+              isDisabled={!nuovoArgomento.trim()}
+              inCaricamento={aggiungiArgomento.isPending}
+              onPress={() => aggiungiArgomento.mutate(nuovoArgomento.trim())}
+            >
+              +
+            </Button>
+          </span>
+        ) : null}
+
         <span className="ml-auto text-[12.5px] font-bold text-testo-debole">
-          {t('conteggioFile', { numero: totale })}
+          {t('conteggioFile', { numero: allegati.length })}
         </span>
       </div>
 
+      {allegati.length === 0 && argomenti.length === 0 ? (
+        <p className="py-10 text-center text-sm text-testo-tenue">{t('nessunMateriale')}</p>
+      ) : null}
+
       <div className="flex flex-col gap-5">
-        {MATERIALI_AULA.map((gruppo) => (
-          <section key={gruppo.nome ?? 'senza-argomento'}>
+        {gruppi.map((gruppo) => (
+          <section key={gruppo.argomento?.id ?? 'senza-argomento'}>
             <div className="mb-3 flex flex-wrap items-center gap-2.5">
-              <span
-                aria-hidden
-                className={cn(
-                  'size-2.5 rounded',
-                  gruppo.nome ? 'bg-primary-500' : 'bg-bordo-forte',
-                )}
-              />
-              <h3
-                className={cn(
-                  'font-display text-[17px] font-extrabold tracking-[-0.015em]',
-                  gruppo.nome ? 'text-testo' : 'text-testo-tenue',
-                )}
-              >
-                {gruppo.nome ?? t('senzaArgomento')}
-              </h3>
-              <span className="text-[11.5px] font-bold text-testo-debole">
-                {t('numeroFile', { numero: gruppo.file.length })}
+              <span className="text-[13.5px] font-extrabold text-testo">
+                {gruppo.argomento?.titolo ?? t('senzaArgomento')}
               </span>
-              {!gruppo.nome ? (
-                <button
-                  type="button"
-                  className="ml-auto text-xs font-extrabold text-primario-collegamento hover:text-primario-accento"
+              <span className="text-[12px] text-testo-debole">
+                {t('conteggioFile', { numero: gruppo.file.length })}
+              </span>
+              {sonoModeratore && gruppo.argomento ? (
+                <Button
+                  variante="fantasma"
+                  className="h-8 px-2 text-[12px] text-testo-tenue"
+                  onPress={() => togliArgomento.mutate(gruppo.argomento!.id)}
                 >
-                  {t('assegnaArgomento')}
-                </button>
+                  {t('eliminaArgomento')}
+                </Button>
               ) : null}
             </div>
 
-            <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {gruppo.file.map((file) => (
-                <li key={file.nome}>
-                  <SchedaFile file={file} />
-                </li>
-              ))}
-            </ul>
+            <Card padding="nessuno" className="overflow-hidden">
+              <ul>
+                {gruppo.file.map((file, indice) => (
+                  <li
+                    key={file.id}
+                    className={cn(
+                      'flex items-center gap-3.5 px-5 py-3.5',
+                      indice < gruppo.file.length - 1 && 'border-b border-superficie-alt-2',
+                    )}
+                  >
+                    <span
+                      aria-hidden
+                      className="grid size-[38px] flex-none place-items-center rounded-xl bg-superficie-alt-2 text-[10px] font-extrabold text-testo-tenue"
+                    >
+                      {SIGLA_ALLEGATO[siglaDi(file.tipo)]}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <a
+                        href={file.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block truncate text-sm font-bold text-testo hover:text-primario-collegamento"
+                      >
+                        {file.nome}
+                      </a>
+                      <span className="mt-0.5 block text-[12px] text-testo-didascalia">
+                        {pesoLeggibile(file.dimensione)}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+                {gruppo.file.length === 0 ? (
+                  <li className="px-5 py-3.5 text-[12.5px] text-testo-debole">
+                    {t('argomentoVuoto')}
+                  </li>
+                ) : null}
+              </ul>
+            </Card>
           </section>
         ))}
       </div>
@@ -87,26 +198,22 @@ export function MaterialiAula() {
   );
 }
 
-function SchedaFile({ file }: { file: FileDiAula }) {
-  const tono = TONO_ALLEGATO[file.tipo];
+/** Prima gli argomenti nell'ordine in cui esistono, poi i materiali sciolti. */
+function raggruppa(argomenti: ArgomentoDto[], allegati: MaterialeDto[]) {
+  const gruppi = argomenti.map((argomento) => ({
+    argomento,
+    file: allegati.filter((file) => file.argomentoId === argomento.id),
+  }));
+  const sciolti = allegati.filter((file) => !file.argomentoId);
+  if (sciolti.length) gruppi.push({ argomento: null as unknown as ArgomentoDto, file: sciolti });
+  return gruppi;
+}
 
-  return (
-    <Card padding="nessuno" className="overflow-hidden">
-      <span
-        aria-hidden
-        className={cn(
-          'grid h-24 place-items-center text-[10px] font-extrabold tracking-widest',
-          ANTEPRIME[tono],
-        )}
-      >
-        {SIGLA_ALLEGATO[file.tipo]}
-      </span>
-      <span className="block px-3.5 py-3">
-        <span className="block truncate text-[13px] font-extrabold text-testo">{file.nome}</span>
-        <span className="mt-0.5 block truncate text-[11.5px] text-testo-didascalia">
-          {file.dettaglio}
-        </span>
-      </span>
-    </Card>
-  );
+const siglaDi = (tipo: MaterialeDto['tipo']): 'pdf' | 'immagine' | 'testo' =>
+  tipo === 'PDF' ? 'pdf' : tipo === 'IMMAGINE' ? 'immagine' : 'testo';
+
+function tipoDi(file: File): MaterialeDto['tipo'] {
+  if (file.type === 'application/pdf') return 'PDF';
+  if (file.type.startsWith('image/')) return 'IMMAGINE';
+  return 'TESTO';
 }

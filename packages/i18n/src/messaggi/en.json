@@ -411,7 +411,8 @@
           "ateneo": "Anyone studying at your university can find and join it.",
           "pubblico": "Open to every student signed up to Prome."
         }
-      }
+      },
+      "nessuna": "You are not in any study room yet: create one and invite the people you study with."
     },
     "sala": {
       "schede": {
@@ -423,7 +424,7 @@
       "apertaDa": "Opened by",
       "nelGruppo": "in the group",
       "scrivi": "Write in the study room…",
-      "invia": "Send",
+      "invia": "Send invitation",
       "oggi": "Today",
       "haCondiviso": "{nome} shared {file} in {argomento}",
       "caricaMateriale": "Upload material",
@@ -443,7 +444,7 @@
         "caricare": "Upload"
       },
       "moderatore": "Moderator",
-      "promuovi": "Promote",
+      "promuovi": "Make moderator",
       "notaPermessi": "Every change is immediate: the person receives a system message in chat. Moderators always hold all three permissions.",
       "solaLettura": "{nomi} is read-only: they can listen and read, without taking part.",
       "solaLetturaPlurale": "{nomi} are read-only: they can listen and read, without taking part.",
@@ -458,7 +459,20 @@
       "inAudio": "In audio · {numero}",
       "soloChat": "Chat only · {numero}",
       "tuoiPermessi": "Your permissions",
-      "tuoiPermessiTesto": "Speak · Write · Upload. You are a Moderator of this study room."
+      "tuoiPermessiTesto": "Speak · Write · Upload. You are a Moderator of this study room.",
+      "chatInArrivo": "Real-time chat is coming in the next update. For now the room is where materials live and where you decide who can do what.",
+      "unPartecipante": "1 participant",
+      "nPartecipanti": "{numero} participants",
+      "nessunMateriale": "No materials yet. Upload the first file and the people studying with you will find it here.",
+      "argomentoVuoto": "No materials in this topic",
+      "eliminaArgomento": "Delete topic",
+      "caricamentoInCorso": "Uploading…",
+      "annulla": "Cancel",
+      "ruoli": {
+        "moderatore": "Moderator",
+        "partecipante": "Takes part",
+        "solaLettura": "Read only"
+      }
     },
     "gruppo": {
       "schede": {

@@ -411,7 +411,8 @@
           "ateneo": "Chi studia nel tuo ateneo può trovarla ed entrare.",
           "pubblico": "Aperta a tutti gli studenti iscritti a Prome."
         }
-      }
+      },
+      "nessuna": "Non sei ancora in nessuna aula studio: creane una e invita chi studia con te."
     },
     "sala": {
       "schede": {
@@ -423,7 +424,7 @@
       "apertaDa": "Aperta da",
       "nelGruppo": "nel gruppo",
       "scrivi": "Scrivi nell'aula studio…",
-      "invia": "Invia",
+      "invia": "Invia invito",
       "oggi": "Oggi",
       "haCondiviso": "{nome} ha condiviso {file} in {argomento}",
       "caricaMateriale": "Carica materiale",
@@ -443,7 +444,7 @@
         "caricare": "Caricare"
       },
       "moderatore": "Moderatore",
-      "promuovi": "Promuovi",
+      "promuovi": "Rendi moderatore",
       "notaPermessi": "Ogni modifica è immediata: la persona riceve un messaggio di sistema in chat. I Moderatori hanno sempre tutti e tre i permessi.",
       "solaLettura": "{nomi} è in sola lettura: può ascoltare e leggere, senza intervenire.",
       "solaLetturaPlurale": "{nomi} sono in sola lettura: possono ascoltare e leggere, senza intervenire.",
@@ -458,7 +459,20 @@
       "inAudio": "In audio · {numero}",
       "soloChat": "Solo in chat · {numero}",
       "tuoiPermessi": "I tuoi permessi",
-      "tuoiPermessiTesto": "Parlare · Scrivere · Caricare. Sei Moderatore di questa aula studio."
+      "tuoiPermessiTesto": "Parlare · Scrivere · Caricare. Sei Moderatore di questa aula studio.",
+      "chatInArrivo": "La chat in tempo reale arriva col prossimo aggiornamento. Per ora l’aula serve a raccogliere i materiali e a decidere chi può fare cosa.",
+      "unPartecipante": "1 partecipante",
+      "nPartecipanti": "{numero} partecipanti",
+      "nessunMateriale": "Nessun materiale ancora. Carica il primo file e chi studia con te lo troverà qui.",
+      "argomentoVuoto": "Nessun materiale in questo argomento",
+      "eliminaArgomento": "Elimina argomento",
+      "caricamentoInCorso": "Caricamento…",
+      "annulla": "Annulla",
+      "ruoli": {
+        "moderatore": "Moderatore",
+        "partecipante": "Partecipa",
+        "solaLettura": "Sola lettura"
+      }
     },
     "gruppo": {
       "schede": {

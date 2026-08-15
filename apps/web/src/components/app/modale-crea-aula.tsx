@@ -3,16 +3,26 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { z } from 'zod';
-import type { Visibilita } from '@/content';
-import { useForm } from '@/hooks';
+import {
+  creaAulaStudio,
+  getElencaAuleStudioQueryKey,
+  type CreaAulaStudioDtoVisibilita,
+} from '@prome/api-client';
+import { useApiMutation, useForm } from '@/hooks';
+import { useRouter } from '@/i18n/navigazione';
+import { percorsiApp } from '@/lib/percorsi-app';
 import { Form, FormInput } from '@/components/form';
 import { Button, Icona, Switch } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
-const VISIBILITA: readonly { valore: Visibilita; chiave: 'privato' | 'ateneo' | 'pubblico' }[] = [
-  { valore: 'Privato', chiave: 'privato' },
-  { valore: 'Ateneo', chiave: 'ateneo' },
-  { valore: 'Pubblico', chiave: 'pubblico' },
+const VISIBILITA: readonly {
+  valore: CreaAulaStudioDtoVisibilita;
+  etichetta: string;
+  chiave: 'privato' | 'ateneo' | 'pubblico';
+}[] = [
+  { valore: 'PRIVATO', etichetta: 'Privato', chiave: 'privato' },
+  { valore: 'ATENEO', etichetta: 'Ateneo', chiave: 'ateneo' },
+  { valore: 'PUBBLICO', etichetta: 'Pubblico', chiave: 'pubblico' },
 ];
 
 /**
@@ -28,13 +38,32 @@ const VISIBILITA: readonly { valore: Visibilita; chiave: 'privato' | 'ateneo' | 
  */
 export function ModaleCreaAula({ onChiudi }: { onChiudi: () => void }) {
   const t = useTranslations('app.aule.modale');
-  const [visibilita, setVisibilita] = useState<Visibilita>('Privato');
+  const router = useRouter();
+  const [visibilita, setVisibilita] = useState<CreaAulaStudioDtoVisibilita>('PRIVATO');
   const [programmata, setProgrammata] = useState(false);
+  const [quando, setQuando] = useState('');
 
   const schema = z.object({
     titolo: z.string().min(1).max(200),
   });
   const form = useForm({ schema, defaultValues: { titolo: '' } });
+
+  const apri = useApiMutation({
+    mutationFn: (dati: { titolo: string }) =>
+      creaAulaStudio({
+        titolo: dati.titolo,
+        visibilita,
+        // Assente = estemporanea: è la sola differenza fra le due, e non
+        // esiste alcuno stato dietro.
+        ...(programmata && quando ? { dataOraInizio: new Date(quando).toISOString() } : {}),
+      }),
+    invalida: [getElencaAuleStudioQueryKey() as never],
+    form,
+    onSuccess: ({ data }) => {
+      onChiudi();
+      router.push(percorsiApp.aulaStudio(data.id));
+    },
+  });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -67,7 +96,7 @@ export function ModaleCreaAula({ onChiudi }: { onChiudi: () => void }) {
         </header>
 
         <div className="overflow-y-auto px-6 py-5">
-          <Form form={form} onSubmit={() => onChiudi()} id="crea-aula">
+          <Form form={form} onSubmit={(valori) => apri.mutate(valori)} id="crea-aula">
             <FormInput name="titolo" etichetta={t('campoTitolo')} segnaposto={t('segnaposto')} />
           </Form>
 
@@ -101,7 +130,7 @@ export function ModaleCreaAula({ onChiudi }: { onChiudi: () => void }) {
                       {scelta ? <span className="size-2.5 rounded-full bg-primary-600" /> : null}
                     </span>
                     <span className="text-[13.5px] font-extrabold text-testo">
-                      {opzione.valore}
+                      {opzione.etichetta}
                     </span>
                   </span>
                   <span className="block text-[11.5px] leading-snug text-testo-tenue">
@@ -125,13 +154,14 @@ export function ModaleCreaAula({ onChiudi }: { onChiudi: () => void }) {
           </div>
 
           {programmata ? (
-            <div className="mt-3 flex gap-2.5">
-              <span className="flex h-[46px] flex-1 items-center rounded-[14px] border-2 border-bordo-forte bg-superficie px-3.5 text-sm font-bold">
-                gio 25 settembre 2026
-              </span>
-              <span className="flex h-[46px] w-[120px] items-center rounded-[14px] border-2 border-bordo-forte bg-superficie px-3.5 text-sm font-bold">
-                21:00
-              </span>
+            <div className="mt-3">
+              <input
+                type="datetime-local"
+                aria-label={t('programma')}
+                value={quando}
+                onChange={(evento) => setQuando(evento.target.value)}
+                className="h-[46px] w-full rounded-[14px] border-2 border-bordo-forte bg-superficie px-3.5 text-sm font-bold text-testo"
+              />
             </div>
           ) : null}
 
@@ -157,7 +187,12 @@ export function ModaleCreaAula({ onChiudi }: { onChiudi: () => void }) {
           <Button variante="contorno" className="h-[46px] border-2 px-5" onPress={onChiudi}>
             {t('annulla')}
           </Button>
-          <Button type="submit" form="crea-aula" className="h-[46px] px-6">
+          <Button
+            type="submit"
+            form="crea-aula"
+            className="h-[46px] px-6"
+            inCaricamento={apri.isPending}
+          >
             {programmata ? t('programmaCta') : t('apri')}
           </Button>
         </footer>
