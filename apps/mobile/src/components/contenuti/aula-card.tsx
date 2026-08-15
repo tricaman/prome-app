@@ -1,10 +1,10 @@
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
-import type { AulaDiSessione, AulaProgrammata } from '@prome/contenuti';
+import type { AulaStudioDto } from '@prome/api-client';
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
 import { useT } from '@/i18n/i18n-provider';
-import { AvatarGroup, Card, Chip, Text } from '@/components/ui';
+import { Card, Chip, Text } from '@/components/ui';
 
 /**
  * Aula studio in corso.
@@ -12,7 +12,7 @@ import { AvatarGroup, Card, Chip, Text } from '@/components/ui';
  * Lo stato viene prima del titolo perché è quello che decide se si può fare
  * qualcosa adesso; il richiamo "Entra" è largo quanto serve al pollice.
  */
-export function AulaCard({ aula }: { aula: AulaDiSessione }) {
+export function AulaCard({ aula }: { aula: AulaStudioDto }) {
   const tema = useTema();
   const t = useT();
 
@@ -23,12 +23,11 @@ export function AulaCard({ aula }: { aula: AulaDiSessione }) {
           <Chip tono="menta" indicatore>
             {t('pagine.aula.inCorso')}
           </Chip>
-          <Chip>{aula.visibilita}</Chip>
-          {aula.gruppo ? <Chip>{aula.gruppo}</Chip> : null}
+          <Chip>{leggibile(aula.visibilita)}</Chip>
+          {aula.ateneo ? <Chip>{aula.ateneo}</Chip> : null}
         </View>
 
         <Text variante="sottotitolo">{aula.titolo}</Text>
-        <Text variante="didascalia">{aula.contesto}</Text>
 
         <View
           style={{
@@ -38,9 +37,10 @@ export function AulaCard({ aula }: { aula: AulaDiSessione }) {
             marginTop: tema.spaziatura[1],
           }}
         >
-          <AvatarGroup nomi={['Giulia Ferrari', 'Luca Bianchi', 'Sara Conti']} />
           <Text variante="didascalia" style={{ flex: 1 }}>
-            {aula.partecipanti}
+            {aula.partecipanti === 1
+              ? t('app.sala.unPartecipante')
+              : t('app.sala.nPartecipanti', { numero: aula.partecipanti })}
           </Text>
           <Chip tono="menta">{t('app.aule.entra')}</Chip>
         </View>
@@ -57,11 +57,11 @@ export function AulaProgrammataRiga({
   aula,
   ultima = false,
 }: {
-  aula: AulaProgrammata;
+  aula: AulaStudioDto;
   ultima?: boolean;
 }) {
   const tema = useTema();
-  const t = useT();
+  const quando = new Date(aula.dataOraInizio!);
 
   return (
     <Pressable
@@ -78,9 +78,9 @@ export function AulaProgrammataRiga({
       }}
     >
       <View style={{ width: 46, alignItems: 'center' }}>
-        <Text variante="sottotitolo">{aula.giorno}</Text>
+        <Text variante="sottotitolo">{quando.getDate()}</Text>
         <Text variante="didascalia" style={{ fontSize: 10.5, letterSpacing: 0.5 }}>
-          {aula.mese}
+          {quando.toLocaleDateString('it-IT', { month: 'short' }).toUpperCase()}
         </Text>
       </View>
       <View
@@ -91,15 +91,18 @@ export function AulaProgrammataRiga({
           {aula.titolo}
         </Text>
         <Text variante="didascalia" numberOfLines={1}>
-          {aula.contesto}
+          {leggibile(aula.visibilita)}
         </Text>
       </View>
       <View style={{ alignItems: 'flex-end', gap: 4 }}>
-        <Text variante="etichetta">{aula.ora}</Text>
-        <Text variante="didascalia" colore="primario" style={{ fontWeight: '800' }}>
-          {t('app.aule.avvisami')}
+        <Text variante="etichetta">
+          {quando.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
         </Text>
       </View>
     </Pressable>
   );
 }
+
+/** «PRIVATO» non si mostra a nessuno: si scrive come si legge. */
+const leggibile = (visibilita: string) =>
+  visibilita.charAt(0) + visibilita.slice(1).toLowerCase();

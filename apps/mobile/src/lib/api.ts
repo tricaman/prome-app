@@ -21,7 +21,7 @@ export function impostaLinguaApi(lingua: Lingua): void {
  * In sviluppo il telefono non raggiunge `localhost`: quello è il telefono
  * stesso. Si ricava l'indirizzo della macchina che serve l'app e si punta lì.
  */
-function urlApiPredefinito(): string {
+export function urlApi(): string {
   const daAmbiente = process.env.EXPO_PUBLIC_URL_API;
   if (daAmbiente) return daAmbiente;
 
@@ -43,7 +43,7 @@ void configuraSessione({
 });
 
 configuraApiClient({
-  baseUrl: urlApiPredefinito(),
+  baseUrl: urlApi(),
   lingua: () => linguaCorrente,
   token: () => tokenSessione() ?? undefined,
 });

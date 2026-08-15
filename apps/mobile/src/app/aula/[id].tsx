@@ -1,27 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { AULE_IN_CORSO, CHAT, MATERIALI_AULA, PARTECIPANTI, UTENTE } from '@prome/contenuti';
-import type { MessaggioChat } from '@prome/contenuti';
-import { useTema } from '@/theme';
-import { useT } from '@/hooks';
-import { BarraAudio } from '@/components/app/barra-audio';
+import { pesoLeggibile } from '@prome/app-core';
+import { LUNGHEZZA_MASSIMA_MESSAGGIO } from '@prome/contracts';
 import {
-  eSolaLettura,
-  PERMESSI,
-  permessiDi,
-  permessiIniziali,
-  type NomePermesso,
-  type Permessi,
-} from '@/components/app/permessi';
-import { AnteprimaAllegato } from '@/components/contenuti';
-import { EmptyState } from '@/components/feedback';
+  concediPermesso,
+  getApriSalaAulaStudioQueryKey,
+  revocaPermesso,
+  useApriSalaAulaStudio,
+  type MaterialeDto,
+  type PartecipanteDto,
+  type SalaDto,
+} from '@prome/api-client';
+import { useTema } from '@/theme';
+import { useApiMutation, useChatAula, useT } from '@/hooks';
+import { QueryBoundary } from '@/components/feedback';
 import {
   Avatar,
   Button,
   Card,
   Chip,
-  Icona,
   Input,
   Intestazione,
   Screen,
@@ -32,340 +30,373 @@ import {
 
 type Scheda = 'chat' | 'materiali' | 'partecipanti';
 
+/** I tre permessi, nell'ordine in cui il dominio li nomina. */
+const PERMESSI = ['parlare', 'scrivere', 'caricare'] as const;
+type NomePermesso = (typeof PERMESSI)[number];
+
 /**
  * Dentro un'aula studio.
  *
- * Le tre schede cambiano il contenuto ma non la barra dell'audio, che resta in
- * fondo: si può passare dai materiali alla chat senza perdere il filo di ciò
- * che si sta ascoltando.
+ * Tutto arriva in **una sola risposta composta** — partecipanti con i loro
+ * permessi, argomenti, materiali — e i permessi **li dichiara il server**: la
+ * copia locale della regola che viveva qui è sparita, perché due copie della
+ * stessa regola sono una di troppo, e quella nel telefono è aggirabile.
  */
 export default function SchermataAula() {
   const tema = useTema();
   const t = useT();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const aula = AULE_IN_CORSO.find((voce) => voce.id === id);
-
   const [scheda, setScheda] = useState<Scheda>('chat');
-  const [permessi, setPermessi] = useState<Record<string, Permessi>>(() =>
-    permessiIniziali(PARTECIPANTI),
-  );
-  const [inAudio, setInAudio] = useState(false);
-  const [microfonoSpento, setMicrofonoSpento] = useState(false);
-
-  const io = PARTECIPANTI.find((partecipante) => partecipante.sonoIo);
-  const mieiPermessi = io ? permessiDi(io, permessi) : undefined;
-
-  const inAudioOra = PARTECIPANTI.filter(
-    (partecipante) => !partecipante.sonoIo && permessiDi(partecipante, permessi).parlare,
-  ).slice(0, 4);
-
-  if (!aula) {
-    return (
-      <>
-        <Intestazione conIndietro />
-        <Screen centrato>
-          <EmptyState
-            titolo={t('errori.nonTrovato.titolo')}
-            descrizione={t('errori.nonTrovato.descrizione')}
-          />
-        </Screen>
-      </>
-    );
-  }
+  const sala = useApriSalaAulaStudio(id);
 
   return (
     <View style={{ flex: 1, backgroundColor: tema.colori.sfondo }}>
       <Intestazione conIndietro />
 
-      <View style={{ paddingHorizontal: tema.spaziatura[5], gap: tema.spaziatura[3] }}>
-        <View style={{ gap: tema.spaziatura[2] }}>
-          <Text variante="titolo">{aula.titolo}</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: tema.spaziatura[2] }}>
-            <Chip tono="menta" indicatore>
-              {t('pagine.aula.inCorso')}
-            </Chip>
-            <Chip>{aula.visibilita}</Chip>
-          </View>
-          <Text variante="didascalia">
-            {aula.contesto} · {aula.partecipanti}
-          </Text>
-        </View>
+      <QueryBoundary query={sala}>
+        {({ data }) => (
+          <>
+            <View style={{ paddingHorizontal: tema.spaziatura[5], gap: tema.spaziatura[3] }}>
+              <View style={{ gap: tema.spaziatura[2] }}>
+                <Text variante="titolo">{data.aula.titolo}</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: tema.spaziatura[2] }}>
+                  <Chip>{leggibile(data.aula.visibilita)}</Chip>
+                  {data.sonoModeratore ? (
+                    <Chip tono="menta">{t('app.sala.ruoli.moderatore')}</Chip>
+                  ) : null}
+                </View>
+                <Text variante="didascalia">
+                  {data.aula.partecipanti === 1
+                    ? t('app.sala.unPartecipante')
+                    : t('app.sala.nPartecipanti', { numero: data.aula.partecipanti })}
+                </Text>
+              </View>
 
-        <Segmented
-          etichetta={aula.titolo}
-          valore={scheda}
-          onChange={setScheda}
-          opzioni={[
-            { valore: 'chat', etichetta: t('app.sala.schede.chat') },
-            { valore: 'materiali', etichetta: t('app.nav.materiali') },
-            { valore: 'partecipanti', etichetta: t('app.sala.schede.partecipanti') },
-          ]}
-        />
-      </View>
+              <Segmented
+                etichetta={data.aula.titolo}
+                valore={scheda}
+                onChange={setScheda}
+                opzioni={[
+                  { valore: 'chat', etichetta: t('app.sala.schede.chat') },
+                  { valore: 'materiali', etichetta: t('app.nav.materiali') },
+                  { valore: 'partecipanti', etichetta: t('app.sala.schede.partecipanti') },
+                ]}
+              />
+            </View>
 
-      {scheda === 'chat' ? <Chat puoScrivere={mieiPermessi?.scrivere ?? true} /> : null}
-      {scheda === 'materiali' ? <Materiali /> : null}
-      {scheda === 'partecipanti' ? (
-        <Partecipanti
-          permessi={permessi}
-          onCambia={(idPartecipante, permesso, attivo) =>
-            setPermessi((precedenti) => ({
-              ...precedenti,
-              [idPartecipante]: {
-                ...(precedenti[idPartecipante] ?? {
-                  parlare: true,
-                  scrivere: true,
-                  caricare: true,
-                }),
-                [permesso]: attivo,
-              },
-            }))
-          }
-        />
-      ) : null}
-
-      <BarraAudio
-        inAudio={inAudio}
-        microfonoSpento={microfonoSpento}
-        puoParlare={mieiPermessi?.parlare ?? true}
-        personeInAudio={inAudioOra.map((partecipante) => partecipante.nome)}
-        partecipantiTotali={PARTECIPANTI.length}
-        onEntra={() => setInAudio(true)}
-        onEsci={() => {
-          setInAudio(false);
-          setMicrofonoSpento(false);
-        }}
-        onAlternaMicrofono={() => setMicrofonoSpento((spento) => !spento)}
-      />
+            {scheda === 'chat' ? (
+              <Chat aulaId={id} puoScrivere={data.mieiPermessi.scrivere} />
+            ) : null}
+            {scheda === 'materiali' ? <Materiali sala={data} /> : null}
+            {scheda === 'partecipanti' ? (
+              <Partecipanti aulaId={id} sala={data} />
+            ) : null}
+          </>
+        )}
+      </QueryBoundary>
     </View>
   );
 }
 
-/** Chat dell'aula: i messaggi inviati sono immutabili, come nel dominio. */
-function Chat({ puoScrivere }: { puoScrivere: boolean }) {
+/**
+ * La chat: in tempo reale, ma non dipendente dal tempo reale.
+ *
+ * Lo stato della connessione è visibile perché sul telefono cade più spesso
+ * che altrove — si esce dall'app, si perde la rete in metropolitana — e chi
+ * scrive deve poter distinguere una linea caduta da una stanza silenziosa.
+ */
+function Chat({ aulaId, puoScrivere }: { aulaId: string; puoScrivere: boolean }) {
   const tema = useTema();
   const t = useT();
-  const [messaggi, setMessaggi] = useState<readonly MessaggioChat[]>(CHAT);
+  const { messaggi, stato, inCaricamento, invia } = useChatAula(aulaId);
   const [bozza, setBozza] = useState('');
+  const [inInvio, setInInvio] = useState(false);
+  const scorrimento = useRef<ScrollView>(null);
 
-  const invia = () => {
+  useEffect(() => {
+    scorrimento.current?.scrollToEnd({ animated: true });
+  }, [messaggi.length]);
+
+  const manda = async () => {
     const testo = bozza.trim();
-    if (!testo) return;
-    setMessaggi((precedenti) => [
-      ...precedenti,
-      { id: `mio-${precedenti.length}`, autore: UTENTE.nome, testo, ora: 'ora', mio: true },
-    ]);
-    setBozza('');
+    if (!testo || inInvio) return;
+    setInInvio(true);
+    try {
+      await invia(testo);
+      setBozza('');
+    } finally {
+      setInInvio(false);
+    }
   };
 
   return (
     <>
       <ScrollView
-        contentContainerStyle={{
-          padding: tema.spaziatura[4],
-          gap: tema.spaziatura[3],
-        }}
+        ref={scorrimento}
+        contentContainerStyle={{ padding: tema.spaziatura[4], gap: tema.spaziatura[3] }}
       >
-        {messaggi.map((messaggio) => (
-          <View
-            key={messaggio.id}
-            style={{
-              flexDirection: messaggio.mio ? 'row-reverse' : 'row',
-              alignItems: 'flex-end',
-              gap: tema.spaziatura[2],
-            }}
-          >
-            {!messaggio.mio ? <Avatar nome={messaggio.autore} dimensione={30} soloColore /> : null}
+        {inCaricamento ? <Text variante="corpoTenue">{t('comune.caricamento')}</Text> : null}
+        {!inCaricamento && messaggi.length === 0 ? (
+          <Text variante="corpoTenue">{t('app.sala.nessunMessaggio')}</Text>
+        ) : null}
+
+        {messaggi.map((messaggio) => {
+          const nome =
+            [messaggio.autore.nome, messaggio.autore.cognome].filter(Boolean).join(' ') ||
+            t('comune.utenteRimosso');
+          return (
             <View
+              key={messaggio.id}
               style={{
-                maxWidth: '76%',
-                backgroundColor: messaggio.mio
-                  ? tema.colori.primarioTenue
-                  : tema.colori.superficie,
-                borderWidth: 1,
-                borderColor: messaggio.mio ? tema.colori.primario : tema.colori.bordo,
-                borderRadius: tema.raggio.lg,
-                paddingHorizontal: tema.spaziatura[3],
-                paddingVertical: tema.spaziatura[3],
-                gap: 3,
+                flexDirection: messaggio.mio ? 'row-reverse' : 'row',
+                alignItems: 'flex-end',
+                gap: tema.spaziatura[2],
               }}
             >
-              {!messaggio.mio ? (
-                <Text variante="didascalia" colore="primario" style={{ fontWeight: '800' }}>
-                  {messaggio.autore}
+              {!messaggio.mio ? <Avatar nome={nome} dimensione={30} soloColore /> : null}
+              <View
+                style={{
+                  maxWidth: '76%',
+                  backgroundColor: messaggio.mio
+                    ? tema.colori.primarioTenue
+                    : tema.colori.superficie,
+                  borderWidth: 1,
+                  borderColor: messaggio.mio ? tema.colori.primario : tema.colori.bordo,
+                  borderRadius: tema.raggio.lg,
+                  paddingHorizontal: tema.spaziatura[3],
+                  paddingVertical: tema.spaziatura[3],
+                  gap: 3,
+                }}
+              >
+                {!messaggio.mio ? (
+                  <Text variante="didascalia" colore="primario" style={{ fontWeight: '800' }}>
+                    {nome}
+                  </Text>
+                ) : null}
+                <Text variante="corpo" style={{ fontSize: 14 }}>
+                  {messaggio.testo}
                 </Text>
-              ) : null}
-              <Text variante="corpo" style={{ fontSize: 14 }}>
-                {messaggio.testo}
-              </Text>
-              <Text variante="didascalia" style={{ fontSize: 10.5, textAlign: 'right' }}>
-                {messaggio.ora}
-              </Text>
+                <Text variante="didascalia" style={{ fontSize: 10.5 }}>
+                  {new Date(messaggio.inviatoIl).toLocaleTimeString('it-IT', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </Text>
+              </View>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </ScrollView>
 
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: tema.spaziatura[3],
-          padding: tema.spaziatura[4],
           borderTopWidth: 1,
           borderTopColor: tema.colori.bordo,
           backgroundColor: tema.colori.superficie,
+          padding: tema.spaziatura[4],
+          gap: tema.spaziatura[2],
         }}
       >
-        <View style={{ flex: 1 }}>
-          <Input
-            value={bozza}
-            onChangeText={setBozza}
-            placeholder={t('app.sala.scrivi')}
-            editable={puoScrivere}
-            onSubmitEditing={invia}
-          />
-        </View>
-        <Button titolo={t('app.sala.invia')} disabled={!puoScrivere || !bozza.trim()} onPress={invia} />
+        <Text
+          variante="didascalia"
+          colore={stato === 'connesso' ? undefined : 'errore'}
+          style={{ fontSize: 11.5, fontWeight: '700' }}
+        >
+          {t(`app.sala.connessione.${stato}`)}
+        </Text>
+
+        {puoScrivere ? (
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: tema.spaziatura[2] }}>
+            <View style={{ flex: 1 }}>
+              <Input
+                value={bozza}
+                onChangeText={setBozza}
+                placeholder={t('app.sala.scrivi')}
+                massimoCaratteri={LUNGHEZZA_MASSIMA_MESSAGGIO}
+                righe={2}
+              />
+            </View>
+            <Button
+              titolo={t('app.sala.invia')}
+              disabled={!bozza.trim()}
+              inCaricamento={inInvio}
+              onPress={() => void manda()}
+            />
+          </View>
+        ) : (
+          // La sola lettura è uno stato legittimo, non un guasto da spiegare.
+          <Text variante="corpoTenue">{t('app.sala.solaLetturaSpiegazione')}</Text>
+        )}
       </View>
     </>
   );
 }
 
-/** Materiali raggruppati per Argomento; l'ultimo gruppo è "senza argomento". */
-function Materiali() {
+/** I materiali, raggruppati per argomento; gli sciolti in fondo. */
+function Materiali({ sala }: { sala: SalaDto }) {
   const tema = useTema();
   const t = useT();
 
+  const gruppi = sala.argomenti.map((argomento) => ({
+    titolo: argomento.titolo,
+    file: sala.allegati.filter((file) => file.argomentoId === argomento.id),
+  }));
+  const sciolti = sala.allegati.filter((file) => !file.argomentoId);
+  if (sciolti.length) gruppi.push({ titolo: t('app.sala.senzaArgomento'), file: sciolti });
+
   return (
     <Screen scorrevole>
-      {MATERIALI_AULA.map((gruppo) => (
-        <View key={gruppo.nome ?? 'senza-argomento'} style={{ gap: tema.spaziatura[3] }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[2] }}>
-            <View
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: 3,
-                backgroundColor: gruppo.nome ? tema.colori.primario : tema.colori.bordoForte,
-              }}
-            />
-            <Text variante="sottotitolo" style={{ fontSize: 17 }}>
-              {gruppo.nome ?? t('app.sala.senzaArgomento')}
-            </Text>
-            <Text variante="didascalia">
-              {t('app.sala.numeroFile', { numero: gruppo.file.length })}
-            </Text>
-          </View>
+      {sala.allegati.length === 0 && sala.argomenti.length === 0 ? (
+        <Text variante="corpoTenue">{t('app.sala.nessunMateriale')}</Text>
+      ) : null}
 
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: tema.spaziatura[3] }}>
-            {gruppo.file.map((file) => (
-              <Card
-                key={file.nome}
-                style={{ padding: 0, overflow: 'hidden', width: '47%' }}
-              >
-                <AnteprimaAllegato tipo={file.tipo} altezza={80} />
-                <View style={{ padding: tema.spaziatura[3] }}>
-                  <Text variante="etichetta" numberOfLines={1} style={{ fontSize: 13 }}>
-                    {file.nome}
-                  </Text>
-                  <Text variante="didascalia" numberOfLines={1}>
-                    {file.dettaglio}
-                  </Text>
-                </View>
-              </Card>
+      {gruppi.map((gruppo) => (
+        <View key={gruppo.titolo} style={{ gap: tema.spaziatura[3] }}>
+          <Text variante="etichetta">{gruppo.titolo}</Text>
+          <Card style={{ padding: 0, overflow: 'hidden' }}>
+            {gruppo.file.map((file, indice) => (
+              <RigaMateriale
+                key={file.id}
+                file={file}
+                ultima={indice === gruppo.file.length - 1}
+              />
             ))}
-          </View>
+            {gruppo.file.length === 0 ? (
+              <View style={{ padding: tema.spaziatura[4] }}>
+                <Text variante="didascalia">{t('app.sala.argomentoVuoto')}</Text>
+              </View>
+            ) : null}
+          </Card>
         </View>
       ))}
-
-      <Button
-        titolo={t('app.sala.caricaMateriale')}
-        larghezzaPiena
-        iconaSinistra={<Icona nome="carica" dimensione={18} colore="primarioTesto" />}
-      />
     </Screen>
+  );
+}
+
+function RigaMateriale({ file, ultima }: { file: MaterialeDto; ultima: boolean }) {
+  const tema = useTema();
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: tema.spaziatura[3],
+        padding: tema.spaziatura[4],
+        borderBottomWidth: ultima ? 0 : 1,
+        borderBottomColor: tema.colori.superficieAlt2,
+      }}
+    >
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text variante="etichetta" numberOfLines={1}>
+          {file.nome}
+        </Text>
+        <Text variante="didascalia">{pesoLeggibile(file.dimensione)}</Text>
+      </View>
+    </View>
   );
 }
 
 /**
- * Partecipanti e permessi.
+ * I partecipanti e i loro permessi.
  *
- * Su un telefono la tabella a tre colonne del web non ci sta: ogni persona
- * diventa una scheda con i tre interruttori uno sotto l'altro, con lo stesso
- * comportamento — un Moderatore li ha sempre tutti e tre, e non si toccano.
+ * Tre interruttori indipendenti, uno per permesso, perché nel dominio si
+ * concedono e si revocano uno alla volta. Sul moderatore restano accesi e
+ * bloccati: spiegare la regola è più onesto che nascondere gli interruttori e
+ * far sembrare la funzione rotta.
  */
-function Partecipanti({
-  permessi,
-  onCambia,
-}: {
-  permessi: Record<string, Permessi>;
-  onCambia: (id: string, permesso: NomePermesso, attivo: boolean) => void;
-}) {
+function Partecipanti({ aulaId, sala }: { aulaId: string; sala: SalaDto }) {
   const tema = useTema();
   const t = useT();
 
-  const solaLettura = PARTECIPANTI.filter(
-    (partecipante) =>
-      !partecipante.moderatore && eSolaLettura(permessiDi(partecipante, permessi)),
-  ).map((partecipante) => partecipante.nome);
+  const cambia = useApiMutation({
+    mutationFn: ({
+      utenteId,
+      permesso,
+      concedi,
+    }: {
+      utenteId: string;
+      permesso: NomePermesso;
+      concedi: boolean;
+    }) =>
+      concedi
+        ? concediPermesso(aulaId, utenteId, permesso)
+        : revocaPermesso(aulaId, utenteId, permesso),
+    invalida: [getApriSalaAulaStudioQueryKey(aulaId) as never],
+  });
 
   return (
     <Screen scorrevole>
-      {PARTECIPANTI.map((partecipante) => {
-        const suoi = permessiDi(partecipante, permessi);
-        return (
-          <Card key={partecipante.id} style={{ gap: tema.spaziatura[3] }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[3] }}>
-              <Avatar
-                nome={partecipante.nome}
-                dimensione={40}
-                evidenziato={partecipante.attivo}
-              />
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[2] }}>
-                  <Text variante="etichetta" numberOfLines={1}>
-                    {partecipante.nome}
-                  </Text>
-                  {partecipante.moderatore ? (
-                    <Chip tono="menta">{t('app.sala.moderatore')}</Chip>
-                  ) : null}
-                </View>
-                <Text variante="didascalia" numberOfLines={1}>
-                  {partecipante.contesto}
-                </Text>
-              </View>
-            </View>
-
-            <View style={{ gap: tema.spaziatura[2] }}>
-              {PERMESSI.map((permesso) => (
-                <View
-                  key={permesso}
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[3] }}
-                >
-                  <Text variante="corpo" style={{ flex: 1, fontSize: 14 }}>
-                    {t(`app.sala.tabella.${permesso}`)}
-                  </Text>
-                  <Switch
-                    etichetta={`${t(`app.sala.tabella.${permesso}`)} — ${partecipante.nome}`}
-                    attivo={suoi[permesso]}
-                    bloccatoAcceso={partecipante.moderatore}
-                    onChange={(attivo) => onCambia(partecipante.id, permesso, attivo)}
-                  />
-                </View>
-              ))}
-            </View>
-          </Card>
-        );
-      })}
-
-      <Text variante="didascalia">
-        {solaLettura.length === 0
-          ? t('app.sala.notaPermessi')
-          : solaLettura.length === 1
-            ? t('app.sala.solaLettura', { nomi: solaLettura[0]! })
-            : t('app.sala.solaLetturaPlurale', { nomi: solaLettura.join(', ') })}
+      {sala.partecipanti.map((partecipante) => (
+        <RigaPartecipante
+          key={partecipante.utenteId}
+          partecipante={partecipante}
+          puoModerare={sala.sonoModeratore}
+          onCambia={(permesso, concedi) =>
+            cambia.mutate({ utenteId: partecipante.utenteId, permesso, concedi })
+          }
+        />
+      ))}
+      <Text variante="didascalia" style={{ marginTop: tema.spaziatura[2] }}>
+        {t('app.sala.tuoiPermessiTesto')}
       </Text>
     </Screen>
   );
 }
+
+function RigaPartecipante({
+  partecipante,
+  puoModerare,
+  onCambia,
+}: {
+  partecipante: PartecipanteDto;
+  puoModerare: boolean;
+  onCambia: (permesso: NomePermesso, concedi: boolean) => void;
+}) {
+  const tema = useTema();
+  const t = useT();
+  const nome =
+    [partecipante.nome, partecipante.cognome].filter(Boolean).join(' ') ||
+    t('comune.utenteRimosso');
+
+  return (
+    <Card style={{ gap: tema.spaziatura[3] }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[3] }}>
+        <Avatar nome={nome} dimensione={38} />
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text variante="etichetta" numberOfLines={1}>
+            {nome}
+          </Text>
+          <Text variante="didascalia">
+            {partecipante.moderatore
+              ? t('app.sala.ruoli.moderatore')
+              : partecipante.solaLettura
+                ? t('app.sala.ruoli.solaLettura')
+                : t('app.sala.ruoli.partecipante')}
+          </Text>
+        </View>
+      </View>
+
+      {puoModerare
+        ? PERMESSI.map((permesso) => (
+            <View
+              key={permesso}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[3] }}
+            >
+              <Text variante="corpo" style={{ flex: 1, fontSize: 14 }}>
+                {t(`app.sala.tabella.${permesso}`)}
+              </Text>
+              <Switch
+                etichetta={`${t(`app.sala.tabella.${permesso}`)} — ${nome}`}
+                attivo={partecipante.permessi[permesso]}
+                bloccatoAcceso={partecipante.moderatore}
+                onChange={(attivo) => onCambia(permesso, attivo)}
+              />
+            </View>
+          ))
+        : null}
+    </Card>
+  );
+}
+
+const leggibile = (visibilita: string) =>
+  visibilita.charAt(0) + visibilita.slice(1).toLowerCase();

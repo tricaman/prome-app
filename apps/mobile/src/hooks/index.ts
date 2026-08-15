@@ -8,3 +8,4 @@
 export { useApiMutation, useForm, type OpzioniApiMutation, type FormProme } from '@prome/app-core';
 export { useI18n, useT } from '@/i18n/i18n-provider';
 export { useTema } from '@/theme';
+export { useChatAula, type StatoConnessione } from './use-chat-aula';
