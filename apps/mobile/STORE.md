@@ -177,7 +177,7 @@ chi la legge, ed è il difetto peggiore possibile in questo documento.
 | `profilo.preferenze_di_notifica` | due interruttori | non interromperti dove non vuoi | no |
 | `profilo.dispositivo_di_notifica` | token della piattaforma | raggiungere il tuo apparecchio | **oggi no**: l'app non registra alcun token e non esiste un fornitore di notifiche |
 | `bacheca.post` / `commento` | testo che scrivi | il prodotto | no |
-| `bacheca.allegato` | file (PDF, immagini, testo), nome, tipo, dimensione | il prodotto | no: archivio sulla stessa macchina, UE |
+| `bacheca.allegato` | file (PDF, immagini, testo) scelti dall'archivio o dal rullino, nome, tipo, dimensione | il prodotto | no: archivio sulla stessa macchina, UE |
 | `aula_studio.*` | titolo, argomenti, partecipanti, permessi, messaggi, materiali | il prodotto | no |
 | `aula_studio.invito` / `gruppo.invito_al_gruppo` | **indirizzo email di chi inviti** | mandargli l'invito | all'invio, verso il relay SMTP |
 | `gruppo.*` | nome del gruppo, membri, ruoli | il prodotto | no |
@@ -209,6 +209,12 @@ chiederlo senza tracciare è un rilievo.
 | User Content | Other User Content | Sì (post, commenti, messaggi, file, titoli) | Sì | No | App Functionality |
 | Identifiers | User ID | Sì | Sì | No | App Functionality |
 | Other Data | Other Data Types | Sì (università, corso) | Sì | No | App Functionality |
+
+**Permessi iOS**: una sola stringa d'uso, `NSPhotoLibraryUsageDescription` — Apple la pretende
+appena il framework Photos è collegato, anche quando la selezione passa dal selettore di sistema e
+non produce alcuna richiesta. Fotocamera e microfono non sono dichiarati (il plugin li cancella
+dall'Info.plist), e su Android fotocamera, microfono e archiviazione sono rimossi dal manifesto:
+verificato con un prebuild, non dedotto.
 
 **Da non dichiarare, e perché**: *Device ID* (l'app non registra nessun token di notifica),
 *Usage Data* e *Diagnostics* (nessun fornitore di misurazioni, nessun crash reporter), *Purchases*,
@@ -292,8 +298,12 @@ Come provare le funzioni principali:
 5. Impostazioni: cambia la visibilità dei tuoi contenuti; scarica i tuoi dati; l'eliminazione
    dell'account è in fondo alla stessa schermata.
 
-L'app non chiede alcun permesso di sistema: non usa fotocamera, microfono, posizione, rubrica
-né notifiche. Non contiene SDK pubblicitari né di analitica.
+L'app non chiede alcun permesso a runtime. Per allegare una foto usa il selettore di
+sistema, che consegna la sola immagine scelta: su iOS resta dichiarata
+NSPhotoLibraryUsageDescription perché il framework Photos è collegato, ma nessuna
+richiesta compare a schermo. Fotocamera, microfono e archiviazione sono rimossi dal
+manifesto Android. Non usa posizione, rubrica né notifiche, e non contiene SDK
+pubblicitari né di analitica.
 
 Contenuti generati dagli utenti (linea guida 1.2): ogni post e commento di altri ha
 un'azione «Segnala» con motivi predefiniti (la esaminiamo entro 24 ore) e, nello stesso

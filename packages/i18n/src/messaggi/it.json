@@ -435,6 +435,7 @@
       "oggi": "Oggi",
       "haCondiviso": "{nome} ha condiviso {file} in {argomento}",
       "caricaMateriale": "Carica materiale",
+      "caricaDallaGalleria": "Dalla galleria",
       "nuovoArgomento": "Nuovo argomento",
       "conteggioFile": "{numero} file · max 25 MB per allegato",
       "senzaArgomento": "Senza argomento",

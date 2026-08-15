@@ -47,9 +47,19 @@ giusta per chi la legge.
 - **`ios.config.usesNonExemptEncryption: false`**: usiamo solo TLS e le API di sistema, che sono
   esenti. Senza questa riga la stessa domanda torna a ogni sottomissione, e una risposta data a mano
   in fretta è una dichiarazione sbagliata su un modulo di conformità.
-- **`android.permissions: []`** dice ciò che il prodotto fa davvero: nessun permesso di sistema.
-  Niente fotocamera, microfono, posizione, rubrica o notifiche — il selettore di documenti non ne
-  chiede. Ogni permesso in più è una domanda in revisione e una spunta in meno all'installazione.
+- **Nessun permesso sensibile, e nessuna richiesta a runtime.** `android.permissions: []` non
+  aggiunge niente, e `android.blockedPermissions` **toglie** ciò che i moduli dichiarano da sé:
+  `expo-image-picker` porta nel proprio manifesto CAMERA, RECORD_AUDIO e le due di archiviazione
+  (`maxSdkVersion=32`), e nel manifesto costruito compaiono tutte con `tools:node="remove"` —
+  verificato con `npx expo prebuild --platform android --clean`, che è l'unico modo di saperlo
+  invece di crederlo. Restano INTERNET, VIBRATE e SYSTEM_ALERT_WINDOW, che vengono dal modello
+  dell'app, sono di livello «normale» e non producono alcuna richiesta.
+  Su iOS resta **una sola** stringa d'uso, `NSPhotoLibraryUsageDescription`: Apple la pretende
+  appena il framework Photos è collegato, anche se la selezione passa dal selettore di sistema e
+  non chiede niente. Fotocamera e microfono si tolgono passando `false` al plugin — su iOS il
+  valore `false` cancella la chiave dall'Info.plist, non la lascia vuota.
+  Ogni permesso in più è una domanda in revisione e una spunta in meno all'installazione: prima di
+  aggiungere un modulo nativo si legge il suo `android/src/main/AndroidManifest.xml` e si prebuilda.
 - **`supportsTablet: false`**: l'interfaccia è disegnata per un telefono, e dichiarare l'iPad
   obbligherebbe a screenshot per iPad di schermate che su iPad stanno male.
 
@@ -63,6 +73,18 @@ l'indirizzo c'è sempre. `EXPO_PUBLIC_URL_API` vince su tutto e serve a puntare 
 ambiente di prova.
 
 ### Icone e splash
+
+### Scegliere un file
+
+La scelta sta in `src/lib/scelta-file.ts` — `scegliDocumento()` (archivio dei file) e `scegliFoto()`
+(rullino) — e restituisce **una forma sola**, `FileScelto`, con il tipo già risolto. Le due schermate
+che caricano (composer dei post, materiali d'aula) non chiamano mai i selettori direttamente: quali
+formati si allegano e come si normalizza ciò che il sistema restituisce è una decisione sola, e prima
+era scritta due volte identica.
+
+Il rullino serve perché il selettore di documenti apre l'archivio dei file, e **su iOS le foto non
+stanno lì**. Due ripieghi obbligati: senza nome se ne costruisce uno con l'estensione dedotta dal
+MIME (un `.jpg` fisso mentirebbe su un PNG o un HEIC), senza MIME si assume JPEG.
 
 **Le sei immagini di `assets/images` sono generate**, non disegnate: `pnpm --filter @prome/mobile
 icone` le ricava da `apps/web/public/logo-prome.svg`, lo stesso marchio del sito. Non ritoccarle a

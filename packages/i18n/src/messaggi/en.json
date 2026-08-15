@@ -435,6 +435,7 @@
       "oggi": "Today",
       "haCondiviso": "{nome} shared {file} in {argomento}",
       "caricaMateriale": "Upload material",
+      "caricaDallaGalleria": "From gallery",
       "nuovoArgomento": "New topic",
       "conteggioFile": "{numero} files · max 25 MB per attachment",
       "senzaArgomento": "No topic",

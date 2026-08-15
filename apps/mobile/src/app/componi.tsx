@@ -9,7 +9,7 @@ import {
   useLeggiMioProfilo,
 } from '@prome/api-client';
 import { LUNGHEZZA_MASSIMA_POST } from '@prome/contracts';
-import { scegliDocumento, type FileScelto } from '@/lib/scelta-file';
+import { scegliDocumento, scegliFoto, type FileScelto } from '@/lib/scelta-file';
 import { useTema } from '@/theme';
 import { useApiMutation, useT } from '@/hooks';
 import { Avatar, Button, Icona, Input, Screen, Text } from '@/components/ui';
@@ -111,6 +111,11 @@ export default function SchermataComponi() {
     if (scelto) await caricaAllegato(scelto);
   };
 
+  const scegliDallaGalleria = async () => {
+    const scelta = await scegliFoto();
+    if (scelta) await caricaAllegato(scelta);
+  };
+
   return (
     <>
       <View
@@ -178,12 +183,22 @@ export default function SchermataComponi() {
           />
         ))}
 
+        {/* Due strade per la stessa cosa, perché il telefono ha due posti in
+            cui stanno i file: l'archivio dei documenti e il rullino. Su iOS le
+            foto non si raggiungono dal primo, e la foto degli appunti è il
+            gesto più naturale che si faccia da un telefono. */}
         <View style={{ flexDirection: 'row', gap: tema.spaziatura[3] }}>
           <Button
             titolo={t('app.sala.caricaMateriale')}
             variante="contorno"
             iconaSinistra={<Icona nome="carica" dimensione={18} colore="testo" />}
             onPress={() => void scegliFile()}
+          />
+          <Button
+            titolo={t('app.sala.caricaDallaGalleria')}
+            variante="contorno"
+            iconaSinistra={<Icona nome="carica" dimensione={18} colore="testo" />}
+            onPress={() => void scegliDallaGalleria()}
           />
         </View>
 

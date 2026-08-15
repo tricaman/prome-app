@@ -24,7 +24,7 @@ import {
   type SalaDto,
 } from '@prome/api-client';
 import { rotte } from '@/content';
-import { scegliDocumento, type FileScelto } from '@/lib/scelta-file';
+import { scegliDocumento, scegliFoto, type FileScelto } from '@/lib/scelta-file';
 import { useTema } from '@/theme';
 import { useApiMutation, useChatAula, useT } from '@/hooks';
 import { QueryBoundary } from '@/components/feedback';
@@ -335,6 +335,11 @@ function Materiali({
     if (scelto) await caricaMateriale(scelto);
   };
 
+  const scegliDallaGalleria = async () => {
+    const scelta = await scegliFoto();
+    if (scelta) await caricaMateriale(scelta);
+  };
+
   const gruppi = sala.argomenti.map((argomento) => ({
     id: argomento.id,
     titolo: argomento.titolo,
@@ -348,14 +353,30 @@ function Materiali({
   return (
     <Screen scorrevole>
       {puoCaricare ? (
-        <Button
-          titolo={t('app.sala.caricaMateriale')}
-          variante="contorno"
-          larghezzaPiena
-          iconaSinistra={<Icona nome="carica" dimensione={18} />}
-          inCaricamento={inCaricamento || condividi.isPending}
-          onPress={() => void scegliFile()}
-        />
+        // Archivio dei documenti e rullino: due posti diversi, e su iOS le foto
+        // stanno solo nel secondo.
+        <View style={{ flexDirection: 'row', gap: tema.spaziatura[2] }}>
+          <View style={{ flex: 1 }}>
+            <Button
+              titolo={t('app.sala.caricaMateriale')}
+              variante="contorno"
+              larghezzaPiena
+              iconaSinistra={<Icona nome="carica" dimensione={18} />}
+              inCaricamento={inCaricamento || condividi.isPending}
+              onPress={() => void scegliFile()}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Button
+              titolo={t('app.sala.caricaDallaGalleria')}
+              variante="contorno"
+              larghezzaPiena
+              iconaSinistra={<Icona nome="carica" dimensione={18} />}
+              inCaricamento={inCaricamento || condividi.isPending}
+              onPress={() => void scegliDallaGalleria()}
+            />
+          </View>
+        </View>
       ) : null}
 
       {sala.sonoModeratore ? (

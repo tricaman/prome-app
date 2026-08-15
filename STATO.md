@@ -146,7 +146,7 @@ Dispositivi e preferenze sono **detentori censiti** dal primo giorno: cadono con
 La catena di distribuzione esiste: `eas.json` con tre profili (dev client, prova interna con APK
 diretto, store con AAB e IPA), identificativo `app.prome` su entrambe le piattaforme, versioni tenute
 da EAS invece che committate a mano, `usesNonExemptEncryption` dichiarato una volta per sempre e
-`permissions: []`, che è la verità: **l'app non chiede alcun permesso di sistema**.
+**nessun permesso chiesto a runtime**: quelli che i moduli nativi dichiarano da sé vengono rimossi dal manifesto con `blockedPermissions`, e su iOS resta la sola stringa della libreria foto (Apple la pretende appena il framework è collegato).
 
 **Le icone erano ancora quelle del modello di Expo** — la "E" blu — e i percorsi di `app.json`
 puntavano a un bundle `.icon` con il marchio di Expo dentro. Ora le sei immagini si **generano dal
@@ -186,6 +186,16 @@ Era il punto 0 degli aperti e l'ultima funzione fra l'app e gli store: la linea 
 
 Blocchi e segnalazioni sono **detentori censiti** dal primo giorno: catena, registro (`segnalazioniEliminateIl`), residuo contato in entrambe le direzioni, esportazione — chi ho bloccato senza nomi, mai chi ha bloccato me. STORE.md §1.1 ora dice dove sta ogni cosa, e la §8 lo dice al revisore.
 
+### E10.2 completa, e «Scarica i tuoi dati» in tasca ✅ (15 agosto 2026, sera)
+
+Il work package diceva «composer con allegati **da galleria e file**»: c'era solo il selettore di documenti, e su iOS le foto del rullino non stanno nell'archivio dei file — caricare la foto degli appunti, che è il gesto più naturale che si faccia da un telefono, richiedeva di aprire il computer. Ora ci sono due bottoni, nel composer e nei materiali d'aula, e la scelta del file vive in un posto solo (`lib/scelta-file.ts`): prima era scritta due volte identica.
+
+**I permessi sono stati verificati, non dedotti.** `expo-image-picker` dichiara nel proprio manifesto fotocamera, microfono e le due di archiviazione: un prebuild usa e getta ha mostrato che con i blocchi in `app.json` compaiono tutte con `tools:node="remove"`, e che su iOS resta **una sola** stringa d'uso, quella della libreria foto — che Apple pretende appena il framework è collegato, anche se la selezione passa dal selettore di sistema e non chiede niente a schermo. Le frasi «l'app non chiede alcun permesso di sistema» in STORE.md, AGENTS.md e qui dicevano una cosa vera in modo impreciso: ora dicono cosa è dichiarato e cosa non viene mai chiesto.
+
+**«Scarica i tuoi dati» c'è anche sul telefono**: il documento si compone nell'app e passa dal foglio di condivisione, perché un collegamento aperto verso l'endpoint non porterebbe il token e salverebbe su disco un 401 chiamandolo «i tuoi dati». Il file si sovrascrive: il nome porta la data del giorno.
+
+Servono **`expo-image-picker`, `expo-file-system` ed `expo-sharing`**, cioè una ricostruzione del dev client. `expo-doctor` resta a 21/21.
+
 ### Mobile (Expo) — parziale
 
 Esistono e funzionano: accesso, inserimento del codice, completamento del profilo, bacheca, composer, dettaglio del post con commenti, **aule studio con materiali, permessi e chat in tempo reale**, impostazioni con privacy e uscita. Rientrando dal background il socket si riapre e la cronologia si rilegge.
@@ -208,7 +218,7 @@ Con E3 è nato anche il **primo canale dei fatti in uscita** (outbox): una tabel
 
 **M5 è fatta con E3 ed E4: le aule sono anche sul telefono** (elenco, sala, materiali, permessi, chat con rientro da background).
 
-**E11.1 era però incompleta, e questa riga lo nascondeva.** Il work package dice «lista, creazione, dettaglio, partecipanti»: la **creazione non esisteva** — chi aveva soltanto il telefono poteva entrare in un'aula aperta da altri ma non aprirne una — i **materiali erano in sola lettura**, e dei partecipanti si potevano cambiare i permessi ma non promuovere, retrocedere o rimuovere nessuno. Non si poteva nemmeno invitare. Ora tutto questo c'è, e il caricamento riusa lo stesso `expo-document-picker` e la stessa funzione condivisa del composer dei post: nessun modulo nativo nuovo.
+**E11.1 era però incompleta, e questa riga lo nascondeva.** Il work package dice «lista, creazione, dettaglio, partecipanti»: la **creazione non esisteva** — chi aveva soltanto il telefono poteva entrare in un'aula aperta da altri ma non aprirne una — i **materiali erano in sola lettura**, e dei partecipanti si potevano cambiare i permessi ma non promuovere, retrocedere o rimuovere nessuno. Non si poteva nemmeno invitare. Ora tutto questo c'è, e il caricamento riusa lo stesso aiuto di scelta e la stessa funzione condivisa del composer dei post (allora bastava `expo-document-picker`; il rullino è arrivato dopo, con E10.2).
 
 Sul telefono l'aula nasce **estemporanea**: un selettore di data nativo sarebbe un modulo in più e una ricostruzione del dev client per un campo che, per AS8, non apre né chiude nulla. Programmarla resta un gesto del web, e la schermata lo dice. Restano al web anche le impostazioni dell'aula (titolo, visibilità, eliminazione).
 
