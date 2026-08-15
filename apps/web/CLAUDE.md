@@ -93,7 +93,14 @@ Logo e marchio denominativo sono quelli storici del prodotto: `public/logo-prome
 
 Il token sta in `localStorage` sul web e nell'archivio cifrato del sistema sull'app; il *comportamento* — chi apre, chi chiude, chi viene avvisato — è uno solo, in `@prome/app-core/sessione`. `lib/api.ts` collega l'archivio e passa il token al client API, che lo mette in `Authorization` a ogni richiesta.
 
-`useSessione()` dice se si è dentro e **se lo si sa già**: sul server la risposta è sempre «non lo sappiamo», così una pagina resa dal server non promette contenuti che il browser potrebbe non avere il diritto di vedere.
+`useSessione()` dice se si è dentro e **se lo si sa già**: sul server la risposta è sempre «non lo sappiamo», così una pagina resa dal server non promette contenuti che il browser potrebbe non avere il diritto di vedere. Sono tre stati e non due: «non lo sappiamo ancora» è un'attesa, e trattarlo come un rifiuto butterebbe fuori a ogni ricarica chi è regolarmente dentro.
+
+- **Il muro sta nel layout, non nelle pagine**: `RichiedeSessione` avvolge il gruppo `(sessione)` e l'onboarding, quindi una schermata nuova nasce protetta per il solo fatto di stare lì — la stessa scelta della guardia globale dell'API. Non aggiungere controlli di sessione dentro una pagina: sarebbero una seconda regola, e quella dimenticata non si vede.
+- Quando la sessione manca, la guardia rimanda a `/app/accedi?da=<percorso>`; `destinazioneDopoAccesso` (in `lib/percorsi-app.ts`) è **l'unico** punto che convalida quel parametro e accetta solo percorsi interni a `/app/` — senza, la schermata di accesso diventerebbe un trampolino verso un dominio qualunque, con il nostro a fare da garanzia.
+- **La cache delle query si svuota nella guardia**, non dove si preme «esci»: una sessione cade in molti modi — il bottone, una revoca da un altro dispositivo, una scadenza — e solo la guardia li vede tutti. Se restasse, chi entra dopo sullo stesso computer troverebbe in bacheca i post di chi c'era prima.
+- **`SoloSenzaSessione` rimanda indietro chi arriva su `/app/accedi` già dentro, ma non chi entra proprio lì.** La sessione nasce su quella pagina: se guardasse `autenticato` a ogni disegno, un istante dopo il codice verificato la guardia e `ModuloAccesso` navigherebbero tutti e due, e vincerebbe l'ultimo — mandando sulla bacheca chi il profilo non l'ha ancora compilato.
+- **Si esce con `useEsci()`** (`@prome/app-core`), da due punti: la colonna di navigazione e le impostazioni. Revoca la sessione sul server e poi svuota l'archivio locale — **e lo svuota anche se il server non risponde**: tenere dentro chi ha chiesto di uscire è il modo peggiore di rispondere a quel gesto, e su un computer condiviso è il caso in cui «esci» conta davvero.
+- Un 401 `PR006` su una richiesta partita **con** un token chiude la sessione da sé (la reazione vive in `@prome/app-core/sessione`, registrata una volta per entrambi i client). Gli altri 401 dell'ingresso — codice sbagliato, codice scaduto — parlano del codice appena digitato, non della sessione, e non devono buttare fuori nessuno.
 
 ## Fare una chiamata
 

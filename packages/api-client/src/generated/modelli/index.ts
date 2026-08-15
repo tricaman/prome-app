@@ -66,6 +66,8 @@ export * from './entraInAulaStudio200Data';
 export * from './errorResponseDto';
 export * from './esciDaProme200';
 export * from './esciDaProme200Data';
+export * from './esciDaTuttiIDispositivi200';
+export * from './esciDaTuttiIDispositivi200Data';
 export * from './healthDto';
 export * from './healthDtoRole';
 export * from './healthDtoStatus';

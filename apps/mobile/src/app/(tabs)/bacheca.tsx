@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { getElencaPostQueryKey } from '@prome/api-client';
+import { getElencaPostQueryKey, useLeggiMioProfilo } from '@prome/api-client';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { UTENTE } from '@prome/contenuti';
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
 import { useT } from '@/hooks';
 import { FeedBacheca } from '@/components/contenuti';
-import { AzioneTonda, Avatar, Icona, Text } from '@/components/ui';
+import { Avatar, Icona, Text } from '@/components/ui';
 
 /**
  * Bacheca.
@@ -26,6 +25,9 @@ export default function SchedaBacheca() {
   const bordi = useSafeAreaInsets();
   const [inAggiornamento, setInAggiornamento] = useState(false);
   const [filtro, setFiltro] = useState(0);
+
+  const profilo = useLeggiMioProfilo();
+  const nome = [profilo.data?.data.nome, profilo.data?.data.cognome].filter(Boolean).join(' ');
 
   const filtri = [
     t('app.feed.filtri.perTe'),
@@ -59,16 +61,17 @@ export default function SchedaBacheca() {
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[3] }}>
           <View style={{ flex: 1 }}>
-            <Text variante="didascalia">Ciao {UTENTE.nome.split(' ')[0]} 👋</Text>
+            {/* Il saluto compare solo quando il nome c'è davvero: durante il
+                caricamento resta il titolo, mai un nome di ripiego. */}
+            {nome ? <Text variante="didascalia">Ciao {nome.split(' ')[0]} 👋</Text> : null}
             <Text variante="titolo">{t('app.nav.bacheca')}</Text>
           </View>
-          <AzioneTonda icona="campana" etichetta={t('app.notifiche')} conPallino />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('app.nav.profilo')}
             onPress={() => router.push(rotte.mioProfilo())}
           >
-            <Avatar nome={UTENTE.nome} dimensione={42} soloColore />
+            <Avatar nome={nome || '?'} dimensione={42} soloColore />
           </Pressable>
         </View>
 

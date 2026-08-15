@@ -33,7 +33,7 @@ const LUNGHEZZA_CODICE = 6;
  * I due passi stanno in una schermata sola, perché il secondo ha senso solo
  * subito dopo il primo e serve poter tornare all'email senza perdere il posto.
  */
-export function ModuloAccesso() {
+export function ModuloAccesso({ destinazione }: { destinazione: string }) {
   const [emailInviata, setEmailInviata] = useState<string | null>(null);
 
   return (
@@ -41,7 +41,11 @@ export function ModuloAccesso() {
       {emailInviata === null ? (
         <PassoEmail onInviato={setEmailInviata} />
       ) : (
-        <PassoCodice email={emailInviata} onCambiaEmail={() => setEmailInviata(null)} />
+        <PassoCodice
+          email={emailInviata}
+          destinazione={destinazione}
+          onCambiaEmail={() => setEmailInviata(null)}
+        />
       )}
     </div>
   );
@@ -101,7 +105,16 @@ function PassoEmail({ onInviato }: { onInviato: (email: string) => void }) {
 }
 
 /** Secondo passo: il codice appena arrivato, con la via di uscita se l'email era sbagliata. */
-function PassoCodice({ email, onCambiaEmail }: { email: string; onCambiaEmail: () => void }) {
+function PassoCodice({
+  email,
+  destinazione,
+  onCambiaEmail,
+}: {
+  email: string;
+  /** Dove atterrare a onboarding già fatto: già convalidata dalla pagina. */
+  destinazione: string;
+  onCambiaEmail: () => void;
+}) {
   const t = useTranslations('app.accesso');
   const router = useRouter();
   const [codice, setCodice] = useState('');
@@ -117,10 +130,9 @@ function PassoCodice({ email, onCambiaEmail }: { email: string; onCambiaEmail: (
     onSuccess: async ({ data }) => {
       await apriSessione(data.token);
       // Chi non ha ancora compilato il profilo non entra nell'app: ci entra
-      // dopo, e da qui sappiamo già quale delle due strade prendere.
-      router.replace(
-        data.onboardingCompletato ? percorsiApp.bacheca() : percorsiApp.benvenuto(),
-      );
+      // dopo, e da qui sappiamo già quale delle due strade prendere. Chi il
+      // profilo ce l'ha torna dove stava andando quando la sessione è caduta.
+      router.replace(data.onboardingCompletato ? destinazione : percorsiApp.benvenuto());
       // Rientrare entro la grazia di 14 giorni annulla la cancellazione: va
       // detto, o l'utente non saprà mai che l'account è salvo.
       const riattivato = data.cancellazioneAnnullata === true;

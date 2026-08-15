@@ -294,7 +294,8 @@
       "gruppi": "Gruppi",
       "materiali": "Materiali salvati",
       "profilo": "Profilo",
-      "tuoiGruppi": "I tuoi gruppi"
+      "tuoiGruppi": "I tuoi gruppi",
+      "esci": "Esci"
     },
     "nuovoPost": "Nuovo post",
     "cerca": "Cerca post, materiali, aule studio…",
@@ -338,6 +339,7 @@
     },
     "feed": {
       "composer": "Cosa vuoi condividere, {nome}?",
+      "composerSenzaNome": "Cosa vuoi condividere?",
       "pubblica": "Pubblica",
       "filtri": {
         "perTe": "Per te",
@@ -501,13 +503,10 @@
       "nav": {
         "profilo": "Profilo",
         "privacy": "Privacy",
-        "notifiche": "Notifiche",
         "aspetto": "Aspetto",
-        "account": "Account e sicurezza",
-        "dati": "Dati e download"
+        "account": "Account"
       },
-      "modificaProfilo": "Modifica profilo",
-      "cambiaFoto": "Cambia foto",
+      "senzaNome": "Profilo da completare",
       "privacy": "Privacy",
       "contenuti": {
         "titolo": "Chi vede quello che scrivi",
@@ -521,22 +520,14 @@
         "ateneo": "Ateneo",
         "pubblico": "Pubblico"
       },
-      "aspetto": "Aspetto e notifiche",
+      "aspetto": "Aspetto",
       "tema": "Tema",
-      "notifiche": {
-        "commenti": "Commenti ai tuoi post",
-        "commentiSub": "Email e in-app",
-        "inviti": "Inviti ad aule studio e gruppi",
-        "invitiSub": "Email e in-app",
-        "promemoria": "Promemoria aule programmate",
-        "promemoriaSub": "10 minuti prima",
-        "materiali": "Nuovi materiali nei tuoi gruppi",
-        "materialiSub": "Riepilogo giornaliero"
-      },
       "account": "Account",
-      "scaricaDati": "Scarica i tuoi dati",
-      "archivioCompleto": "Archivio completo",
+      "sessione": "Sessione",
+      "esci": "Esci",
+      "esciSub": "Solo da questo browser",
       "esciDaTutti": "Esci da tutti i dispositivi",
+      "esciDaTuttiSub": "Chiude anche le sessioni aperte sugli altri browser e telefoni",
       "elimina": {
         "titolo": "Elimina account",
         "testo": "Il profilo scompare subito. I tuoi post e commenti restano utili a chi studia ma diventano anonimi (“Utente rimosso”), e i dati personali vengono cancellati anche dai backup entro 30 giorni. Se cambi idea, entro 14 giorni puoi riattivare l'account accedendo di nuovo.",

@@ -38,6 +38,7 @@ export default async function PaginaBacheca({
 }) {
   await linguaDellaRotta(params);
   const t = await getTranslations('app.feed');
+  const tNav = await getTranslations('app.nav');
 
   const filtri = [
     t('filtri.perTe'),
@@ -48,7 +49,13 @@ export default async function PaginaBacheca({
 
   return (
     <>
-      <AppTopbar conRicerca />
+      <AppTopbar
+        titolo={
+          <span className="font-display text-xl font-extrabold tracking-[-0.02em]">
+            {tNav('bacheca')}
+          </span>
+        }
+      />
 
       <div className="flex flex-1 justify-center gap-6 px-5 py-6 sm:px-8">
         <div className="flex w-full max-w-[640px] flex-none flex-col gap-3.5">

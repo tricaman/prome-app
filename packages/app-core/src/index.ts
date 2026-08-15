@@ -36,6 +36,8 @@ export {
   type DepositoSessione,
 } from './sessione';
 
+export { useEsci, type Portata, type EsitoUscita } from './use-esci';
+
 export {
   caricaConAvanzamento,
   tipoAllegatoDa,

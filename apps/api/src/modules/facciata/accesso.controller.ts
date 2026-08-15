@@ -8,6 +8,7 @@ import { AppException } from '../../common/exceptions';
 import { FORNITORE_IDENTITA } from '../../infrastruttura/accesso/accesso.module';
 import {
   DURATA_CODICE_SECONDI,
+  DURATA_SESSIONE_SECONDI,
   type FornitoreIdentita,
 } from '../../infrastruttura/accesso/better-auth';
 import { traduciErroreDelFornitore } from '../../infrastruttura/accesso/errori-del-fornitore';
@@ -173,6 +174,23 @@ export class AccessoController {
     await this.fornitore.api.signOut({ headers: intestazioniStandard(richiesta) });
     return null;
   }
+
+  @Post('esci-da-tutti')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    operationId: 'esciDaTuttiIDispositivi',
+    summary: 'Chiude tutte le sessioni, compresa questa',
+  })
+  @ApiWrappedResponse({ description: 'Sessioni chiuse' })
+  @ResponseMessage('successes.USCITA_DA_TUTTI_EFFETTUATA')
+  async esciDaTutti(@Req() richiesta: FastifyRequest): Promise<null> {
+    // È il gesto di chi sospetta che qualcun altro sia entrato: deve valere
+    // per tutti i dispositivi **compreso questo**, altrimenti chi lo preme dal
+    // dispositivo compromesso lascerebbe viva proprio la sessione da chiudere.
+    // `revokeSessions` le elimina tutte, quindi non serve un `signOut` a parte.
+    await this.fornitore.api.revokeSessions({ headers: intestazioniStandard(richiesta) });
+    return null;
+  }
 }
 
 /**
@@ -210,6 +228,6 @@ function leggiSessione(esito: unknown): { token: string; utenteId: string; scade
   return {
     token,
     utenteId,
-    scadeIl: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    scadeIl: new Date(Date.now() + DURATA_SESSIONE_SECONDI * 1000).toISOString(),
   };
 }

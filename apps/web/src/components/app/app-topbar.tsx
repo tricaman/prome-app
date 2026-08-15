@@ -1,31 +1,27 @@
 import type { ReactNode } from 'react';
-import { useTranslations } from 'next-intl';
-import { UTENTE } from '@/content';
-import { Avatar, Icona } from '@/components/ui';
+import { AvatarUtente } from '@/components/app/avatar-utente';
 import { ThemeToggle } from '@/components/layout';
 import { cn } from '@/lib/utils';
 
 export interface AppTopbarProps {
-  /** Titolo della schermata: usato al posto della ricerca dove serve contesto. */
+  /** Titolo della schermata: dice dove ci si trova. */
   titolo?: ReactNode;
-  /** Azioni a destra, prima delle notifiche. */
+  /** Azioni a destra, prima del tema. */
   azioni?: ReactNode;
-  /** Con `true` mostra il campo di ricerca al posto del titolo. */
-  conRicerca?: boolean;
   className?: string;
 }
 
 /**
- * Barra superiore dell'app.
+ * Barra superiore dell'app: dove ci si trova, e le azioni della schermata.
  *
- * Ha due configurazioni: con la ricerca, quando la schermata è un elenco da
- * esplorare, e con il titolo, quando si è dentro un contenuto e serve sapere
- * dove ci si trova. Non entrambe: due punti di attenzione in una barra alta
- * 68 pixel si annullano a vicenda.
+ * Non ha la campana delle notifiche né il campo di ricerca che aveva prima.
+ * La campana era un bottone senza gesto con un pallino sempre acceso — diceva
+ * «c'è qualcosa di nuovo» a ogni pagina, per sempre, e non c'era nulla da
+ * aprire; il campo di ricerca era un riquadro di testo, non un campo, e
+ * nessuna ricerca esiste ancora sui contenuti. Erano in cima a ogni schermata
+ * dell'app, che è il posto peggiore in cui tenere due cose finte.
  */
-export function AppTopbar({ titolo, azioni, conRicerca = false, className }: AppTopbarProps) {
-  const t = useTranslations('app');
-
+export function AppTopbar({ titolo, azioni, className }: AppTopbarProps) {
   return (
     <header
       className={cn(
@@ -33,32 +29,12 @@ export function AppTopbar({ titolo, azioni, conRicerca = false, className }: App
         className,
       )}
     >
-      {conRicerca ? (
-        <div className="flex h-[42px] w-full max-w-[440px] items-center gap-2.5 rounded-[14px] bg-superficie-alt-2 px-3.5 text-sm text-testo-debole">
-          <Icona nome="cerca" dimensione={17} />
-          <span className="truncate">{t('cerca')}</span>
-        </div>
-      ) : (
-        <div className="flex min-w-0 flex-1 items-center gap-3">{titolo}</div>
-      )}
+      <div className="flex min-w-0 flex-1 items-center gap-3">{titolo}</div>
 
       <div className="ml-auto flex flex-none items-center gap-3">
         {azioni}
         <ThemeToggle className="size-[42px] rounded-[14px] border border-bordo bg-superficie" />
-        <button
-          type="button"
-          aria-label={t('notifiche')}
-          className="relative grid size-[42px] place-items-center rounded-[14px] border border-bordo bg-superficie text-testo-corpo transition-colors hover:bg-superficie-alt"
-        >
-          <Icona nome="campana" />
-          {/* Il pallino dice "c'è qualcosa di nuovo", non quante cose: il
-              numero esatto sta dentro il pannello delle notifiche. */}
-          <span
-            aria-hidden
-            className="absolute right-2.5 top-2.5 size-2 rounded-full bg-tinta-ambra-bordo ring-2 ring-superficie"
-          />
-        </button>
-        <Avatar nome={UTENTE.nome} dimensione={42} />
+        <AvatarUtente />
       </div>
     </header>
   );

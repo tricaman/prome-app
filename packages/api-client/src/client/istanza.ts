@@ -22,6 +22,27 @@ export function configuraApiClient(config: ConfigurazioneApiClient): void {
   configurazione = config;
 }
 
+/** Chi viene avvisato quando una richiesta *autenticata* viene rifiutata. */
+type Osservatore = (errore: ApiClientError) => void;
+
+let osservatore: Osservatore | undefined;
+
+/**
+ * Registra chi guarda gli errori delle richieste partite **con un token**.
+ *
+ * Serve a un caso solo, ma indispensabile: una sessione può morire lontano da
+ * qui — revocata da un altro dispositivo, scaduta, cancellata con l'account —
+ * e il client non ha modo di saperlo se non provando. Il primo rifiuto è
+ * quell'annuncio, e questo è l'unico punto in cui passano tutte le risposte:
+ * chiunque altro se ne occupasse, se ne occuperebbe per la sua metà.
+ *
+ * L'osservatore riceve l'errore e decide: qui non si sa cosa significhi un
+ * codice, e nemmeno lo si deve sapere.
+ */
+export function osservaErroriAutenticati(nuovo: Osservatore): void {
+  osservatore = nuovo;
+}
+
 /**
  * Errore lanciato per ogni risposta non-2xx: trasporta la ApiErrorResponse del
  * contratto (message già tradotto, errorCode, errorId da mostrare/segnalare).
@@ -94,7 +115,12 @@ export const istanzaApi = async <T>(
     risposta.status === 204 ? undefined : await risposta.json().catch(() => undefined);
 
   if (!risposta.ok) {
-    throw new ApiClientError(corpo as ApiErrorResponse, risposta.status);
+    const errore = new ApiClientError(corpo as ApiErrorResponse, risposta.status);
+    // Solo se il token c'era: senza, il rifiuto non dice nulla sulla sessione.
+    // È la differenza fra «la tua sessione è caduta» e «stai sbagliando il
+    // codice di accesso», che è pure un 401 e non deve buttare fuori nessuno.
+    if (token) osservatore?.(errore);
+    throw errore;
   }
   return corpo as T;
 };

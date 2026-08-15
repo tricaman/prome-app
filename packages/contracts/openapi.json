@@ -194,6 +194,50 @@
         ]
       }
     },
+    "/accesso/esci-da-tutti": {
+      "post": {
+        "operationId": "esciDaTuttiIDispositivi",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sessioni chiuse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Chiude tutte le sessioni, compresa questa",
+        "tags": [
+          "accesso"
+        ]
+      }
+    },
     "/profilo/me": {
       "get": {
         "operationId": "leggiMioProfilo",

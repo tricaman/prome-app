@@ -1,6 +1,7 @@
 export {
   ApiClientError,
   configuraApiClient,
+  osservaErroriAutenticati,
   type ConfigurazioneApiClient,
 } from './client/istanza';
 export * from './generated/endpoints';

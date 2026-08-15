@@ -1,4 +1,15 @@
 import { useSyncExternalStore } from 'react';
+import { osservaErroriAutenticati } from '@prome/api-client';
+
+/**
+ * Il codice con cui il server dice «questa sessione non vale».
+ *
+ * È l'unico che deve svuotare l'archivio: gli altri 401 dell'ingresso —
+ * codice sbagliato (PR003), codice scaduto (PR004) — parlano del codice
+ * appena digitato, non della sessione, e reagire allo stato invece che al
+ * codice butterebbe fuori chi sbaglia a scrivere sei cifre.
+ */
+const ACCESSO_RICHIESTO = 'PR006';
 
 /**
  * Dove il token della sessione viene conservato.
@@ -32,6 +43,24 @@ function avvisa(): void {
  */
 export async function configuraSessione(nuovoDeposito: DepositoSessione): Promise<void> {
   deposito = nuovoDeposito;
+
+  /**
+   * Una sessione può morire senza che questo client lo chieda: revocata da un
+   * altro dispositivo, scaduta, portata via dalla cancellazione dell'account.
+   * Il token resterebbe nell'archivio per sempre, e l'app continuerebbe a
+   * mostrarsi «dentro» mandando richieste che nessuno accetterà più.
+   *
+   * Sta qui, e non nei due client, per la stessa ragione per cui sta qui tutto
+   * il resto: due copie sarebbero due modi diversi di cadere fuori da Prome.
+   */
+  osservaErroriAutenticati((errore) => {
+    if (errore.status !== 401 || errore.errore?.errorCode !== ACCESSO_RICHIESTO) return;
+    // Già chiusa: senza questa guardia una pagina con dieci query in volo
+    // scriverebbe dieci volte nell'archivio e avviserebbe dieci volte.
+    if (token === null) return;
+    void chiudiSessione();
+  });
+
   token = (await nuovoDeposito.leggi()) ?? null;
   caricata = true;
   avvisa();

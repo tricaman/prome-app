@@ -56,6 +56,7 @@ import type {
   EntraInAulaStudio200,
   ErrorResponseDto,
   EsciDaProme200,
+  EsciDaTuttiIDispositivi200,
   InviaMessaggioDto,
   InvitaInAulaStudio201,
   LeggiInvito200,
@@ -372,6 +373,69 @@ export const useEsciDaProme = <TError = ErrorResponseDto,
       > => {
 
       const mutationOptions = getEsciDaPromeMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Chiude tutte le sessioni, compresa questa
+ */
+export const esciDaTuttiIDispositivi = (
+    
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<EsciDaTuttiIDispositivi200>(
+      {url: `/accesso/esci-da-tutti`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getEsciDaTuttiIDispositiviMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof esciDaTuttiIDispositivi>>, TError,void, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof esciDaTuttiIDispositivi>>, TError,void, TContext> => {
+
+const mutationKey = ['esciDaTuttiIDispositivi'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof esciDaTuttiIDispositivi>>, void> = () => {
+          
+
+          return  esciDaTuttiIDispositivi(requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EsciDaTuttiIDispositiviMutationResult = NonNullable<Awaited<ReturnType<typeof esciDaTuttiIDispositivi>>>
+    
+    export type EsciDaTuttiIDispositiviMutationError = ErrorResponseDto
+
+    /**
+ * @summary Chiude tutte le sessioni, compresa questa
+ */
+export const useEsciDaTuttiIDispositivi = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof esciDaTuttiIDispositivi>>, TError,void, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof esciDaTuttiIDispositivi>>,
+        TError,
+        void,
+        TContext
+      > => {
+
+      const mutationOptions = getEsciDaTuttiIDispositiviMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

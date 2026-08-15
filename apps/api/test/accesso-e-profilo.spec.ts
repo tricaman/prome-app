@@ -352,6 +352,56 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
       expect(dopo.statusCode).toBe(401);
     });
 
+    it("l'uscita chiude una sessione sola: le altre restano vive", async () => {
+      // Due ingressi con lo stesso indirizzo: due dispositivi della stessa
+      // persona. È la premessa del test che segue, e senza di essa «esci da
+      // tutti» passerebbe anche se chiudesse solo la sessione corrente.
+      const indirizzo = nuovoIndirizzo();
+      const primo = await entra(indirizzo);
+      const secondo = await entra(indirizzo);
+      expect(primo.token).not.toBe(secondo.token);
+
+      const uscita = await chiedi('/accesso/esci', {
+        method: 'POST',
+        headers: { authorization: `Bearer ${primo.token}` },
+      });
+      expect(uscita.statusCode).toBe(200);
+
+      const altroDispositivo = await chiedi('/profilo/me', {
+        headers: { authorization: `Bearer ${secondo.token}` },
+      });
+      expect(altroDispositivo.statusCode).toBe(200);
+    });
+
+    it("«esci da tutti» chiude ogni sessione, compresa quella che l'ha chiesto", async () => {
+      const indirizzo = nuovoIndirizzo();
+      const primo = await entra(indirizzo);
+      const secondo = await entra(indirizzo);
+
+      const uscita = await chiedi('/accesso/esci-da-tutti', {
+        method: 'POST',
+        headers: { authorization: `Bearer ${secondo.token}` },
+      });
+      expect(uscita.statusCode).toBe(200);
+      expect(uscita.json().data).toBeNull();
+      expect(uscita.json().meta.message).toBe('Sei uscito da Prome su tutti i dispositivi');
+
+      // Compresa la propria: chi preme questo bottone sospetta che qualcuno sia
+      // entrato, e lasciare viva la sessione da cui l'ha premuto sarebbe
+      // esattamente il caso in cui il gesto non serve a niente.
+      for (const token of [primo.token, secondo.token]) {
+        const dopo = await chiedi('/profilo/me', { headers: { authorization: `Bearer ${token}` } });
+        expect(dopo.statusCode).toBe(401);
+        expect(dopo.json().errorCode).toBe('PR006');
+      }
+    });
+
+    it('nega «esci da tutti» senza sessione, con PR006', async () => {
+      const risposta = await chiedi('/accesso/esci-da-tutti', { method: 'POST' });
+      expect(risposta.statusCode).toBe(401);
+      expect(risposta.json().errorCode).toBe('PR006');
+    });
+
     it('traduce i messaggi nella lingua della richiesta', async () => {
       const risposta = await chiedi('/profilo/me', { headers: { 'x-lang': 'en' } });
       expect(risposta.json().message).toBe('You need to sign in to continue');

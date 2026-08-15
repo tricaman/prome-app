@@ -25,6 +25,12 @@
 - Nei controller l'utente arriva con `@Utente()`. Su un endpoint protetto c'è sempre: se non ci fosse, la guardia avrebbe già risposto 401 (PR006).
 - I codici errore dell'ingresso stanno fra quelli di **Profilo** (PR003–PR008): Accesso non è un contesto, e chi possiede la porta possiede anche i modi in cui può fallire.
 
+### Uscita
+
+Due endpoint, perché rispondono a due domande diverse: `POST /accesso/esci` chiude **questa** sessione (`signOut`), `POST /accesso/esci-da-tutti` le chiude **tutte, compresa quella che l'ha chiesto** (`revokeSessions`). La seconda non è la prima fatta meglio: è il gesto di chi sospetta che qualcun altro sia entrato, e lasciare viva la sessione da cui l'ha premuta sarebbe esattamente il caso in cui non serve a niente. Entrambe passano dal fornitore chiamato come libreria, come tutto il resto dell'accesso — `session.deleteMany` diretto vive solo in `cancellazione-accesso.ts`, dove non esiste una sessione viva da cui partire.
+
+`DURATA_SESSIONE_SECONDI` è esportata da `better-auth.ts` e la risposta all'ingresso ci calcola `scadeIl`: scritta due volte, prima o poi una delle due cambia e il client crede di avere una sessione che non ha più.
+
 ### Invio del codice
 
 `AvvisiInUscita` è una porta (`infrastruttura/avvisi-in-uscita/canale-email.ts`) con due adattatori, scelti da `CANALE_EMAIL`. Quello di sviluppo **scrive il codice nei log e non manda niente**: in produzione l'avvio si ferma (`CANALE_EMAIL=sviluppo` + `NODE_ENV=production` = fail-fast), perché un codice nei log è un codice regalato. Quello SMTP parla con un fornitore qualunque — Brevo, Resend, altri: lo spike che deve sceglierne uno cambia quattro valori nel file dei segreti, non una riga di codice.

@@ -6,11 +6,11 @@ import {
   getElencaPostQueryKey,
   preautorizzaAllegato,
   pubblicaPost,
+  useLeggiMioProfilo,
   type PreautorizzaAllegatoDto,
 } from '@prome/api-client';
 import { LUNGHEZZA_MASSIMA_POST } from '@prome/contracts';
 import { caricaConAvanzamento, tipoAllegatoDa } from '@prome/app-core';
-import { UTENTE } from '@/content';
 import { useApiMutation } from '@/hooks';
 import { Avatar, Button, Card, Icona } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -49,7 +49,14 @@ export function Composer() {
   // valore che cambia a ogni lettura non è qualcosa da chiamare nel corpo di
   // un componente.
   const prossimoId = useRef(0);
-  const nome = UTENTE.nome.split(' ')[0] ?? UTENTE.nome;
+  // Il nome vero, o nessun nome: l'invito a scrivere si rivolge a chi sta
+  // davanti allo schermo, e chiamarlo con il nome di qualcun altro è la prima
+  // cosa che gli dice che questa schermata non lo conosce.
+  const profilo = useLeggiMioProfilo();
+  const nomeCompleto = [profilo.data?.data.nome, profilo.data?.data.cognome]
+    .filter(Boolean)
+    .join(' ');
+  const nome = nomeCompleto.split(' ')[0] ?? '';
 
   const pubblica = useApiMutation({
     mutationFn: () =>
@@ -113,7 +120,7 @@ export function Composer() {
   return (
     <Card padding="nessuno" className="p-4">
       <div className="flex items-center gap-3">
-        <Avatar nome={UTENTE.nome} dimensione={40} />
+        <Avatar nome={nomeCompleto || '?'} dimensione={40} />
 
         {aperto ? (
           <textarea
@@ -122,7 +129,7 @@ export function Composer() {
             value={testo}
             maxLength={LUNGHEZZA_MASSIMA_POST}
             onChange={(evento) => setTesto(evento.target.value)}
-            placeholder={t('composer', { nome })}
+            placeholder={nome ? t('composer', { nome }) : t('composerSenzaNome')}
             className="flex-1 resize-none rounded-[14px] border-2 border-bordo bg-superficie px-4 py-3 text-[14.5px] outline-none focus:border-primary-500"
           />
         ) : (
@@ -131,7 +138,7 @@ export function Composer() {
             onClick={() => setAperto(true)}
             className="flex h-11 flex-1 items-center rounded-[14px] bg-superficie-alt-2 px-4 text-left text-[14.5px] text-testo-debole"
           >
-            {t('composer', { nome })}
+            {nome ? t('composer', { nome }) : t('composerSenzaNome')}
           </button>
         )}
 

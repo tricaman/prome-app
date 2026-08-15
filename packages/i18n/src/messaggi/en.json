@@ -294,7 +294,8 @@
       "gruppi": "Groups",
       "materiali": "Saved materials",
       "profilo": "Profile",
-      "tuoiGruppi": "Your groups"
+      "tuoiGruppi": "Your groups",
+      "esci": "Sign out"
     },
     "nuovoPost": "New post",
     "cerca": "Search posts, materials, study rooms…",
@@ -338,6 +339,7 @@
     },
     "feed": {
       "composer": "What do you want to share, {nome}?",
+      "composerSenzaNome": "What do you want to share?",
       "pubblica": "Publish",
       "filtri": {
         "perTe": "For you",
@@ -501,13 +503,10 @@
       "nav": {
         "profilo": "Profile",
         "privacy": "Privacy",
-        "notifiche": "Notifications",
         "aspetto": "Appearance",
-        "account": "Account and security",
-        "dati": "Data and downloads"
+        "account": "Account"
       },
-      "modificaProfilo": "Edit profile",
-      "cambiaFoto": "Change photo",
+      "senzaNome": "Profile to complete",
       "privacy": "Privacy",
       "contenuti": {
         "titolo": "Who sees what you write",
@@ -521,22 +520,14 @@
         "ateneo": "University",
         "pubblico": "Public"
       },
-      "aspetto": "Appearance and notifications",
+      "aspetto": "Appearance",
       "tema": "Theme",
-      "notifiche": {
-        "commenti": "Comments on your posts",
-        "commentiSub": "Email and in-app",
-        "inviti": "Invitations to study rooms and groups",
-        "invitiSub": "Email and in-app",
-        "promemoria": "Reminders for scheduled rooms",
-        "promemoriaSub": "10 minutes before",
-        "materiali": "New materials in your groups",
-        "materialiSub": "Daily digest"
-      },
       "account": "Account",
-      "scaricaDati": "Download your data",
-      "archivioCompleto": "Complete archive",
-      "esciDaTutti": "Sign out of all devices",
+      "sessione": "Session",
+      "esci": "Sign out",
+      "esciSub": "This browser only",
+      "esciDaTutti": "Sign out everywhere",
+      "esciDaTuttiSub": "Also closes the sessions open on your other browsers and phones",
       "elimina": {
         "titolo": "Delete account",
         "testo": "Your profile disappears immediately. Your posts and comments stay useful to those who study but become anonymous (“Removed user”), and personal data is deleted from backups too within 30 days. If you change your mind, you can reactivate the account within 14 days by signing in again.",

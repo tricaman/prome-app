@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -11,7 +10,7 @@ import {
   type LeggiMioProfilo200,
 } from '@prome/api-client';
 import { useApiMutation } from '@/hooks';
-import { Card, Switch } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { QueryBoundary } from '@/components/feedback';
 import { cn } from '@/lib/utils';
 
@@ -113,42 +112,5 @@ export function ImpostazioniPrivacy() {
         </Card>
       )}
     </QueryBoundary>
-  );
-}
-
-/** Interruttori delle notifiche: ognuno dice anche come arriva l'avviso. */
-export function ImpostazioniNotifiche() {
-  const t = useTranslations('app.impostazioni.notifiche');
-  const [attive, setAttive] = useState<Record<string, boolean>>({
-    commenti: true,
-    inviti: true,
-    promemoria: true,
-    materiali: false,
-  });
-
-  const righe = ['commenti', 'inviti', 'promemoria', 'materiali'] as const;
-
-  return (
-    <ul>
-      {righe.map((riga, indice) => (
-        <li
-          key={riga}
-          className={cn(
-            'flex items-center gap-4 px-5 py-4',
-            indice < righe.length - 1 && 'border-b border-superficie-alt-2',
-          )}
-        >
-          <span className="min-w-0 flex-1">
-            <span className="block text-sm font-bold text-testo">{t(riga)}</span>
-            <span className="mt-0.5 block text-xs text-testo-didascalia">{t(`${riga}Sub`)}</span>
-          </span>
-          <Switch
-            etichetta={t(riga)}
-            attivo={attive[riga] ?? false}
-            onChange={(valore) => setAttive((precedenti) => ({ ...precedenti, [riga]: valore }))}
-          />
-        </li>
-      ))}
-    </ul>
   );
 }

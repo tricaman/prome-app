@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useEsci } from '@prome/app-core';
 import { MIEI_GRUPPI, UTENTE } from '@/content';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { Link, usePathname } from '@/i18n/navigazione';
@@ -34,6 +35,7 @@ const VOCI: readonly VoceApp[] = [
 export function AppSidebar() {
   const t = useTranslations('app');
   const percorso = usePathname();
+  const { esci, inCorso } = useEsci();
 
   return (
     <aside className="hidden w-64 flex-none flex-col border-r border-bordo bg-superficie px-3.5 py-5 lg:flex">
@@ -96,9 +98,23 @@ export function AppSidebar() {
         ))}
       </ul>
 
+      {/* L'uscita sta qui, sempre visibile, e non solo in fondo alle
+          impostazioni: chi vuole uscire — su un computer condiviso, in
+          biblioteca — non deve attraversare una schermata piena di
+          interruttori per farlo. */}
+      <button
+        type="button"
+        disabled={inCorso}
+        onClick={() => void esci()}
+        className="mt-auto mb-2 flex h-11 items-center gap-3 rounded-xl px-3 text-[14.5px] font-semibold text-testo-tenue transition-colors hover:bg-superficie-alt-2 hover:text-testo disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <Icona nome="esci" />
+        {t('nav.esci')}
+      </button>
+
       <Link
         href={percorsiApp.impostazioni()}
-        className="mt-auto flex items-center gap-2.5 rounded-2xl border border-bordo bg-superficie-alt p-3 transition-colors hover:border-tinta-menta-bordo"
+        className="flex items-center gap-2.5 rounded-2xl border border-bordo bg-superficie-alt p-3 transition-colors hover:border-tinta-menta-bordo"
       >
         <Avatar nome={UTENTE.nome} dimensione={36} />
         <span className="min-w-0 flex-1">

@@ -32,6 +32,15 @@ src/
 
 **Unificato: email + codice OTP, nessuna password.** `accedi.tsx` chiede solo l'email e passa a `codice.tsx` portandosi dietro l'indirizzo (`rotte.codice(email)`), che va ripetuto in schermata: è l'unico modo per accorgersi di averlo sbagliato prima di aspettare un messaggio che non arriverà. Non c'è una registrazione separata, quindi la schermata iniziale ha un invito solo.
 
+## Sessione
+
+La guardia sta in `app/_layout.tsx`, sopra lo `Stack`, e l'elenco `SENZA_SESSIONE` è **chiuso e per esclusione**: una schermata nuova nasce protetta per il solo fatto di non essere lì dentro. L'elenco inverso lascerebbe scoperto ciò che ci si dimentica di aggiungere.
+
+- Finché `caricata` è falso non si disegna niente: l'archivio cifrato si legge in modo asincrono, e la schermata di partenza è quella di chi non è entrato — mostrarla a chi è entrato sarebbe un lampo di app sbagliata a ogni apertura.
+- **`codice` è pubblico ma non rimanda indietro chi è dentro**, e non è una dimenticanza: è la schermata su cui la sessione nasce, e se lo facesse navigherebbe insieme alla schermata, mandando sulla bacheca chi il profilo non l'ha ancora compilato.
+- **La cache delle query la svuota la guardia**, non il bottone: una sessione cade in molti modi — l'uscita, una revoca da un altro dispositivo, una scadenza — e solo la guardia li vede tutti.
+- **Si esce con `useEsci()`** (`@prome/app-core`, lo stesso del web), dalle impostazioni: questo telefono o tutti i dispositivi. L'archivio locale si svuota **anche se il server non risponde**, e la schermata non naviga — ci pensa la guardia, così esiste un modo solo di uscire.
+
 ## Visibilità dei contenuti
 
 Un'aula studio o un gruppo può essere Privato, Ateneo o Pubblico, e **"Pubblico" significa aperto a tutti gli studenti iscritti a Prome**, non al web. I contenuti si vedono solo da dentro l'app: non esistono pagine pubbliche di aule, post, materiali, profili o gruppi. Quando si scrive una descrizione di visibilità — nella creazione di un'aula o nelle impostazioni privacy — non deve mai promettere indicizzazione o visibilità agli anonimi.

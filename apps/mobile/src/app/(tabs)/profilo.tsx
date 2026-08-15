@@ -60,7 +60,7 @@ export default function SchedaProfilo() {
           </View>
 
           <Button
-            titolo={t('app.impostazioni.modificaProfilo')}
+            titolo={t('app.impostazioni.titolo')}
             variante="contorno"
             larghezzaPiena
             style={{ marginTop: tema.spaziatura[2] }}

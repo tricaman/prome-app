@@ -22,7 +22,6 @@ export const rotte = {
   accedi: (): Href => '/accedi',
   codice: (email: string): Href => ({ pathname: '/codice', params: { email } }),
   profilo: (): Href => '/completa-profilo',
-  notifiche: (): Href => '/notifiche',
   bacheca: (): Href => '/bacheca',
   auleStudio: (): Href => '/aule-studio',
   gruppi: (): Href => '/gruppi',

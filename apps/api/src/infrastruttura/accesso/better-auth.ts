@@ -12,8 +12,14 @@ export const DURATA_CODICE_SECONDI = 10 * 60;
 export const LUNGHEZZA_CODICE = 6;
 /** Quanti tentativi sbagliati prima che il codice venga bruciato. */
 export const TENTATIVI_CONSENTITI = 3;
-/** Quanto dura una sessione senza essere usata. */
-const DURATA_SESSIONE_SECONDI = 30 * 24 * 60 * 60;
+/**
+ * Quanto dura una sessione senza essere usata.
+ *
+ * È esportata perché la risposta all'ingresso deve dichiarare la stessa
+ * scadenza che il fornitore applica davvero: scritta due volte, prima o poi
+ * una delle due cambia e il client crede di avere una sessione che non ha più.
+ */
+export const DURATA_SESSIONE_SECONDI = 30 * 24 * 60 * 60;
 
 export type FornitoreIdentita = ReturnType<typeof creaFornitoreIdentita>;
 
