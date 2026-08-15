@@ -15,6 +15,7 @@ import { useTema } from '@/theme';
 import { useApiMutation, useT } from '@/hooks';
 import { QueryBoundary } from '@/components/feedback';
 import { ModificaProfilo } from '@/components/app/modifica-profilo';
+import { ScaricaDati } from '@/components/app/scarica-dati';
 import { Avatar, Button, Card, Icona, Intestazione, Screen, Text } from '@/components/ui';
 
 const OPZIONI: readonly {
@@ -40,10 +41,14 @@ const OPZIONI: readonly {
  * che può non avere un account). Un interruttore che non protegge da niente è
  * peggio di un interruttore che manca.
  *
- * Sono spariti per la stessa ragione gli interruttori delle notifiche, il
- * download dei dati e l'uscita da tutti i dispositivi: nessuno dei tre ha
- * qualcosa dietro, e in una schermata di impostazioni credere di aver messo a
- * posto una cosa è indistinguibile dall'averlo fatto davvero.
+ * Delle tre righe tolte a luglio perché non avevano niente dietro — notifiche,
+ * download dei dati, uscita da tutti i dispositivi — **due sono tornate vere**:
+ * l'uscita da tutti i dispositivi con la sessione, e «Scarica i tuoi dati» con
+ * i moduli nativi. Resta fuori il solo pannello delle notifiche, e non perché
+ * manchi il codice: manca un fornitore che le recapiti, e mostrare interruttori
+ * per avvisi che nessuno consegna sarebbe di nuovo il difetto di allora — in
+ * una schermata di impostazioni, credere di aver messo a posto una cosa è
+ * indistinguibile dall'averlo fatto davvero.
  */
 export default function SchermataImpostazioni() {
   const t = useT();
@@ -87,6 +92,8 @@ export default function SchermataImpostazioni() {
         />
 
         <SessioneAccount />
+
+        <ScaricaDati />
 
         <Button
           titolo={t('app.impostazioni.elimina.titolo')}
