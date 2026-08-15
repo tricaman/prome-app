@@ -8,9 +8,12 @@ import {
   getElencaCommentiQueryKey,
   useElencaCommenti,
   type CommentoDto,
+  getElencaPostQueryKey,
+  useLeggiMioProfilo,
 } from '@prome/api-client';
 import { LUNGHEZZA_MASSIMA_COMMENTO } from '@prome/contracts';
 import { useApiMutation } from '@/hooks';
+import { SegnalaEBlocca } from './segnala-e-blocca';
 import { QueryBoundary } from '@/components/feedback';
 import { Avatar, Button, Icona } from '@/components/ui';
 
@@ -59,6 +62,7 @@ function RigaCommento({
 }) {
   const t = useTranslations('app.post');
   const tComune = useTranslations('comune');
+  const profilo = useLeggiMioProfilo();
   const autore =
     [commento.autore.nome, commento.autore.cognome].filter(Boolean).join(' ') ||
     tComune('utenteRimosso');
@@ -68,25 +72,44 @@ function RigaCommento({
     invalida: [chiaveElenco as never],
   });
 
+  // «Segnala» compare sui commenti degli ALTRI, non dove manca il permesso di
+  // eliminare: `puoEliminare` è vero anche per il proprietario del post sui
+  // commenti altrui — che è esattamente chi deve potersi difendere da un
+  // commento molesto sotto casa propria. X e «Segnala» convivono.
+  const mio = profilo.data?.data.utenteId === commento.autore.utenteId;
+  const segnalabile = !mio && !commento.autore.rimosso;
+
   return (
     <div className="flex items-start gap-3">
       <Avatar nome={autore} dimensione={34} />
       <div className="min-w-0 flex-1 rounded-[16px] border border-bordo bg-superficie-alt px-3.5 py-2.5">
         <div className="flex items-center gap-2">
           <span className="text-[13px] font-extrabold text-testo">{autore}</span>
-          {/* Il permesso arriva dal server: ricalcolarlo qui vorrebbe dire
-              tenere due copie della stessa regola, e questa sarebbe aggirabile. */}
-          {commento.puoEliminare ? (
-            <button
-              type="button"
-              onClick={() => elimina.mutate(undefined)}
-              disabled={elimina.isPending}
-              aria-label={t('eliminaCommento')}
-              className="ml-auto text-testo-debole transition-colors hover:text-errore"
-            >
-              <Icona nome="chiudi" dimensione={14} />
-            </button>
-          ) : null}
+          <span className="ml-auto flex items-center gap-2.5">
+            {segnalabile ? (
+              <SegnalaEBlocca
+                tipo="COMMENTO"
+                soggettoId={commento.id}
+                autore={{ utenteId: commento.autore.utenteId, nome: autore }}
+                // Bloccato l'autore del commento, spariscono i suoi commenti
+                // QUI e i suoi post dal feed: si invalidano entrambi.
+                invalidaAlBlocco={[chiaveElenco, getElencaPostQueryKey()]}
+              />
+            ) : null}
+            {/* Il permesso arriva dal server: ricalcolarlo qui vorrebbe dire
+                tenere due copie della stessa regola, e questa sarebbe aggirabile. */}
+            {commento.puoEliminare ? (
+              <button
+                type="button"
+                onClick={() => elimina.mutate(undefined)}
+                disabled={elimina.isPending}
+                aria-label={t('eliminaCommento')}
+                className="text-testo-debole transition-colors hover:text-errore"
+              >
+                <Icona nome="chiudi" dimensione={14} />
+              </button>
+            ) : null}
+          </span>
         </div>
         <p className="mt-1 whitespace-pre-wrap text-[14px] leading-relaxed text-testo-corpo">
           {commento.testo}

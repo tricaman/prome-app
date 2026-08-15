@@ -8,6 +8,7 @@ import { SchedaProfilo } from '@/components/app/scheda-profilo';
 import { ModificaProfilo } from '@/components/app/modifica-profilo';
 import { ImpostazioniPrivacy } from '@/components/app/impostazioni-privacy';
 import { ImpostazioniNotifiche } from '@/components/app/impostazioni-notifiche';
+import { UtentiBloccati } from '@/components/app/utenti-bloccati';
 import { SessioneAccount } from '@/components/app/sessione-account';
 import { ScaricaDati } from '@/components/app/scarica-dati';
 import { EliminaAccount } from '@/components/app/elimina-account';
@@ -93,6 +94,7 @@ export default async function PaginaImpostazioni({
             <section id="privacy" className="scroll-mt-6">
               <EtichettaSezione>{t('privacy')}</EtichettaSezione>
               <ImpostazioniPrivacy />
+              <UtentiBloccati />
             </section>
 
             <section id="notifiche" className="scroll-mt-6">

@@ -613,7 +613,29 @@
           "titolo": "Invitations",
           "testo": "When someone invites you to a study room or a group."
         }
+      },
+      "bloccati": {
+        "titolo": "Blocked users",
+        "testo": "You no longer see each other’s content on the board, and their invitations send you no notifications. In rooms and groups you already share, leaving and moderation still apply.",
+        "vuoto": "You have not blocked anyone.",
+        "dal": "Since {data}",
+        "sblocca": "Unblock"
       }
+    },
+    "segnala": {
+      "segnala": "Report",
+      "titolo": "Report this content",
+      "testo": "Pick a reason: whoever runs Prome reviews it within 24 hours. Reporters are never revealed. The rules are in the",
+      "lineeGuida": "community guidelines",
+      "motivi": {
+        "SPAM": "Spam",
+        "MOLESTIE": "Harassment",
+        "CONTENUTO_INAPPROPRIATO": "Inappropriate content"
+      },
+      "blocca": "Block {nome}",
+      "bloccaConferma": "You will no longer see each other’s content.",
+      "bloccaDavvero": "Block",
+      "annulla": "Cancel"
     }
   }
 }

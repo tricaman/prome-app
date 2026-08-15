@@ -21,6 +21,7 @@ import { QueryBoundary } from '@/components/feedback';
 import { TarghettaAllegato } from '@/components/contenuti';
 import { Avatar, Card, Heading, Icona } from '@/components/ui';
 import { Commenti } from './commenti';
+import { SegnalaEBlocca } from './segnala-e-blocca';
 
 /**
  * Dettaglio di un post.
@@ -73,6 +74,13 @@ export function DettaglioPost({ postId }: { postId: string }) {
                     </li>
                   ))}
                 </ul>
+              ) : null}
+
+              {/* Sui contenuti altrui, mai sui propri né su un autore rimosso:
+                  è la superficie da cui uno sconosciuto può raggiungerti, e la
+                  linea guida 1.2 chiede che da qui ci si possa difendere. */}
+              {!data.puoModificare && !data.autore.rimosso ? (
+                <AzioniLettore post={data} nomeAutore={autore} />
               ) : null}
             </Card>
 
@@ -151,6 +159,24 @@ function VisoreAllegato({
  * testo, con il cursore dentro. Portare altrove per cambiare una parola fa
  * perdere il contesto della discussione che sta sotto.
  */
+function AzioniLettore({ post, nomeAutore }: { post: PostDto; nomeAutore: string }) {
+  const router = useRouter();
+
+  return (
+    <div className="mt-4 border-t border-superficie-alt-2 pt-3">
+      <SegnalaEBlocca
+        tipo="POST"
+        soggettoId={post.id}
+        autore={{ utenteId: post.autore.utenteId, nome: nomeAutore }}
+        invalidaAlBlocco={[getElencaPostQueryKey()]}
+        // Bloccato l'autore, questo post non esiste più per chi guarda:
+        // restare qui mostrerebbe un errore per una cosa andata a buon fine.
+        onBloccato={() => router.replace(percorsiApp.bacheca())}
+      />
+    </div>
+  );
+}
+
 function AzioniAutore({ post }: { post: PostDto }) {
   const t = useTranslations('app.post');
   const router = useRouter();

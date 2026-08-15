@@ -613,7 +613,29 @@
           "titolo": "Inviti",
           "testo": "Quando qualcuno ti invita in un’aula studio o in un gruppo."
         }
+      },
+      "bloccati": {
+        "titolo": "Utenti bloccati",
+        "testo": "Non vedete più i contenuti l’uno dell’altro in bacheca, e i loro inviti non ti mandano notifiche. Nelle aule e nei gruppi che già condividete restano l’uscita e la moderazione dello spazio.",
+        "vuoto": "Non hai bloccato nessuno.",
+        "dal": "Da {data}",
+        "sblocca": "Sblocca"
       }
+    },
+    "segnala": {
+      "segnala": "Segnala",
+      "titolo": "Segnala questo contenuto",
+      "testo": "Scegli il motivo: chi gestisce Prome lo guarda entro 24 ore. Chi segnala non viene mai rivelato. Le regole sono nelle",
+      "lineeGuida": "linee guida della community",
+      "motivi": {
+        "SPAM": "Spam",
+        "MOLESTIE": "Molestie",
+        "CONTENUTO_INAPPROPRIATO": "Contenuto inappropriato"
+      },
+      "blocca": "Blocca {nome}",
+      "bloccaConferma": "Non vedrete più i contenuti l’uno dell’altro.",
+      "bloccaDavvero": "Blocca",
+      "annulla": "Annulla"
     }
   }
 }
