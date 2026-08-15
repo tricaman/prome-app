@@ -61,6 +61,14 @@ WORKDIR /app
 # lo esegue un utente senza privilegi.
 RUN addgroup -S prome && adduser -S prome -G prome
 
+# La cartella dell'archivio esiste già nell'immagine e appartiene a prome.
+# Non è una premura inutile: un volume Docker vuoto viene inizializzato con
+# proprietà e permessi della cartella che trova nell'immagine, e se lì non
+# c'è niente nasce di root. Il processo, che root non è, riceve allora un
+# EACCES al primo file caricato — un 500 che si manifesta solo in esercizio,
+# perché in sviluppo l'archivio è una cartella del progetto.
+RUN mkdir -p /archivio && chown prome:prome /archivio
+
 # `/produzione` contiene già lo schema, le migration e il client generato.
 COPY --from=build --chown=prome:prome /produzione ./
 
