@@ -46,7 +46,9 @@ openssl rand -base64 48   # BETTER_AUTH_SECRET
 openssl rand -base64 32   # POSTGRES_PASSWORD
 ```
 
-L'API **si ferma all'avvio** se ne manca uno, invece di partire e sbagliare dopo. In particolare rifiuta di partire con `CANALE_EMAIL=sviluppo` in produzione: quel canale scrive i codici OTP nei log.
+L'API **si ferma all'avvio** se ne manca uno, invece di partire e sbagliare dopo. In particolare rifiuta di partire con `CANALE_EMAIL=sviluppo` in produzione (quel canale scrive i codici OTP nei log) e senza `EMAIL_SUPPORTO`, la casella che riceve le segnalazioni: le linee guida promettono una risposta entro 24 ore, e senza nessuno dietro è una promessa falsa dal primo giorno.
+
+**Una variabile nuova nell'API va aggiunta anche qui**, in tre punti: `.env` sulla macchina, `.env.esempio` e il blocco `environment` del compose — di `api` **e** di `worker`, che condividono l'immagine e quindi la stessa validazione. Il compose passa solo ciò che dichiara: una variabile presente in `.env` ma non elencata lì non arriva al contenitore. Le obbligatorie si scrivono nella forma `${NOME:?...}`, così il rilascio si ferma al primo comando invece di avviare qualcosa che esce subito e viene rimesso in piedi all'infinito.
 
 ## Backup
 

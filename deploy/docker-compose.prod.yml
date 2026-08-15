@@ -59,6 +59,14 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: https://${DOMINIO_API}
       CANALE_EMAIL: ${CANALE_EMAIL}
+      # Obbligatoria in produzione: senza, l'API si ferma all'avvio. Le linee
+      # guida promettono una risposta entro 24 ore, e una segnalazione senza
+      # casella dietro è una promessa falsa dal primo giorno.
+      #
+      # `:?` ferma il rilascio al primo comando invece di lasciar partire un
+      # contenitore che esce subito e viene rimesso in piedi all'infinito: lo
+      # stesso guasto, ma detto adesso e per nome.
+      EMAIL_SUPPORTO: "${EMAIL_SUPPORTO:?manca in deploy/.env sulla macchina}"
       # Servono solo con CANALE_EMAIL=smtp, ma vanno passate comunque: se
       # mancano quando servono, l'API si ferma all'avvio invece di accettare
       # richieste di accesso e non mandare niente.
@@ -68,6 +76,10 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_MITTENTE: ${SMTP_MITTENTE:-}
       ORIGINI_CONSENTITE: https://${DOMINIO_WEB}
+      # I collegamenti degli inviti portano dentro l'applicazione web, non
+      # dentro l'API. Senza, il valore predefinito è `localhost` e l'invito
+      # parte comunque: un'email che nessuno può aprire, e nessun errore.
+      URL_APP_WEB: https://${DOMINIO_WEB}
       ARCHIVIO_LOCALE_PERCORSO: /archivio
     volumes:
       - archivio_data:/archivio
@@ -88,6 +100,9 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: https://${DOMINIO_API}
       CANALE_EMAIL: ${CANALE_EMAIL}
+      # Stessa immagine, stessa validazione all'avvio: quello che ferma l'API
+      # ferma anche il worker.
+      EMAIL_SUPPORTO: "${EMAIL_SUPPORTO:?manca in deploy/.env sulla macchina}"
       # Servono solo con CANALE_EMAIL=smtp, ma vanno passate comunque: se
       # mancano quando servono, l'API si ferma all'avvio invece di accettare
       # richieste di accesso e non mandare niente.
@@ -96,6 +111,7 @@ services:
       SMTP_UTENTE: ${SMTP_UTENTE:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_MITTENTE: ${SMTP_MITTENTE:-}
+      URL_APP_WEB: https://${DOMINIO_WEB}
       ARCHIVIO_LOCALE_PERCORSO: /archivio
     # La sonda dell'immagine interroga /health, che qui non esiste: il worker
     # non ascolta su HTTP, ed è il punto. Lasciarla accesa lo terrebbe

@@ -70,6 +70,26 @@ for SERVIZIO in api worker web; do
   if [ "$IN_ESERCIZIO" != "$ATTESA" ]; then
     echo "  ${SERVIZIO}: gira ${IN_ESERCIZIO}, attesa ${ATTESA}" >&2
     ERRORI=$((ERRORI + 1))
+    continue
+  fi
+
+  # L'immagine giusta non vuol dire ancora niente. Un contenitore che esce
+  # all'avvio — una variabile obbligatoria che manca, e la validazione fail-fast
+  # che fa il suo mestiere — viene rimesso in piedi da `restart: unless-stopped`
+  # e continua a dichiarare l'immagine attesa mentre non serve nessuno. Guardare
+  # solo l'etichetta lascia passare in verde proprio il guasto più comune, e a
+  # scoprirlo resta la prova finale: cento secondi dopo, senza una riga di log.
+  #
+  # Un momento di respiro prima di guardare: un contenitore appena avviato è
+  # legittimamente ancora in "created" per una frazione di secondo.
+  sleep 2
+  STATO=$(sudo docker inspect --format '{{.State.Status}}' "prome-${SERVIZIO}-1")
+  RIAVVII=$(sudo docker inspect --format '{{.RestartCount}}' "prome-${SERVIZIO}-1")
+  if [ "$STATO" != running ] || [ "$RIAVVII" -gt 0 ]; then
+    echo "  ${SERVIZIO}: stato ${STATO}, riavvii ${RIAVVII} — non è in esercizio" >&2
+    echo "  ── ultime righe di ${SERVIZIO} ──" >&2
+    "${COMPOSE[@]}" logs --tail 40 --no-color "$SERVIZIO" >&2 || true
+    ERRORI=$((ERRORI + 1))
   else
     echo "  ${SERVIZIO}: ok"
   fi
