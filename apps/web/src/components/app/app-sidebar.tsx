@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useEsci } from '@prome/app-core';
-import { MIEI_GRUPPI, UTENTE } from '@/content';
+import { useElencaMieiGruppi, useLeggiMioProfilo } from '@prome/api-client';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { Link, usePathname } from '@/i18n/navigazione';
 import { Avatar, Icona, type NomeIcona } from '@/components/ui';
@@ -10,18 +10,21 @@ import { Logo } from '@/components/layout';
 import { cn } from '@/lib/utils';
 
 interface VoceApp {
-  chiave: 'bacheca' | 'aule' | 'gruppi' | 'materiali' | 'profilo';
+  chiave: 'bacheca' | 'aule' | 'gruppi' | 'profilo';
   icona: NomeIcona;
   href: string;
-  /** Quante cose richiedono attenzione: assente se non ce ne sono. */
-  contatore?: number;
 }
 
+/**
+ * I badge numerici sono spariti: erano due costanti scritte qui dentro — un 2
+ * sulle aule e un 3 sui gruppi — accese a ogni caricamento di ogni pagina.
+ * Diceva «hai cose da vedere» a chi non ne aveva nessuna, ed è la bugia più
+ * facile da lasciare in giro, perché somiglia a un dettaglio grafico.
+ */
 const VOCI: readonly VoceApp[] = [
   { chiave: 'bacheca', icona: 'bacheca', href: percorsiApp.bacheca() },
-  { chiave: 'aule', icona: 'aule', href: percorsiApp.auleStudio(), contatore: 2 },
-  { chiave: 'gruppi', icona: 'gruppi', href: percorsiApp.gruppo('ingegneria-informatica-2026'), contatore: 3 },
-  { chiave: 'materiali', icona: 'cartella', href: percorsiApp.materiali() },
+  { chiave: 'aule', icona: 'aule', href: percorsiApp.auleStudio() },
+  { chiave: 'gruppi', icona: 'gruppi', href: percorsiApp.gruppi() },
   { chiave: 'profilo', icona: 'profilo', href: percorsiApp.impostazioni() },
 ];
 
@@ -36,6 +39,14 @@ export function AppSidebar() {
   const t = useTranslations('app');
   const percorso = usePathname();
   const { esci, inCorso } = useEsci();
+  const profilo = useLeggiMioProfilo();
+  const gruppi = useElencaMieiGruppi({ limit: 8 });
+
+  const nome = [profilo.data?.data.nome, profilo.data?.data.cognome].filter(Boolean).join(' ');
+  const studi = [profilo.data?.data.corso, profilo.data?.data.universita]
+    .filter(Boolean)
+    .join(' · ');
+  const mieiGruppi = gruppi.data?.data ?? [];
 
   return (
     <aside className="hidden w-64 flex-none flex-col border-r border-bordo bg-superficie px-3.5 py-5 lg:flex">
@@ -43,13 +54,15 @@ export function AppSidebar() {
         <Logo />
       </Link>
 
-      <button
-        type="button"
+      {/* Scrivere un post si fa dal composer, in cima alla bacheca: questo
+          bottone non era collegato a niente e compariva su ogni schermata. */}
+      <Link
+        href={percorsiApp.bacheca()}
         className="mb-4 flex h-11 items-center justify-center gap-2 rounded-full bg-primario text-[14.5px] font-extrabold text-primario-testo shadow-marchio transition-colors hover:bg-primary-600"
       >
         <Icona nome="piu" dimensione={18} />
         {t('nuovoPost')}
-      </button>
+      </Link>
 
       <nav aria-label={t('nav.bacheca')} className="flex flex-col gap-0.5">
         {VOCI.map((voce) => {
@@ -68,35 +81,34 @@ export function AppSidebar() {
             >
               <Icona nome={voce.icona} />
               {t(`nav.${voce.chiave}`)}
-              {voce.contatore ? (
-                <span className="ml-auto grid h-[22px] min-w-[22px] place-items-center rounded-full bg-primario px-1.5 text-[11px] font-extrabold text-primario-testo">
-                  {voce.contatore}
-                </span>
-              ) : null}
             </Link>
           );
         })}
       </nav>
 
-      <p className="px-3 pb-2 pt-5 text-[10.5px] font-extrabold uppercase tracking-[0.09em] text-testo-debole">
-        {t('nav.tuoiGruppi')}
-      </p>
-      <ul className="flex flex-col gap-0.5">
-        {MIEI_GRUPPI.map((gruppo) => (
-          <li key={gruppo.slug}>
-            <Link
-              href={percorsiApp.gruppo(gruppo.slug)}
-              className="flex h-10 items-center gap-2.5 rounded-xl px-3 text-[13.5px] font-semibold text-testo-tenue transition-colors hover:bg-superficie-alt-2"
-            >
-              <span
-                aria-hidden
-                className="size-[22px] flex-none rounded-[7px] bg-gradient-to-br from-primary-200 to-primary-500"
-              />
-              <span className="truncate">{gruppo.nome}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      {mieiGruppi.length ? (
+        <>
+          <p className="px-3 pb-2 pt-5 text-[10.5px] font-extrabold uppercase tracking-[0.09em] text-testo-debole">
+            {t('nav.tuoiGruppi')}
+          </p>
+          <ul className="flex flex-col gap-0.5">
+            {mieiGruppi.map((gruppo) => (
+              <li key={gruppo.id}>
+                <Link
+                  href={percorsiApp.gruppo(gruppo.id)}
+                  className="flex h-10 items-center gap-2.5 rounded-xl px-3 text-[13.5px] font-semibold text-testo-tenue transition-colors hover:bg-superficie-alt-2"
+                >
+                  <span
+                    aria-hidden
+                    className="size-[22px] flex-none rounded-[7px] bg-gradient-to-br from-primary-200 to-primary-500"
+                  />
+                  <span className="truncate">{gruppo.nome}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
 
       {/* L'uscita sta qui, sempre visibile, e non solo in fondo alle
           impostazioni: chi vuole uscire — su un computer condiviso, in
@@ -116,12 +128,10 @@ export function AppSidebar() {
         href={percorsiApp.impostazioni()}
         className="flex items-center gap-2.5 rounded-2xl border border-bordo bg-superficie-alt p-3 transition-colors hover:border-tinta-menta-bordo"
       >
-        <Avatar nome={UTENTE.nome} dimensione={36} />
+        <Avatar nome={nome || '?'} dimensione={36} />
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[13px] font-extrabold text-testo">{UTENTE.nome}</span>
-          <span className="block truncate text-[11px] text-testo-didascalia">
-            {UTENTE.corso} · {UTENTE.ateneo}
-          </span>
+          <span className="block truncate text-[13px] font-extrabold text-testo">{nome}</span>
+          <span className="block truncate text-[11px] text-testo-didascalia">{studi}</span>
         </span>
       </Link>
     </aside>

@@ -12,8 +12,9 @@ export const percorsiApp = {
   post: (id: string) => `/app/post/${id}`,
   auleStudio: () => '/app/aule-studio',
   aulaStudio: (id: string) => `/app/aule-studio/${id}`,
-  gruppo: (slug: string) => `/app/gruppi/${slug}`,
-  materiali: () => '/app/materiali',
+  gruppi: () => '/app/gruppi',
+  gruppo: (id: string) => `/app/gruppi/${id}`,
+  invitoGruppo: (id: string) => `/app/inviti-gruppo/${id}`,
   impostazioni: () => '/app/impostazioni',
 } as const;
 

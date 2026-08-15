@@ -24,12 +24,10 @@ export const rotte = {
   profilo: (): Href => '/completa-profilo',
   bacheca: (): Href => '/bacheca',
   auleStudio: (): Href => '/aule-studio',
-  gruppi: (): Href => '/gruppi',
   mioProfilo: (): Href => '/profilo',
   componi: (): Href => '/componi',
   post: (id: string): Href => ({ pathname: '/post/[id]', params: { id } }),
   aula: (id: string): Href => ({ pathname: '/aula/[id]', params: { id } }),
-  gruppo: (slug: string): Href => ({ pathname: '/gruppo/[slug]', params: { slug } }),
   impostazioni: (): Href => '/impostazioni',
   eliminaAccount: (): Href => '/impostazioni/elimina-account',
 } as const;

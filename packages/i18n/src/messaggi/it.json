@@ -483,20 +483,40 @@
       }
     },
     "gruppo": {
-      "schede": {
-        "cartelle": "Cartelle e materiali",
-        "chat": "Chat del gruppo",
-        "membri": "Membri",
-        "impostazioni": "Impostazioni"
+      "titolo": "Gruppi",
+      "sommario": "Uno spazio che resta: chi ne fa parte entra nelle aule studio del gruppo senza un invito ogni volta.",
+      "crea": "Nuovo gruppo",
+      "nessuno": "Non fai ancora parte di nessun gruppo. Creane uno e invita i tuoi compagni.",
+      "nome": "Nome del gruppo",
+      "nomeEsempio": "Ingegneria informatica – 2° anno",
+      "chiPuoVederlo": "Chi può vederlo",
+      "membri": "{numero, plural, =1 {# membro} other {# membri}}",
+      "moderatore": "Moderatore",
+      "invita": "Invita",
+      "invitaTesto": "Mandiamo un invito valido sette giorni. Funziona anche con chi non è ancora iscritto a Prome.",
+      "indirizzo": "Indirizzo email",
+      "promuovi": "Rendi moderatore",
+      "retrocedi": "Togli da moderatore",
+      "rimuovi": "Rimuovi dal gruppo",
+      "esci": "Esci dal gruppo",
+      "elimina": "Elimina il gruppo",
+      "eliminaTesto": "Il gruppo sparisce per tutti. Le aule studio collocate qui dentro restano, con i loro materiali e la loro chat: tornano semplicemente senza gruppo.",
+      "ultimoModeratore": "Sei l’unico moderatore: promuovi qualcun altro prima di uscire.",
+      "aule": "Aule studio del gruppo",
+      "nessunAula": "Nessuna aula studio è collocata in questo gruppo.",
+      "collocaTesto": "Un’aula si colloca qui dalla sua schermata.",
+      "visibilita": {
+        "privato": "Privato",
+        "ateneo": "Ateneo",
+        "pubblico": "Pubblico",
+        "privatoTesto": "Solo chi ne fa parte",
+        "ateneoTesto": "Chi studia nel tuo ateneo lo trova",
+        "pubblicoTesto": "Tutti gli studenti iscritti a Prome lo trovano"
       },
-      "invitaMembri": "Invita membri",
-      "nuovaAula": "Nuova aula studio",
-      "albero": "Albero cartelle",
-      "nuovaCartella": "Nuova cartella",
-      "profondita": "Massimo 5 livelli di profondità. Sei al livello {livello}.",
-      "auleInCartella": "Aule studio in questa cartella",
-      "apri": "Apri",
-      "sottotitolo": "{membri} membri · {ateneo} · gruppo {visibilita}"
+      "invitoTitolo": "Sei stato invitato in un gruppo",
+      "invitoEntra": "Entra nel gruppo",
+      "invitoInCorso": "Ti stiamo aggiungendo al gruppo…",
+      "invitoScaduto": "Questo invito è scaduto."
     },
     "impostazioni": {
       "titolo": "Impostazioni",
