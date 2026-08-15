@@ -31,5 +31,6 @@
   "COMMENTO_NOT_FOUND": "Comment not found",
   "COMMENTO_TESTO_VUOTO": "Write something before commenting",
   "COMMENTO_TESTO_TROPPO_LUNGO": "The comment exceeds {massimo} characters",
-  "NON_PUOI_MODERARE": "You can only delete your own comments and those under your posts"
+  "NON_PUOI_MODERARE": "You can only delete your own comments and those under your posts",
+  "ACCOUNT_IN_CANCELLAZIONE": "This account is being deleted and can no longer be used"
 }

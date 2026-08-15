@@ -9,6 +9,7 @@
 export * from './allegatoDto';
 export * from './allegatoDtoTipo';
 export * from './autoreDto';
+export * from './cancellazioneRichiestaRispostaDto';
 export * from './commentaPost201';
 export * from './commentoDto';
 export * from './completaMioProfilo200';
@@ -53,6 +54,7 @@ export * from './preautorizzaAllegatoRispostaDtoMetodo';
 export * from './profiloDto';
 export * from './pubblicaPost201';
 export * from './responseMetaDto';
+export * from './richiediCancellazioneAccount200';
 export * from './richiediCodiceAccesso200';
 export * from './richiestaCodiceDto';
 export * from './richiestaCodiceRispostaDto';

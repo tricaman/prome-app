@@ -54,6 +54,19 @@ Le invarianti dell'aggregato vivono in `modules/bacheca/dominio/post.ts`, **non 
 - **I permessi li dichiara il server**: `puoModificare` sul post, `puoEliminare` sul commento. Non farli dedurre al client — sarebbero due copie della stessa regola, e quella del client è aggirabile.
 - **Lettura di un singolo post**: post inesistente e post non visibile rispondono entrambi 404. «Esiste ma non puoi vederlo» racconta comunque che esiste.
 
+## Cancellazione dell'account (V5/SE3)
+
+Componente **trasversale**, non un bounded context: `modules/cancellazione` orchestra e verifica, ma **non decide alcuna sorte** — la sorte la decide il modulo proprietario del dato. È l'unico modulo autorizzato a importare più contesti insieme; nessun modulo lo importa (solo Facciata, App e Worker) e **nessun modulo legge lo schema `cancellazione`**.
+
+- **Grazia di 14 giorni**: `POST /account/cancellazione` (202) crea la voce nel registro, revoca TUTTE le sessioni e nasconde subito il profilo (`Profilo.inCancellazioneDal`, scritto solo via `ProfiloService`). Un accesso OTP entro la grazia annulla (delete **condizionato sul tempo**: chiude la gara col worker senza colonne di stato); oltre, l'accesso risponde 403 `CA001` e revoca la sessione appena creata.
+- **La catena** esegue nel worker, in quest'ordine vincolante: Bacheca (anonimizza) → Profilo (elimina) → Accesso (elimina). Eliminare il profilo prima dell'anonimizzazione esporrebbe post con l'id reale «senza profilo», cioè visibili e collegabili.
+- **Anonimizzazione**: id `anonimo-<uuid>` **nuovo per record** (mai uno pseudonimo per utente: due post non devono restare collegabili), **nessuna mappa** conservata. `modules/bacheca/cancellazione-bacheca.service.ts` è **l'unico file che scrive `autore_id`** (R12): non aggiungere scritture altrove.
+- **Accesso**: `infrastruttura/accesso/cancellazione-accesso.ts` è il **secondo** punto sancito che tocca lo schema `accesso` (l'altro è `PortaIdentitàUtente`): non aggiungerne altri. Fatto non ovvio: l'`identifier` delle righe OTP è `sign-in-otp-<email>` — si eliminano per `contains`, nella **stessa transazione** dell'utente, perché dopo l'email non è più nota a nessuno.
+- **Verifica del residuo (SE3)**: 0 record e 0 file su TUTTI i detentori censiti — l'elenco chiuso è `DETENTORI_CENSITI` in `cancellazione.service.ts`, con copia speculare nell'helper `residuoDi` di `test/cancellazione.spec.ts`: **si aggiornano insieme a ogni nuovo detentore**. I file degli allegati dei post anonimizzati DEVONO restare.
+- **Il registro sopravvive al completamento** (solo `utente_id` + istanti + esiti, nessun altro dato personale): serve alla **ri-applicazione automatica dopo un ripristino** — il giro ri-verifica ogni ora anche le voci completate e ri-esegue la catena se trova residuo risorto. Allerta (`logger.error`) oltre il 25° giorno senza esito totale.
+- Gli eventi (`cancellazione_richiesta`/`annullata`/`completata`) viaggiano **senza `utenteId`**.
+- I contenuti anonimizzati restano visibili **a ogni iscritto** (`elenca`/`leggi` ammettono la classe `anonimo-`), mai al web; il server manda `rimosso: true` sull'autore e i client mostrano «Utente rimosso».
+
 ## Misurazioni di utilizzo (E1.6)
 
 `MisurazioniDiUtilizzo` è una porta **senza fornitore assegnato**, e resta tale finché non è dimostrabile la conformità su regione e trattamento: quello che esiste sono i punti di emissione, provati da `test/misurazioni.spec.ts`. Attaccarci un prodotto sarà un adattatore, non una riscrittura.
@@ -94,7 +107,7 @@ throw new AppException(ProfiloErrorCode.NOT_FOUND, 'PROFILO_NOT_FOUND', HttpStat
 ```
 
 - `messageKey` è TIPIZZATA da `src/i18n/it/errors.json` (autocomplete; una chiave inesistente non compila).
-- Codici per contesto: **Profilo PR001-999, Bacheca BA, Gruppo GR, Aula studio AS** (`modules/{contesto}/constants/error-codes.ts`); sistema S/V/H in `common/constants/error-codes.ts`. Stesso messaggio, punti diversi → codici diversi.
+- Codici per contesto: **Profilo PR001-999, Bacheca BA, Gruppo GR, Aula studio AS, Cancellazione CA** (`modules/{contesto}/constants/error-codes.ts`); sistema S/V/H in `common/constants/error-codes.ts`. Stesso messaggio, punti diversi → codici diversi.
 - Nuovo errore: aggiungi il codice nel contesto, la chiave in **entrambi** `i18n/it/errors.json` e `i18n/en/errors.json` (la parità è verificata a compile time), poi lancia.
 - Nuovo contesto: crea `constants/error-codes.ts` col suo prefisso e aggiungilo alla union `ErrorCode` in `common/constants/error-codes.ts`.
 - I 5xx non intenzionali sono mascherati dal filtro: il dettaglio resta SOLO nei log (mai nomi o contenuti utente nei log — solo `utente_id`).

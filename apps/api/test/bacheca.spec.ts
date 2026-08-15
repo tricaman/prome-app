@@ -393,8 +393,13 @@ describe('Bacheca — post con allegato (E0.5)', () => {
 
       const risposta = await chiedi('/bacheca?limit=10', { headers: comeUtente(token) });
       expect(risposta.statusCode).toBe(200);
-      const testi = risposta.json().data.map((p: { testo: string }) => p.testo);
-      expect(testi.slice(0, 3)).toEqual(['terzo', 'secondo', 'primo']);
+      // Solo i propri post: il feed condiviso può contenere anche contenuti
+      // anonimizzati di altre suite (visibili a tutti per progetto, V5).
+      const miei = risposta
+        .json()
+        .data.filter((p: { puoModificare: boolean }) => p.puoModificare)
+        .map((p: { testo: string }) => p.testo);
+      expect(miei.slice(0, 3)).toEqual(['terzo', 'secondo', 'primo']);
       expect(risposta.json().meta.pagination.limit).toBe(10);
     });
 

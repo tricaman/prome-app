@@ -3,6 +3,7 @@ import { AvvisiInUscitaModule } from '../avvisi-in-uscita/avvisi-in-uscita.modul
 import { CANALE_EMAIL, type CanaleEmail } from '../avvisi-in-uscita/canale-email';
 import { PrismaService } from '../../database/prisma.service';
 import { creaFornitoreIdentita, type FornitoreIdentita } from './better-auth';
+import { CancellazioneAccesso } from './cancellazione-accesso';
 
 /** Gettone di iniezione del fornitore di identità. */
 export const FORNITORE_IDENTITA = Symbol('FornitoreIdentita');
@@ -25,7 +26,8 @@ export const FORNITORE_IDENTITA = Symbol('FornitoreIdentita');
       useFactory: (prisma: PrismaService, canaleEmail: CanaleEmail): FornitoreIdentita =>
         creaFornitoreIdentita(prisma, canaleEmail),
     },
+    CancellazioneAccesso,
   ],
-  exports: [FORNITORE_IDENTITA],
+  exports: [FORNITORE_IDENTITA, CancellazioneAccesso],
 })
 export class AccessoModule {}

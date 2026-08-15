@@ -12,4 +12,6 @@ export interface VerificaCodiceRispostaDto {
   scadeIl: string;
   /** Falso finché i quattro dati del profilo non ci sono */
   onboardingCompletato: boolean;
+  /** Vero quando questo accesso ha annullato una richiesta di cancellazione pendente */
+  cancellazioneAnnullata?: boolean;
 }

@@ -31,5 +31,6 @@
   "COMMENTO_NOT_FOUND": "Commento non trovato",
   "COMMENTO_TESTO_VUOTO": "Scrivi qualcosa prima di commentare",
   "COMMENTO_TESTO_TROPPO_LUNGO": "Il commento supera i {massimo} caratteri",
-  "NON_PUOI_MODERARE": "Puoi eliminare solo i tuoi commenti e quelli sotto ai tuoi post"
+  "NON_PUOI_MODERARE": "Puoi eliminare solo i tuoi commenti e quelli sotto ai tuoi post",
+  "ACCOUNT_IN_CANCELLAZIONE": "Questo account è in cancellazione e non è più utilizzabile"
 }

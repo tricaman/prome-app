@@ -14,4 +14,6 @@ export interface AutoreDto {
   cognome: string | null;
   /** @nullable */
   universita: string | null;
+  /** Vero quando l'account dell'autore non esiste più: il client mostra «Utente rimosso» */
+  rimosso?: boolean;
 }

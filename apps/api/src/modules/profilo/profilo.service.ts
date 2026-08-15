@@ -146,7 +146,10 @@ export class ProfiloService {
     }
 
     const visibili = await this.prisma.profilo.findMany({
-      where: { OR: condizioni },
+      // Chi è in cancellazione «scompare subito» (grazia di 14 giorni): il
+      // profilo esiste ancora — la riattivazione deve trovarlo intatto — ma
+      // nessuna lettura lo espone più.
+      where: { OR: condizioni, inCancellazioneDal: null },
       select: { utenteId: true },
     });
 
@@ -158,11 +161,56 @@ export class ProfiloService {
     if (!utenteIds.length) return new Map();
 
     const profili = await this.prisma.profilo.findMany({
-      where: { utenteId: { in: utenteIds } },
+      // Il filtro fa sparire subito anche il nome nei commenti di chi è in
+      // grazia: il client mostra «Utente rimosso». L'identificativo resta nel
+      // payload durante la grazia — era già pubblico prima, e se la grazia
+      // finisce lo stacca l'anonimizzazione.
+      where: { utenteId: { in: utenteIds }, inCancellazioneDal: null },
       include: { impostazioniPrivacy: true },
     });
 
     return new Map(profili.map((p) => [p.utenteId, this.perIlClient(p)]));
+  }
+
+  // --- Cancellazione dell'account (V5) --------------------------------------
+  //
+  // La sorte dei dati di Profilo la decide Profilo: la catena di cancellazione
+  // orchestra e verifica, ma elimina attraverso questi metodi.
+
+  /** Apre la grazia: il profilo scompare dalle letture senza essere toccato. */
+  async segnaInCancellazione(utenteId: string): Promise<void> {
+    // updateMany e non update: se il profilo non c'è (utente mai entrato
+    // davvero) non è un errore, e la ri-asserzione del worker è idempotente.
+    await this.prisma.profilo.updateMany({
+      where: { utenteId, inCancellazioneDal: null },
+      data: { inCancellazioneDal: new Date() },
+    });
+  }
+
+  /** Chiude la grazia al rientro: l'account torna con tutto com'era. */
+  async annullaCancellazione(utenteId: string): Promise<void> {
+    await this.prisma.profilo.updateMany({
+      where: { utenteId },
+      data: { inCancellazioneDal: null },
+    });
+  }
+
+  /**
+   * Eliminazione dei dati personali (V5): Profilo e Impostazioni di privacy
+   * cadono insieme — la cascata è nello schema. Idempotente: a zero righe non
+   * c'è niente da fare, non un errore.
+   */
+  async eliminaDatiDi(utenteId: string): Promise<void> {
+    await this.prisma.profilo.deleteMany({ where: { utenteId } });
+  }
+
+  /** Verifica del residuo (SE3): quante righe portano ancora questo id. */
+  async contaResiduiDi(utenteId: string): Promise<number> {
+    const profili = await this.prisma.profilo.count({ where: { utenteId } });
+    const impostazioni = await this.prisma.impostazioniDiPrivacy.count({
+      where: { utenteId },
+    });
+    return profili + impostazioni;
   }
 
   /** Vero quando i quattro dati ci sono: è il solo criterio. */

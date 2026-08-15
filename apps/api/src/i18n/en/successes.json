@@ -13,5 +13,6 @@
   "POST_ELIMINATO": "Post deleted",
   "COMMENTO_PUBBLICATO": "Comment published",
   "COMMENTO_ELIMINATO": "Comment deleted",
-  "COMMENTI_ELENCATI": "Comments loaded"
+  "COMMENTI_ELENCATI": "Comments loaded",
+  "CANCELLAZIONE_RICHIESTA": "Deletion request received: sign in again within 14 days to undo it"
 }

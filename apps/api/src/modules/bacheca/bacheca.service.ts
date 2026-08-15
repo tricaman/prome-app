@@ -16,6 +16,7 @@ import {
 } from '../../infrastruttura/archivio-file/archivio-file';
 import { ProfiloService } from '../profilo/profilo.service';
 import { BachecaErrorCode } from './constants/error-codes';
+import { PREFISSO_AUTORE_ANONIMO } from './cancellazione-bacheca.service';
 import { costruisciPost, verificaFileArchiviato, type FileArchiviato } from './dominio/post';
 
 /** Quanti file può portarsi dietro un post. */
@@ -151,7 +152,16 @@ export class BachecaService {
     const lettore = await this.profilo.perUtente(lettoreId);
     const autoriVisibili = await this.profilo.autoriVisibiliA(lettore);
 
-    const dove = { autoreId: { in: autoriVisibili } };
+    // I contenuti anonimizzati (autore rimosso con la cancellazione account)
+    // restano visibili a ogni iscritto: non c'è più un proprietario, quindi
+    // non c'è più una decisione di privacy da interrogare. Mai al web: la
+    // guardia della facciata resta.
+    const dove = {
+      OR: [
+        { autoreId: { in: autoriVisibili } },
+        { autoreId: { startsWith: PREFISSO_AUTORE_ANONIMO } },
+      ],
+    };
     const [totale, righe] = await Promise.all([
       this.prisma.post.count({ where: dove }),
       this.prisma.post.findMany({
@@ -248,7 +258,8 @@ export class BachecaService {
     const lettore = await this.profilo.perUtente(lettoreId);
     const visibili = await this.profilo.autoriVisibiliA(lettore);
 
-    if (!post || !visibili.includes(post.autoreId)) {
+    const anonimo = post?.autoreId.startsWith(PREFISSO_AUTORE_ANONIMO) ?? false;
+    if (!post || (!visibili.includes(post.autoreId) && !anonimo)) {
       throw new AppException(
         BachecaErrorCode.POST_NOT_FOUND,
         'POST_NOT_FOUND',
@@ -476,6 +487,9 @@ export class BachecaService {
         nome: autore?.nome ?? null,
         cognome: autore?.cognome ?? null,
         universita: autore?.universita ?? null,
+        // Senza profilo dietro: account cancellato (contenuto anonimizzato)
+        // o in corso di cancellazione. Il client mostra «Utente rimosso».
+        ...(autore ? {} : { rimosso: true }),
       },
       // Lo decide il server: ricalcolarlo nel client vorrebbe dire tenere due
       // copie della stessa regola, e quella del client sarebbe aggirabile.
@@ -503,6 +517,9 @@ export class BachecaService {
         nome: autore?.nome ?? null,
         cognome: autore?.cognome ?? null,
         universita: autore?.universita ?? null,
+        // Senza profilo dietro: account cancellato (contenuto anonimizzato)
+        // o in corso di cancellazione. Il client mostra «Utente rimosso».
+        ...(autore ? {} : { rimosso: true }),
       },
       puoModificare: post.autoreId === lettoreId,
       allegati: post.allegati.map((a) => ({

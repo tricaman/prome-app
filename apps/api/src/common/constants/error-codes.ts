@@ -6,6 +6,7 @@ import type { ProfiloErrorCode } from '../../modules/profilo/constants/error-cod
 import type { BachecaErrorCode } from '../../modules/bacheca/constants/error-codes';
 import type { GruppoErrorCode } from '../../modules/gruppo/constants/error-codes';
 import type { AulaStudioErrorCode } from '../../modules/aula-studio/constants/error-codes';
+import type { CancellazioneErrorCode } from '../../modules/cancellazione/constants/error-codes';
 
 /**
  * Chiavi i18n auto-estratte da errors.json: garantiscono a compile time che
@@ -57,11 +58,12 @@ export type SystemErrorCode = (typeof SystemErrorCode)[keyof typeof SystemErrorC
 /**
  * Tutti i codici errore dell'applicazione. Ogni bounded context definisce i
  * propri in modules/{contesto}/constants/error-codes.ts:
- * - Profilo:     PR001-PR999
- * - Bacheca:     BA001-BA999
- * - Gruppo:      GR001-GR999
- * - Aula studio: AS001-AS999
- * - Sistema:     S/V/H (qui)
+ * - Profilo:       PR001-PR999
+ * - Bacheca:       BA001-BA999
+ * - Gruppo:        GR001-GR999
+ * - Aula studio:   AS001-AS999
+ * - Cancellazione: CA001-CA999
+ * - Sistema:       S/V/H (qui)
  *
  * Un nuovo contesto va aggiunto a questa union e ri-esportato qui sotto.
  */
@@ -70,9 +72,11 @@ export type ErrorCode =
   | BachecaErrorCode
   | GruppoErrorCode
   | AulaStudioErrorCode
+  | CancellazioneErrorCode
   | SystemErrorCode;
 
 export { ProfiloErrorCode } from '../../modules/profilo/constants/error-codes';
 export { BachecaErrorCode } from '../../modules/bacheca/constants/error-codes';
 export { GruppoErrorCode } from '../../modules/gruppo/constants/error-codes';
 export { AulaStudioErrorCode } from '../../modules/aula-studio/constants/error-codes';
+export { CancellazioneErrorCode } from '../../modules/cancellazione/constants/error-codes';

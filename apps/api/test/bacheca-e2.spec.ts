@@ -376,8 +376,13 @@ describe('Bacheca — post completi e commenti (E2)', () => {
       const perAutore = await chiedi(`/bacheca/${post.id}`, { headers: comeUtente(autore) });
       expect(perAutore.json().data.puoModificare).toBe(true);
 
-      const bacheca = await chiedi('/bacheca?limit=5', { headers: comeUtente(autore) });
-      expect(bacheca.json().data[0].puoModificare).toBe(true);
+      // Si cerca il post per id: il feed condiviso può contenere anche
+      // contenuti anonimizzati di altre suite, visibili a tutti per progetto.
+      const bacheca = await chiedi('/bacheca?limit=50', { headers: comeUtente(autore) });
+      const nelFeed = bacheca
+        .json()
+        .data.find((p: { id: string }) => p.id === post.id);
+      expect(nelFeed.puoModificare).toBe(true);
     });
   });
 

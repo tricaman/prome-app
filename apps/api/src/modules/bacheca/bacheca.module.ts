@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ArchivioFileModule } from '../../infrastruttura/archivio-file/archivio-file.module';
 import { ProfiloModule } from '../profilo/profilo.module';
 import { BachecaService } from './bacheca.service';
+import { CancellazioneBachecaService } from './cancellazione-bacheca.service';
 import { PuliziaBachecaService } from './pulizia-bacheca.service';
 
 /**
@@ -14,7 +15,7 @@ import { PuliziaBachecaService } from './pulizia-bacheca.service';
  */
 @Module({
   imports: [ProfiloModule, ArchivioFileModule],
-  providers: [BachecaService, PuliziaBachecaService],
-  exports: [BachecaService, PuliziaBachecaService],
+  providers: [BachecaService, PuliziaBachecaService, CancellazioneBachecaService],
+  exports: [BachecaService, PuliziaBachecaService, CancellazioneBachecaService],
 })
 export class BachecaModule {}

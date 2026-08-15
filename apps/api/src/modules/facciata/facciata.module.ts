@@ -3,10 +3,12 @@ import { APP_GUARD } from '@nestjs/core';
 import { AccessoModule } from '../../infrastruttura/accesso/accesso.module';
 import { ArchivioFileModule } from '../../infrastruttura/archivio-file/archivio-file.module';
 import { BachecaModule } from '../bacheca/bacheca.module';
+import { CancellazioneModule } from '../cancellazione/cancellazione.module';
 import { ProfiloModule } from '../profilo/profilo.module';
 import { AccessoController } from './accesso.controller';
 import { ArchivioController } from './archivio.controller';
 import { BachecaController } from './bacheca.controller';
+import { CancellazioneController } from './cancellazione.controller';
 import { GuardiaAccesso } from './guardia-accesso';
 import { HealthController } from './health.controller';
 import { ProfiloController } from './profilo.controller';
@@ -23,13 +25,14 @@ import { ProfiloController } from './profilo.controller';
  * proteggere, e ciò che si dimentica non si vede.
  */
 @Module({
-  imports: [AccessoModule, ProfiloModule, BachecaModule, ArchivioFileModule],
+  imports: [AccessoModule, ProfiloModule, BachecaModule, ArchivioFileModule, CancellazioneModule],
   controllers: [
     HealthController,
     AccessoController,
     ProfiloController,
     BachecaController,
     ArchivioController,
+    CancellazioneController,
   ],
   providers: [{ provide: APP_GUARD, useClass: GuardiaAccesso }],
 })

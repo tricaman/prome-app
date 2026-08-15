@@ -49,4 +49,11 @@ export class VerificaCodiceRispostaDto implements VerificaCodiceResponse {
 
   @ApiProperty({ description: "Falso finché i quattro dati del profilo non ci sono" })
   onboardingCompletato!: boolean;
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Vero quando questo accesso ha annullato una richiesta di cancellazione pendente',
+  })
+  cancellazioneAnnullata?: boolean;
 }

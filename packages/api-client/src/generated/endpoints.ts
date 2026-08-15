@@ -45,6 +45,7 @@ import type {
   PreautorizzaAllegato200,
   PreautorizzaAllegatoDto,
   PubblicaPost201,
+  RichiediCancellazioneAccount200,
   RichiediCodiceAccesso200,
   RichiestaCodiceDto,
   StatoDelServizio200,
@@ -1169,6 +1170,69 @@ export const useEliminaCommento = <TError = ErrorResponseDto,
       > => {
 
       const mutationOptions = getEliminaCommentoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Chiede la cancellazione dell'account (annullabile rientrando entro 14 giorni)
+ */
+export const richiediCancellazioneAccount = (
+    
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<RichiediCancellazioneAccount200>(
+      {url: `/account/cancellazione`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getRichiediCancellazioneAccountMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof richiediCancellazioneAccount>>, TError,void, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof richiediCancellazioneAccount>>, TError,void, TContext> => {
+
+const mutationKey = ['richiediCancellazioneAccount'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof richiediCancellazioneAccount>>, void> = () => {
+          
+
+          return  richiediCancellazioneAccount(requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RichiediCancellazioneAccountMutationResult = NonNullable<Awaited<ReturnType<typeof richiediCancellazioneAccount>>>
+    
+    export type RichiediCancellazioneAccountMutationError = ErrorResponseDto
+
+    /**
+ * @summary Chiede la cancellazione dell'account (annullabile rientrando entro 14 giorni)
+ */
+export const useRichiediCancellazioneAccount = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof richiediCancellazioneAccount>>, TError,void, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof richiediCancellazioneAccount>>,
+        TError,
+        void,
+        TContext
+      > => {
+
+      const mutationOptions = getRichiediCancellazioneAccountMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

@@ -225,4 +225,46 @@ describe('Misurazioni di utilizzo (E1.6)', () => {
     expect(pubblicazione?.proprieta?.allegati).toBe(1);
     expect(JSON.stringify(misurazioni.emessi())).not.toContain('segretissimo.pdf');
   });
+
+  it('conta richiesta e annullamento della cancellazione senza mai nominare la persona', async () => {
+    // L'evento di completamento è provato in test/cancellazione.spec.ts,
+    // accanto alla catena che lo emette: qui non si esegue il giro, che sul
+    // database condiviso interferirebbe con le voci delle altre suite.
+    const indirizzo = nuovoIndirizzo();
+    const entra = async () => {
+      await chiedi('/accesso/codice', { method: 'POST', payload: { email: indirizzo } });
+      return chiedi('/accesso/verifica', {
+        method: 'POST',
+        payload: { email: indirizzo, codice: email.ultimoCodicePer(indirizzo) },
+      });
+    };
+
+    const primoIngresso = await entra();
+    const token = primoIngresso.json().data.token as string;
+    const profilo = await chiedi('/profilo/me', {
+      method: 'GET',
+      headers: { authorization: `Bearer ${token}` },
+    });
+    const utenteId = profilo.json().data.utenteId as string;
+    misurazioni.azzera();
+
+    await chiedi('/account/cancellazione', {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}` },
+    });
+    await entra(); // il rientro entro la grazia annulla
+
+    const delCiclo = misurazioni.emessi().filter((e) => e.evento.startsWith('cancellazione_'));
+    expect(delCiclo.map((e) => e.evento)).toEqual([
+      'cancellazione_richiesta',
+      'cancellazione_annullata',
+    ]);
+
+    // Nemmeno l'identificativo: chi chiede di sparire non deve rinascere in
+    // una serie storica presso un fornitore futuro (esclusione V5).
+    const tutto = JSON.stringify(delCiclo);
+    expect(tutto).not.toContain(indirizzo);
+    expect(tutto).not.toContain(utenteId);
+    for (const evento of delCiclo) expect(evento.proprieta?.utenteId).toBeUndefined();
+  });
 });

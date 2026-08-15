@@ -81,6 +81,12 @@ export class AutoreDto implements AutoreResponse {
   @ApiProperty({ nullable: true, type: String }) nome!: string | null;
   @ApiProperty({ nullable: true, type: String }) cognome!: string | null;
   @ApiProperty({ nullable: true, type: String }) universita!: string | null;
+
+  @ApiProperty({
+    required: false,
+    description: 'Vero quando l\'account dell\'autore non esiste più: il client mostra «Utente rimosso»',
+  })
+  rimosso?: boolean;
 }
 
 export class PostDto implements PostResponse {

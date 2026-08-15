@@ -3,12 +3,15 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 import type { RichiestaCodiceResponse, VerificaCodiceResponse } from '@prome/contracts';
 import { ApiWrappedResponse, ResponseMessage } from '../../common/decorators';
+import { AppException } from '../../common/exceptions';
 import { FORNITORE_IDENTITA } from '../../infrastruttura/accesso/accesso.module';
 import {
   DURATA_CODICE_SECONDI,
   type FornitoreIdentita,
 } from '../../infrastruttura/accesso/better-auth';
 import { traduciErroreDelFornitore } from '../../infrastruttura/accesso/errori-del-fornitore';
+import { CancellazioneErrorCode } from '../cancellazione/constants/error-codes';
+import { CancellazioneService } from '../cancellazione/cancellazione.service';
 import { ProfiloErrorCode } from '../profilo/constants/error-codes';
 import { ProfiloService } from '../profilo/profilo.service';
 import { MISURAZIONI, type MisurazioniDiUtilizzo } from '../../infrastruttura/misurazioni/misurazioni';
@@ -37,6 +40,7 @@ export class AccessoController {
   constructor(
     @Inject(FORNITORE_IDENTITA) private readonly fornitore: FornitoreIdentita,
     private readonly profilo: ProfiloService,
+    private readonly cancellazione: CancellazioneService,
     @Inject(MISURAZIONI) private readonly misurazioni: MisurazioniDiUtilizzo,
   ) {}
 
@@ -98,6 +102,23 @@ export class AccessoController {
 
     const { token, utenteId, scadeIl } = leggiSessione(esito);
 
+    // Rientrare entro la grazia di 14 giorni annulla la cancellazione; oltre,
+    // la catena è in arrivo e questo accesso non deve lasciare tracce — la
+    // sessione appena creata è già stata revocata dal servizio.
+    const esitoCancellazione = await this.cancellazione.annullaSePendente(utenteId);
+    if (esitoCancellazione === 'oltre-grazia') {
+      throw new AppException(
+        CancellazioneErrorCode.ACCOUNT_IN_CANCELLAZIONE,
+        'ACCOUNT_IN_CANCELLAZIONE',
+        HttpStatus.FORBIDDEN,
+        { utenteId },
+      );
+    }
+    if (esitoCancellazione === 'annullata') {
+      // Senza utenteId, come tutti gli eventi della cancellazione.
+      this.misurazioni.registra('cancellazione_annullata');
+    }
+
     // Il profilo nasce al primo ingresso, insieme alle sue impostazioni di
     // privacy: da qui in poi esiste un Utente di dominio, non solo un account.
     const profilo = await this.profilo.assicuraEsistenza(utenteId);
@@ -109,7 +130,12 @@ export class AccessoController {
       primoIngresso: !profilo.onboardingCompletato,
     });
 
-    return { token, scadeIl, onboardingCompletato: profilo.onboardingCompletato };
+    return {
+      token,
+      scadeIl,
+      onboardingCompletato: profilo.onboardingCompletato,
+      ...(esitoCancellazione === 'annullata' ? { cancellazioneAnnullata: true } : {}),
+    };
   }
 
   @Post('esci')

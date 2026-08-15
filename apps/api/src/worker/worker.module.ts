@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { registrazioneI18n } from '../config/i18n';
 import { PrismaModule } from '../database/prisma.module';
+import { MisurazioniModule } from '../infrastruttura/misurazioni/misurazioni.module';
 import { BachecaModule } from '../modules/bacheca/bacheca.module';
+import { CancellazioneModule } from '../modules/cancellazione/cancellazione.module';
 import { WorkerService } from './worker.service';
 
 /**
@@ -17,8 +19,10 @@ import { WorkerService } from './worker.service';
  * - RecapitoDeiFattiDiDominio: il recapito affidabile dei fatti di dominio
  *   (pattern outbox) dai contesti che li producono a quelli che li ascoltano.
  *
- * Oggi esegue le pulizie della Bacheca: i commenti dei post eliminati e i
- * caricamenti abbandonati. Il recapito dei fatti arriverà con E3.
+ * Oggi esegue le pulizie della Bacheca (i commenti dei post eliminati e i
+ * caricamenti abbandonati) e la catena di cancellazione degli account (V5):
+ * grazia, eliminazione, anonimizzazione e verifica del residuo. Il recapito
+ * dei fatti arriverà con E3.
  */
 @Module({
   imports: [
@@ -28,7 +32,11 @@ import { WorkerService } from './worker.service';
     // regola del resto — tradotti dal server.
     registrazioneI18n,
     PrismaModule,
+    // @Global vale solo se il modulo è importato dalla radice di QUESTO
+    // contesto: senza, la catena non potrebbe contare i completamenti.
+    MisurazioniModule,
     BachecaModule,
+    CancellazioneModule,
   ],
   providers: [WorkerService],
 })

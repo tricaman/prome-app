@@ -1,7 +1,7 @@
 // Schema Prisma di Prome — un solo database Postgres, uno schema per bounded
 // context (più "cancellazione" per il registro delle cancellazioni account).
-// Gli schemi senza modelli (bacheca, gruppo, aula_studio, cancellazione)
-// vengono creati vuoti nella migration iniziale (CREATE SCHEMA a mano nel SQL).
+// Gli schemi ancora senza modelli (gruppo, aula_studio) sono stati creati
+// vuoti nella migration iniziale (CREATE SCHEMA a mano nel SQL).
 //
 // Nota: multiSchema è GA in Prisma 6 — il flag previewFeatures non serve più
 // (Prisma emetteva un warning di deprecazione, quindi è stato rimosso).
@@ -123,6 +123,13 @@ model Profilo {
   onboardingCompletato Boolean  @default(false)
   creatoIl             DateTime @default(now())
   aggiornatoIl         DateTime @default(now()) @updatedAt
+
+  /// Valorizzato mentre esiste una richiesta di cancellazione pendente: il
+  /// profilo «scompare subito» (visibilità e letture lo escludono) senza
+  /// essere eliminato, così un nuovo accesso entro la grazia lo riattiva
+  /// intatto, impostazioni comprese. Scritto SOLO dalla catena di
+  /// cancellazione attraverso ProfiloService.
+  inCancellazioneDal DateTime?
 
   impostazioniPrivacy ImpostazioniDiPrivacy?
 
@@ -269,4 +276,59 @@ model Commento {
   @@index([autoreId])
   @@map("commento")
   @@schema("bacheca")
+}
+
+// ---------------------------------------------------------------------------
+// Schema "cancellazione" — il registro delle cancellazioni account (V5/SE3).
+// ---------------------------------------------------------------------------
+
+/// Registro delle richieste di cancellazione (architecture-doc §7).
+///
+/// Contiene SOLO: identificativo, istanti, stato per detentore, esito della
+/// verifica. Nessun altro dato personale — niente email, nomi, contenuti, e
+/// nemmeno gli identificatori anonimi (una mappa id → pseudonimo sarebbe
+/// pseudonimizzazione, non cancellazione: esclusione 19 di V5).
+///
+/// La riga NON viene eliminata al completamento: dopo qualunque ripristino da
+/// backup il registro è ri-applicato automaticamente, e per ri-applicare
+/// servono utente_id e scadenza. Viene eliminata SOLO se la richiesta è
+/// annullata da un nuovo accesso entro la grazia: un utente attivo non deve
+/// figurare qui, e una voce «annullata ma conservata» cancellerebbe i dati di
+/// un utente vivo alla prima ri-applicazione.
+///
+/// Nessuna foreign key verso altri schemi: fra contesti non si attraversano
+/// gli schemi, e questa riga deve sopravvivere all'utente che nomina.
+model RichiestaDiCancellazione {
+  /// Id dell'utente. Chiave primaria: una sola richiesta per utente.
+  utenteId    String   @id
+  richiestaIl DateTime @default(now())
+  /// Fine della grazia (richiestaIl + 14 giorni). La catena parte da qui.
+  /// Memorizzato e non derivato: la query del worker è un range su un indice,
+  /// e i test lo invecchiano senza mock dell'orologio.
+  eseguibileDal DateTime
+  /// Termine massimo di V5 (richiestaIl + 30 giorni).
+  scadenza      DateTime
+
+  // Stato per detentore: null = da eseguire, valorizzato = quando è riuscito
+  // la prima volta. Un timestamp è insieme stato e traccia.
+  // >>> PUNTO DA AGGIORNARE A OGNI NUOVO DETENTORE (con DETENTORI_CENSITI) <<<
+  bachecaAnonimizzataIl DateTime?
+  profiloEliminatoIl    DateTime?
+  accessoEliminatoIl    DateTime?
+
+  // Verifica del residuo (SE3): l'ultima eseguita e la prima TOTALE pulita.
+  ultimaVerificaIl    DateTime?
+  ultimoResiduoRecord Int?
+  ultimoResiduoFile   Int?
+  /// Prima verifica con esito TOTALE e residuo 0+0: è la prova di SE3 e il
+  /// criterio di «richiesta completata». Non si azzera mai — la verità
+  /// corrente sta in ultimaVerificaIl/ultimoResiduo*.
+  verificataATotaleIl DateTime?
+
+  aggiornatoIl DateTime @default(now()) @updatedAt
+
+  @@index([eseguibileDal])
+  @@index([verificataATotaleIl])
+  @@map("richiesta_di_cancellazione")
+  @@schema("cancellazione")
 }

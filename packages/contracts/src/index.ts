@@ -132,6 +132,28 @@ export interface VerificaCodiceResponse {
    * completare il profilo prima di lasciarlo entrare nell'app.
    */
   onboardingCompletato: boolean;
+  /**
+   * Vero quando questo accesso ha annullato una richiesta di cancellazione
+   * pendente: rientrare entro i 14 giorni di grazia riattiva l'account.
+   * Campo additivo e opzionale: i client vecchi lo ignorano.
+   */
+  cancellazioneAnnullata?: boolean;
+}
+
+// --- Cancellazione dell'account ---------------------------------------------
+//
+// La richiesta apre una grazia di 14 giorni: rientrare con un nuovo accesso
+// entro il termine la annulla. Dopo, i contenuti vengono anonimizzati e i dati
+// personali eliminati entro 30 giorni dalla richiesta (V5). Non esiste un
+// endpoint di stato: dopo la richiesta non esistono più sessioni per chiamarlo.
+
+export interface CancellazioneAccountResponse {
+  /** Quando la richiesta è stata registrata, in ISO 8601. */
+  richiestaIl: string;
+  /** Un nuovo accesso entro questo istante annulla la richiesta. */
+  riattivabileFinoAl: string;
+  /** Termine massimo entro cui tutto è eliminato o anonimizzato. */
+  scadenza: string;
 }
 
 // --- Profilo --------------------------------------------------------------
@@ -222,6 +244,12 @@ export interface AutoreResponse {
   nome: string | null;
   cognome: string | null;
   universita: string | null;
+  /**
+   * Vero quando l'autore non esiste più (account cancellato: contenuto
+   * anonimizzato) o è in corso di cancellazione. Il client mostra
+   * «Utente rimosso». Campo additivo e opzionale.
+   */
+  rimosso?: boolean;
 }
 
 export interface PostResponse {

@@ -883,6 +883,49 @@
           "bacheca"
         ]
       }
+    },
+    "/account/cancellazione": {
+      "post": {
+        "operationId": "richiediCancellazioneAccount",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CancellazioneRichiestaRispostaDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Chiede la cancellazione dell'account (annullabile rientrando entro 14 giorni)",
+        "tags": [
+          "account"
+        ]
+      }
     }
   },
   "info": {
@@ -1077,6 +1120,10 @@
           "onboardingCompletato": {
             "type": "boolean",
             "description": "Falso finché i quattro dati del profilo non ci sono"
+          },
+          "cancellazioneAnnullata": {
+            "type": "boolean",
+            "description": "Vero quando questo accesso ha annullato una richiesta di cancellazione pendente"
           }
         },
         "required": [
@@ -1272,6 +1319,10 @@
           "universita": {
             "type": "string",
             "nullable": true
+          },
+          "rimosso": {
+            "type": "boolean",
+            "description": "Vero quando l'account dell'autore non esiste più: il client mostra «Utente rimosso»"
           }
         },
         "required": [
@@ -1417,6 +1468,30 @@
         },
         "required": [
           "testo"
+        ]
+      },
+      "CancellazioneRichiestaRispostaDto": {
+        "type": "object",
+        "properties": {
+          "richiestaIl": {
+            "type": "string",
+            "example": "2026-08-15T10:00:00.000Z"
+          },
+          "riattivabileFinoAl": {
+            "type": "string",
+            "example": "2026-08-29T10:00:00.000Z",
+            "description": "Un nuovo accesso entro questo istante annulla la richiesta"
+          },
+          "scadenza": {
+            "type": "string",
+            "example": "2026-09-14T10:00:00.000Z",
+            "description": "Termine massimo entro cui tutto è eliminato o anonimizzato"
+          }
+        },
+        "required": [
+          "richiestaIl",
+          "riattivabileFinoAl",
+          "scadenza"
         ]
       }
     }

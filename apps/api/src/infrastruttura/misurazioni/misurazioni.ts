@@ -14,7 +14,13 @@ export type EventoDiProdotto =
   | 'accesso_effettuato'
   | 'onboarding_completato'
   | 'post_pubblicato'
-  | 'allegato_caricato';
+  | 'allegato_caricato'
+  // I tre eventi della cancellazione viaggiano SENZA utenteId: dopo il
+  // completamento quell'id sarebbe, presso un fornitore futuro, una replica
+  // di un dato personale senza percorso di cancellazione (esclusione V5).
+  | 'cancellazione_richiesta'
+  | 'cancellazione_annullata'
+  | 'cancellazione_completata';
 
 /**
  * Le proprietà che possono accompagnare un evento.
