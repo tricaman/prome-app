@@ -108,6 +108,17 @@ Un gruppo è un **contenitore di utenti con appartenenza e visibilità**: niente
 - **G5 — l'ateneo è congelato alla creazione** dall'università del creatore. Se seguisse il profilo, un gruppo cambierebbe pubblico perché una persona si è trasferita. L'università di chi legge si interroga invece **fresca**: dato anagrafico propagato, decisione di autorizzazione interrogata.
 - **`gruppo` ha la propria outbox** (`FattoInUscitaDelGruppo`), gemella di quella dell'aula: una tabella per schema, perché il fatto va scritto nella stessa transazione dell'aggregato che lo produce. Porta tre fatti — invito accettato, membro rimosso, gruppo eliminato — e gira sulla **stessa corsia rapida da 1 s**: di là qualcuno aspetta davanti allo schermo, di qua qualcuno sta leggendo ciò che non dovrebbe più.
 
+### L'università si interroga all'ingresso, non insegue chi è dentro
+
+I quattro dati del profilo **si correggono** (P3: «modificabili ma mai svuotabili»), e `PUT /profilo/me` è la stessa scrittura dell'onboarding — non esiste un aggiornamento parziale, perché i quattro dati sono un dato solo.
+
+Cambiare università ha effetto **alla lettura successiva, senza finestra**: chi si trasferisce vede subito la bacheca del nuovo ateneo (SE2). Non ha invece alcun effetto retroattivo, ed è **un confine dichiarato, non una dimenticanza**:
+
+- l'ateneo di un'aula o di un gruppo **già creati resta quello della creazione** (AS7, G5): uno spazio non cambia pubblico perché chi l'ha aperto si è trasferito;
+- **chi è già dentro un'aula resta dentro**. Il titolo di ammissione si interroga all'ingresso, e l'unica decadenza che insegue chi è già dentro è quella dell'appartenenza al gruppo (SE1) — l'unico caso che i documenti impongono di propagare. Chi era stato ammesso legittimamente non viene espulso da un cambio di dato anagrafico.
+
+Provato in `test/accesso-e-profilo.spec.ts`, sezione «correggere il profilo (P3)», perché è esattamente il tipo di asimmetria che qualcuno tratterà come difetto.
+
 ### Il confine con l'aula studio
 
 **La dipendenza va in un verso solo: Aula studio importa Gruppo, mai il contrario.** È ciò che rende impossibile l'anello fra i due moduli, e il motivo per cui il gruppo non elenca le aule collocate — non le conosce affatto. Chi le vuole le chiede al contesto che le possiede.

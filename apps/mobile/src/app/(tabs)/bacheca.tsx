@@ -24,17 +24,9 @@ export default function SchedaBacheca() {
   const t = useT();
   const bordi = useSafeAreaInsets();
   const [inAggiornamento, setInAggiornamento] = useState(false);
-  const [filtro, setFiltro] = useState(0);
 
   const profilo = useLeggiMioProfilo();
   const nome = [profilo.data?.data.nome, profilo.data?.data.cognome].filter(Boolean).join(' ');
-
-  const filtri = [
-    t('app.feed.filtri.perTe'),
-    t('app.feed.filtri.mioCorso'),
-    t('app.feed.filtri.mioAteneo'),
-    t('app.feed.filtri.mieiGruppi'),
-  ];
 
   /**
    * Il trascinamento rilegge davvero la bacheca.
@@ -74,41 +66,6 @@ export default function SchedaBacheca() {
             <Avatar nome={nome || '?'} dimensione={42} soloColore />
           </Pressable>
         </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: tema.spaziatura[2] }}
-        >
-          {filtri.map((etichetta, indice) => (
-            <Pressable
-              key={etichetta}
-              accessibilityRole="button"
-              accessibilityState={{ selected: indice === filtro }}
-              onPress={() => setFiltro(indice)}
-              style={{
-                borderRadius: tema.raggio.full,
-                borderWidth: 1.5,
-                borderColor: indice === filtro ? tema.colori.primario : tema.colori.bordoForte,
-                backgroundColor: indice === filtro ? tema.colori.primario : tema.colori.superficie,
-                paddingHorizontal: tema.spaziatura[4],
-                paddingVertical: tema.spaziatura[2],
-              }}
-            >
-              <Text
-                variante="didascalia"
-                style={{
-                  fontSize: 12.5,
-                  fontWeight: '700',
-                  color:
-                    indice === filtro ? tema.colori.primarioTesto : tema.colori.testoTenue,
-                }}
-              >
-                {etichetta}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
       </View>
 
       <ScrollView

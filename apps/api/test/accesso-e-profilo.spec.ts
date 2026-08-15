@@ -484,4 +484,146 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
       expect(dopo.onboardingCompletato).toBe(true);
     });
   });
+
+  /**
+   * P3 — «i quattro dati restano modificabili ma mai svuotabili».
+   *
+   * La metà «modificabili» non era provata da nessuna parte, ed è quella che
+   * conta di più per chi usa il prodotto: l'università non è un dato
+   * anagrafico qualunque, decide chi vede i suoi contenuti e a quali aule è
+   * ammesso. Un errore di battitura, senza questa strada, sarebbe definitivo.
+   */
+  describe('correggere il profilo (P3)', () => {
+    async function profiloCompleto(universita = 'Università di Bologna') {
+      const sessione = await entra(nuovoIndirizzo());
+      const intestazioni = { authorization: `Bearer ${sessione.token}` };
+      const risposta = await chiedi('/profilo/me', {
+        method: 'PUT',
+        headers: intestazioni,
+        payload: {
+          nome: 'Marta',
+          cognome: 'Rossi',
+          universita,
+          corso: 'Ingegneria informatica',
+        },
+      });
+      return { intestazioni, utenteId: risposta.json().data.utenteId as string };
+    }
+
+    it('corregge i quattro dati, e l\'onboarding resta completato', async () => {
+      const { intestazioni } = await profiloCompleto();
+
+      const risposta = await chiedi('/profilo/me', {
+        method: 'PUT',
+        headers: intestazioni,
+        payload: {
+          nome: 'Marta',
+          cognome: 'Rossini',
+          universita: 'Politecnico di Milano',
+          corso: 'Ingegneria gestionale',
+        },
+      });
+
+      expect(risposta.statusCode).toBe(200);
+      const dati = risposta.json().data;
+      expect(dati.cognome).toBe('Rossini');
+      expect(dati.universita).toBe('Politecnico di Milano');
+      // P3 è a senso unico: da completato non si torna indietro, e correggere
+      // non è tornare indietro.
+      expect(dati.onboardingCompletato).toBe(true);
+    });
+
+    it('non lascia svuotare un campo: svuotarlo sarebbe tornare indietro', async () => {
+      const { intestazioni } = await profiloCompleto();
+
+      const risposta = await chiedi('/profilo/me', {
+        method: 'PUT',
+        headers: intestazioni,
+        payload: {
+          nome: 'Marta',
+          cognome: 'Rossi',
+          universita: '   ',
+          corso: 'Ingegneria informatica',
+        },
+      });
+
+      expect(risposta.statusCode).toBe(400);
+      const campi = risposta.json().details.map((d: { field: string }) => d.field);
+      expect(campi).toContain('universita');
+    });
+
+    it('cambiare ateneo cambia SUBITO ciò che si vede, senza finestra (SE2)', async () => {
+      // Un autore del Politecnico che mostra i contenuti al proprio ateneo.
+      const autore = await profiloCompleto('Politecnico di Milano');
+      await chiedi('/profilo/me/privacy', {
+        method: 'PUT',
+        headers: autore.intestazioni,
+        payload: { visibilita: 'ATENEO' },
+      });
+      await chiedi('/bacheca', {
+        method: 'POST',
+        headers: autore.intestazioni,
+        payload: { testo: 'Appunti di Fisica 2' },
+      });
+
+      // Un lettore di Bologna: non lo vede.
+      const lettore = await profiloCompleto('Università di Bologna');
+      const prima = await chiedi('/bacheca', { headers: lettore.intestazioni });
+      expect(prima.json().data.map((p: { testo: string }) => p.testo)).not.toContain(
+        'Appunti di Fisica 2',
+      );
+
+      // Si trasferisce, e alla lettura successiva lo vede. Nessun passaggio
+      // intermedio, nessuna cache da svuotare.
+      await chiedi('/profilo/me', {
+        method: 'PUT',
+        headers: lettore.intestazioni,
+        payload: {
+          nome: 'Marta',
+          cognome: 'Rossi',
+          universita: 'Politecnico di Milano',
+          corso: 'Ingegneria informatica',
+        },
+      });
+
+      const dopo = await chiedi('/bacheca', { headers: lettore.intestazioni });
+      expect(dopo.json().data.map((p: { testo: string }) => p.testo)).toContain(
+        'Appunti di Fisica 2',
+      );
+    });
+
+    it('ma NON cambia l\'ateneo di un\'aula già creata, né fa uscire da dove si è già dentro', async () => {
+      const { intestazioni, utenteId } = await profiloCompleto('Università di Bologna');
+      const aula = await chiedi('/aule-studio', {
+        method: 'POST',
+        headers: intestazioni,
+        payload: { titolo: 'Ripasso di Analisi', visibilita: 'ATENEO' },
+      });
+      const aulaId = aula.json().data.id as string;
+      expect(aula.json().data.ateneo).toBe('Università di Bologna');
+
+      await chiedi('/profilo/me', {
+        method: 'PUT',
+        headers: intestazioni,
+        payload: {
+          nome: 'Marta',
+          cognome: 'Rossi',
+          universita: 'Politecnico di Milano',
+          corso: 'Ingegneria informatica',
+        },
+      });
+
+      // AS7: l'ateneo dello spazio è congelato alla creazione. Uno spazio non
+      // cambia pubblico perché chi l'ha aperto si è trasferito.
+      const sala = await chiedi(`/aule-studio/${aulaId}/sala`, { headers: intestazioni });
+      expect(sala.statusCode).toBe(200);
+      expect(sala.json().data.aula.ateneo).toBe('Università di Bologna');
+      // E chi era già dentro resta dentro: l'ammissione si interroga
+      // all'ingresso, e la sola decadenza che insegue chi è dentro è quella
+      // dell'appartenenza al gruppo (SE1).
+      expect(
+        sala.json().data.partecipanti.map((p: { utenteId: string }) => p.utenteId),
+      ).toContain(utenteId);
+    });
+  });
 });

@@ -341,25 +341,12 @@
       "composer": "Cosa vuoi condividere, {nome}?",
       "composerSenzaNome": "Cosa vuoi condividere?",
       "pubblica": "Pubblica",
-      "filtri": {
-        "perTe": "Per te",
-        "mioCorso": "Il mio corso",
-        "mioAteneo": "Il mio ateneo",
-        "mieiGruppi": "I miei gruppi"
-      },
-      "commenti": "{numero} commenti",
-      "salva": "Salva",
-      "condividi": "Condividi",
+      "commenta": "Commenta",
       "apri": "Apri",
       "auleOra": "Aule studio ora",
       "tutte": "Tutte",
       "entra": "Entra",
       "argomentiCorso": "Argomenti del tuo corso",
-      "appello": {
-        "titolo": "Appello di {materia} tra {giorni} giorni",
-        "testo": "Ci sono {numero} aule studio di ripasso questa settimana.",
-        "azione": "Guarda il calendario"
-      },
       "vuoto": "Qui compariranno i post del tuo corso. Comincia tu.",
       "tipoNonAmmesso": "Puoi allegare PDF, immagini e file di testo",
       "caricamentoFallito": "Caricamento non riuscito",
@@ -527,6 +514,11 @@
         "account": "Account"
       },
       "senzaNome": "Profilo da completare",
+      "profilo": {
+        "titolo": "I tuoi dati",
+        "testo": "Nome, cognome, università e corso. L'ateneo decide chi vede quello che scrivi e a quali aule riservate all'ateneo puoi entrare: correggerlo vale da subito. Le aule e i gruppi che hai già creato tengono l'ateneo con cui sono nati, e da un'aula in cui sei già dentro non esci.",
+        "salva": "Salva le modifiche"
+      },
       "privacy": "Privacy",
       "contenuti": {
         "titolo": "Chi vede quello che scrivi",

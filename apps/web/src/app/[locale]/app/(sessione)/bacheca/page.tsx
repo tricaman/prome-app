@@ -5,11 +5,10 @@ import { creaMetadata } from '@/lib/seo';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { AppTopbar } from '@/components/app/app-topbar';
 import { Composer } from '@/components/app/composer';
-import { FiltriChip } from '@/components/app/filtri-chip';
 import { FeedBacheca } from '@/components/app/feed-bacheca';
 import { AuleInCorsoLaterale } from '@/components/app/aule-in-corso-laterale';
 import { RiquadroLaterale } from '@/components/contenuti';
-import { Button, Card, Chip, Heading } from '@/components/ui';
+import { Chip } from '@/components/ui';
 import { Link } from '@/i18n/navigazione';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -40,13 +39,6 @@ export default async function PaginaBacheca({
   const t = await getTranslations('app.feed');
   const tNav = await getTranslations('app.nav');
 
-  const filtri = [
-    t('filtri.perTe'),
-    t('filtri.mioCorso'),
-    t('filtri.mioAteneo'),
-    t('filtri.mieiGruppi'),
-  ];
-
   return (
     <>
       <AppTopbar
@@ -60,7 +52,6 @@ export default async function PaginaBacheca({
       <div className="flex flex-1 justify-center gap-6 px-5 py-6 sm:px-8">
         <div className="flex w-full max-w-[640px] flex-none flex-col gap-3.5">
           <Composer />
-          <FiltriChip opzioni={filtri} etichetta={t('filtri.perTe')} />
           <FeedBacheca />
         </div>
 
@@ -78,18 +69,6 @@ export default async function PaginaBacheca({
               ))}
             </div>
           </RiquadroLaterale>
-
-          <Card variante="menta" padding="sm">
-            <Heading taglia="xs" className="text-tinta-menta-testo">
-              {t('appello.titolo', { materia: 'Analisi 2', giorni: 9 })}
-            </Heading>
-            <p className="mt-2 text-[12.5px] leading-relaxed text-primario-accento">
-              {t('appello.testo', { numero: 3 })}
-            </p>
-            <Button className="mt-3 h-10 w-full justify-center text-[13px]">
-              {t('appello.azione')}
-            </Button>
-          </Card>
         </aside>
       </div>
     </>

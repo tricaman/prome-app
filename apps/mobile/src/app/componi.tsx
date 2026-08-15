@@ -7,9 +7,9 @@ import {
   getElencaPostQueryKey,
   preautorizzaAllegato,
   pubblicaPost,
+  useLeggiMioProfilo,
 } from '@prome/api-client';
 import { LUNGHEZZA_MASSIMA_POST } from '@prome/contracts';
-import { UTENTE } from '@prome/contenuti';
 import { useTema } from '@/theme';
 import { useApiMutation, useT } from '@/hooks';
 import { Avatar, Button, Icona, Input, Screen, Text } from '@/components/ui';
@@ -38,6 +38,12 @@ export default function SchermataComponi() {
   const tema = useTema();
   const t = useT();
   const [testo, setTesto] = useState('');
+  // Il nome vero, o nessun nome: l'invito a scrivere si rivolge a chi sta
+  // davanti allo schermo, e chiamarlo con il nome di qualcun altro è la prima
+  // cosa che gli dice che questa schermata non lo conosce.
+  const profilo = useLeggiMioProfilo();
+  const nome = [profilo.data?.data.nome, profilo.data?.data.cognome].filter(Boolean).join(' ');
+  const nomeProprio = nome.split(' ')[0] ?? '';
   const [allegati, setAllegati] = useState<AllegatoInCorso[]>([]);
   const prossimoId = useRef(0);
 
@@ -139,17 +145,21 @@ export default function SchermataComponi() {
 
       <Screen scorrevole>
         <View style={{ flexDirection: 'row', gap: tema.spaziatura[3] }}>
-          <Avatar nome={UTENTE.nome} dimensione={40} />
+          <Avatar nome={nome || '?'} dimensione={40} />
           <View style={{ flex: 1 }}>
-            <Text variante="etichetta">{UTENTE.nome}</Text>
-            <Text variante="didascalia">{UTENTE.corso}</Text>
+            <Text variante="etichetta">{nome}</Text>
+            <Text variante="didascalia">{profilo.data?.data.corso ?? ''}</Text>
           </View>
         </View>
 
         <Input
           value={testo}
           onChangeText={setTesto}
-          placeholder={t('app.feed.composer', { nome: UTENTE.nome.split(' ')[0] ?? '' })}
+          placeholder={
+            nomeProprio
+              ? t('app.feed.composer', { nome: nomeProprio })
+              : t('app.feed.composerSenzaNome')
+          }
           righe={8}
           massimoCaratteri={LUNGHEZZA_MASSIMA_POST}
           errore={

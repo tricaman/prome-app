@@ -10,10 +10,9 @@ import { TarghettaAllegato } from '@/components/contenuti';
 /**
  * Post nella bacheca.
  *
- * Le tre azioni in fondo sono commentare, salvare e condividere: non c'è un
- * "mi piace", perché il motto del prodotto è tradotto in una regola precisa —
- * niente classifiche, niente approvazione sociale, solo cose che servono a
- * ritrovare un contenuto o a passarlo a qualcuno.
+ * **Non c'è un «mi piace»**, e non è una mancanza: il motto del prodotto è
+ * tradotto in una regola precisa — niente classifiche, niente approvazione
+ * sociale. L'unica azione è aprire la discussione, che è ciò che serve.
  */
 export function PostBacheca({ post }: { post: PostDiBacheca }) {
   const t = useTranslations('app.feed');
@@ -26,24 +25,10 @@ export function PostBacheca({ post }: { post: PostDiBacheca }) {
           <p className="truncate text-[14.5px] font-extrabold text-testo">{post.autore}</p>
           <p className="mt-0.5 truncate text-xs text-testo-didascalia">{post.contesto}</p>
         </div>
-        <button
-          type="button"
-          aria-label="Altre azioni"
-          className="px-1 text-base font-extrabold text-testo-debole"
-        >
-          ···
-        </button>
       </header>
 
       <p className="mt-3.5 text-[15.5px] leading-[1.7] text-testo-corpo">{post.corpo}</p>
 
-      {post.tag.length ? (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {post.tag.map((tag) => (
-            <Chip key={tag}>{tag}</Chip>
-          ))}
-        </div>
-      ) : null}
 
       {post.allegato ? (
         <div className="mt-3.5 flex items-center gap-3 rounded-[14px] border border-bordo bg-superficie-alt px-4 py-3.5">
@@ -62,40 +47,20 @@ export function PostBacheca({ post }: { post: PostDiBacheca }) {
         </div>
       ) : null}
 
-      {post.immagini ? (
-        <div className="mt-3.5 grid grid-cols-2 gap-2.5">
-          {Array.from({ length: post.immagini }).map((_, indice) => (
-            <span
-              key={indice}
-              aria-hidden
-              className="block h-[150px] rounded-[14px] bg-gradient-to-br from-segnaposto to-segnaposto-fondo"
-            />
-          ))}
-        </div>
-      ) : null}
 
+      {/* Una sola azione, e vera. «Salva» prometteva una raccolta che non
+          esiste, «Condividi» un collegamento che per la maggior parte dei
+          destinatari sarebbe un 404 — la visibilità si risolve per autore — e
+          «···» non apriva niente. Il numero dei commenti non c'è perché il
+          feed non lo conosce: si contano nel dettaglio, dove ci sono. */}
       <footer className="mt-4 flex items-center gap-6 border-t border-superficie-alt-2 pt-3.5">
         <Link
           href={percorsiApp.post(post.id)}
           className="flex items-center gap-2 text-[13px] font-extrabold text-testo-tenue hover:text-primario-collegamento"
         >
           <Icona nome="commento" dimensione={19} />
-          {t('commenti', { numero: post.commenti })}
+          {t('commenta')}
         </Link>
-        <button
-          type="button"
-          className="flex items-center gap-2 text-[13px] font-extrabold text-testo-tenue hover:text-primario-collegamento"
-        >
-          <Icona nome="salva" dimensione={19} />
-          {t('salva')}
-        </button>
-        <button
-          type="button"
-          className="ml-auto flex items-center gap-2 text-[13px] font-extrabold text-testo-tenue hover:text-primario-collegamento"
-        >
-          <Icona nome="condividi" dimensione={19} />
-          {t('condividi')}
-        </button>
       </footer>
     </Card>
   );

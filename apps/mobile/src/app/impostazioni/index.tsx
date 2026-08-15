@@ -14,6 +14,7 @@ import { rotte } from '@/content';
 import { useTema } from '@/theme';
 import { useApiMutation, useT } from '@/hooks';
 import { QueryBoundary } from '@/components/feedback';
+import { ModificaProfilo } from '@/components/app/modifica-profilo';
 import { Avatar, Button, Card, Icona, Intestazione, Screen, Text } from '@/components/ui';
 
 const OPZIONI: readonly {
@@ -68,6 +69,7 @@ export default function SchermataImpostazioni() {
           {({ data }) => (
             <>
               <SchedaProfilo profilo={data} />
+              <ModificaProfilo profilo={data} />
               <SceltaVisibilita
                 valore={data.impostazioniPrivacy.visibilita}
                 inCorso={salva.isPending}

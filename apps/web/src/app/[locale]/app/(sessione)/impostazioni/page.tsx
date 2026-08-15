@@ -5,6 +5,7 @@ import { percorsiApp } from '@/lib/percorsi-app';
 import { AppTopbar } from '@/components/app/app-topbar';
 import { SceltaTema } from '@/components/app/scelta-tema';
 import { SchedaProfilo } from '@/components/app/scheda-profilo';
+import { ModificaProfilo } from '@/components/app/modifica-profilo';
 import { ImpostazioniPrivacy } from '@/components/app/impostazioni-privacy';
 import { SessioneAccount } from '@/components/app/sessione-account';
 import { ScaricaDati } from '@/components/app/scarica-dati';
@@ -78,6 +79,7 @@ export default async function PaginaImpostazioni({
           <div className="max-w-[680px]">
             <section id="profilo" className="scroll-mt-6">
               <SchedaProfilo />
+              <ModificaProfilo />
             </section>
 
             <section id="privacy" className="scroll-mt-6">

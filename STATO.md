@@ -50,7 +50,7 @@ Le due unità dell'API escono dalla stessa build e si distinguono solo per confi
 
 **Si pubblica facendo `push` su `main`.** Il resto è automatico e sta in [`.github/workflows/rilascio.yml`](.github/workflows/rilascio.yml):
 
-1. **Verifica** — database vero come servizio, migrazioni, `pnpm -r build`, typecheck, lint, 236 test dell'API.
+1. **Verifica** — database vero come servizio, migrazioni, `pnpm -r build`, typecheck, lint, 247 test dell'API.
 2. **Immagini** — costruite in CI (non sulla macchina, che ha due core e serve traffico) e pubblicate su `ghcr.io` etichettate con lo sha del commit.
 3. **Rilascio** — rsync della configurazione (`--delete`, così la macchina corrisponde al commit), poi [`deploy/rilascia.sh`](deploy/rilascia.sh) via SSH.
 
@@ -101,11 +101,21 @@ Un gruppo è un **contenitore di utenti con appartenenza e visibilità**: nessun
 
 `gruppo` è ora fra i `DETENTORI_CENSITI` della cancellazione, con la sua colonna nel registro: chi cancella l'account esce da tutti i gruppi, e dove lascerebbe uno spazio senza moderatori il ruolo passa al membro più anziano.
 
+### Il profilo si corregge, e niente a schermo è più inventato ✅
+
+**«Modifica profilo» esiste (15 agosto 2026).** P3 dice da sempre che i quattro dati «restano modificabili ma mai svuotabili — un cognome sbagliato si corregge», e `PUT /profilo/me` lo faceva già: mancava la schermata, su entrambi i client. Non era un dettaglio anagrafico — **l'università decide chi vede i tuoi contenuti** e a quali aule sei ammesso, quindi un errore di battitura nell'onboarding restava per sempre e cambiava in silenzio il tuo pubblico. Quattro casi nuovi provano la metà «modificabili» di P3, che nessun test copriva: la correzione non riporta indietro l'onboarding, un campo svuotato è rifiutato, cambiare ateneo cambia **subito** ciò che si vede (SE2) e **non** tocca l'ateneo congelato di aule e gruppi già creati né fa uscire da dove si è già dentro.
+
+**Nella stessa giornata sono spariti gli ultimi dati inventati.** Erano tutti sulle due schermate più usate: i quattro filtri del feed che cambiavano solo colore (non sono in nessun work package — «filtro» non compare in tutto il piano, e «i miei gruppi» avrebbe richiesto un arco Bacheca → Gruppo che la Context Map vieta); «Salva», «Condividi» e «···» su post veri, senza gestore; il conteggio dei commenti sempre `0`, scritto a mano nel client; il riquadro «Appello di Analisi 2 fra 9 giorni · 3 aule studio» con i numeri nel JSX; e il tab profilo del telefono, finto per intero — identità inventata, contatori `86/23/41` costanti e, come «i tuoi contenuti», **il post di un'altra persona**.
+
+Il modulo dei dati dimostrativi dell'area privata (`packages/contenuti/src/sessione.ts`) **non contiene più dati**: resta il solo tipo della scheda del post. Nessuna schermata può più importare per sbaglio una persona che non esiste.
+
 ### Mobile (Expo) — parziale
 
 Esistono e funzionano: accesso, inserimento del codice, completamento del profilo, bacheca, composer, dettaglio del post con commenti, **aule studio con materiali, permessi e chat in tempo reale**, impostazioni con privacy e uscita. Rientrando dal background il socket si riapre e la cronologia si rilegge.
 
-**Tre superfici finte sono state rimosse** invece di essere lasciate lì: la scheda gruppi con la sua schermata di dettaglio (sono E12), la schermata di richiesta notifiche — irraggiungibile, e il suo bottone «attiva» non chiedeva alcun permesso — e gli interruttori delle notifiche nelle impostazioni. Resta finto per intero **il tab profilo** (`(tabs)/profilo.tsx`): nome, statistiche e post inventati, e serve un endpoint che non esiste per i conteggi per autore.
+**Le superfici finte sono state rimosse** invece di essere lasciate lì: la scheda gruppi con la sua schermata di dettaglio (sono E12), la schermata di richiesta notifiche — irraggiungibile, e il suo bottone «attiva» non chiedeva alcun permesso — gli interruttori delle notifiche nelle impostazioni, e infine il tab profilo, che ora mostra il profilo vero.
+
+**Un limite da conoscere**: il feed del telefono carica **una sola pagina da 20 post** e non ne carica altre scorrendo. Il web usa `useInfiniteQuery`, il mobile no: non è una bugia a schermo, è una funzione incompleta.
 
 **Il lint del mobile non era mai stato configurato**: `expo lint` genera la propria configurazione al primo avvio, e finché nessuno l'ha eseguito il codice nativo è cresciuto senza controllo. Ora la configurazione è committata, la CI la esegue, e i sette errori che aveva fatto emergere in `providers/avvisi-provider.tsx` sono corretti — erano difetti veri: il conto alla rovescia dell'avviso ripartiva a ogni disegno del padre, e un messaggio in uscita poteva spegnere quello appena arrivato.
 
@@ -190,7 +200,7 @@ pnpm db:up                              # Postgres locale, porta 6400
 pnpm --filter @prome/api exec prisma migrate deploy
 pnpm dev:api                            # API
 pnpm dev:web                            # sito, porta 3500
-pnpm --filter @prome/api test           # 236 test, serve il database
+pnpm --filter @prome/api test           # 247 test, serve il database
 pnpm api:client                         # rigenera il client dopo OGNI modifica agli endpoint
 ```
 

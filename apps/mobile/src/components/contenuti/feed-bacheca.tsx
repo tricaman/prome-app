@@ -46,8 +46,6 @@ function perLaScheda(post: PostDto, utenteRimosso: string): PostDiBacheca {
     autore: autore || utenteRimosso,
     contesto: [post.autore.universita, quando(post.creatoIl)].filter(Boolean).join(' · '),
     corpo: post.testo,
-    tag: [],
-    commenti: 0,
     allegato: primoAllegato
       ? { nome: primoAllegato.nome, dettaglio: pesoLeggibile(primoAllegato.dimensione) }
       : undefined,

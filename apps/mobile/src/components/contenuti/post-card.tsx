@@ -4,13 +4,13 @@ import type { PostDiBacheca } from '@prome/contenuti';
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
 import { useT } from '@/i18n/i18n-provider';
-import { Avatar, Card, Chip, Icona, Text } from '@/components/ui';
+import { Avatar, Card, Icona, Text } from '@/components/ui';
 import { TarghettaAllegato } from './allegato';
 
 /**
  * Post nella bacheca.
  *
- * Le azioni in fondo sono commentare, salvare e condividere: non c'è un "mi
+ * L'unica azione è commentare: non c'è un "mi
  * piace", perché il motto del prodotto è tradotto in una regola precisa —
  * niente classifiche, niente approvazione sociale, solo ciò che serve a
  * ritrovare un contenuto o a passarlo a qualcuno.
@@ -35,13 +35,6 @@ export function PostCard({ post }: { post: PostDiBacheca }) {
 
       <Text variante="corpo">{post.corpo}</Text>
 
-      {post.tag.length ? (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: tema.spaziatura[2] }}>
-          {post.tag.map((tag) => (
-            <Chip key={tag}>{tag}</Chip>
-          ))}
-        </View>
-      ) : null}
 
       {post.allegato ? (
         <Pressable
@@ -71,21 +64,6 @@ export function PostCard({ post }: { post: PostDiBacheca }) {
         </Pressable>
       ) : null}
 
-      {post.immagini ? (
-        <View style={{ flexDirection: 'row', gap: tema.spaziatura[2] }}>
-          {Array.from({ length: post.immagini }).map((_, indice) => (
-            <View
-              key={indice}
-              style={{
-                flex: 1,
-                height: 130,
-                borderRadius: tema.raggio.lg,
-                backgroundColor: tema.colori.superficieAlt2,
-              }}
-            />
-          ))}
-        </View>
-      ) : null}
 
       <View
         style={{
@@ -99,13 +77,9 @@ export function PostCard({ post }: { post: PostDiBacheca }) {
       >
         <AzionePost
           icona="commento"
-          etichetta={t('app.feed.commenti', { numero: post.commenti })}
+          etichetta={t('app.feed.commenta')}
           onPress={() => router.push(rotte.post(post.id))}
         />
-        <AzionePost icona="salva" etichetta={t('app.feed.salva')} />
-        <View style={{ marginLeft: 'auto' }}>
-          <AzionePost icona="condividi" etichetta={t('app.feed.condividi')} soloIcona />
-        </View>
       </View>
     </Card>
   );
@@ -117,7 +91,7 @@ function AzionePost({
   soloIcona = false,
   onPress,
 }: {
-  icona: 'commento' | 'salva' | 'condividi';
+  icona: 'commento';
   etichetta: string;
   soloIcona?: boolean;
   onPress?: () => void;

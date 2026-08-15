@@ -341,25 +341,12 @@
       "composer": "What do you want to share, {nome}?",
       "composerSenzaNome": "What do you want to share?",
       "pubblica": "Publish",
-      "filtri": {
-        "perTe": "For you",
-        "mioCorso": "My course",
-        "mioAteneo": "My university",
-        "mieiGruppi": "My groups"
-      },
-      "commenti": "{numero} comments",
-      "salva": "Save",
-      "condividi": "Share",
+      "commenta": "Comment",
       "apri": "Open",
       "auleOra": "Study rooms now",
       "tutte": "All",
       "entra": "Join",
       "argomentiCorso": "Topics of your course",
-      "appello": {
-        "titolo": "{materia} exam in {giorni} days",
-        "testo": "There are {numero} review study rooms this week.",
-        "azione": "See the calendar"
-      },
       "vuoto": "Posts from your course will appear here. Start it off.",
       "tipoNonAmmesso": "You can attach PDFs, images and text files",
       "caricamentoFallito": "Upload failed",
@@ -527,6 +514,11 @@
         "account": "Account"
       },
       "senzaNome": "Profile to complete",
+      "profilo": {
+        "titolo": "Your details",
+        "testo": "First name, last name, university and course. Your university decides who sees what you write and which university-only rooms you can join: correcting it applies straight away. Rooms and groups you already created keep the university they were born with, and you are not removed from a room you are already in.",
+        "salva": "Save changes"
+      },
       "privacy": "Privacy",
       "contenuti": {
         "titolo": "Who sees what you write",
