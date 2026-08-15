@@ -24,4 +24,5 @@ export const percorsi = {
   guida: (slug: string) => `/guide/${slug}`,
   chiSiamo: () => '/chi-siamo',
   privacy: () => '/privacy',
+  lineeGuida: () => '/linee-guida',
 } as const;

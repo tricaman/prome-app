@@ -285,6 +285,13 @@
         "testo": "Write to our data protection officer: we reply within 30 days as required by the GDPR."
       },
       "soloItaliano": "This document is available in Italian only."
+    },
+    "lineeGuida": {
+      "titolo": "Community guidelines",
+      "documenti": "Documents",
+      "inQuestaPagina": "On this page",
+      "inBreve": "In short",
+      "soloItaliano": "This document is only available in Italian: a properly drafted translation will come, a machine one will not."
     }
   },
   "app": {

@@ -7,3 +7,4 @@ export { SiteFooter } from './site-footer';
 export { SiteShell, type SiteShellProps } from './site-shell';
 export { LanguageSwitcher } from './language-switcher';
 export { ThemeToggle } from './theme-toggle';
+export { NavLegale } from './nav-legale';

@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { percorsi } from '@/content';
-import { EMAIL_PRIVACY, PRIVACY_IN_BREVE, PRIVACY_SEZIONI } from '@/content';
+import { LINEE_GUIDA_IN_BREVE, LINEE_GUIDA_SEZIONI } from '@/content';
 import { linguaDellaRotta, linguaDeiMetadati } from '@/lib/pagina';
 import { creaMetadata } from '@/lib/seo';
 import { briciole } from '@/lib/schema';
@@ -10,26 +10,31 @@ import { Card, Heading } from '@/components/ui';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const lingua = await linguaDeiMetadati(params);
-  const t = await getTranslations({ locale: lingua, namespace: 'pagine.privacy' });
+  const t = await getTranslations({ locale: lingua, namespace: 'pagine.lineeGuida' });
   return creaMetadata({
     lingua,
-    percorso: percorsi.privacy(),
+    percorso: percorsi.lineeGuida(),
     titolo: t('titolo'),
-    descrizione:
-      'Quali dati raccogliamo, perché, per quanto tempo e come esercitare i tuoi diritti.',
+    descrizione: 'Le regole della community: cosa non è ammesso, come segnalare, come bloccare.',
   });
 }
 
 /**
- * Privacy policy.
+ * Linee guida della community.
  *
- * Due livelli di lettura: il riepilogo senza legalese, per essere capiti, e il
- * testo completo, per essere conformi. Le pagine legali si indicizzano: sono
- * un segnale di affidabilità, non una formalità da nascondere.
+ * È la pagina a cui rimanda la schermata di segnalazione, e la promessa che
+ * fa — contenuti segnalati guardati **entro 24 ore** — è la stessa
+ * dell'email che arriva al supporto: se il documento e il prodotto si
+ * contraddicono, quello che resta è la sfiducia. Stessa composizione della
+ * privacy policy: riepilogo senza legalese, poi le sezioni.
  */
-export default async function PaginaPrivacy({ params }: { params: Promise<{ locale: string }> }) {
+export default async function PaginaLineeGuida({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
   const lingua = await linguaDellaRotta(params);
-  const t = await getTranslations('pagine.privacy');
+  const t = await getTranslations('pagine.lineeGuida');
   const tSito = await getTranslations('sito');
 
   const voci = [
@@ -43,15 +48,14 @@ export default async function PaginaPrivacy({ params }: { params: Promise<{ loca
 
       <Container larghezza="media" className="py-8">
         <div className="grid items-start gap-10 lg:grid-cols-[230px_1fr]">
-          {/* Le legali si consultano per punti, non si leggono in sequenza. */}
           <nav className="lg:sticky lg:top-24" aria-label={t('documenti')}>
-            <NavLegale corrente={percorsi.privacy()} titolo={t('documenti')} />
+            <NavLegale corrente={percorsi.lineeGuida()} titolo={t('documenti')} />
 
             <p className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.08em] text-testo-debole">
               {t('inQuestaPagina')}
             </p>
             <ul className="flex flex-col gap-2">
-              {PRIVACY_SEZIONI.map((sezione) => (
+              {LINEE_GUIDA_SEZIONI.map((sezione) => (
                 <li key={sezione.id}>
                   <a
                     href={`#${sezione.id}`}
@@ -69,7 +73,6 @@ export default async function PaginaPrivacy({ params }: { params: Promise<{ loca
             <Heading livello={1} taglia="xl">
               {t('titolo')}
             </Heading>
-            <p className="mt-2.5 text-[13.5px] font-bold text-testo-debole">{t('vigore')}</p>
 
             {lingua !== 'it' ? (
               <p className="mt-4 rounded-2xl border border-tinta-ambra-bordo bg-tinta-ambra px-4 py-3 text-[13.5px] font-semibold text-tinta-ambra-testo">
@@ -82,7 +85,7 @@ export default async function PaginaPrivacy({ params }: { params: Promise<{ loca
                 {t('inBreve')}
               </Heading>
               <ul className="mt-3 flex flex-col gap-2.5">
-                {PRIVACY_IN_BREVE.map((punto) => (
+                {LINEE_GUIDA_IN_BREVE.map((punto) => (
                   <li key={punto.slice(0, 30)} className="flex items-start gap-3">
                     <span
                       aria-hidden
@@ -97,7 +100,7 @@ export default async function PaginaPrivacy({ params }: { params: Promise<{ loca
             </Card>
 
             <div className="mt-8">
-              {PRIVACY_SEZIONI.map((sezione) => (
+              {LINEE_GUIDA_SEZIONI.map((sezione) => (
                 <section key={sezione.id} id={sezione.id} className="mb-7 scroll-mt-24">
                   <Heading taglia="md">{sezione.titolo}</Heading>
                   <p className="mt-3 text-[15.5px] leading-[1.8] text-testo-corpo">
@@ -106,17 +109,6 @@ export default async function PaginaPrivacy({ params }: { params: Promise<{ loca
                 </section>
               ))}
             </div>
-
-            <Card variante="tenue" padding="md">
-              <p className="text-[15px] font-extrabold text-testo">{t('contatto.titolo')}</p>
-              <p className="mt-2 text-sm leading-relaxed text-testo-tenue">{t('contatto.testo')}</p>
-              <a
-                href={`mailto:${EMAIL_PRIVACY}`}
-                className="mt-3.5 inline-block rounded-full bg-primario px-5 py-3 text-sm font-extrabold text-primario-testo"
-              >
-                {EMAIL_PRIVACY}
-              </a>
-            </Card>
           </div>
         </div>
       </Container>

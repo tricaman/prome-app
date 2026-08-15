@@ -285,6 +285,13 @@
         "testo": "Scrivi al nostro responsabile della protezione dei dati: rispondiamo entro 30 giorni come previsto dal GDPR."
       },
       "soloItaliano": "Questo documento è disponibile solo in italiano."
+    },
+    "lineeGuida": {
+      "titolo": "Linee guida della community",
+      "documenti": "Documenti",
+      "inQuestaPagina": "In questa pagina",
+      "inBreve": "In breve",
+      "soloItaliano": "Questo documento è disponibile solo in italiano: una traduzione redatta arriverà, una automatica no."
     }
   },
   "app": {

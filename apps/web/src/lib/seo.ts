@@ -23,6 +23,7 @@ export function percorsiPubblici(): readonly string[] {
     percorsi.guide(),
     percorsi.chiSiamo(),
     percorsi.privacy(),
+    percorsi.lineeGuida(),
     ...ATENEI.map((ateneo) => percorsi.ateneo(ateneo.slug)),
     ...ARGOMENTI.map((argomento) => percorsi.argomento(argomento.slug)),
     ...GUIDE.map((guida) => percorsi.guida(guida.slug)),
