@@ -7,14 +7,21 @@
     "icon": "./assets/images/icon.png",
     "scheme": "prome",
     "userInterfaceStyle": "automatic",
+    "primaryColor": "#32E0C4",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "app.prome",
+      "supportsTablet": false,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "app.prome",
+      "permissions": [],
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundColor": "#32E0C4",
         "backgroundImage": "./assets/images/android-icon-background.png",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
@@ -28,11 +35,18 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#181D25",
+          "backgroundColor": "#F7F9FB",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "dark": {
+            "backgroundColor": "#14181F",
+            "image": "./assets/images/splash-icon.png"
+          }
         }
-      ]
+      ],
+      "expo-image",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

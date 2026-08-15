@@ -17,5 +17,11 @@
     "api:client": "pnpm --filter @prome/api openapi:emit && pnpm --filter @prome/api-client generate",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "19.2.3",
+      "react-dom": "19.2.3"
+    }
   }
 }

@@ -28,6 +28,67 @@ src/
 └── theme/             tema chiaro/scuro costruito dai token condivisi
 ```
 
+## Build di distribuzione (E13.1)
+
+**L'app si costruisce con EAS** (`eas.json`, tre profili): `development` per un dev client,
+`preview` per una prova interna (APK diretto), `production` per gli store (AAB e IPA firmati).
+Materiale, dichiarazioni e il conto di ciò che manca prima di sottomettere stanno in `STORE.md`, che
+si aggiorna nello stesso commit del prodotto: una dichiarazione vecchia è indistinguibile da una
+giusta per chi la legge.
+
+- **Le versioni le tiene EAS** (`appVersionSource: "remote"`, `autoIncrement` in produzione): non si
+  scrivono `buildNumber` né `versionCode` in `app.json`, e non si committa un bump. La politica del
+  piano resta quella: **nessuna funzionalità richiede l'aggiornamento simultaneo di client e
+  backend**, e nessuna versione dell'app si rende inutilizzabile prima di 90 giorni dalla
+  pubblicazione della successiva. In pratica significa che il server non risponde mai «aggiorna
+  l'app» a un client vecchio: l'evoluzione del contratto è solo additiva dentro una versione.
+- **`app.prome`** è l'identificativo su entrambe le piattaforme (il dominio è `prome.app`, letto al
+  contrario), e non si cambia: cambiarlo dopo la prima pubblicazione significa un'app nuova.
+- **`ios.config.usesNonExemptEncryption: false`**: usiamo solo TLS e le API di sistema, che sono
+  esenti. Senza questa riga la stessa domanda torna a ogni sottomissione, e una risposta data a mano
+  in fretta è una dichiarazione sbagliata su un modulo di conformità.
+- **`android.permissions: []`** dice ciò che il prodotto fa davvero: nessun permesso di sistema.
+  Niente fotocamera, microfono, posizione, rubrica o notifiche — il selettore di documenti non ne
+  chiede. Ogni permesso in più è una domanda in revisione e una spunta in meno all'installazione.
+- **`supportsTablet: false`**: l'interfaccia è disegnata per un telefono, e dichiarare l'iPad
+  obbligherebbe a screenshot per iPad di schermate che su iPad stanno male.
+
+### L'indirizzo dell'API
+
+`urlApi()` ricava l'indirizzo dalla macchina che serve l'app **solo in sviluppo**. Fuori dallo
+sviluppo va su `https://api.prome.app`, e il ripiego **non è più `localhost`**: un'app installata da
+uno store non ha un server di sviluppo da cui dedurre un indirizzo, e quel ripiego produceva un'app
+che si apre, gira e non raggiunge niente. È un guasto che nessun test può vedere, perché in sviluppo
+l'indirizzo c'è sempre. `EXPO_PUBLIC_URL_API` vince su tutto e serve a puntare una build a un
+ambiente di prova.
+
+### Icone e splash
+
+**Le sei immagini di `assets/images` sono generate**, non disegnate: `pnpm --filter @prome/mobile
+icone` le ricava da `apps/web/public/logo-prome.svg`, lo stesso marchio del sito. Non ritoccarle a
+mano — sono sei file che devono restare uguali fra loro, e a mano non lo restano. Le tre decisioni
+di geometria (zona sicura Android a 0,66, segno mai ricolorato perché contiene un raster
+incorporato, posizione conservata rispetto al cerchio) sono spiegate in `scripts/genera-icone.mjs`.
+
+Lo splash usa i colori dei due temi (`#F7F9FB` e `#14181F`, gli stessi ruoli di `sfondo`) con il
+marchio intero al centro: non si ricolora, quindi funziona su entrambi senza una seconda immagine.
+
+### Dipendenze: la matrice dell'SDK non è un consiglio
+
+`npx expo-doctor` deve restare a **21/21**. Prima della prima build ne fallivano due, e nessuna delle
+due era cosmetica:
+
+- **due copie di React** (19.2.3 per il mobile, 19.2.8 tirata dentro dai peer di `app-core`): nel
+  fascio nativo sono due istanze, cioè hook e contesti che si rompono in modi che sembrano difetti
+  del prodotto. La cura sta negli `overrides` di pnpm alla radice — **una sola versione di React nel
+  monorepo, quella che l'SDK di Expo pretende esatta**, perché fra i due consumatori è il più
+  stretto a dover vincere;
+- **nove pacchetti fuori dalla matrice dell'SDK**, fra cui `expo-localization` con un intero major di
+  distanza. Si allineano con `npx expo install --check` e `--fix`.
+
+Un peer non soddisfatto (`@expo/metro-runtime`) **non si aggiusta con un override**: gli override non
+toccano i peer. Si installa nell'app la versione attesa, e allora la risoluzione torna a posto.
+
 ## Accesso
 
 **Unificato: email + codice OTP, nessuna password.** `accedi.tsx` chiede solo l'email e passa a `codice.tsx` portandosi dietro l'indirizzo (`rotte.codice(email)`), che va ripetuto in schermata: è l'unico modo per accorgersi di averlo sbagliato prima di aspettare un messaggio che non arriverà. Non c'è una registrazione separata, quindi la schermata iniziale ha un invito solo.

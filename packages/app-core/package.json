@@ -32,7 +32,6 @@
     "@hookform/resolvers": "^5.7.1",
     "@tanstack/react-query": "^5.101.0",
     "@types/react": "^19.0.0",
-    "react": "^19.2.0",
     "react-hook-form": "^7.85.0",
     "typescript": "^5.7.0",
     "zod": "^4.0.0"

@@ -141,6 +141,39 @@ Sul web le preferenze hanno di nuovo un pannello, e questa volta salva davvero. 
 
 Dispositivi e preferenze sono **detentori censiti** dal primo giorno: cadono con il profilo, la verifica del residuo li conta, e l'esportazione li include — senza il token, che non è un dato della persona ma il modo di raggiungere il suo apparecchio.
 
+### E13.1 ed E13.2 — l'app è pronta per essere costruita ✅ (tutto ciò che non passa dai tuoi account)
+
+La catena di distribuzione esiste: `eas.json` con tre profili (dev client, prova interna con APK
+diretto, store con AAB e IPA), identificativo `app.prome` su entrambe le piattaforme, versioni tenute
+da EAS invece che committate a mano, `usesNonExemptEncryption` dichiarato una volta per sempre e
+`permissions: []`, che è la verità: **l'app non chiede alcun permesso di sistema**.
+
+**Le icone erano ancora quelle del modello di Expo** — la "E" blu — e i percorsi di `app.json`
+puntavano a un bundle `.icon` con il marchio di Expo dentro. Ora le sei immagini si **generano dal
+marchio** (`pnpm --filter @prome/mobile icone`, che le ricava da `logo-prome.svg`): non sono sei file
+da tenere allineati a mano, e le tre decisioni di geometria stanno nello script. Lo splash usa i
+colori dei due temi.
+
+**Un difetto vero, trovato preparando la build**: fuori dallo sviluppo `urlApi()` ripiegava su
+`http://localhost:3600`. Una build da store non ha un server di sviluppo da cui dedurre l'indirizzo:
+si sarebbe installata, aperta, e non avrebbe raggiunto niente. Nessun test poteva vederlo, perché in
+sviluppo l'indirizzo c'è sempre.
+
+**`expo-doctor` è passato da 19/21 a 21/21**, e i due controlli che fallivano non erano cosmetici:
+due copie di React nel fascio nativo (19.2.3 del mobile contro 19.2.8 tirata dentro dai peer di
+`app-core` — hook e contesti che si rompono sembrando difetti del prodotto) e nove pacchetti fuori
+dalla matrice dell'SDK, fra cui `expo-localization` con un major di distanza. Ora il monorepo ha
+**una sola versione di React**, quella che Expo pretende esatta.
+
+Il materiale per gli store sta in `apps/mobile/STORE.md`: schede in due lingue, e le **dichiarazioni
+sui dati** ricavate tabella per tabella dallo schema invece che a memoria — con la regola che una
+tabella nuova nel database è una riga nuova là dentro.
+
+**Manca una funzione, e non è materiale da compilare: segnalazione e blocco non esistono.** La linea
+guida 1.2 di Apple le pretende da chi ospita contenuti generati dagli utenti, e Prome li ospita:
+post, commenti, messaggi, materiali. Non c'è una chiave di traduzione né un endpoint che le riguardi.
+Con l'app così, la revisione la rifiuta — ed è il primo punto degli aperti, non una nota a margine.
+
 ### Mobile (Expo) — parziale
 
 Esistono e funzionano: accesso, inserimento del codice, completamento del profilo, bacheca, composer, dettaglio del post con commenti, **aule studio con materiali, permessi e chat in tempo reale**, impostazioni con privacy e uscita. Rientrando dal background il socket si riapre e la cronologia si rilegge.
@@ -216,24 +249,32 @@ Vale la pena conoscerli, perché sono tutti della stessa famiglia: cose che in s
 
 ## Aperto, in ordine di importanza
 
-0. **Un difetto trovato oggi, e corretto: la pagina di atterraggio dell'invito a un'aula non esisteva.** L'email di invito la nomina dal giorno in cui gli inviti sono in esercizio — punta a `/app/inviti/<id>` — e chi apriva quel collegamento trovava «Pagina non trovata». Il server faceva la sua parte da sempre: mancava soltanto la schermata. **Nessun test dell'API poteva vederlo**, perché non era l'API a essere rotta, ed è esattamente ciò che il giro dal vivo del punto 1 avrebbe scoperto al primo tentativo.
+0. **Prima di sottomettere agli store servono segnalazione e blocco**, e oggi non esistono. La linea
+   guida 1.2 di Apple chiede a chi ospita contenuti generati dagli utenti un filtro, un modo per
+   segnalare, la possibilità di bloccare chi abusa e contatti pubblici: l'ultimo punto è coperto dal
+   sito, i primi tre no. La forma minima è in `apps/mobile/STORE.md` — un endpoint di segnalazione con
+   motivi da elenco chiuso, una lista di blocchi posseduta da Profilo e applicata **in lettura** dove
+   già si risolve la visibilità, e una coda che qualcuno guarda. Senza la terza parte le prime due
+   sono una promessa falsa. Non è in nessun work package del piano: è una decisione di prodotto.
 
-1. **M4 non è chiusa finché non è provata dal vivo.** Il codice c'è (E3+E4), ma l'accettazione dell'epica chiede atti che nessun test sostituisce: il giro completo **con due persone reali e invito via email vero**, da un dispositivo diverso da quello di sviluppo; le misure di soglia da registrare (apertura della sala, ingresso dopo l'accettazione, comparsa del messaggio agli altri); la degradazione osservata **spegnendo davvero** archivio, canale email e trasporto; e — poiché lo schema è cambiato — il **ripristino del database riprovato**.
-2. **Il giro dei gruppi va provato a due account** (E7), e comprende la misura che l'epica chiede di registrare: A crea un gruppo e vi colloca un'aula, B accetta l'invito arrivato per email vera ed **entra senza invito all'aula**, poi A rimuove B mentre B è dentro la sala — B deve essere allontanato **entro pochi secondi** e non rientrare. Va verificato dal vivo anche AS6: B moderatore del gruppo entra nell'aula collocata **in sola lettura**.
-3. **«Scarica i tuoi dati» esiste (15 agosto 2026), ma solo sul web.** `GET /account/dati` produce la copia completa che la privacy policy promette per nome, composta dalla facciata interrogando gli stessi detentori che la cancellazione deve svuotare — i due elenchi vanno aggiornati insieme, altrimenti la copia si dichiara completa senza esserlo. Sul telefono manca: salvare un file richiede `expo-file-system` e `expo-sharing`, che sono moduli nativi non installati e comportano una ricostruzione del dev client. Da fare quando si toccherà il pacchetto nativo.
-4. **La suite dell'API è a volte rossa su una macchina carica.** Tre fallimenti in una ventina di giri, sempre con altro in esecuzione in parallelo, e serie lunghe di giri verdi quando gira da sola — oggi cinque di fila dopo l'arrivo dei 16 test delle notifiche (268 casi). Oggi **due casi sono stati catturati**, e sono due cose diverse:
+1. **Un difetto trovato oggi, e corretto: la pagina di atterraggio dell'invito a un'aula non esisteva.** L'email di invito la nomina dal giorno in cui gli inviti sono in esercizio — punta a `/app/inviti/<id>` — e chi apriva quel collegamento trovava «Pagina non trovata». Il server faceva la sua parte da sempre: mancava soltanto la schermata. **Nessun test dell'API poteva vederlo**, perché non era l'API a essere rotta, ed è esattamente ciò che il giro dal vivo del punto 2 avrebbe scoperto al primo tentativo.
+
+2. **M4 non è chiusa finché non è provata dal vivo.** Il codice c'è (E3+E4), ma l'accettazione dell'epica chiede atti che nessun test sostituisce: il giro completo **con due persone reali e invito via email vero**, da un dispositivo diverso da quello di sviluppo; le misure di soglia da registrare (apertura della sala, ingresso dopo l'accettazione, comparsa del messaggio agli altri); la degradazione osservata **spegnendo davvero** archivio, canale email e trasporto; e — poiché lo schema è cambiato — il **ripristino del database riprovato**.
+3. **Il giro dei gruppi va provato a due account** (E7), e comprende la misura che l'epica chiede di registrare: A crea un gruppo e vi colloca un'aula, B accetta l'invito arrivato per email vera ed **entra senza invito all'aula**, poi A rimuove B mentre B è dentro la sala — B deve essere allontanato **entro pochi secondi** e non rientrare. Va verificato dal vivo anche AS6: B moderatore del gruppo entra nell'aula collocata **in sola lettura**.
+4. **«Scarica i tuoi dati» esiste (15 agosto 2026), ma solo sul web.** `GET /account/dati` produce la copia completa che la privacy policy promette per nome, composta dalla facciata interrogando gli stessi detentori che la cancellazione deve svuotare — i due elenchi vanno aggiornati insieme, altrimenti la copia si dichiara completa senza esserlo. Sul telefono manca: salvare un file richiede `expo-file-system` e `expo-sharing`, che sono moduli nativi non installati e comportano una ricostruzione del dev client. Da fare quando si toccherà il pacchetto nativo.
+5. **La suite dell'API è a volte rossa su una macchina carica.** Tre fallimenti in una ventina di giri, sempre con altro in esecuzione in parallelo, e serie lunghe di giri verdi quando gira da sola — oggi cinque di fila dopo l'arrivo dei 16 test delle notifiche (268 casi). Oggi **due casi sono stati catturati**, e sono due cose diverse:
 
    - *«i commenti di un post eliminato spariscono al giro dell'unità lavoratrice»* (E2) — **capito e corretto**: la pulizia guarda un **lotto** di post per volta, e con altre suite in esecuzione sullo stesso database il lotto può essere pieno di post altrui. In esercizio è indifferente (il giro dopo li prende), ma il test pretendeva *un* giro solo: ora ne fa fino a cinque e si ferma appena il conto è a zero. È lo stesso difetto di isolamento che ho evitato scrivendo i test delle notifiche.
    - *«rifiuta un codice scaduto con PR004»* (E0.2) — **localizzato, non spiegato**: risponde PR003 «codice non valido» invece di PR004 «scaduto». L'ipotesi è che il fornitore di identità spazzi via le righe di verifica scadute quando un'altra richiesta qualunque passa di lì, e che il codice sparisca fra la riga che ne sposta indietro la scadenza e la verifica — con la riga sparita, «scaduto» diventa indistinguibile da «inesistente». È un'ipotesi, e finché non è provata resta aperta: accettare entrambi i codici toglierebbe al test l'unica cosa che verifica.
 
    La configurazione ha già `testTimeout: 30000` e `maxWorkers: 50%` per la contesa sul database. Una cosa è però migliorata di lato: i test delle notifiche contano **solo gli avvisi del proprio post**, perché le suite condividono database e corsia dei fatti — contare tutto avrebbe reso quei casi sensibili a ciò che stava facendo un'altra suite, che è uno dei modi in cui questa intermittenza si crea. Una suite che a volte è rossa insegna a rilanciarla invece che a indagare, ed è il modo in cui un difetto vero passa inosservato.
-5. **La porta S-audio non è attraversabile da qui**: i suoi quattro criteri di uscita — tre o quattro persone che si sentono da reti diverse, funzionamento da telefono, costo del nodo dentro il budget, riavvio non presidiato — si verificano solo con un nodo LiveKit vero. Il timebox è di 2,5 giorni e allo scadere un esito non nettamente positivo **vale come negativo**: l'audio esce dal perimetro e l'aula resta testuale, che è già consegnabile.
-6. **L'`MX` di `prome.app` punta alla macchina**, che non ha un server di posta: chi risponde all'email di accesso scrive nel vuoto. Mandare i codici funziona lo stesso.
-7. **SSH è aperto al mondo** e prende migliaia di tentativi al giorno. Restringerlo nel pannello Hetzner è più solido di fail2ban, perché blocca prima che sshd veda il pacchetto.
-8. **L'archivio dei file è locale**, su un volume della macchina. Quando arriverà un fornitore con regione UE dichiarata, sarà un adattatore: `ArchivioLocale` usa già lo stesso flusso firmato di un fornitore vero.
-9. **Il profilo dell'account di prova ha dati inventati** («Andrea Trica», Politecnico di Milano): li ho messi io per provare il giro, vanno corretti.
-10. **Il progetto Vercel è ancora attivo** e va dismesso.
-11. **Residui DNS del vecchio hosting**: `ftp`, `mail`, `_cpanel-dcv-test-record`, `_acme-challenge`.
+6. **La porta S-audio non è attraversabile da qui**: i suoi quattro criteri di uscita — tre o quattro persone che si sentono da reti diverse, funzionamento da telefono, costo del nodo dentro il budget, riavvio non presidiato — si verificano solo con un nodo LiveKit vero. Il timebox è di 2,5 giorni e allo scadere un esito non nettamente positivo **vale come negativo**: l'audio esce dal perimetro e l'aula resta testuale, che è già consegnabile.
+7. **L'`MX` di `prome.app` punta alla macchina**, che non ha un server di posta: chi risponde all'email di accesso scrive nel vuoto. Mandare i codici funziona lo stesso.
+8. **SSH è aperto al mondo** e prende migliaia di tentativi al giorno. Restringerlo nel pannello Hetzner è più solido di fail2ban, perché blocca prima che sshd veda il pacchetto.
+9. **L'archivio dei file è locale**, su un volume della macchina. Quando arriverà un fornitore con regione UE dichiarata, sarà un adattatore: `ArchivioLocale` usa già lo stesso flusso firmato di un fornitore vero.
+10. **Il profilo dell'account di prova ha dati inventati** («Andrea Trica», Politecnico di Milano): li ho messi io per provare il giro, vanno corretti.
+11. **Il progetto Vercel è ancora attivo** e va dismesso.
+12. **Residui DNS del vecchio hosting**: `ftp`, `mail`, `_cpanel-dcv-test-record`, `_acme-challenge`.
 
 ---
 

@@ -17,13 +17,27 @@ export function impostaLinguaApi(lingua: Lingua): void {
   linguaCorrente = lingua;
 }
 
+/** L'API in esercizio. Scritta qui perché una build da store non ha altro modo di saperlo. */
+const URL_API_IN_ESERCIZIO = 'https://api.prome.app';
+
 /**
+ * Dove sta l'API.
+ *
  * In sviluppo il telefono non raggiunge `localhost`: quello è il telefono
  * stesso. Si ricava l'indirizzo della macchina che serve l'app e si punta lì.
+ *
+ * **Fuori dallo sviluppo si va sull'API in esercizio, e il ripiego non è più
+ * `localhost`.** Un'app installata da uno store non ha un server di sviluppo
+ * da cui dedurre un indirizzo: quel ripiego produrrebbe un'app che si apre,
+ * gira e non raggiunge niente — un guasto che nessun test può vedere, perché
+ * in sviluppo l'indirizzo c'è sempre. La variabile d'ambiente resta e vince su
+ * tutto: serve per puntare una build a un ambiente di prova.
  */
 export function urlApi(): string {
   const daAmbiente = process.env.EXPO_PUBLIC_URL_API;
   if (daAmbiente) return daAmbiente;
+
+  if (!__DEV__) return URL_API_IN_ESERCIZIO;
 
   const host = Constants.expoConfig?.hostUri?.split(':')[0];
   return host ? `http://${host}:3600` : 'http://localhost:3600';
