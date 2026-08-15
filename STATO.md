@@ -8,7 +8,7 @@ Le regole vincolanti stanno altrove e vanno lette: [`apps/api/CLAUDE.md`](apps/a
 
 ## In una riga
 
-Prome è in esercizio su prome.app. Una persona può ricevere un codice via email, entrare, compilare il profilo, pubblicare un post con allegato e commentare. Tutto il resto del prodotto — aule di studio, tempo reale, audio, gruppi, notifiche — non esiste ancora.
+Prome è in esercizio su prome.app. Una persona può ricevere un codice via email, entrare, compilare il profilo, pubblicare un post con allegato e commentare, e — dal 15 agosto — creare un'aula di studio, invitarci qualcuno, condividerci materiali e scriverci in tempo reale. Restano fuori audio, gruppi e notifiche; e sul telefono le aule non ci sono ancora.
 
 Il giro completo è stato **provato in produzione il 15 agosto**, non dedotto: codice ricevuto via email, accesso, onboarding, allegato caricato e riscaricato identico all'originale.
 
@@ -50,7 +50,7 @@ Le due unità dell'API escono dalla stessa build e si distinguono solo per confi
 
 **Si pubblica facendo `push` su `main`.** Il resto è automatico e sta in [`.github/workflows/rilascio.yml`](.github/workflows/rilascio.yml):
 
-1. **Verifica** — database vero come servizio, migrazioni, `pnpm -r build`, typecheck, lint, 75 test dell'API.
+1. **Verifica** — database vero come servizio, migrazioni, `pnpm -r build`, typecheck, lint, 172 test dell'API.
 2. **Immagini** — costruite in CI (non sulla macchina, che ha due core e serve traffico) e pubblicate su `ghcr.io` etichettate con lo sha del commit.
 3. **Rilascio** — rsync della configurazione (`--delete`, così la macchina corrisponde al commit), poi [`deploy/rilascia.sh`](deploy/rilascia.sh) via SSH.
 
@@ -64,7 +64,7 @@ Un rilascio alla volta (`concurrency`), quindi i push ravvicinati si mettono in 
 
 ### E0 — online e utilizzabile da capo a fondo ✅
 
-- **E0.1** Scheletro API e schema dati. Postgres con sei schemi (`accesso`, `profilo`, `bacheca`, `gruppo`, `aula_studio`, `cancellazione`), foreign key **solo dentro** lo schema, riferimenti fra contesti come identificatori nudi. Cinque migrazioni versionate. Due unità di esecuzione dalla stessa immagine.
+- **E0.1** Scheletro API e schema dati. Postgres con sei schemi (`accesso`, `profilo`, `bacheca`, `gruppo`, `aula_studio`, `cancellazione`), foreign key **solo dentro** lo schema, riferimenti fra contesti come identificatori nudi. Nove migrazioni versionate. Due unità di esecuzione dalla stessa immagine.
 - **E0.2** Accesso con email e codice. **Un solo modo di entrare**: niente password, niente social, nessuna registrazione separata — chi verifica un codice per la prima volta ottiene account e profilo.
 - **E0.3** Shell web: home, chi siamo, guide, atenei, argomenti, privacy, accesso, feed.
 - **E0.4** Onboarding del profilo (nome, cognome, università, corso) con `ImpostazioniDiPrivacy` create nella stessa scrittura e **default restrittivo** (`PRIVATO` su entrambe le voci).
