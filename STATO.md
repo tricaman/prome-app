@@ -174,6 +174,18 @@ guida 1.2 di Apple le pretende da chi ospita contenuti generati dagli utenti, e 
 post, commenti, messaggi, materiali. Non c'è una chiave di traduzione né un endpoint che le riguardi.
 Con l'app così, la revisione la rifiuta — ed è il primo punto degli aperti, non una nota a margine.
 
+### Segnalazione e blocco ✅ (15 agosto 2026, sera)
+
+Era il punto 0 degli aperti e l'ultima funzione fra l'app e gli store: la linea guida 1.2 di Apple pretende segnalazione, blocco e regole pubbliche da chi ospita contenuti degli utenti. Ora ci sono, su tutte e tre le superfici, con i test scritti prima del codice (21 casi) perché è un'area a difetti invisibili: un blocco che non filtra non produce sintomi, e una segnalazione che non arriva a nessuno ringrazia lo stesso.
+
+**Il blocco è della bacheca, in entrambe le direzioni.** Chi blocchi sparisce dal tuo feed, dal link diretto e dai commenti — e tu dai suoi — qualunque sia la sua privacy: la sottrazione vive in `autoriVisibiliA`, lo stesso punto della privacy, perché è la stessa domanda col segno opposto. Dentro aule e gruppi condivisi il blocco **non** decide niente (spazi scelti, con uscita e moderazione proprie): confine dichiarato e provato da un test, perché non venga «sistemato» in silenzio. Le notifiche push fra coppie bloccate non partono, lette all'istante dell'invio. L'elenco dei bloccati, con lo sblocco, sta nelle impostazioni di web e telefono.
+
+**La segnalazione è la coda che qualcuno guarda.** «Segnala» su ogni post e commento altrui, motivo da elenco chiuso, e la regola «si segnala ciò che si vede»: la facciata verifica il soggetto attraverso la lettura del modulo proprietario, 404 altrimenti. La riga è la fonte di verità; l'email a `EMAIL_SUPPORTO` — **obbligatoria in produzione, l'avvio si ferma senza** — è il campanello, con un estratto di 300 caratteri che attraversa solo l'email e non si conserva mai. Doppione = una riga, una sola email. Niente pannello admin: l'operatore agisce via database, e le **linee guida della community** (pagina pubblica nuova, `/linee-guida`) promettono una risposta **entro 24 ore** — un impegno operativo, non decorativo.
+
+**Sistemando i commenti è emerso e chiuso un buco di E6.2**: la privacy non era applicata ai commenti, che la schermata impostazioni prometteva da sempre («vale per i post e i commenti che pubblichi»). Ora un commento segue la visibilità del suo autore — un autore PRIVATO ha commenti invisibili a tutti, proprietario del post compreso — e commentare esige di vedere il post: prima chiunque con un id poteva commentare e leggere la discussione di un post che il feed non gli avrebbe mai mostrato.
+
+Blocchi e segnalazioni sono **detentori censiti** dal primo giorno: catena, registro (`segnalazioniEliminateIl`), residuo contato in entrambe le direzioni, esportazione — chi ho bloccato senza nomi, mai chi ha bloccato me. STORE.md §1.1 ora dice dove sta ogni cosa, e la §8 lo dice al revisore.
+
 ### Mobile (Expo) — parziale
 
 Esistono e funzionano: accesso, inserimento del codice, completamento del profilo, bacheca, composer, dettaglio del post con commenti, **aule studio con materiali, permessi e chat in tempo reale**, impostazioni con privacy e uscita. Rientrando dal background il socket si riapre e la cronologia si rilegge.
@@ -249,13 +261,7 @@ Vale la pena conoscerli, perché sono tutti della stessa famiglia: cose che in s
 
 ## Aperto, in ordine di importanza
 
-0. **Prima di sottomettere agli store servono segnalazione e blocco**, e oggi non esistono. La linea
-   guida 1.2 di Apple chiede a chi ospita contenuti generati dagli utenti un filtro, un modo per
-   segnalare, la possibilità di bloccare chi abusa e contatti pubblici: l'ultimo punto è coperto dal
-   sito, i primi tre no. La forma minima è in `apps/mobile/STORE.md` — un endpoint di segnalazione con
-   motivi da elenco chiuso, una lista di blocchi posseduta da Profilo e applicata **in lettura** dove
-   già si risolve la visibilità, e una coda che qualcuno guarda. Senza la terza parte le prime due
-   sono una promessa falsa. Non è in nessun work package del piano: è una decisione di prodotto.
+0. ~~Prima di sottomettere agli store servono segnalazione e blocco~~ — **fatto (15 agosto 2026, sera)**: vedi la sezione «Segnalazione e blocco». Resta tuo: mettere un indirizzo vero in `EMAIL_SUPPORTO` al prossimo rilascio (l'avvio in produzione si ferma senza), e ricordare che la casella va letta — le linee guida promettono 24 ore.
 
 1. **Un difetto trovato oggi, e corretto: la pagina di atterraggio dell'invito a un'aula non esisteva.** L'email di invito la nomina dal giorno in cui gli inviti sono in esercizio — punta a `/app/inviti/<id>` — e chi apriva quel collegamento trovava «Pagina non trovata». Il server faceva la sua parte da sempre: mancava soltanto la schermata. **Nessun test dell'API poteva vederlo**, perché non era l'API a essere rotta, ed è esattamente ciò che il giro dal vivo del punto 2 avrebbe scoperto al primo tentativo.
 

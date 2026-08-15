@@ -91,6 +91,12 @@ Per lo stesso motivo l'interfaccia mostra un asse solo, la visibilità dei conte
 
 Come per la privacy: nessuno stato locale, si manda **solo l'asse toccato**, e se la scrittura fallisce l'interruttore torna dov'era.
 
+### Segnala e blocca
+
+Un'affordance sola per contenuto — «Segnala» — che apre `segnala-e-blocca.tsx` sul posto: motivi da elenco chiuso, e dentro lo stesso pannello «Blocca {nome}» con conferma a due passi. Compare **sui contenuti degli altri**, mai sui propri né su un autore `rimosso`; sui commenti la condizione è il confronto con il proprio profilo, **non** `!puoEliminare` — il proprietario del post può eliminare i commenti altrui ed è esattamente chi deve potersi difendere sotto casa propria: X e «Segnala» convivono.
+
+Dopo un blocco dal dettaglio si torna in bacheca (il post non esiste più per chi guarda); da un commento si invalidano commenti **e** feed. L'elenco dei bloccati sta nelle impostazioni sotto la privacy, con lo sblocco **senza conferma**: reversibile — la conferma sta dove si blocca. La nav dei documenti legali è `NavLegale` con parametro `corrente`: `attivo` nei dati significa «la pagina esiste», non «è questa».
+
 ## Marchio
 
 Logo e marchio denominativo sono quelli storici del prodotto: `public/logo-prome.svg` per il segno e `components/layout/wordmark.tsx` per la scritta (tracciati originali, non ridisegnati). La scritta usa `currentColor`, quindi non servono varianti per fondo chiaro e scuro. Non sostituirli con testo tipografico.
