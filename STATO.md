@@ -8,7 +8,7 @@ Le regole vincolanti stanno altrove e vanno lette: [`apps/api/CLAUDE.md`](apps/a
 
 ## In una riga
 
-Prome è in esercizio su prome.app. Una persona può ricevere un codice via email, entrare, compilare il profilo, pubblicare un post con allegato e commentare, e — dal 15 agosto — creare un'aula di studio, invitarci qualcuno, condividerci materiali e scriverci in tempo reale. Restano fuori audio, gruppi e notifiche; e sul telefono le aule non ci sono ancora.
+Prome è in esercizio su prome.app. Una persona può ricevere un codice via email, entrare, compilare il profilo, pubblicare un post con allegato e commentare, e — dal 15 agosto — creare un'aula di studio, invitarci qualcuno, condividerci materiali e scriverci in tempo reale. Le stesse aule, con la chat, funzionano anche sul telefono. Restano fuori audio, gruppi e notifiche.
 
 Il giro completo è stato **provato in produzione il 15 agosto**, non dedotto: codice ricevuto via email, accesso, onboarding, allegato caricato e riscaricato identico all'originale.
 
@@ -88,7 +88,9 @@ La porta `MisurazioniDiUtilizzo` è **senza fornitore assegnato**, e resta così
 
 ### Mobile (Expo) — parziale
 
-Esistono e funzionano: accesso, inserimento del codice, completamento del profilo, bacheca, composer, dettaglio del post con commenti. Le altre schede (aule studio, gruppi, notifiche) sono schermate senza API dietro.
+Esistono e funzionano: accesso, inserimento del codice, completamento del profilo, bacheca, composer, dettaglio del post con commenti, **aule studio con materiali, permessi e chat in tempo reale**. Rientrando dal background il socket si riapre e la cronologia si rilegge. Restano senza API dietro le schede gruppi e notifiche.
+
+**Il lint del mobile non era mai stato configurato** (`expo lint` genera la propria configurazione al primo avvio, e la CI esegue solo quello del web). Attivandolo emergono **sette errori preesistenti in `providers/avvisi-provider.tsx`** — accessi a `ref` durante il render, che React 19 non perdona. Non sono stati toccati: sono fuori dal perimetro delle aule, ma vanno affrontati prima di dire che il mobile è pulito.
 
 ---
 
@@ -100,7 +102,9 @@ Esistono e funzionano: accesso, inserimento del codice, completamento del profil
 
 Con E3 è nato anche il **primo canale dei fatti in uscita** (outbox): una tabella per schema scritta nella stessa transazione dell'aggregato, consegna at-least-once con deduplica sull'id dell'evento, corsia rapida a 1 secondo nel worker, purga a 7 giorni. Oggi trasporta un fatto solo — l'accettazione dell'invito, che risponde 202 perché il partecipante non nasce nella stessa transazione.
 
-**Gruppi: non iniziati.** `gruppo` resta un modulo dichiarato con un service di dodici righe, e le schermate dei gruppi nel web e nel mobile **leggono ancora dati finti**. Sul mobile anche aule e materiali sono ancora finti: il piano vuole il web prima (E11 è la posizione 8), e il mobile arriva a M5.
+**M5 è fatta con E3 ed E4: le aule sono anche sul telefono** (elenco, sala, materiali, permessi, chat con rientro da background).
+
+**Gruppi: non iniziati.** `gruppo` resta un modulo dichiarato con un service di dodici righe, e le schermate dei gruppi nel web e nel mobile **leggono ancora dati finti**. Il prossimo passo della fila è la porta a timebox sull'audio (S-audio → E5), che può anche chiudersi con un no: in quel caso l'aula resta testuale, ed è già consegnabile così.
 
 **La cancellazione dell'account è implementata (15 agosto 2026).** `POST /account/cancellazione` apre una **grazia di 14 giorni**: sessioni revocate subito, profilo nascosto subito (flag su Profilo, impostazioni intatte), e un nuovo accesso OTP entro la grazia annulla la richiesta; oltre, l'accesso risponde 403. La catena esegue nell'unità lavoratrice — post e commenti **anonimizzati** con id `anonimo-<uuid>` **diverso per record** (nessuna mappa), allegati dei post conservati, profilo e account eliminati — e la **verifica del residuo** (0 record, 0 file su tutti i detentori censiti) finisce nel registro dello schema `cancellazione`, che sopravvive al completamento: dopo un ripristino da backup la ri-applicazione è automatica (ri-verifica oraria + giro d'avvio del worker). Allerta nei log oltre il 25° giorno senza esito totale. Le schermate web e mobile sono collegate (conferma con parola digitata, «Utente rimosso» sui contenuti anonimi, messaggio di riattivazione al rientro); il bottone «Disattiva temporaneamente», mai definito da nessun documento, è stato rimosso. Le regole nuove (percorso privilegiato R12, detentori censiti, prefisso errori `CA`) sono in `apps/api/CLAUDE.md`; i test in `apps/api/test/cancellazione.spec.ts` (37 casi, scritti prima del codice).
 
