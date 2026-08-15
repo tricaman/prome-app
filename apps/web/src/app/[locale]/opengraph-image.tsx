@@ -1,6 +1,19 @@
+import { readFile } from 'node:fs/promises';
 import { ImageResponse } from 'next/og';
 import { COLORE_MARCHIO, temaScuro } from '@prome/design-tokens';
 import { catalogoDi, eLinguaSupportata, LINGUA_DI_RIPIEGO } from '@prome/i18n';
+
+/**
+ * Il marchio, letto dal file accanto a questo.
+ *
+ * Va letto dal disco e incorporato come dati: a disegnare l'anteprima è il
+ * server stesso, che non ha motivo di scaricare da sé un file che ha già. È un
+ * PNG e non l'SVG perché il motore che compone l'immagine lavora su mappe di
+ * pixel.
+ */
+const logo = readFile(new URL('./logo-anteprima.png', import.meta.url)).then(
+  (dati) => `data:image/png;base64,${dati.toString('base64')}`,
+);
 
 /**
  * Anteprima mostrata quando un collegamento viene condiviso.
@@ -20,6 +33,7 @@ export default async function AnteprimaSocial({
   const { locale } = await params;
   const lingua = eLinguaSupportata(locale) ? locale : LINGUA_DI_RIPIEGO;
   const messaggi = catalogoDi(lingua);
+  const marchio = await logo;
 
   return new ImageResponse(
     (
@@ -38,14 +52,7 @@ export default async function AnteprimaSocial({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <div
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 999,
-              backgroundColor: COLORE_MARCHIO,
-            }}
-          />
+          <img src={marchio} width={64} height={64} alt="" />
           <div style={{ fontSize: 44, fontWeight: 800, letterSpacing: -1 }}>prome</div>
         </div>
 

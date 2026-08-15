@@ -18,6 +18,7 @@ import type {
   ArgomentoResponse,
   AulaStudioResponse,
   InvitoResponse,
+  MessaggioDiChatResponse,
   PaginatedResult,
   PermessoAulaStudio,
   SalaResponse,
@@ -36,12 +37,15 @@ import {
   CreaAulaStudioDto,
   CreaInvitoDto,
   CreaMaterialeDto,
+  InviaMessaggioDto,
   InvitoDto,
   MaterialeDto,
+  MessaggioDiChatDto,
   ModificaAulaStudioDto,
   PreautorizzaMaterialeDto,
   PreautorizzazioneMaterialeDto,
   QueryAuleStudioDto,
+  QueryMessaggiDto,
   SalaDto,
 } from './dtos/aula-studio.dto';
 import { Utente } from './guardia-accesso';
@@ -232,6 +236,42 @@ export class AulaStudioController {
     @Body() corpo: CreaInvitoDto,
   ): Promise<InvitoResponse> {
     return this.aule.invita(utente.id, id, corpo.destinatario);
+  }
+
+  // --- Chat -----------------------------------------------------------------
+
+  /**
+   * Si scrive con una richiesta ordinaria, non dal canale in tempo reale.
+   *
+   * È qui che vivono le regole — il permesso di scrivere si legge fresco — e
+   * qui che il messaggio viene persistito. Il tempo reale lo consegna dopo, a
+   * chi sta guardando: se non ci riesce, il messaggio esiste lo stesso.
+   */
+  @Post(':id/messaggi')
+  @ApiOperation({ operationId: 'scriviInAula', summary: 'Scrive un messaggio nella chat' })
+  @ApiWrappedResponse({ type: MessaggioDiChatDto, status: HttpStatus.CREATED })
+  @ResponseMessage('successes.MESSAGGIO_INVIATO')
+  async scrivi(
+    @Utente() utente: UtenteDiDominio,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() corpo: InviaMessaggioDto,
+  ): Promise<MessaggioDiChatResponse> {
+    return this.aule.scrivi(utente.id, id, corpo.testo);
+  }
+
+  @Get(':id/messaggi')
+  @ApiOperation({
+    operationId: 'leggiMessaggiAula',
+    summary: 'La conversazione, dal più vecchio',
+  })
+  @ApiPaginatedResponse({ type: MessaggioDiChatDto })
+  @ResponseMessage('successes.MESSAGGI_ELENCATI')
+  async messaggi(
+    @Utente() utente: UtenteDiDominio,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: QueryMessaggiDto,
+  ): Promise<PaginatedResult<MessaggioDiChatResponse>> {
+    return this.aule.messaggi(utente.id, id, { page: query.page, limit: query.limit });
   }
 
   // --- Argomenti e materiali ------------------------------------------------

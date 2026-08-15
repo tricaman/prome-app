@@ -8,6 +8,7 @@ import { Link } from '@/i18n/navigazione';
 import { Avatar, Chip, Icona } from '@/components/ui';
 import { QueryBoundary } from '@/components/feedback';
 import { cn } from '@/lib/utils';
+import { ChatAula } from './chat-aula';
 import { MaterialiAula } from './materiali-aula';
 import { TabellaPermessi } from './tabella-permessi';
 import { InvitaInAula } from './invita-in-aula';
@@ -23,13 +24,13 @@ type Scheda = 'chat' | 'materiali' | 'partecipanti';
  * tenerne una seconda copia qui significherebbe avere due risposte alla stessa
  * domanda, di cui una aggirabile.
  *
- * Chat in tempo reale e audio non hanno ancora un backend: la scheda lo dice,
- * invece di mostrare una conversazione che non esiste.
+ * La chat è in tempo reale ma non dipende dal tempo reale: i messaggi sono
+ * persistiti, e col trasporto spento la conversazione resta leggibile.
  */
 export function SalaAula({ aulaId }: { aulaId: string }) {
   const t = useTranslations('app.sala');
   const tComune = useTranslations('comune');
-  const [scheda, setScheda] = useState<Scheda>('materiali');
+  const [scheda, setScheda] = useState<Scheda>('chat');
   const sala = useApriSalaAulaStudio(aulaId);
 
   return (
@@ -46,11 +47,7 @@ export function SalaAula({ aulaId }: { aulaId: string }) {
           <div className="flex min-h-0 flex-1">
             <div className="flex min-w-0 flex-1 flex-col border-r border-bordo">
               {scheda === 'chat' ? (
-                <div className="flex flex-1 items-center justify-center bg-sfondo px-6 py-10">
-                  <p className="max-w-[380px] text-center text-sm leading-relaxed text-testo-tenue">
-                    {t('chatInArrivo')}
-                  </p>
-                </div>
+                <ChatAula aulaId={aulaId} puoScrivere={data.mieiPermessi.scrivere} />
               ) : null}
               {scheda === 'materiali' ? (
                 <MaterialiAula

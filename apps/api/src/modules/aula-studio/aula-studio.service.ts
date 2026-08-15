@@ -6,6 +6,7 @@ import type {
   AulaStudioResponse,
   CreaAulaStudioRequest,
   InvitoResponse,
+  MessaggioDiChatResponse,
   ModificaAulaStudioRequest,
   PaginatedResult,
   PartecipanteResponse,
@@ -26,6 +27,11 @@ import {
   CANALE_EMAIL,
   type CanaleEmail,
 } from '../../infrastruttura/avvisi-in-uscita/canale-email';
+import {
+  stanzaDiAula,
+  TRASPORTO_TEMPO_REALE,
+  type TrasportoInTempoReale,
+} from '../../infrastruttura/tempo-reale/trasporto';
 import { PortaIdentitaUtente } from '../profilo/porta-identita-utente';
 import { ProfiloService } from '../profilo/profilo.service';
 import { AulaStudioErrorCode } from './constants/error-codes';
@@ -74,8 +80,12 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     private readonly recapito: RecapitoFattiService,
     @Inject(ARCHIVIO_DI_FILE) private readonly archivio: ArchivioDiFile,
     @Inject(CANALE_EMAIL) private readonly email: CanaleEmail,
+    @Inject(TRASPORTO_TEMPO_REALE) private readonly trasporto: TrasportoInTempoReale,
   ) {
     this.recapito.registra(this);
+    // Il modulo proprietario si presenta come guardiano delle proprie stanze:
+    // il trasporto consegna, ma non decide chi può ascoltare.
+    this.trasporto.registraGuardiano?.(this);
   }
 
   // --- Comandi sull'aula ----------------------------------------------------
@@ -250,10 +260,11 @@ export class AulaStudioService implements ConsumatoreDiFatti {
   async elimina(utenteId: string, aulaId: string): Promise<void> {
     await this.esigiModeratore(utenteId, aulaId);
 
-    const materiali = await this.prisma.allegatoDiAulaStudio.count({
-      where: { aulaStudioId: aulaId },
-    });
-    if (materiali > 0) {
+    const [materiali, messaggi] = await Promise.all([
+      this.prisma.allegatoDiAulaStudio.count({ where: { aulaStudioId: aulaId } }),
+      this.prisma.messaggioDiChat.count({ where: { aulaStudioId: aulaId } }),
+    ]);
+    if (materiali > 0 || messaggi > 0) {
       throw new AppException(
         AulaStudioErrorCode.AULA_NON_VUOTA,
         'AULA_NON_VUOTA',
@@ -670,6 +681,106 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     await this.archivio.rimuovi(materiale.chiave).catch(() => undefined);
   }
 
+  // --- Chat dell'aula (E4) --------------------------------------------------
+
+  /**
+   * Scrive in chat.
+   *
+   * Il permesso si legge **sull'aula, fresco, adesso** (MA2): un partecipante
+   * ammesso può benissimo essere in sola lettura, e la revoca zittisce da quel
+   * momento senza toccare ciò che è già stato detto.
+   *
+   * Il messaggio è **persistito prima e pubblicato dopo**: se il trasporto non
+   * risponde la conversazione esiste comunque, e chi riapre l'aula la trova. Un
+   * fallimento della consegna non è un fallimento della scrittura.
+   */
+  async scrivi(
+    utenteId: string,
+    aulaId: string,
+    testo: string,
+  ): Promise<MessaggioDiChatResponse> {
+    const partecipante = await this.esigiPartecipante(utenteId, aulaId);
+    if (!permessiEffettivi(partecipante).scrivere) {
+      throw new AppException(
+        AulaStudioErrorCode.NON_PUOI_SCRIVERE,
+        'AULA_NON_PUOI_SCRIVERE',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const pulito = testo.trim();
+    if (!pulito) {
+      throw new AppException(
+        AulaStudioErrorCode.MESSAGGIO_VUOTO,
+        'MESSAGGIO_VUOTO',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    const messaggio = await this.prisma.messaggioDiChat.create({
+      data: { aulaStudioId: aulaId, autoreId: utenteId, testo: pulito },
+    });
+
+    const autori = await this.profilo.perUtenti([utenteId]);
+    const perIlClient = this.messaggioPerIlClient(messaggio, autori.get(utenteId), utenteId);
+
+    // Pubblicato dopo il commit, e senza attendere che riesca: chi ascolta lo
+    // riceve subito, chi non ascolta lo leggerà dalla cronologia.
+    await this.trasporto
+      .pubblicaInStanza(stanzaDiAula(aulaId), 'messaggio', perIlClient)
+      .catch(() => undefined);
+
+    return perIlClient;
+  }
+
+  /** La cronologia, dal più vecchio: una conversazione ha un ordine. */
+  async messaggi(
+    utenteId: string,
+    aulaId: string,
+    pagina: { page: number; limit: number },
+  ): Promise<PaginatedResult<MessaggioDiChatResponse>> {
+    await this.esigiPartecipante(utenteId, aulaId);
+    const dove = { aulaStudioId: aulaId };
+
+    const [totale, righe] = await Promise.all([
+      this.prisma.messaggioDiChat.count({ where: dove }),
+      this.prisma.messaggioDiChat.findMany({
+        where: dove,
+        orderBy: { inviatoIl: 'asc' },
+        skip: (pagina.page - 1) * pagina.limit,
+        take: pagina.limit,
+      }),
+    ]);
+
+    const autori = await this.profilo.perUtenti([...new Set(righe.map((r) => r.autoreId))]);
+
+    return {
+      data: righe.map((riga) =>
+        this.messaggioPerIlClient(riga, autori.get(riga.autoreId), utenteId),
+      ),
+      meta: {
+        total: totale,
+        page: pagina.page,
+        limit: pagina.limit,
+        totalPages: Math.max(1, Math.ceil(totale / pagina.limit)),
+      },
+    };
+  }
+
+  /**
+   * Chi può ascoltare la stanza di un'aula: **i suoi partecipanti**.
+   *
+   * È una verifica di ammissione, non di permesso — chi è in sola lettura
+   * resta ammesso ad ascoltare, perché assistere è una condizione normale
+   * dell'incontro.
+   */
+  async puoAscoltare(utenteId: string, aulaStudioId: string): Promise<boolean> {
+    const partecipante = await this.prisma.partecipante.findUnique({
+      where: { aulaStudioId_utenteId: { aulaStudioId, utenteId } },
+    });
+    return Boolean(partecipante);
+  }
+
   // --- Consumo dei fatti ----------------------------------------------------
 
   /**
@@ -728,6 +839,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     throw new AppException(AulaStudioErrorCode.NOT_FOUND, 'AULA_NOT_FOUND', HttpStatus.NOT_FOUND);
   }
 
+  /** Il bersaglio di un gesto di moderazione: se non è nell'aula, non esiste. */
   private async partecipanteDi(aulaId: string, utenteId: string) {
     const partecipante = await this.prisma.partecipante.findUnique({
       where: { aulaStudioId_utenteId: { aulaStudioId: aulaId, utenteId } },
@@ -742,9 +854,27 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     return partecipante;
   }
 
+  /**
+   * Chi agisce dev'essere dentro.
+   *
+   * È un diniego, non un nascondere: 403 e non 404. Che l'aula esista è già
+   * noto a chi la sta guardando — la lettura della sala ha già deciso se
+   * poteva vederla, e lì «esiste ma non puoi vederla» risponde 404 come
+   * un'aula che non c'è.
+   */
   private async esigiPartecipante(utenteId: string, aulaId: string) {
     await this.aulaEsistente(aulaId);
-    return this.partecipanteDi(aulaId, utenteId);
+    const partecipante = await this.prisma.partecipante.findUnique({
+      where: { aulaStudioId_utenteId: { aulaStudioId: aulaId, utenteId } },
+    });
+    if (!partecipante) {
+      throw new AppException(
+        AulaStudioErrorCode.NON_SEI_PARTECIPANTE,
+        'AULA_NON_SEI_PARTECIPANTE',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    return partecipante;
   }
 
   /** Il controllo di moderazione sta QUI, nel modulo, mai nella facciata. */
@@ -841,6 +971,26 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       argomentoId: materiale.argomentoId,
       caricatoDa: materiale.caricatoDa,
       creatoIl: materiale.creatoIl.toISOString(),
+    };
+  }
+
+  private messaggioPerIlClient(
+    messaggio: { id: string; testo: string; inviatoIl: Date; autoreId: string },
+    autore: { nome: string | null; cognome: string | null; universita: string | null } | undefined,
+    lettoreId: string,
+  ): MessaggioDiChatResponse {
+    return {
+      id: messaggio.id,
+      testo: messaggio.testo,
+      inviatoIl: messaggio.inviatoIl.toISOString(),
+      autore: {
+        utenteId: messaggio.autoreId,
+        nome: autore?.nome ?? null,
+        cognome: autore?.cognome ?? null,
+        universita: autore?.universita ?? null,
+        ...(autore ? {} : { rimosso: true }),
+      },
+      mio: messaggio.autoreId === lettoreId,
     };
   }
 

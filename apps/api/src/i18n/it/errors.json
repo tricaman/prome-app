@@ -49,5 +49,7 @@
   "AULA_ALLEGATO_NOT_FOUND": "Materiale non trovato",
   "AULA_FILE_NON_VALIDO": "Il file non è utilizzabile: controlla tipo e dimensione",
   "AULA_NON_PUOI_CARICARE": "Non hai il permesso di caricare materiali in quest’aula",
-  "AULA_CONFLITTO_DI_VERSIONE": "Qualcun altro ha appena modificato l’aula: riprova"
+  "AULA_CONFLITTO_DI_VERSIONE": "Qualcun altro ha appena modificato l’aula: riprova",
+  "AULA_NON_PUOI_SCRIVERE": "Non hai il permesso di scrivere in quest’aula",
+  "MESSAGGIO_VUOTO": "Scrivi qualcosa prima di inviare"
 }

@@ -16,12 +16,28 @@ export type OggettoSchema = Record<string, unknown>;
 
 const idOrganizzazione = `${config.urlSito}#organizzazione`;
 
+/**
+ * Il marchio come lo vedono i motori di ricerca.
+ *
+ * È la versione PNG e non l'SVG perché Google accetta solo formati raster per
+ * il logo di un'organizzazione: è l'immagine che può comparire accanto al
+ * risultato di ricerca e nel pannello informativo.
+ */
+export const URL_LOGO = `${config.urlSito}/icona-512.png`;
+
 export const organizzazione = (descrizione: string): OggettoSchema => ({
   '@type': 'Organization',
   '@id': idOrganizzazione,
   name: config.nome,
   url: config.urlSito,
   description: descrizione,
+  logo: {
+    '@type': 'ImageObject',
+    url: URL_LOGO,
+    width: 512,
+    height: 512,
+  },
+  image: URL_LOGO,
 });
 
 export const sitoWeb = (lingua: Lingua, nome: string, descrizione: string): OggettoSchema => ({

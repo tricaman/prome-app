@@ -28,6 +28,9 @@ export const AulaStudioErrorCode = {
   NON_PUOI_CARICARE: 'AS016',
   /** Due gesti concorrenti sullo stesso insieme di partecipanti. */
   CONFLITTO_DI_VERSIONE: 'AS017',
+  /** MA2: il permesso di scrivere si legge fresco, nell'istante dell'invio. */
+  NON_PUOI_SCRIVERE: 'AS018',
+  MESSAGGIO_VUOTO: 'AS019',
 } as const;
 
 export type AulaStudioErrorCode =

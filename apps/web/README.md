@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Prome — web
 
-## Getting Started
+Sito pubblico e applicazione web di Prome: Next.js App Router, React 19, Tailwind v4, HeroUI v3, next-intl.
 
-First, run the development server:
+Le convenzioni di codice — struttura delle cartelle, contenuti, SEO, componenti — sono in [CLAUDE.md](CLAUDE.md).
+
+## Avvio
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm dev        # sviluppo su http://localhost:3500
+pnpm build      # build di produzione (compila prima i pacchetti del monorepo)
+pnpm start      # serve la build
+pnpm lint       # ESLint
+pnpm typecheck  # tipi delle rotte + tsc
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Ambiente
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Variabile              | Valore predefinito      | A cosa serve                                          |
+| ---------------------- | ----------------------- | ----------------------------------------------------- |
+| `NEXT_PUBLIC_URL_SITO` | `https://prome.app`     | base di URL canonici, sitemap, anteprime e dati strutturati |
+| `NEXT_PUBLIC_URL_API`  | `http://localhost:3600` | origine dell'API                                       |
+| `BUILD_AUTONOMA`       | —                       | `1` per l'output `standalone` usato dall'immagine Docker |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Marchio e icone
 
-## Learn More
+Il logo di riferimento è `public/logo-prome.svg`; da lì sono derivate tutte le icone:
 
-To learn more about Next.js, take a look at the following resources:
+| File                                | Uso                                                        |
+| ----------------------------------- | ---------------------------------------------------------- |
+| `src/app/icon.svg`                  | icona del browser sulle schede moderne                      |
+| `src/app/favicon.ico`               | 16/32/48 px, browser storici e favicon nei risultati Google  |
+| `src/app/apple-icon.png`            | 180 px, schermata iniziale iOS                              |
+| `public/icona-192.png`, `-512.png`  | icone del manifest (installazione come app)                  |
+| `public/icona-mascherabile-512.png` | variante con margine, ritagliata da Android                  |
+| `src/app/[locale]/logo-anteprima.png` | marchio dentro l'anteprima social generata da `opengraph-image.tsx` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Cambiando il logo vanno rigenerate tutte: sono file statici, nessuno le ricalcola alla build.

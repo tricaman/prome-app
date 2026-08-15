@@ -204,7 +204,7 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
       // comportamento provato è lo stesso, il tempo di esecuzione no.
       await prisma.verification.updateMany({
         where: { identifier: { contains: indirizzo } },
-        data: { expiresAt: new Date(Date.now() - 1000) },
+        data: { expiresAt: new Date(Date.now() - 60_000) },
       });
 
       const risposta = await chiedi('/accesso/verifica', {

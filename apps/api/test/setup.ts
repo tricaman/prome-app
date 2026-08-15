@@ -17,3 +17,8 @@ process.env.APP_ROLE ??= 'app';
 // produzione non partirebbe.
 process.env.BETTER_AUTH_SECRET ??= 'segreto-di-prova-lungo-abbastanza-per-i-test';
 process.env.CANALE_EMAIL ??= 'sviluppo';
+
+// Il trasporto in tempo reale resta spento nei test: è la degradazione
+// dichiarata dell'aula, e provarla col fornitore acceso non direbbe nulla
+// sul giorno in cui quel fornitore cade.
+process.env.TRASPORTO_TEMPO_REALE ??= 'assente';

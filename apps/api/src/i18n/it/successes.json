@@ -30,5 +30,7 @@
   "ARGOMENTO_CREATO": "Argomento creato",
   "ARGOMENTO_ELIMINATO": "Argomento eliminato: i materiali restano nell’aula",
   "MATERIALE_CARICATO": "Materiale condiviso",
-  "MATERIALE_ELIMINATO": "Materiale eliminato"
+  "MATERIALE_ELIMINATO": "Materiale eliminato",
+  "MESSAGGIO_INVIATO": "Messaggio inviato",
+  "MESSAGGI_ELENCATI": "Conversazione caricata"
 }

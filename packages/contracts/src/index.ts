@@ -441,3 +441,25 @@ export interface InvitoResponse {
 export interface CreaInvitoRequest {
   destinatario: string;
 }
+
+// --- Chat dell'aula studio --------------------------------------------------
+//
+// Il messaggio è immutabile dopo l'invio: è un fatto, non un documento. Non
+// esiste alcun modello condiviso con la chat del gruppo, perché ciò che si
+// verifica prima di scrivere è diverso — qui un permesso, là l'appartenenza.
+
+/** 2.000 caratteri, non vuoto dopo il trim. */
+export const LUNGHEZZA_MASSIMA_MESSAGGIO = 2000;
+
+export interface MessaggioDiChatResponse {
+  id: string;
+  testo: string;
+  inviatoIl: string;
+  autore: AutoreResponse;
+  /** Se chi legge ne è l'autore: lo dice il server, come sempre. */
+  mio: boolean;
+}
+
+export interface InviaMessaggioRequest {
+  testo: string;
+}

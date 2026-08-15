@@ -54,8 +54,11 @@ import type {
   EntraInAulaStudio200,
   ErrorResponseDto,
   EsciDaProme200,
+  InviaMessaggioDto,
   InvitaInAulaStudio201,
   LeggiInvito200,
+  LeggiMessaggiAula200,
+  LeggiMessaggiAulaParams,
   LeggiMioProfilo200,
   LeggiPost200,
   ModificaAulaStudio200,
@@ -74,6 +77,7 @@ import type {
   RichiediCodiceAccesso200,
   RichiestaCodiceDto,
   RimuoviPartecipante200,
+  ScriviInAula201,
   StatoDelServizio200,
   VerificaCodiceAccesso200,
   VerificaCodiceDto
@@ -2027,6 +2031,173 @@ export const useInvitaInAulaStudio = <TError = ErrorResponseDto,
       return useMutation(mutationOptions, queryClient);
     }
     
+/**
+ * @summary Scrive un messaggio nella chat
+ */
+export const scriviInAula = (
+    id: string,
+    inviaMessaggioDto: InviaMessaggioDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ScriviInAula201>(
+      {url: `/aule-studio/${id}/messaggi`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: inviaMessaggioDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getScriviInAulaMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof scriviInAula>>, TError,{id: string;data: InviaMessaggioDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof scriviInAula>>, TError,{id: string;data: InviaMessaggioDto}, TContext> => {
+
+const mutationKey = ['scriviInAula'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof scriviInAula>>, {id: string;data: InviaMessaggioDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  scriviInAula(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ScriviInAulaMutationResult = NonNullable<Awaited<ReturnType<typeof scriviInAula>>>
+    export type ScriviInAulaMutationBody = InviaMessaggioDto
+    export type ScriviInAulaMutationError = ErrorResponseDto
+
+    /**
+ * @summary Scrive un messaggio nella chat
+ */
+export const useScriviInAula = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof scriviInAula>>, TError,{id: string;data: InviaMessaggioDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof scriviInAula>>,
+        TError,
+        {id: string;data: InviaMessaggioDto},
+        TContext
+      > => {
+
+      const mutationOptions = getScriviInAulaMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary La conversazione, dal più vecchio
+ */
+export const leggiMessaggiAula = (
+    id: string,
+    params?: LeggiMessaggiAulaParams,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<LeggiMessaggiAula200>(
+      {url: `/aule-studio/${id}/messaggi`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getLeggiMessaggiAulaQueryKey = (id?: string,
+    params?: LeggiMessaggiAulaParams,) => {
+    return [
+    `/aule-studio/${id}/messaggi`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getLeggiMessaggiAulaQueryOptions = <TData = Awaited<ReturnType<typeof leggiMessaggiAula>>, TError = ErrorResponseDto>(id: string,
+    params?: LeggiMessaggiAulaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiMessaggiAula>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getLeggiMessaggiAulaQueryKey(id,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof leggiMessaggiAula>>> = ({ signal }) => leggiMessaggiAula(id,params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof leggiMessaggiAula>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type LeggiMessaggiAulaQueryResult = NonNullable<Awaited<ReturnType<typeof leggiMessaggiAula>>>
+export type LeggiMessaggiAulaQueryError = ErrorResponseDto
+
+
+export function useLeggiMessaggiAula<TData = Awaited<ReturnType<typeof leggiMessaggiAula>>, TError = ErrorResponseDto>(
+ id: string,
+    params: undefined |  LeggiMessaggiAulaParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiMessaggiAula>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiMessaggiAula>>,
+          TError,
+          Awaited<ReturnType<typeof leggiMessaggiAula>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiMessaggiAula<TData = Awaited<ReturnType<typeof leggiMessaggiAula>>, TError = ErrorResponseDto>(
+ id: string,
+    params?: LeggiMessaggiAulaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiMessaggiAula>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiMessaggiAula>>,
+          TError,
+          Awaited<ReturnType<typeof leggiMessaggiAula>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiMessaggiAula<TData = Awaited<ReturnType<typeof leggiMessaggiAula>>, TError = ErrorResponseDto>(
+ id: string,
+    params?: LeggiMessaggiAulaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiMessaggiAula>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary La conversazione, dal più vecchio
+ */
+
+export function useLeggiMessaggiAula<TData = Awaited<ReturnType<typeof leggiMessaggiAula>>, TError = ErrorResponseDto>(
+ id: string,
+    params?: LeggiMessaggiAulaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiMessaggiAula>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getLeggiMessaggiAulaQueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
 /**
  * @summary Crea un argomento nell'aula
  */

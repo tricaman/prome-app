@@ -91,6 +91,15 @@ const SchemaEnv = z.object({
    * sapere dove il client è pubblicato.
    */
   URL_APP_WEB: z.url().default('http://localhost:3500'),
+
+  /**
+   * Quale trasporto in tempo reale usare.
+   *
+   * `assente` non è un ripiego: è la degradazione dichiarata resa eseguibile —
+   * l'aula continua a funzionare in tutto ciò che non è tempo reale, e i
+   * messaggi restano persistiti e leggibili. È anche il valore dei test.
+   */
+  TRASPORTO_TEMPO_REALE: z.enum(['socket-io', 'assente']).default('socket-io'),
 });
 
 export type Env = z.infer<typeof SchemaEnv>;

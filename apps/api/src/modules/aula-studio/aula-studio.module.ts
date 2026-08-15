@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ArchivioFileModule } from '../../infrastruttura/archivio-file/archivio-file.module';
 import { AvvisiInUscitaModule } from '../../infrastruttura/avvisi-in-uscita/avvisi-in-uscita.module';
+import { TempoRealeModule } from '../../infrastruttura/tempo-reale/tempo-reale.module';
 import { ProfiloModule } from '../profilo/profilo.module';
 import { AulaStudioService } from './aula-studio.service';
 import { CancellazioneAulaStudioService } from './cancellazione-aula-studio.service';
@@ -25,7 +26,7 @@ import { RecapitoFattiService } from './recapito-fatti.service';
  * non come dettaglio interno.
  */
 @Module({
-  imports: [ProfiloModule, ArchivioFileModule, AvvisiInUscitaModule],
+  imports: [ProfiloModule, ArchivioFileModule, AvvisiInUscitaModule, TempoRealeModule],
   providers: [
     AulaStudioService,
     PuliziaAulaStudioService,

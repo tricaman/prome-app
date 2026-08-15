@@ -34,7 +34,8 @@ const GIORNO_MS = 24 * 60 * 60 * 1000;
  * file conservato), bacheca.allegato_in_attesa (+ file in archivio, eliminati),
  * aula_studio.partecipante (rimosso onorando AS2), aula_studio.invito
  * (eliminato), aula_studio.allegato_di_aula_studio (`caricatoDa` anonimizzato,
- * **file conservato**), aula_studio.fatto_in_uscita (payload con l'id).
+ * **file conservato**), aula_studio.messaggio_di_chat (anonimizzato),
+ * aula_studio.fatto_in_uscita (payload con l'id).
  * Il registro stesso è l'eccezione sancita: conserva utente_id per progetto.
  *
  * Domani: gruppo.*, altre tabelle outbox, log solo se la loro conservazione
@@ -282,6 +283,7 @@ export class CancellazioneService {
       await this.aule.rimuoviPartecipazioniDi(utenteId);
       await this.aule.eliminaInvitiDi(utenteId, indirizzo);
       await this.aule.anonimizzaMaterialiDi(utenteId);
+      await this.aule.anonimizzaMessaggiDi(utenteId);
       await this.aule.eliminaFattiDi(utenteId);
       auleComplete = true;
       if (!voce.auleStudioLiberateIl) marca.auleStudioLiberateIl = new Date();

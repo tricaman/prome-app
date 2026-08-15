@@ -97,6 +97,21 @@ export class CancellazioneAulaStudioService {
   }
 
   /**
+   * I messaggi restano, con il solo autore staccato: una conversazione a cui
+   * altri hanno partecipato non si riscrive perché uno se ne è andato.
+   */
+  async anonimizzaMessaggiDi(utenteId: string): Promise<number> {
+    return this.prisma.$executeRaw`
+      UPDATE "aula_studio"."messaggio_di_chat"
+      SET "autoreId" = ${PREFISSO_AUTORE_ANONIMO} || gen_random_uuid()::text
+      WHERE "id" IN (
+        SELECT "id" FROM "aula_studio"."messaggio_di_chat"
+        WHERE "autoreId" = ${utenteId}
+        LIMIT ${PER_GIRO}
+      )`;
+  }
+
+  /**
    * Verifica del residuo (SE3) per i detentori dell'aula studio.
    *
    * I file NON si contano: quelli dei materiali restano per progetto, e le
@@ -104,9 +119,10 @@ export class CancellazioneAulaStudioService {
    * sopravvivano senza essere un dato personale.
    */
   async contaResiduiDi(utenteId: string, indirizzo: string | null): Promise<number> {
-    const [partecipazioni, materiali, inviti, fatti] = await Promise.all([
+    const [partecipazioni, materiali, messaggi, inviti, fatti] = await Promise.all([
       this.prisma.partecipante.count({ where: { utenteId } }),
       this.prisma.allegatoDiAulaStudio.count({ where: { caricatoDa: utenteId } }),
+      this.prisma.messaggioDiChat.count({ where: { autoreId: utenteId } }),
       this.prisma.invito.count({
         where: {
           OR: [{ invitatoDa: utenteId }, ...(indirizzo ? [{ destinatario: indirizzo }] : [])],
@@ -120,7 +136,7 @@ export class CancellazioneAulaStudioService {
       }),
     ]);
 
-    return partecipazioni + materiali + inviti + fatti;
+    return partecipazioni + materiali + messaggi + inviti + fatti;
   }
 
   /** I fatti che portano il suo identificativo, ovunque siano nel payload. */

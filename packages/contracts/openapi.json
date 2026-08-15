@@ -1636,6 +1636,178 @@
         ]
       }
     },
+    "/aule-studio/{id}/messaggi": {
+      "post": {
+        "operationId": "scriviInAula",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviaMessaggioDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MessaggioDiChatDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Scrive un messaggio nella chat",
+        "tags": [
+          "aule studio"
+        ]
+      },
+      "get": {
+        "operationId": "leggiMessaggiAula",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Campo di ordinamento (dipende dalla risorsa)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "asc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MessaggioDiChatDto"
+                      }
+                    },
+                    "meta": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ResponseMetaDto"
+                        },
+                        {
+                          "properties": {
+                            "pagination": {
+                              "$ref": "#/components/schemas/PaginationMetaDto"
+                            }
+                          },
+                          "required": [
+                            "pagination"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "La conversazione, dal più vecchio",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
     "/aule-studio/{id}/argomenti": {
       "post": {
         "operationId": "creaArgomento",
@@ -2963,6 +3135,77 @@
         },
         "required": [
           "destinatario"
+        ]
+      },
+      "AutoreDiAulaDto": {
+        "type": "object",
+        "properties": {
+          "utenteId": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "cognome": {
+            "type": "string",
+            "nullable": true
+          },
+          "universita": {
+            "type": "string",
+            "nullable": true
+          },
+          "rimosso": {
+            "type": "boolean",
+            "description": "Account non più esistente: «Utente rimosso»"
+          }
+        },
+        "required": [
+          "utenteId",
+          "nome",
+          "cognome",
+          "universita"
+        ]
+      },
+      "MessaggioDiChatDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "testo": {
+            "type": "string"
+          },
+          "inviatoIl": {
+            "type": "string"
+          },
+          "autore": {
+            "$ref": "#/components/schemas/AutoreDiAulaDto"
+          },
+          "mio": {
+            "type": "boolean",
+            "description": "Se chi legge ne è l'autore: lo dice il server"
+          }
+        },
+        "required": [
+          "id",
+          "testo",
+          "inviatoIl",
+          "autore",
+          "mio"
+        ]
+      },
+      "InviaMessaggioDto": {
+        "type": "object",
+        "properties": {
+          "testo": {
+            "type": "string",
+            "example": "Ci vediamo alle 21",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "testo"
         ]
       },
       "CreaArgomentoDto": {

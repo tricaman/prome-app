@@ -49,5 +49,7 @@
   "AULA_ALLEGATO_NOT_FOUND": "Material not found",
   "AULA_FILE_NON_VALIDO": "The file cannot be used: check its type and size",
   "AULA_NON_PUOI_CARICARE": "You do not have permission to upload materials in this room",
-  "AULA_CONFLITTO_DI_VERSIONE": "Someone just changed the room: try again"
+  "AULA_CONFLITTO_DI_VERSIONE": "Someone just changed the room: try again",
+  "AULA_NON_PUOI_SCRIVERE": "You do not have permission to write in this room",
+  "MESSAGGIO_VUOTO": "Write something before sending"
 }

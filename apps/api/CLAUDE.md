@@ -69,6 +69,17 @@ Cinque aggregati (`AulaStudio`, `Argomento`, `AllegatoDiAulaStudio`, `Invito`, e
 - **`PortaAppartenenzaGruppo`** è l'anti-corruption layer verso il Gruppo: passa **un booleano** tradotto in titolo di ammissione, e **la parola «Membro» non entra nel core**. Oggi risponde sempre di no; E7 si attaccherà lì senza toccare l'ammissione.
 - Codici errore: prefisso **AS**. Il contesto ha **due sole dipendenze di dominio** (Profilo e, in futuro, l'appartenenza al Gruppo): una terza è una modifica della Context Map, non un dettaglio interno.
 
+## Chat dell'aula (E4)
+
+Il messaggio è un aggregato **minuscolo**: nessuna versione, immutabile dopo l'invio (MA1) — è un fatto, non un documento. Non condivide alcun modello con la futura chat del Gruppo: ciò che si verifica prima di scrivere è diverso (qui un permesso, là l'appartenenza), e la duplicazione è un costo già messo a bilancio.
+
+- **Si scrive con una richiesta ordinaria** (`POST /aule-studio/:id/messaggi`), non dal socket: è lì che vivono le regole, e il permesso di scrivere si legge **fresco all'invio** (MA2). Revocarlo zittisce da quel momento, non cancella la conversazione.
+- **Persistito prima, pubblicato dopo**: la consegna in tempo reale è un `catch` che ignora il fallimento, perché un errore di consegna non è un errore di scrittura. Con il trasporto spento la chat resta usabile.
+- `TrasportoInTempoReale` è una porta con **due adattatori** e un interruttore (`TRASPORTO_TEMPO_REALE`): `assente` è la **degradazione dichiarata resa eseguibile**, ed è il valore dei test — un test che passasse solo col fornitore acceso non direbbe nulla sul giorno in cui cade.
+- Il trasporto **consegna e non interpreta**: non conosce permessi. Sa solo chi può *ascoltare* una stanza, e lo chiede al modulo proprietario (`registraGuardiano`, registrato a runtime per non creare un anello fra i due). Chi è in sola lettura è ammesso ad ascoltare.
+- **La deduplica sta nel client**, per identificativo: la consegna è at-least-once, e alla riconnessione si rilegge la cronologia invece di ricucire buchi.
+- Un'aula con messaggi (o materiali) **non si elimina**: la verifica è al comando, su lettura fresca.
+
 ## Fatti di dominio (outbox)
 
 `modules/aula-studio/recapito-fatti.service.ts`. **Una tabella per schema, mai globale**: il fatto si scrive nella **stessa transazione dell'aggregato che lo produce** — la firma di `pubblica()` esige la transazione proprio per rendere impossibile pubblicare fuori da essa.

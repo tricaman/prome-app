@@ -460,7 +460,6 @@
       "soloChat": "Solo in chat · {numero}",
       "tuoiPermessi": "I tuoi permessi",
       "tuoiPermessiTesto": "Parlare · Scrivere · Caricare. Sei Moderatore di questa aula studio.",
-      "chatInArrivo": "La chat in tempo reale arriva col prossimo aggiornamento. Per ora l’aula serve a raccogliere i materiali e a decidere chi può fare cosa.",
       "unPartecipante": "1 partecipante",
       "nPartecipanti": "{numero} partecipanti",
       "nessunMateriale": "Nessun materiale ancora. Carica il primo file e chi studia con te lo troverà qui.",
@@ -472,6 +471,13 @@
         "moderatore": "Moderatore",
         "partecipante": "Partecipa",
         "solaLettura": "Sola lettura"
+      },
+      "nessunMessaggio": "Nessun messaggio. Scrivi il primo: chi è in aula lo vede subito.",
+      "solaLetturaSpiegazione": "Sei in sola lettura: puoi seguire la conversazione, non scriverci. Un moderatore può darti il permesso.",
+      "connessione": {
+        "connessione": "Connessione in corso…",
+        "connesso": "In tempo reale",
+        "assente": "Fuori tempo reale: i messaggi restano salvati e la conversazione si riallinea da sola."
       }
     },
     "gruppo": {

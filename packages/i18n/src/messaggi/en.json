@@ -460,7 +460,6 @@
       "soloChat": "Chat only · {numero}",
       "tuoiPermessi": "Your permissions",
       "tuoiPermessiTesto": "Speak · Write · Upload. You are a Moderator of this study room.",
-      "chatInArrivo": "Real-time chat is coming in the next update. For now the room is where materials live and where you decide who can do what.",
       "unPartecipante": "1 participant",
       "nPartecipanti": "{numero} participants",
       "nessunMateriale": "No materials yet. Upload the first file and the people studying with you will find it here.",
@@ -472,6 +471,13 @@
         "moderatore": "Moderator",
         "partecipante": "Takes part",
         "solaLettura": "Read only"
+      },
+      "nessunMessaggio": "No messages yet. Write the first one: whoever is in the room sees it right away.",
+      "solaLetturaSpiegazione": "You are in read-only: you can follow the conversation but not write in it. A moderator can grant you permission.",
+      "connessione": {
+        "connessione": "Connecting…",
+        "connesso": "Live",
+        "assente": "Not live: messages are still saved and the conversation realigns on its own."
       }
     },
     "gruppo": {

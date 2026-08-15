@@ -30,5 +30,7 @@
   "ARGOMENTO_CREATO": "Topic created",
   "ARGOMENTO_ELIMINATO": "Topic deleted: the materials stay in the room",
   "MATERIALE_CARICATO": "Material shared",
-  "MATERIALE_ELIMINATO": "Material deleted"
+  "MATERIALE_ELIMINATO": "Material deleted",
+  "MESSAGGIO_INVIATO": "Message sent",
+  "MESSAGGI_ELENCATI": "Conversation loaded"
 }

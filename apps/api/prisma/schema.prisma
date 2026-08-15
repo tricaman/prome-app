@@ -471,6 +471,32 @@ enum StatoInvito {
   @@schema("aula_studio")
 }
 
+/// Un messaggio nella chat dell'aula.
+///
+/// Aggregato autonomo e **minuscolo**: nessuna versione, niente da
+/// riconciliare, nessuna contesa fra chi scrive contemporaneamente. È
+/// **immutabile dopo l'invio** (MA1) — un messaggio è un fatto, non un
+/// documento — e questo è ciò che gli consente di essere così piccolo.
+///
+/// Il permesso di scrivere si verifica **sull'aula, su dato fresco, all'invio**
+/// (MA2): revocarlo zittisce da quel momento, non cancella la conversazione.
+///
+/// Non condivide alcun modello con il messaggio del Gruppo, che arriverà: ciò
+/// che si verifica prima di scrivere è diverso — qui un permesso, là
+/// l'appartenenza — e la duplicazione è un costo già messo a bilancio.
+model MessaggioDiChat {
+  id           String   @id @default(uuid())
+  aulaStudioId String
+  autoreId     String
+  testo        String
+  inviatoIl    DateTime @default(now())
+
+  @@index([aulaStudioId, inviatoIl])
+  @@index([autoreId])
+  @@map("messaggio_di_chat")
+  @@schema("aula_studio")
+}
+
 /// I fatti di dominio in uscita da questo schema (pattern outbox).
 ///
 /// **Una tabella per schema, mai una globale**: il fatto è scritto nella

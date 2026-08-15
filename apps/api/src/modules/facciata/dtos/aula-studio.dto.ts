@@ -16,6 +16,7 @@ import {
 import {
   DIMENSIONE_MASSIMA_ALLEGATO,
   LUNGHEZZA_MASSIMA_TESTO_ARGOMENTO,
+  LUNGHEZZA_MASSIMA_MESSAGGIO,
   LUNGHEZZA_MASSIMA_TITOLO_AULA,
   type AllegatoDiAulaStudioResponse,
   type ArgomentoResponse,
@@ -24,7 +25,9 @@ import {
   type CreaArgomentoRequest,
   type CreaAulaStudioRequest,
   type CreaInvitoRequest,
+  type InviaMessaggioRequest,
   type InvitoResponse,
+  type MessaggioDiChatResponse,
   type ModificaAulaStudioRequest,
   type PartecipanteResponse,
   type PermessiResponse,
@@ -134,7 +137,26 @@ export class CreaInvitoDto implements CreaInvitoRequest {
   destinatario!: string;
 }
 
+export class InviaMessaggioDto implements InviaMessaggioRequest {
+  @ApiProperty({ example: 'Ci vediamo alle 21', maxLength: LUNGHEZZA_MASSIMA_MESSAGGIO })
+  @Transform(ripulisci)
+  @IsString()
+  @Length(1, LUNGHEZZA_MASSIMA_MESSAGGIO)
+  testo!: string;
+}
+
+export class QueryMessaggiDto extends PaginationDto {}
+
 // --- Uscita -----------------------------------------------------------------
+
+export class AutoreDiAulaDto {
+  @ApiProperty() utenteId!: string;
+  @ApiProperty({ nullable: true, type: String }) nome!: string | null;
+  @ApiProperty({ nullable: true, type: String }) cognome!: string | null;
+  @ApiProperty({ nullable: true, type: String }) universita!: string | null;
+  @ApiPropertyOptional({ description: 'Account non più esistente: «Utente rimosso»' })
+  rimosso?: boolean;
+}
 
 export class PermessiDto implements PermessiResponse {
   @ApiProperty() @IsBoolean() parlare!: boolean;
@@ -214,6 +236,15 @@ export class InvitoDto implements InvitoResponse {
   @ApiProperty() emessoIl!: string;
   @ApiProperty({ description: 'Falso subito dopo l\'accettazione: compare entro pochi secondi' })
   partecipanteCreato!: boolean;
+}
+
+export class MessaggioDiChatDto implements MessaggioDiChatResponse {
+  @ApiProperty() id!: string;
+  @ApiProperty() testo!: string;
+  @ApiProperty() inviatoIl!: string;
+  @ApiProperty({ type: AutoreDiAulaDto }) autore!: AutoreDiAulaDto;
+  @ApiProperty({ description: 'Se chi legge ne è l\'autore: lo dice il server' })
+  mio!: boolean;
 }
 
 /** Massimo consentito, ri-dichiarato qui per la documentazione. */
