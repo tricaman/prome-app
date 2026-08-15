@@ -90,7 +90,7 @@ La porta `MisurazioniDiUtilizzo` è **senza fornitore assegnato**, e resta così
 
 Esistono e funzionano: accesso, inserimento del codice, completamento del profilo, bacheca, composer, dettaglio del post con commenti, **aule studio con materiali, permessi e chat in tempo reale**. Rientrando dal background il socket si riapre e la cronologia si rilegge. Restano senza API dietro le schede gruppi e notifiche.
 
-**Il lint del mobile non era mai stato configurato** (`expo lint` genera la propria configurazione al primo avvio, e la CI esegue solo quello del web). Attivandolo emergono **sette errori preesistenti in `providers/avvisi-provider.tsx`** — accessi a `ref` durante il render, che React 19 non perdona. Non sono stati toccati: sono fuori dal perimetro delle aule, ma vanno affrontati prima di dire che il mobile è pulito.
+**Il lint del mobile non era mai stato configurato**: `expo lint` genera la propria configurazione al primo avvio, e finché nessuno l'ha eseguito il codice nativo è cresciuto senza controllo. Ora la configurazione è committata, la CI la esegue, e i sette errori che aveva fatto emergere in `providers/avvisi-provider.tsx` sono corretti — erano difetti veri: il conto alla rovescia dell'avviso ripartiva a ogni disegno del padre, e un messaggio in uscita poteva spegnere quello appena arrivato.
 
 ---
 
