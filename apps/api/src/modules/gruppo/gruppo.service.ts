@@ -15,6 +15,7 @@ import { PrismaService } from '../../database/prisma.service';
 import { AppException } from '../../common/exceptions';
 import { CANALE_EMAIL, type CanaleEmail } from '../../infrastruttura/avvisi-in-uscita/canale-email';
 import { env } from '../../config/env';
+import { AvvisiService } from '../avvisi/avvisi.service';
 import { ProfiloService } from '../profilo/profilo.service';
 import { PortaIdentitaUtente } from '../profilo/porta-identita-utente';
 import { GruppoErrorCode } from './constants/error-codes';
@@ -63,6 +64,7 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
     private readonly identita: PortaIdentitaUtente,
     private readonly recapito: RecapitoFattiDelGruppoService,
     @Inject(CANALE_EMAIL) private readonly email: CanaleEmail,
+    private readonly avvisi: AvvisiService,
   ) {
     this.recapito.registra(this);
   }
@@ -297,6 +299,17 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
         scadeIl,
       },
       'it',
+    );
+
+    await this.avvisi.avvisaIndirizzo(
+      invito.destinatario,
+      'invito',
+      {
+        percorso: `/app/inviti-gruppo/${invito.id}`,
+        titolo: 'notifiche.invito.titolo',
+        corpo: 'notifiche.invito.corpo',
+      },
+      utenteId,
     );
 
     return this.invitoPerIlClient(invito, gruppo.nome, false);

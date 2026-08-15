@@ -7,6 +7,7 @@ import { SceltaTema } from '@/components/app/scelta-tema';
 import { SchedaProfilo } from '@/components/app/scheda-profilo';
 import { ModificaProfilo } from '@/components/app/modifica-profilo';
 import { ImpostazioniPrivacy } from '@/components/app/impostazioni-privacy';
+import { ImpostazioniNotifiche } from '@/components/app/impostazioni-notifiche';
 import { SessioneAccount } from '@/components/app/sessione-account';
 import { ScaricaDati } from '@/components/app/scarica-dati';
 import { EliminaAccount } from '@/components/app/elimina-account';
@@ -32,7 +33,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
  * senza niente dietro: una riga che non fa nulla è una promessa falsa, e in
  * una schermata di impostazioni è anche peggio — è il posto dove si va per
  * mettere le cose a posto, e crederci sbagliato è indistinguibile
- * dall'esserci riusciti. Tornano quando ci sarà qualcosa da collegare.
+ * dall'esserci riusciti. Sono tornate una per una, quando c'era qualcosa da
+ * collegare.
+ *
+ * Gli avvisi sono l'unico caso a metà, e per questo la loro scheda **dichiara
+ * il proprio stato**: le preferenze si salvano davvero e il server le rispetta,
+ * ma nessun avviso viene ancora recapitato perché non c'è un fornitore. È
+ * l'opposto degli interruttori tolti a luglio, che si dicevano attivi e non
+ * salvavano niente: qui la parte mancante è scritta sulla scheda.
  *
  * L'eliminazione dell'account sta in fondo e in chiaro, con le stesse parole
  * della privacy policy: contenuti anonimizzati, dati cancellati entro 30
@@ -47,7 +55,7 @@ export default async function PaginaImpostazioni({
   await linguaDellaRotta(params);
   const t = await getTranslations('app.impostazioni');
 
-  const sezioni = ['profilo', 'privacy', 'aspetto', 'account'] as const;
+  const sezioni = ['profilo', 'privacy', 'notifiche', 'aspetto', 'account'] as const;
 
   return (
     <>
@@ -85,6 +93,11 @@ export default async function PaginaImpostazioni({
             <section id="privacy" className="scroll-mt-6">
               <EtichettaSezione>{t('privacy')}</EtichettaSezione>
               <ImpostazioniPrivacy />
+            </section>
+
+            <section id="notifiche" className="scroll-mt-6">
+              <EtichettaSezione>{t('nav.notifiche')}</EtichettaSezione>
+              <ImpostazioniNotifiche />
             </section>
 
             <section id="aspetto" className="scroll-mt-6">

@@ -68,6 +68,8 @@ export class EsportazioneController {
         corso: null,
         onboardingCompletato: false,
         impostazioniPrivacy: { contattabilita: 'PRIVATO', visibilita: 'PRIVATO' },
+        preferenzeDiNotifica: { commenti: true, inviti: true },
+        dispositiviRegistrati: [],
       },
       bacheca,
       gruppi,

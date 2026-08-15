@@ -571,6 +571,40 @@ export interface CreaInvitoAlGruppoRequest {
   destinatario: string;
 }
 
+// --- Notifiche --------------------------------------------------------------
+//
+// Il prodotto interrompe qualcuno in due sole occasioni, e l'elenco è chiuso
+// per la stessa ragione per cui lo è quello degli eventi di misurazione: un
+// tipo in più è una decisione, non un dettaglio. Ciò che esce **non trasporta
+// dati personali** oltre gli identificativi tecnici necessari ad aprire il
+// contenuto giusto.
+
+export type PiattaformaDiNotifica = 'IOS' | 'ANDROID' | 'WEB';
+
+export interface RegistraDispositivoRequest {
+  /** Rilasciato dalla piattaforma, non da noi. */
+  token: string;
+  piattaforma: PiattaformaDiNotifica;
+}
+
+/**
+ * Quali avvisi si vogliono ricevere. Nascono **accesi**, al contrario delle
+ * regole di privacy: un avviso che non arriva non espone nulla a nessuno, ma
+ * un prodotto che non avvisa mai sembra morto.
+ */
+export interface PreferenzeDiNotificaResponse {
+  /** Qualcuno ha commentato un mio contenuto. */
+  commenti: boolean;
+  /** Sono stato invitato in un'aula studio o in un gruppo. */
+  inviti: boolean;
+}
+
+/** Si cambia un asse alla volta: quello omesso resta com'era. */
+export interface AggiornaPreferenzeDiNotificaRequest {
+  commenti?: boolean;
+  inviti?: boolean;
+}
+
 // --- Esportazione dei propri dati -------------------------------------------
 //
 // La privacy policy promette «una copia completa in formato leggibile». Questa

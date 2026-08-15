@@ -80,6 +80,17 @@ class AccountEsportatoDto {
   email!: string | null;
 }
 
+class PreferenzeEsportateDto {
+  @ApiProperty() commenti!: boolean;
+  @ApiProperty() inviti!: boolean;
+}
+
+/** Senza il token: è il modo di raggiungere l'apparecchio, non un dato suo. */
+class DispositivoEsportatoDto {
+  @ApiProperty() piattaforma!: string;
+  @ApiProperty() registratoIl!: string;
+}
+
 class ProfiloEsportatoDto {
   @ApiProperty({ nullable: true, type: String }) nome!: string | null;
   @ApiProperty({ nullable: true, type: String }) cognome!: string | null;
@@ -88,6 +99,12 @@ class ProfiloEsportatoDto {
   @ApiProperty() onboardingCompletato!: boolean;
   @ApiProperty({ type: ImpostazioniDiPrivacyDto })
   impostazioniPrivacy!: ImpostazioniDiPrivacyDto;
+
+  @ApiProperty({ type: PreferenzeEsportateDto })
+  preferenzeDiNotifica!: PreferenzeEsportateDto;
+
+  @ApiProperty({ type: [DispositivoEsportatoDto] })
+  dispositiviRegistrati!: DispositivoEsportatoDto[];
 }
 
 /**

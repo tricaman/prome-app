@@ -403,7 +403,16 @@ describe('Bacheca — post completi e commenti (E2)', () => {
       // sta aspettando.
       expect(await prisma.commento.count({ where: { postId: post.id } })).toBe(1);
 
-      await pulizia.eseguiGiro();
+      // Il giro guarda un **lotto** di post per volta (`PER_GIRO`), non tutti:
+      // con altre suite in esecuzione sullo stesso database il lotto può
+      // essere pieno di post altrui, e questo finirci al secondo giro invece
+      // che al primo. In esercizio è la stessa cosa — nessuno aspetta un
+      // commento orfano — ma un test che pretendesse *un* giro sarebbe rosso
+      // a intermittenza, e una suite a intermittenza insegna a rilanciarla.
+      for (let giro = 0; giro < 5; giro += 1) {
+        await pulizia.eseguiGiro();
+        if ((await prisma.commento.count({ where: { postId: post.id } })) === 0) break;
+      }
       expect(await prisma.commento.count({ where: { postId: post.id } })).toBe(0);
     });
 

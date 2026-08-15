@@ -44,6 +44,12 @@ export class ProfiloService {
       create: {
         utenteId,
         impostazioniPrivacy: { create: {} },
+        // Le preferenze di notifica nascono con il profilo, come le regole di
+        // privacy: una domanda che si pone al recapito deve avere sempre una
+        // risposta. Partono **accese**, al contrario della privacy — un avviso
+        // che non arriva non espone nulla, ma un prodotto che non avvisa mai
+        // sembra morto.
+        preferenzeNotifiche: { create: {} },
       },
       include: { impostazioniPrivacy: true },
     });
@@ -256,13 +262,22 @@ export class ProfiloService {
     await this.prisma.profilo.deleteMany({ where: { utenteId } });
   }
 
-  /** Verifica del residuo (SE3): quante righe portano ancora questo id. */
+  /**
+   * Verifica del residuo (SE3): quante righe portano ancora questo id.
+   *
+   * >>> PUNTO DA AGGIORNARE A OGNI NUOVA TABELLA DI QUESTO SCHEMA <<<
+   * Dispositivi e preferenze cadono in cascata con il profilo, ma vanno
+   * **contati lo stesso**: una verifica che non guarda una tabella dichiara
+   * «totale» senza esserlo, ed è il difetto peggiore possibile qui.
+   */
   async contaResiduiDi(utenteId: string): Promise<number> {
-    const profili = await this.prisma.profilo.count({ where: { utenteId } });
-    const impostazioni = await this.prisma.impostazioniDiPrivacy.count({
-      where: { utenteId },
-    });
-    return profili + impostazioni;
+    const [profili, impostazioni, preferenze, dispositivi] = await Promise.all([
+      this.prisma.profilo.count({ where: { utenteId } }),
+      this.prisma.impostazioniDiPrivacy.count({ where: { utenteId } }),
+      this.prisma.preferenzeDiNotifica.count({ where: { utenteId } }),
+      this.prisma.dispositivoDiNotifica.count({ where: { utenteId } }),
+    ]);
+    return profili + impostazioni + preferenze + dispositivi;
   }
 
   /**
@@ -281,10 +296,12 @@ export class ProfiloService {
     corso: string | null;
     onboardingCompletato: boolean;
     impostazioniPrivacy: { contattabilita: string; visibilita: string };
+    preferenzeDiNotifica: { commenti: boolean; inviti: boolean };
+    dispositiviRegistrati: Array<{ piattaforma: string; registratoIl: Date }>;
   } | null> {
     const profilo = await this.prisma.profilo.findUnique({
       where: { utenteId },
-      include: { impostazioniPrivacy: true },
+      include: { impostazioniPrivacy: true, preferenzeNotifiche: true, dispositivi: true },
     });
     if (!profilo) return null;
 
@@ -296,7 +313,97 @@ export class ProfiloService {
       corso: perIlClient.corso,
       onboardingCompletato: perIlClient.onboardingCompletato,
       impostazioniPrivacy: perIlClient.impostazioniPrivacy,
+      preferenzeDiNotifica: {
+        commenti: profilo.preferenzeNotifiche?.commenti ?? true,
+        inviti: profilo.preferenzeNotifiche?.inviti ?? true,
+      },
+      // **Il token del dispositivo non esce**, come non escono la sessione e i
+      // codici d'accesso: non è un dato della persona ma il modo in cui il
+      // sistema raggiunge un suo apparecchio, e in un file nella cartella dei
+      // download sarebbe un modo per mandarle notifiche a nome nostro. Ciò
+      // che la riguarda — quanti apparecchi, di che tipo, da quando — c'è.
+      dispositiviRegistrati: profilo.dispositivi.map((dispositivo) => ({
+        piattaforma: dispositivo.piattaforma,
+        registratoIl: dispositivo.creatoIl,
+      })),
     };
+  }
+
+  // --- Avvisi (E8) -----------------------------------------------------------
+
+  /**
+   * Gli apparecchi su cui questa persona vuole ancora essere interrotta.
+   *
+   * La preferenza si legge **adesso**, non da una copia presa quando il fatto
+   * è nato: chi ha appena spento gli avvisi dei commenti non deve riceverne
+   * uno per un commento arrivato un istante prima.
+   *
+   * Elenco vuoto è una risposta normale — nessun apparecchio, o avvisi spenti
+   * — e chi chiama non manda niente. Non è un errore.
+   */
+  async dispositiviDaAvvisare(utenteId: string, tipo: 'commento' | 'invito'): Promise<string[]> {
+    const preferenze = await this.prisma.preferenzeDiNotifica.findUnique({ where: { utenteId } });
+    // Assenti significa «mai scelto»: valgono i valori di partenza, che sono
+    // accesi. Non esiste lo stato «non impostato».
+    const acceso = tipo === 'commento' ? (preferenze?.commenti ?? true) : (preferenze?.inviti ?? true);
+    if (!acceso) return [];
+
+    const dispositivi = await this.prisma.dispositivoDiNotifica.findMany({
+      where: { utenteId },
+      select: { token: true },
+    });
+    return dispositivi.map((d) => d.token);
+  }
+
+  async preferenzeDiNotifica(utenteId: string): Promise<{ commenti: boolean; inviti: boolean }> {
+    await this.perUtente(utenteId);
+    const preferenze = await this.prisma.preferenzeDiNotifica.upsert({
+      where: { utenteId },
+      update: {},
+      create: { utenteId },
+    });
+    return { commenti: preferenze.commenti, inviti: preferenze.inviti };
+  }
+
+  /** Si cambia un asse alla volta: quello omesso resta com'era. */
+  async aggiornaPreferenzeDiNotifica(
+    utenteId: string,
+    dati: { commenti?: boolean; inviti?: boolean },
+  ): Promise<{ commenti: boolean; inviti: boolean }> {
+    await this.preferenzeDiNotifica(utenteId);
+    const aggiornate = await this.prisma.preferenzeDiNotifica.update({
+      where: { utenteId },
+      data: {
+        ...(dati.commenti === undefined ? {} : { commenti: dati.commenti }),
+        ...(dati.inviti === undefined ? {} : { inviti: dati.inviti }),
+      },
+    });
+    return { commenti: aggiornate.commenti, inviti: aggiornate.inviti };
+  }
+
+  /**
+   * Registra un apparecchio.
+   *
+   * Il token è unico: lo stesso apparecchio registrato due volte è **una**
+   * registrazione, e se a registrarlo è un altro account passa a lui — è il
+   * caso vero del telefono prestato o dell'account cambiato, e lasciare gli
+   * avvisi al primo vorrebbe dire mandarli a chi ora ha quel telefono in mano.
+   */
+  async registraDispositivo(
+    utenteId: string,
+    dati: { token: string; piattaforma: 'IOS' | 'ANDROID' | 'WEB' },
+  ): Promise<void> {
+    await this.perUtente(utenteId);
+    await this.prisma.dispositivoDiNotifica.upsert({
+      where: { token: dati.token },
+      update: { utenteId, piattaforma: dati.piattaforma },
+      create: { utenteId, token: dati.token, piattaforma: dati.piattaforma },
+    });
+  }
+
+  /** Idempotente: togliere un apparecchio già tolto non è un errore. */
+  async dimenticaDispositivo(utenteId: string, token: string): Promise<void> {
+    await this.prisma.dispositivoDiNotifica.deleteMany({ where: { utenteId, token } });
   }
 
   /** Vero quando i quattro dati ci sono: è il solo criterio. */

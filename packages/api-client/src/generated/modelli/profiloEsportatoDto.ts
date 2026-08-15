@@ -6,6 +6,8 @@
  * OpenAPI spec version: v1
  */
 import type { ImpostazioniDiPrivacyDto } from './impostazioniDiPrivacyDto';
+import type { PreferenzeEsportateDto } from './preferenzeEsportateDto';
+import type { DispositivoEsportatoDto } from './dispositivoEsportatoDto';
 
 export interface ProfiloEsportatoDto {
   /** @nullable */
@@ -18,4 +20,6 @@ export interface ProfiloEsportatoDto {
   corso: string | null;
   onboardingCompletato: boolean;
   impostazioniPrivacy: ImpostazioniDiPrivacyDto;
+  preferenzeDiNotifica: PreferenzeEsportateDto;
+  dispositiviRegistrati: DispositivoEsportatoDto[];
 }

@@ -2326,6 +2326,207 @@
         ]
       }
     },
+    "/notifiche/dispositivi": {
+      "post": {
+        "operationId": "registraDispositivo",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistraDispositivoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Dispositivo registrato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Registra un apparecchio su cui ricevere gli avvisi",
+        "tags": [
+          "notifiche"
+        ]
+      }
+    },
+    "/notifiche/dispositivi/{token}": {
+      "delete": {
+        "operationId": "dimenticaDispositivo",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dispositivo dimenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Smette di mandare avvisi a questo apparecchio",
+        "tags": [
+          "notifiche"
+        ]
+      }
+    },
+    "/notifiche/preferenze": {
+      "get": {
+        "operationId": "leggiPreferenzeNotifiche",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PreferenzeDiNotificaDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cosa voglio sapere",
+        "tags": [
+          "notifiche"
+        ]
+      },
+      "put": {
+        "operationId": "aggiornaPreferenzeNotifiche",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AggiornaPreferenzeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PreferenzeDiNotificaDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Accende o spegne un tipo di avviso",
+        "tags": [
+          "notifiche"
+        ]
+      }
+    },
     "/gruppi": {
       "post": {
         "operationId": "creaGruppo",
@@ -4142,6 +4343,55 @@
           "chiave"
         ]
       },
+      "RegistraDispositivoDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Token rilasciato dalla piattaforma"
+          },
+          "piattaforma": {
+            "type": "string",
+            "enum": [
+              "IOS",
+              "ANDROID",
+              "WEB"
+            ]
+          }
+        },
+        "required": [
+          "token",
+          "piattaforma"
+        ]
+      },
+      "PreferenzeDiNotificaDto": {
+        "type": "object",
+        "properties": {
+          "commenti": {
+            "type": "boolean",
+            "description": "Qualcuno ha commentato un mio contenuto"
+          },
+          "inviti": {
+            "type": "boolean",
+            "description": "Sono stato invitato in un'aula studio o in un gruppo"
+          }
+        },
+        "required": [
+          "commenti",
+          "inviti"
+        ]
+      },
+      "AggiornaPreferenzeDto": {
+        "type": "object",
+        "properties": {
+          "commenti": {
+            "type": "boolean"
+          },
+          "inviti": {
+            "type": "boolean"
+          }
+        }
+      },
       "GruppoDto": {
         "type": "object",
         "properties": {
@@ -4379,6 +4629,36 @@
           "email"
         ]
       },
+      "PreferenzeEsportateDto": {
+        "type": "object",
+        "properties": {
+          "commenti": {
+            "type": "boolean"
+          },
+          "inviti": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "commenti",
+          "inviti"
+        ]
+      },
+      "DispositivoEsportatoDto": {
+        "type": "object",
+        "properties": {
+          "piattaforma": {
+            "type": "string"
+          },
+          "registratoIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "piattaforma",
+          "registratoIl"
+        ]
+      },
       "ProfiloEsportatoDto": {
         "type": "object",
         "properties": {
@@ -4403,6 +4683,15 @@
           },
           "impostazioniPrivacy": {
             "$ref": "#/components/schemas/ImpostazioniDiPrivacyDto"
+          },
+          "preferenzeDiNotifica": {
+            "$ref": "#/components/schemas/PreferenzeEsportateDto"
+          },
+          "dispositiviRegistrati": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DispositivoEsportatoDto"
+            }
           }
         },
         "required": [
@@ -4411,7 +4700,9 @@
           "universita",
           "corso",
           "onboardingCompletato",
-          "impostazioniPrivacy"
+          "impostazioniPrivacy",
+          "preferenzeDiNotifica",
+          "dispositiviRegistrati"
         ]
       },
       "FileEsportatoDto": {

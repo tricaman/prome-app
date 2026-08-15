@@ -42,5 +42,8 @@
   "GRUPPO_MODERATORE_PROMOSSO": "They are now a group moderator",
   "GRUPPO_MODERATORE_RETROCESSO": "They are no longer a group moderator",
   "GRUPPO_INVITO_EMESSO": "Invitation sent",
-  "GRUPPO_INVITO_ACCETTATO": "Invitation accepted: we are adding you to the group"
+  "GRUPPO_INVITO_ACCETTATO": "Invitation accepted: we are adding you to the group",
+  "DISPOSITIVO_REGISTRATO": "Device registered",
+  "DISPOSITIVO_DIMENTICATO": "We will no longer send notices to this device",
+  "PREFERENZE_AGGIORNATE": "Preferences updated"
 }

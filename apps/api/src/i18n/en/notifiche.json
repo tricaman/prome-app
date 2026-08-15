@@ -1,0 +1,10 @@
+{
+  "commento": {
+    "titolo": "New comment",
+    "corpo": "Someone commented on one of your posts"
+  },
+  "invito": {
+    "titolo": "New invitation",
+    "corpo": "You have been invited to a study space"
+  }
+}

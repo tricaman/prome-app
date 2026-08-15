@@ -132,6 +132,8 @@ model Profilo {
   inCancellazioneDal DateTime?
 
   impostazioniPrivacy ImpostazioniDiPrivacy?
+  preferenzeNotifiche PreferenzeDiNotifica?
+  dispositivi         DispositivoDiNotifica[]
 
   @@map("profilo")
   @@schema("profilo")
@@ -153,6 +155,66 @@ model ImpostazioniDiPrivacy {
   profilo Profilo @relation(fields: [utenteId], references: [utenteId], onDelete: Cascade)
 
   @@map("impostazioni_di_privacy")
+  @@schema("profilo")
+}
+
+/// Quali avvisi la persona vuole ricevere fuori dall'app.
+///
+/// **Non sono impostazioni di privacy** e non stanno con loro: la privacy dice
+/// chi può vedere e contattare, questa dice cosa si vuole sapere. Mescolarle
+/// reintrodurrebbe il «livello» unico che il dominio ha rifiutato (IP3).
+///
+/// Nascono con il Profilo e partono **accese**, al contrario della privacy: un
+/// avviso che non arriva non espone nulla a nessuno, mentre un avviso che non
+/// arriva perché nessuno lo ha acceso fa sembrare il prodotto morto. Si
+/// spengono con un gesto, e quel gesto ha effetto alla prima notifica dopo.
+model PreferenzeDiNotifica {
+  utenteId String @id
+
+  /// Qualcuno ha commentato un mio contenuto.
+  commenti Boolean @default(true)
+  /// Sono stato invitato in un'aula studio o in un gruppo.
+  inviti   Boolean @default(true)
+
+  aggiornatoIl DateTime @default(now()) @updatedAt
+
+  profilo Profilo @relation(fields: [utenteId], references: [utenteId], onDelete: Cascade)
+
+  @@map("preferenze_di_notifica")
+  @@schema("profilo")
+}
+
+/// Un dispositivo su cui recapitare gli avvisi.
+///
+/// Il token è **rilasciato dalla piattaforma**, non da noi: su iOS il trasporto
+/// è quello imposto dal sistema, e nessun meccanismo proprio è ammesso. Qui se
+/// ne conserva il minimo — a chi appartiene, su quale piattaforma, da quando —
+/// perché è comunque un dato che identifica un apparecchio di una persona, e
+/// cade con il profilo.
+model DispositivoDiNotifica {
+  id       String @id @default(uuid())
+  utenteId String
+  /// Unico: lo stesso dispositivo registrato due volte è una registrazione
+  /// sola, non due destinatari.
+  token    String @unique
+  piattaforma PiattaformaDiNotifica
+
+  creatoIl     DateTime @default(now())
+  aggiornatoIl DateTime @default(now()) @updatedAt
+
+  profilo Profilo @relation(fields: [utenteId], references: [utenteId], onDelete: Cascade)
+
+  @@index([utenteId])
+  @@map("dispositivo_di_notifica")
+  @@schema("profilo")
+}
+
+enum PiattaformaDiNotifica {
+  IOS
+  ANDROID
+  WEB
+
+  @@map("piattaforma_di_notifica")
   @@schema("profilo")
 }
 
@@ -275,6 +337,34 @@ model Commento {
   @@index([postId, creatoIl])
   @@index([autoreId])
   @@map("commento")
+  @@schema("bacheca")
+}
+
+/// I fatti di dominio in uscita da questo schema (pattern outbox).
+///
+/// **Una tabella per schema, mai una globale**, come per l'aula e per il
+/// gruppo. Porta un fatto solo — un commento scritto sotto il contenuto di
+/// qualcuno — e serve a una cosa precisa: l'avviso verso l'esterno parte
+/// **fuori dal percorso della richiesta**, così chi scrive un commento non
+/// aspetta un fornitore di notifiche per vedere il proprio commento comparire,
+/// e un fornitore lento o guasto non diventa un commento fallito.
+model FattoInUscitaDellaBacheca {
+  /// Identificativo dell'evento: è la chiave di deduplica sul consumatore.
+  id          String   @id @default(uuid())
+  tipo        String
+  aggregatoId String
+  versione    Int      @default(1)
+  accadutoIl  DateTime @default(now())
+  payload     Json
+
+  consegnatoIl        DateTime?
+  tentativi           Int       @default(0)
+  prossimoTentativoIl DateTime  @default(now())
+  nonConsegnabileIl   DateTime?
+
+  @@index([consegnatoIl, prossimoTentativoIl])
+  @@index([accadutoIl])
+  @@map("fatto_in_uscita")
   @@schema("bacheca")
 }
 

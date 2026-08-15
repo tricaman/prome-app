@@ -550,6 +550,7 @@
       "nav": {
         "profilo": "Profile",
         "privacy": "Privacy",
+        "notifiche": "Notifications",
         "aspetto": "Appearance",
         "account": "Account"
       },
@@ -593,6 +594,18 @@
         "azione": "Delete my account",
         "parola": "DELETE",
         "scriviPerConfermare": "Type {parola} to confirm"
+      },
+      "notifiche": {
+        "titolo": "When we notify you",
+        "stato": "Notices are not delivered yet: there is no notification provider. What you choose here applies immediately and decides what you will receive once they arrive.",
+        "commenti": {
+          "titolo": "Comments on your posts",
+          "testo": "When someone comments on something you wrote. Never for your own comments."
+        },
+        "inviti": {
+          "titolo": "Invitations",
+          "testo": "When someone invites you to a study room or a group."
+        }
       }
     }
   }

@@ -42,5 +42,8 @@
   "GRUPPO_MODERATORE_PROMOSSO": "Ora è moderatore del gruppo",
   "GRUPPO_MODERATORE_RETROCESSO": "Non è più moderatore del gruppo",
   "GRUPPO_INVITO_EMESSO": "Invito inviato",
-  "GRUPPO_INVITO_ACCETTATO": "Invito accettato: stiamo aggiungendoti al gruppo"
+  "GRUPPO_INVITO_ACCETTATO": "Invito accettato: stiamo aggiungendoti al gruppo",
+  "DISPOSITIVO_REGISTRATO": "Dispositivo registrato",
+  "DISPOSITIVO_DIMENTICATO": "Non manderemo più avvisi a questo dispositivo",
+  "PREFERENZE_AGGIORNATE": "Preferenze aggiornate"
 }

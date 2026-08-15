@@ -550,6 +550,7 @@
       "nav": {
         "profilo": "Profilo",
         "privacy": "Privacy",
+        "notifiche": "Avvisi",
         "aspetto": "Aspetto",
         "account": "Account"
       },
@@ -593,6 +594,18 @@
         "azione": "Elimina il mio account",
         "parola": "ELIMINA",
         "scriviPerConfermare": "Scrivi {parola} per confermare"
+      },
+      "notifiche": {
+        "titolo": "Quando ti avvisiamo",
+        "stato": "Gli avvisi non vengono ancora recapitati: non c’è un fornitore di notifiche. Quello che scegli qui vale da subito e decide cosa riceverai quando arriveranno.",
+        "commenti": {
+          "titolo": "Commenti ai tuoi post",
+          "testo": "Quando qualcuno commenta un contenuto che hai scritto. Mai per i tuoi commenti."
+        },
+        "inviti": {
+          "titolo": "Inviti",
+          "testo": "Quando qualcuno ti invita in un’aula studio o in un gruppo."
+        }
       }
     }
   }

@@ -1,0 +1,10 @@
+{
+  "commento": {
+    "titolo": "Nuovo commento",
+    "corpo": "Qualcuno ha commentato un tuo post"
+  },
+  "invito": {
+    "titolo": "Nuovo invito",
+    "corpo": "Sei stato invitato in uno spazio di studio"
+  }
+}

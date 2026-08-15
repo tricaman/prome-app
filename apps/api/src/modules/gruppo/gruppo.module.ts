@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AvvisiInUscitaModule } from '../../infrastruttura/avvisi-in-uscita/avvisi-in-uscita.module';
+import { AvvisiModule } from '../avvisi/avvisi.module';
 import { ProfiloModule } from '../profilo/profilo.module';
 import { GruppoService } from './gruppo.service';
 import { RecapitoFattiDelGruppoService } from './recapito-fatti.service';
@@ -19,7 +20,7 @@ import { RecapitoFattiDelGruppoService } from './recapito-fatti.service';
  * potrebbe elencarle nemmeno volendo.
  */
 @Module({
-  imports: [ProfiloModule, AvvisiInUscitaModule],
+  imports: [ProfiloModule, AvvisiInUscitaModule, AvvisiModule],
   providers: [GruppoService, RecapitoFattiDelGruppoService],
   exports: [GruppoService, RecapitoFattiDelGruppoService],
 })

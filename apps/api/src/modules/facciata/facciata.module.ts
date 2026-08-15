@@ -16,6 +16,7 @@ import { CancellazioneController } from './cancellazione.controller';
 import { EsportazioneController } from './esportazione.controller';
 import { GruppoController, InvitiAlGruppoController } from './gruppo.controller';
 import { InvitiController } from './inviti.controller';
+import { NotificheController } from './notifiche.controller';
 import { GuardiaAccesso } from './guardia-accesso';
 import { HealthController } from './health.controller';
 import { ProfiloController } from './profilo.controller';
@@ -49,6 +50,7 @@ import { ProfiloController } from './profilo.controller';
     BachecaController,
     AulaStudioController,
     InvitiController,
+    NotificheController,
     GruppoController,
     InvitiAlGruppoController,
     ArchivioController,

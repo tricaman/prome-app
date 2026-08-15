@@ -6,6 +6,7 @@ import {
   type PostResponse,
   type TipoAllegato,
 } from '@prome/contracts';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { AppException } from '../../common/exceptions';
 import {
@@ -15,6 +16,13 @@ import {
   type Preautorizzazione,
 } from '../../infrastruttura/archivio-file/archivio-file';
 import { ProfiloService } from '../profilo/profilo.service';
+import { AvvisiService } from '../avvisi/avvisi.service';
+import {
+  COMMENTO_SCRITTO,
+  RecapitoFattiDellaBachecaService,
+  type ConsumatoreDiFattiDellaBacheca,
+  type PayloadCommentoScritto,
+} from './recapito-fatti.service';
 import { BachecaErrorCode } from './constants/error-codes';
 import { PREFISSO_AUTORE_ANONIMO } from './cancellazione-bacheca.service';
 import { costruisciPost, verificaFileArchiviato, type FileArchiviato } from './dominio/post';
@@ -30,12 +38,42 @@ export const MASSIMO_ALLEGATI_PER_POST = 10;
  * risolvere chi vede cosa in lettura (B5). Non importa Gruppo né Aula studio.
  */
 @Injectable()
-export class BachecaService {
+export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
   constructor(
     private readonly prisma: PrismaService,
     private readonly profilo: ProfiloService,
+    private readonly recapito: RecapitoFattiDellaBachecaService,
+    private readonly avvisi: AvvisiService,
     @Inject(ARCHIVIO_DI_FILE) private readonly archivio: ArchivioDiFile,
-  ) {}
+  ) {
+    // Il modulo consuma il proprio fatto: è lui che sa cosa significa un
+    // commento, e chi vada avvisato di conseguenza.
+    this.recapito.registra(this);
+  }
+
+  /**
+   * L'unico fatto consumato: un commento diventa un avviso all'autore del post.
+   *
+   * Il messaggio non porta fuori nulla di personale — non il testo, non il
+   * nome di chi ha scritto — perché finirà sulla schermata di blocco di un
+   * telefono che in quel momento può essere in mano a chiunque. Il percorso
+   * porta al post, e lì dentro le regole di visibilità valgono ancora.
+   */
+  async elabora(tipo: string, payload: unknown): Promise<void> {
+    if (tipo !== COMMENTO_SCRITTO) return;
+    const { postId, destinatarioId, autoreId } = payload as PayloadCommentoScritto;
+
+    await this.avvisi.avvisa(
+      destinatarioId,
+      'commento',
+      {
+        percorso: `/app/post/${postId}`,
+        titolo: 'notifiche.commento.titolo',
+        corpo: 'notifiche.commento.corpo',
+      },
+      autoreId,
+    );
+  }
 
   /**
    * Autorizza il caricamento di un file e prenota la sua chiave.
@@ -361,8 +399,26 @@ export class BachecaService {
       );
     }
 
-    const commento = await this.prisma.commento.create({
-      data: { postId, autoreId: utenteId, testo: pulito },
+    // Il commento e il fatto che lo annuncia nascono nella **stessa
+    // transazione**: o esistono entrambi, o nessuno dei due. È la sola forma in
+    // cui «l'avviso non si perde» è dimostrabile, e insieme la ragione per cui
+    // l'avviso non parte da qui — chi commenta non aspetta un fornitore di
+    // notifiche per vedere il proprio commento comparire.
+    const commento = await this.prisma.$transaction(async (tx) => {
+      const scritto = await tx.commento.create({
+        data: { postId, autoreId: utenteId, testo: pulito },
+      });
+      await this.recapito.pubblica(tx, {
+        tipo: COMMENTO_SCRITTO,
+        aggregatoId: scritto.id,
+        payload: {
+          commentoId: scritto.id,
+          postId,
+          destinatarioId: post.autoreId,
+          autoreId: utenteId,
+        } satisfies PayloadCommentoScritto as unknown as Prisma.InputJsonValue,
+      });
+      return scritto;
     });
 
     const autore = await this.profilo.perUtente(utenteId);

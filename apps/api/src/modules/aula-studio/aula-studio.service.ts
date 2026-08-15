@@ -50,6 +50,7 @@ import {
   verificaNonSiaLUltimoModeratore,
   type Permessi,
 } from './dominio/aula-studio';
+import { AvvisiService } from '../avvisi/avvisi.service';
 import { PortaAppartenenzaGruppo } from './porta-appartenenza-gruppo';
 import {
   INVITO_ACCETTATO,
@@ -90,6 +91,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     private readonly recapitoDelGruppo: RecapitoFattiDelGruppoService,
     @Inject(ARCHIVIO_DI_FILE) private readonly archivio: ArchivioDiFile,
     @Inject(CANALE_EMAIL) private readonly email: CanaleEmail,
+    private readonly avvisi: AvvisiService,
     @Inject(TRASPORTO_TEMPO_REALE) private readonly trasporto: TrasportoInTempoReale,
   ) {
     this.recapito.registra(this);
@@ -553,6 +555,20 @@ export class AulaStudioService implements ConsumatoreDiFatti {
         scadeIl,
       },
       'it',
+    );
+
+    // Se dietro quell'indirizzo c'è già un iscritto, l'avviso lo raggiunge
+    // anche sul telefono. Il messaggio non nomina né l'aula né chi invita:
+    // quelli si leggono aprendo l'invito, dove le regole valgono ancora.
+    await this.avvisi.avvisaIndirizzo(
+      invito.destinatario,
+      'invito',
+      {
+        percorso: `/app/inviti/${invito.id}`,
+        titolo: 'notifiche.invito.titolo',
+        corpo: 'notifiche.invito.corpo',
+      },
+      utenteId,
     );
 
     return this.invitoPerIlClient(invito, aula.titolo, false);

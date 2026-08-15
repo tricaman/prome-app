@@ -85,6 +85,12 @@ Le regole di privacy si mostrano **solo come il server le ha confermate**: `impo
 
 Per lo stesso motivo l'interfaccia mostra un asse solo, la visibilità dei contenuti: la contattabilità è un valore vero e salvato, ma **nessuna regola la legge ancora** (vedi `apps/api/CLAUDE.md`), e un interruttore che non protegge da niente è peggio di un interruttore che manca. Quando qualcosa la applicherà, il riquadro torna.
 
+### Preferenze di notifica
+
+`impostazioni-notifiche.tsx` **dichiara il proprio stato invece di tacerlo**: le preferenze si salvano davvero e il server le rispetta, ma nessun avviso viene ancora recapitato perché non c'è un fornitore, e la scheda lo dice in prima riga. È l'opposto degli interruttori tolti a luglio, che si dicevano attivi senza salvare niente — la differenza non è la presenza di un'infrastruttura, è che qui la parte mancante è scritta a schermo.
+
+Come per la privacy: nessuno stato locale, si manda **solo l'asse toccato**, e se la scrittura fallisce l'interruttore torna dov'era.
+
 ## Marchio
 
 Logo e marchio denominativo sono quelli storici del prodotto: `public/logo-prome.svg` per il segno e `components/layout/wordmark.tsx` per la scritta (tracciati originali, non ridisegnati). La scritta usa `currentColor`, quindi non servono varianti per fondo chiaro e scuro. Non sostituirli con testo tipografico.

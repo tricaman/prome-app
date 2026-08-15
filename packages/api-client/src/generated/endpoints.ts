@@ -28,6 +28,8 @@ import type {
   AccettaInvito200,
   AccettaInvitoDiGruppo200,
   AggiornaMiaPrivacy200,
+  AggiornaPreferenzeDto,
+  AggiornaPreferenzeNotifiche200,
   AggiornaPrivacyDto,
   ApriSalaAulaStudio200,
   CommentaPost201,
@@ -46,6 +48,7 @@ import type {
   CreaInvitoDto,
   CreaMaterialeDto,
   CreaPostDto,
+  DimenticaDispositivo200,
   ElencaAuleStudio200,
   ElencaAuleStudioParams,
   ElencaCommenti200,
@@ -74,6 +77,7 @@ import type {
   LeggiMessaggiAulaParams,
   LeggiMioProfilo200,
   LeggiPost200,
+  LeggiPreferenzeNotifiche200,
   ModificaAulaStudio200,
   ModificaAulaStudioDto,
   ModificaGruppo200,
@@ -87,6 +91,8 @@ import type {
   PromuoviAModeratore200,
   PromuoviNelGruppo200,
   PubblicaPost201,
+  RegistraDispositivo201,
+  RegistraDispositivoDto,
   RetrocediDaModeratore200,
   RetrocediNelGruppo200,
   RevocaPermesso200,
@@ -2820,6 +2826,290 @@ export const useAccettaInvito = <TError = ErrorResponseDto,
       > => {
 
       const mutationOptions = getAccettaInvitoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Registra un apparecchio su cui ricevere gli avvisi
+ */
+export const registraDispositivo = (
+    registraDispositivoDto: RegistraDispositivoDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<RegistraDispositivo201>(
+      {url: `/notifiche/dispositivi`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: registraDispositivoDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getRegistraDispositivoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registraDispositivo>>, TError,{data: RegistraDispositivoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof registraDispositivo>>, TError,{data: RegistraDispositivoDto}, TContext> => {
+
+const mutationKey = ['registraDispositivo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registraDispositivo>>, {data: RegistraDispositivoDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  registraDispositivo(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegistraDispositivoMutationResult = NonNullable<Awaited<ReturnType<typeof registraDispositivo>>>
+    export type RegistraDispositivoMutationBody = RegistraDispositivoDto
+    export type RegistraDispositivoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Registra un apparecchio su cui ricevere gli avvisi
+ */
+export const useRegistraDispositivo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registraDispositivo>>, TError,{data: RegistraDispositivoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof registraDispositivo>>,
+        TError,
+        {data: RegistraDispositivoDto},
+        TContext
+      > => {
+
+      const mutationOptions = getRegistraDispositivoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Smette di mandare avvisi a questo apparecchio
+ */
+export const dimenticaDispositivo = (
+    token: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<DimenticaDispositivo200>(
+      {url: `/notifiche/dispositivi/${token}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getDimenticaDispositivoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof dimenticaDispositivo>>, TError,{token: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof dimenticaDispositivo>>, TError,{token: string}, TContext> => {
+
+const mutationKey = ['dimenticaDispositivo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof dimenticaDispositivo>>, {token: string}> = (props) => {
+          const {token} = props ?? {};
+
+          return  dimenticaDispositivo(token,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DimenticaDispositivoMutationResult = NonNullable<Awaited<ReturnType<typeof dimenticaDispositivo>>>
+    
+    export type DimenticaDispositivoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Smette di mandare avvisi a questo apparecchio
+ */
+export const useDimenticaDispositivo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof dimenticaDispositivo>>, TError,{token: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof dimenticaDispositivo>>,
+        TError,
+        {token: string},
+        TContext
+      > => {
+
+      const mutationOptions = getDimenticaDispositivoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Cosa voglio sapere
+ */
+export const leggiPreferenzeNotifiche = (
+    
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<LeggiPreferenzeNotifiche200>(
+      {url: `/notifiche/preferenze`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getLeggiPreferenzeNotificheQueryKey = () => {
+    return [
+    `/notifiche/preferenze`
+    ] as const;
+    }
+
+    
+export const getLeggiPreferenzeNotificheQueryOptions = <TData = Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>, TError = ErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getLeggiPreferenzeNotificheQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>> = ({ signal }) => leggiPreferenzeNotifiche(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type LeggiPreferenzeNotificheQueryResult = NonNullable<Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>>
+export type LeggiPreferenzeNotificheQueryError = ErrorResponseDto
+
+
+export function useLeggiPreferenzeNotifiche<TData = Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>, TError = ErrorResponseDto>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>,
+          TError,
+          Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiPreferenzeNotifiche<TData = Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>,
+          TError,
+          Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiPreferenzeNotifiche<TData = Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Cosa voglio sapere
+ */
+
+export function useLeggiPreferenzeNotifiche<TData = Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiPreferenzeNotifiche>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getLeggiPreferenzeNotificheQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Accende o spegne un tipo di avviso
+ */
+export const aggiornaPreferenzeNotifiche = (
+    aggiornaPreferenzeDto: AggiornaPreferenzeDto,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<AggiornaPreferenzeNotifiche200>(
+      {url: `/notifiche/preferenze`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: aggiornaPreferenzeDto
+    },
+      options);
+    }
+  
+
+
+export const getAggiornaPreferenzeNotificheMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof aggiornaPreferenzeNotifiche>>, TError,{data: AggiornaPreferenzeDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof aggiornaPreferenzeNotifiche>>, TError,{data: AggiornaPreferenzeDto}, TContext> => {
+
+const mutationKey = ['aggiornaPreferenzeNotifiche'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof aggiornaPreferenzeNotifiche>>, {data: AggiornaPreferenzeDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  aggiornaPreferenzeNotifiche(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AggiornaPreferenzeNotificheMutationResult = NonNullable<Awaited<ReturnType<typeof aggiornaPreferenzeNotifiche>>>
+    export type AggiornaPreferenzeNotificheMutationBody = AggiornaPreferenzeDto
+    export type AggiornaPreferenzeNotificheMutationError = ErrorResponseDto
+
+    /**
+ * @summary Accende o spegne un tipo di avviso
+ */
+export const useAggiornaPreferenzeNotifiche = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof aggiornaPreferenzeNotifiche>>, TError,{data: AggiornaPreferenzeDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof aggiornaPreferenzeNotifiche>>,
+        TError,
+        {data: AggiornaPreferenzeDto},
+        TContext
+      > => {
+
+      const mutationOptions = getAggiornaPreferenzeNotificheMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

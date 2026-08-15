@@ -72,4 +72,24 @@ export class PortaIdentitaUtente {
     });
     return utente?.email.toLowerCase() ?? null;
   }
+
+  /**
+   * La direzione inversa: chi c'è dietro un indirizzo, se c'è qualcuno.
+   *
+   * Serve a una cosa sola — **avvisare sul telefono chi è stato invitato** —
+   * e la risposta non torna mai a chi ha invitato: né nel corpo, né nel
+   * codice di stato, né nel tempo di risposta. Chi invita continua a non
+   * poter sapere se quell'indirizzo ha un account su Prome, che è la stessa
+   * ragione per cui `contattabilita` non è applicata agli inviti.
+   *
+   * `null` è una risposta normale: si invita chi non è ancora iscritto, ed è
+   * il caso per cui l'invito viaggia per email invece che per identificativo.
+   */
+  async utenteIdPerIndirizzo(indirizzo: string): Promise<string | null> {
+    const utente = await this.prisma.user.findFirst({
+      where: { email: { equals: indirizzo.trim(), mode: 'insensitive' } },
+      select: { id: true },
+    });
+    return utente?.id ?? null;
+  }
 }
