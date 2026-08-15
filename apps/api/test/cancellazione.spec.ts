@@ -178,6 +178,11 @@ describe('Cancellazione dell\'account (V5/SE3)', () => {
       impostazioni: await prisma.impostazioniDiPrivacy.count({ where: { utenteId } }),
       preferenzeNotifiche: await prisma.preferenzeDiNotifica.count({ where: { utenteId } }),
       dispositivi: await prisma.dispositivoDiNotifica.count({ where: { utenteId } }),
+      // Il blocco vive in due direzioni, e il residuo si conta su entrambe.
+      blocchi: await prisma.blocco.count({
+        where: { OR: [{ bloccanteId: utenteId }, { bloccatoId: utenteId }] },
+      }),
+      segnalazioni: await prisma.segnalazione.count({ where: { segnalanteId: utenteId } }),
       post: await prisma.post.count({ where: { autoreId: utenteId } }),
       commenti: await prisma.commento.count({ where: { autoreId: utenteId } }),
       prenotazioni: await prisma.allegatoInAttesa.count({ where: { autoreId: utenteId } }),
@@ -200,6 +205,8 @@ describe('Cancellazione dell\'account (V5/SE3)', () => {
       impostazioni: 0,
       preferenzeNotifiche: 0,
       dispositivi: 0,
+      blocchi: 0,
+      segnalazioni: 0,
       post: 0,
       commenti: 0,
       prenotazioni: 0,

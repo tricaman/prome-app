@@ -22,3 +22,7 @@ process.env.CANALE_EMAIL ??= 'sviluppo';
 // dichiarata dell'aula, e provarla col fornitore acceso non direbbe nulla
 // sul giorno in cui quel fornitore cade.
 process.env.TRASPORTO_TEMPO_REALE ??= 'assente';
+
+// Il supporto delle segnalazioni: un indirizzo qualunque, l'adattatore di
+// sviluppo non manda niente e i test guardano ciò che sarebbe partito.
+process.env.EMAIL_SUPPORTO ??= 'supporto@prome.test';

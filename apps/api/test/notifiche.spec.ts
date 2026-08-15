@@ -72,6 +72,14 @@ describe('Notifiche (E8)', () => {
         corso: 'Ingegneria informatica',
       },
     });
+    // Contenuti visibili a tutti: qui si provano gli avvisi, non la privacy,
+    // e da E6.2 completata commentare esige di vedere il post (chi nasce
+    // PRIVATO non è visibile a nessuno, e il commento risponderebbe 404).
+    await chiedi('/profilo/me/privacy', {
+      method: 'PUT',
+      headers: comeUtente(token),
+      payload: { visibilita: 'PUBBLICO' },
+    });
     return { token, utenteId: profilo.json().data.utenteId as string, indirizzo };
   }
 

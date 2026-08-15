@@ -64,6 +64,21 @@ describe('Bacheca — post completi e commenti (E2)', () => {
     return token;
   }
 
+  /**
+   * Apre la visibilità dei contenuti. Da E6.2 completata (privacy applicata
+   * anche ai commenti), commentare o leggere i commenti esige di **vedere**
+   * il post e i loro autori: chi nasce PRIVATO non è visibile a nessuno.
+   * Si passa dall'API, la sola via che un utente ha davvero.
+   */
+  async function visibileATutti(token: string): Promise<void> {
+    const risposta = await chiedi('/profilo/me/privacy', {
+      method: 'PUT',
+      headers: comeUtente(token),
+      payload: { visibilita: 'PUBBLICO' },
+    });
+    expect(risposta.statusCode).toBe(200);
+  }
+
   async function pubblicaPost(token: string, testo: string, allegati: string[] = []) {
     const risposta = await chiedi('/bacheca', {
       method: 'POST',
@@ -198,6 +213,7 @@ describe('Bacheca — post completi e commenti (E2)', () => {
     it('si commenta un post e il commento compare nella discussione', async () => {
       const autore = await utenteCompleto();
       const lettore = await utenteCompleto();
+      await visibileATutti(autore);
       const post = await pubblicaPost(autore, 'Domanda sugli integrali');
 
       const commento = await chiedi(`/bacheca/${post.id}/commenti`, {
@@ -273,6 +289,8 @@ describe('Bacheca — post completi e commenti (E2)', () => {
     it('chi ha scritto il commento può eliminarlo', async () => {
       const autore = await utenteCompleto();
       const commentatore = await utenteCompleto();
+      await visibileATutti(autore);
+      await visibileATutti(commentatore);
       const post = await pubblicaPost(autore, 'Post');
       const commento = await chiedi(`/bacheca/${post.id}/commenti`, {
         method: 'POST',
@@ -290,6 +308,8 @@ describe('Bacheca — post completi e commenti (E2)', () => {
     it('l\'autore del post modera ciò che sta sotto al suo contenuto', async () => {
       const autore = await utenteCompleto();
       const commentatore = await utenteCompleto();
+      await visibileATutti(autore);
+      await visibileATutti(commentatore);
       const post = await pubblicaPost(autore, 'Post');
       const commento = await chiedi(`/bacheca/${post.id}/commenti`, {
         method: 'POST',
@@ -309,6 +329,8 @@ describe('Bacheca — post completi e commenti (E2)', () => {
       const autore = await utenteCompleto();
       const commentatore = await utenteCompleto();
       const estraneo = await utenteCompleto();
+      await visibileATutti(autore);
+      await visibileATutti(commentatore);
       const post = await pubblicaPost(autore, 'Post');
       const commento = await chiedi(`/bacheca/${post.id}/commenti`, {
         method: 'POST',
@@ -328,6 +350,8 @@ describe('Bacheca — post completi e commenti (E2)', () => {
       const autore = await utenteCompleto();
       const commentatore = await utenteCompleto();
       const estraneo = await utenteCompleto();
+      await visibileATutti(autore);
+      await visibileATutti(commentatore);
       const post = await pubblicaPost(autore, 'Post');
       await chiedi(`/bacheca/${post.id}/commenti`, {
         method: 'POST',
