@@ -96,9 +96,11 @@ Esistono e funzionano: accesso, inserimento del codice, completamento del profil
 
 **E1.1–E1.5 sono superate da una decisione di prodotto.** Il piano prevedeva accesso Google, Apple ed email con password: è stato deciso l'**accesso unificato email + OTP e basta**. Quei tre work package non vanno realizzati così come sono scritti. Restano validi E1.4 (stati di errore) ed E1.5 (homepage e pagine informative complete), in parte già coperti.
 
-**E3 in poi non è iniziato.** `aula-studio` e `gruppo` sono moduli dichiarati con service di **dodici righe**: esistono per fissare il grafo delle dipendenze, non fanno niente. Non ci sono controller per aule e gruppi.
+**E3 ed E4 sono fatti (15 agosto 2026): l'aula di studio esiste, ci si entra e ci si scrive.** Aule con visibilità e data opzionale (nessuno stato di ciclo di vita: la data non apre né chiude nulla), ruoli e i tre permessi concessi **uno per uno** con la sola lettura come stato legittimo, l'ultimo moderatore che non si rimuove né si retrocede nemmeno con due gesti concorrenti, inviti via email con scadenza a 7 giorni, materiali con argomenti — e eliminare un argomento **non cancella alcun file**, i materiali tornano sciolti. La chat è in tempo reale con Socket.IO, ma **i messaggi sono persistiti prima e pubblicati dopo**: col trasporto spento la conversazione resta scritta e leggibile.
 
-**Attenzione a una trappola**: nel web e nel mobile esistono schermate per aule studio, gruppi e materiali. **Leggono dati finti.** Sembrano funzionanti e non lo sono.
+Con E3 è nato anche il **primo canale dei fatti in uscita** (outbox): una tabella per schema scritta nella stessa transazione dell'aggregato, consegna at-least-once con deduplica sull'id dell'evento, corsia rapida a 1 secondo nel worker, purga a 7 giorni. Oggi trasporta un fatto solo — l'accettazione dell'invito, che risponde 202 perché il partecipante non nasce nella stessa transazione.
+
+**Gruppi: non iniziati.** `gruppo` resta un modulo dichiarato con un service di dodici righe, e le schermate dei gruppi nel web e nel mobile **leggono ancora dati finti**. Sul mobile anche aule e materiali sono ancora finti: il piano vuole il web prima (E11 è la posizione 8), e il mobile arriva a M5.
 
 **La cancellazione dell'account è implementata (15 agosto 2026).** `POST /account/cancellazione` apre una **grazia di 14 giorni**: sessioni revocate subito, profilo nascosto subito (flag su Profilo, impostazioni intatte), e un nuovo accesso OTP entro la grazia annulla la richiesta; oltre, l'accesso risponde 403. La catena esegue nell'unità lavoratrice — post e commenti **anonimizzati** con id `anonimo-<uuid>` **diverso per record** (nessuna mappa), allegati dei post conservati, profilo e account eliminati — e la **verifica del residuo** (0 record, 0 file su tutti i detentori censiti) finisce nel registro dello schema `cancellazione`, che sopravvive al completamento: dopo un ripristino da backup la ri-applicazione è automatica (ri-verifica oraria + giro d'avvio del worker). Allerta nei log oltre il 25° giorno senza esito totale. Le schermate web e mobile sono collegate (conferma con parola digitata, «Utente rimosso» sui contenuti anonimi, messaggio di riattivazione al rientro); il bottone «Disattiva temporaneamente», mai definito da nessun documento, è stato rimosso. Le regole nuove (percorso privilegiato R12, detentori censiti, prefisso errori `CA`) sono in `apps/api/CLAUDE.md`; i test in `apps/api/test/cancellazione.spec.ts` (37 casi, scritti prima del codice).
 
@@ -141,13 +143,14 @@ Vale la pena conoscerli, perché sono tutti della stessa famiglia: cose che in s
 
 ## Aperto, in ordine di importanza
 
-1. ~~La cancellazione dell'account non esiste.~~ **Fatta** (15 agosto 2026, vedi sopra). Resta da correggere il testo dell'informativa quando arriveranno le aule studio (E1.5: «un materiale caricato in aula resta accessibile anche dopo la cancellazione»), e «Scarica i tuoi dati» promesso dalla policy non è ancora implementato.
-2. **L'`MX` di `prome.app` punta alla macchina**, che non ha un server di posta: chi risponde all'email di accesso scrive nel vuoto. Mandare i codici funziona lo stesso.
-3. **SSH è aperto al mondo** e prende migliaia di tentativi al giorno. Restringerlo nel pannello Hetzner è più solido di fail2ban, perché blocca prima che sshd veda il pacchetto.
-4. **L'archivio dei file è locale**, su un volume della macchina. Quando arriverà un fornitore con regione UE dichiarata, sarà un adattatore: `ArchivioLocale` usa già lo stesso flusso firmato di un fornitore vero.
-5. **Il profilo dell'account di prova ha dati inventati** («Andrea Trica», Politecnico di Milano): li ho messi io per provare il giro, vanno corretti.
-6. **Il progetto Vercel è ancora attivo** e va dismesso.
-7. **Residui DNS del vecchio hosting**: `ftp`, `mail`, `_cpanel-dcv-test-record`, `_acme-challenge`.
+1. **M4 non è chiusa finché non è provata dal vivo.** Il codice c'è (E3+E4), ma l'accettazione dell'epica chiede atti che nessun test sostituisce: il giro completo **con due persone reali e invito via email vero**, da un dispositivo diverso da quello di sviluppo; le misure di soglia da registrare (apertura della sala, ingresso dopo l'accettazione, comparsa del messaggio agli altri); la degradazione osservata **spegnendo davvero** archivio, canale email e trasporto; e — poiché lo schema è cambiato — il **ripristino del database riprovato**.
+2. **«Scarica i tuoi dati»** è promesso dalla privacy policy e non esiste. La frase sull'informativa che mancava per M1 (il materiale d'aula sopravvive alla cancellazione) è stata invece aggiunta.
+3. **L'`MX` di `prome.app` punta alla macchina**, che non ha un server di posta: chi risponde all'email di accesso scrive nel vuoto. Mandare i codici funziona lo stesso.
+4. **SSH è aperto al mondo** e prende migliaia di tentativi al giorno. Restringerlo nel pannello Hetzner è più solido di fail2ban, perché blocca prima che sshd veda il pacchetto.
+5. **L'archivio dei file è locale**, su un volume della macchina. Quando arriverà un fornitore con regione UE dichiarata, sarà un adattatore: `ArchivioLocale` usa già lo stesso flusso firmato di un fornitore vero.
+6. **Il profilo dell'account di prova ha dati inventati** («Andrea Trica», Politecnico di Milano): li ho messi io per provare il giro, vanno corretti.
+7. **Il progetto Vercel è ancora attivo** e va dismesso.
+8. **Residui DNS del vecchio hosting**: `ftp`, `mail`, `_cpanel-dcv-test-record`, `_acme-challenge`.
 
 ---
 
@@ -158,7 +161,7 @@ pnpm db:up                              # Postgres locale, porta 6400
 pnpm --filter @prome/api exec prisma migrate deploy
 pnpm dev:api                            # API
 pnpm dev:web                            # sito, porta 3500
-pnpm --filter @prome/api test           # 75 test, serve il database
+pnpm --filter @prome/api test           # 172 test, serve il database
 pnpm api:client                         # rigenera il client dopo OGNI modifica agli endpoint
 ```
 
