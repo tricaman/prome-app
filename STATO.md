@@ -8,7 +8,7 @@ Le regole vincolanti stanno altrove e vanno lette: [`apps/api/CLAUDE.md`](apps/a
 
 ## In una riga
 
-Prome è in esercizio su prome.app. Una persona può ricevere un codice via email, entrare, compilare il profilo, pubblicare un post con allegato e commentare, e — dal 15 agosto — creare un'aula di studio, invitarci qualcuno, condividerci materiali e scriverci in tempo reale. Le stesse aule, con la chat, funzionano anche sul telefono. Restano fuori audio, gruppi e notifiche.
+Prome è in esercizio su prome.app. Una persona può ricevere un codice via email, entrare, compilare il profilo, pubblicare un post con allegato e commentare, e — dal 15 agosto — creare un'aula di studio, invitarci qualcuno, condividerci materiali e scriverci in tempo reale. Le stesse aule, con la chat, funzionano anche sul telefono. Sempre il 15 agosto sono arrivate le **impostazioni di privacy** (prima nascevano chiuse e non c'era modo di cambiarle, quindi la bacheca era di fatto a un utente solo) e i **gruppi**, con l'appartenenza che apre le aule collocate. Restano fuori audio e notifiche.
 
 Il giro completo è stato **provato in produzione il 15 agosto**, non dedotto: codice ricevuto via email, accesso, onboarding, allegato caricato e riscaricato identico all'originale.
 
@@ -50,7 +50,7 @@ Le due unità dell'API escono dalla stessa build e si distinguono solo per confi
 
 **Si pubblica facendo `push` su `main`.** Il resto è automatico e sta in [`.github/workflows/rilascio.yml`](.github/workflows/rilascio.yml):
 
-1. **Verifica** — database vero come servizio, migrazioni, `pnpm -r build`, typecheck, lint, 172 test dell'API.
+1. **Verifica** — database vero come servizio, migrazioni, `pnpm -r build`, typecheck, lint, 236 test dell'API.
 2. **Immagini** — costruite in CI (non sulla macchina, che ha due core e serve traffico) e pubblicate su `ghcr.io` etichettate con lo sha del commit.
 3. **Rilascio** — rsync della configurazione (`--delete`, così la macchina corrisponde al commit), poi [`deploy/rilascia.sh`](deploy/rilascia.sh) via SSH.
 
@@ -64,7 +64,7 @@ Un rilascio alla volta (`concurrency`), quindi i push ravvicinati si mettono in 
 
 ### E0 — online e utilizzabile da capo a fondo ✅
 
-- **E0.1** Scheletro API e schema dati. Postgres con sei schemi (`accesso`, `profilo`, `bacheca`, `gruppo`, `aula_studio`, `cancellazione`), foreign key **solo dentro** lo schema, riferimenti fra contesti come identificatori nudi. Nove migrazioni versionate. Due unità di esecuzione dalla stessa immagine.
+- **E0.1** Scheletro API e schema dati. Postgres con sei schemi (`accesso`, `profilo`, `bacheca`, `gruppo`, `aula_studio`, `cancellazione`), foreign key **solo dentro** lo schema, riferimenti fra contesti come identificatori nudi. Undici migrazioni versionate. Due unità di esecuzione dalla stessa immagine.
 - **E0.2** Accesso con email e codice. **Un solo modo di entrare**: niente password, niente social, nessuna registrazione separata — chi verifica un codice per la prima volta ottiene account e profilo.
 - **E0.3** Shell web: home, chi siamo, guide, atenei, argomenti, privacy, accesso, feed.
 - **E0.4** Onboarding del profilo (nome, cognome, università, corso) con `ImpostazioniDiPrivacy` create nella stessa scrittura e **default restrittivo** (`PRIVATO` su entrambe le voci).
@@ -86,9 +86,26 @@ La porta `MisurazioniDiUtilizzo` è **senza fornitore assegnato**, e resta così
 - Feed paginato, dettaglio del post, viewer degli allegati.
 - I permessi li **dichiara il server** (`puoModificare`, `puoEliminare`): non farli dedurre al client, sarebbero due copie della stessa regola e quella del client è aggirabile.
 
+### E6.1 — le impostazioni di privacy si cambiano ✅
+
+`PUT /profilo/me/privacy` aggiorna **i soli assi indicati**, ed è ciò che rende vero IP2 senza doverselo ricordare: l'asse omesso resta al valore che aveva, e non esiste lo stato «non impostato». Una richiesta che non cambia niente risponde `PR009`. Non emette eventi né misurazioni: la decisione si interroga alla lettura, quindi vale subito, senza finestra. Diciassette casi in `test/privacy.spec.ts`, scritti prima del codice, verificano separatamente che un post sparisca **dal feed e dal link diretto** — sparire da uno solo è il modo tipico in cui quest'area si rompe.
+
+### E7 — i gruppi, e l'appartenenza che apre le aule ✅
+
+Un gruppo è un **contenitore di utenti con appartenenza e visibilità**: nessun feed, nessuna chat, nessuna notifica propria. Si crea, si amministra, si lascia; si entra **per invito**, con la stessa scadenza a sette giorni dell'aula, e il membro nasce **dopo** l'accettazione (`202`, IG3).
+
+- **La dipendenza fra i contesti va in un verso solo**: Aula studio importa Gruppo, mai il contrario. Attraversa il confine un booleano, quindi **essere moderatore del gruppo non concede nulla dentro un'aula collocata** (AS6) — il core non ha modo di saperlo.
+- **La decadenza dell'appartenenza raggiunge chi è già dentro** (SE1): il fatto viaggia sulla corsia rapida, il titolo di ammissione si ri-risolve su dato fresco, e si rimuove **solo chi resta senza** — chi era entrato con un invito proprio non si tocca. Chi è connesso viene tolto anche dalla stanza del socket, perché una connessione aperta non fa nuove richieste.
+- **Eliminare un gruppo non elimina alcuna aula**: le collocate tornano sciolte, in differita.
+- Ventinove casi in `test/gruppo.spec.ts`, scritti prima del codice.
+
+`gruppo` è ora fra i `DETENTORI_CENSITI` della cancellazione, con la sua colonna nel registro: chi cancella l'account esce da tutti i gruppi, e dove lascerebbe uno spazio senza moderatori il ruolo passa al membro più anziano.
+
 ### Mobile (Expo) — parziale
 
-Esistono e funzionano: accesso, inserimento del codice, completamento del profilo, bacheca, composer, dettaglio del post con commenti, **aule studio con materiali, permessi e chat in tempo reale**. Rientrando dal background il socket si riapre e la cronologia si rilegge. Restano senza API dietro le schede gruppi e notifiche.
+Esistono e funzionano: accesso, inserimento del codice, completamento del profilo, bacheca, composer, dettaglio del post con commenti, **aule studio con materiali, permessi e chat in tempo reale**, impostazioni con privacy e uscita. Rientrando dal background il socket si riapre e la cronologia si rilegge.
+
+**Tre superfici finte sono state rimosse** invece di essere lasciate lì: la scheda gruppi con la sua schermata di dettaglio (sono E12), la schermata di richiesta notifiche — irraggiungibile, e il suo bottone «attiva» non chiedeva alcun permesso — e gli interruttori delle notifiche nelle impostazioni. Resta finto per intero **il tab profilo** (`(tabs)/profilo.tsx`): nome, statistiche e post inventati, e serve un endpoint che non esiste per i conteggi per autore.
 
 **Il lint del mobile non era mai stato configurato**: `expo lint` genera la propria configurazione al primo avvio, e finché nessuno l'ha eseguito il codice nativo è cresciuto senza controllo. Ora la configurazione è committata, la CI la esegue, e i sette errori che aveva fatto emergere in `providers/avvisi-provider.tsx` sono corretti — erano difetti veri: il conto alla rovescia dell'avviso ripartiva a ogni disegno del padre, e un messaggio in uscita poteva spegnere quello appena arrivato.
 
@@ -104,11 +121,17 @@ Con E3 è nato anche il **primo canale dei fatti in uscita** (outbox): una tabel
 
 **M5 è fatta con E3 ed E4: le aule sono anche sul telefono** (elenco, sala, materiali, permessi, chat con rientro da background).
 
-**Gruppi: non iniziati.** `gruppo` resta un modulo dichiarato con un service di dodici righe, e le schermate dei gruppi nel web e nel mobile **leggono ancora dati finti**. Il prossimo passo della fila è la porta a timebox sull'audio (S-audio → E5), che può anche chiudersi con un no: in quel caso l'aula resta testuale, ed è già consegnabile così.
+**I gruppi esistono (15 agosto 2026).** Lo schema `gruppo` era stato creato vuoto e il service non aveva un metodo. Ora un gruppo si crea, si amministra e si lascia, e **chi ne fa parte entra nelle aule collocate lì dentro senza un invito ogni volta** — che è la sola ragione per cui i gruppi esistono. G3 è la chiave primaria di Membro, quindi la doppia aggiunta è un'operazione senza effetto invece di un errore; G2 è protetta dal blocco ottimistico, e due moderatori che si retrocedono a vicenda non lasciano il gruppo ingovernabile; G5 congela l'ateneo alla creazione.
+
+Il punto difficile è **la decadenza dell'appartenenza**: chi perde l'appartenenza mentre è dentro un'aula collocata non farà alcuna nuova richiesta, quindi l'informazione gli va incontro sulla corsia rapida. Il titolo di ammissione si ri-risolve su dato fresco e si rimuove **solo chi resta senza** — chi era entrato con un invito proprio non si tocca — e chi è connesso viene tolto anche dalla stanza del socket. Eliminare un gruppo non elimina alcuna aula: le collocate tornano sciolte, in differita.
+
+Fuori perimetro, dichiarato: **l'albero delle cartelle** (le schermate finte lo mostravano, ed è stato tolto insieme ai dati inventati), la chat di gruppo e i post riservati al gruppo, che sono E6.3. Le schermate native dei gruppi sono E12: sul telefono la scheda è stata **rimossa** invece di lasciarla mentire.
+
+Il prossimo passo della fila è la porta a timebox sull'audio (S-audio → E5), che può anche chiudersi con un no: in quel caso l'aula resta testuale, ed è già consegnabile così. **Nessuno dei suoi quattro criteri è codice** — tre reti diverse, telefono, costo del nodo, riavvio non presidiato — quindi va attraversata dal vivo.
 
 **La cancellazione dell'account è implementata (15 agosto 2026).** `POST /account/cancellazione` apre una **grazia di 14 giorni**: sessioni revocate subito, profilo nascosto subito (flag su Profilo, impostazioni intatte), e un nuovo accesso OTP entro la grazia annulla la richiesta; oltre, l'accesso risponde 403. La catena esegue nell'unità lavoratrice — post e commenti **anonimizzati** con id `anonimo-<uuid>` **diverso per record** (nessuna mappa), allegati dei post conservati, profilo e account eliminati — e la **verifica del residuo** (0 record, 0 file su tutti i detentori censiti) finisce nel registro dello schema `cancellazione`, che sopravvive al completamento: dopo un ripristino da backup la ri-applicazione è automatica (ri-verifica oraria + giro d'avvio del worker). Allerta nei log oltre il 25° giorno senza esito totale. Le schermate web e mobile sono collegate (conferma con parola digitata, «Utente rimosso» sui contenuti anonimi, messaggio di riattivazione al rientro); il bottone «Disattiva temporaneamente», mai definito da nessun documento, è stato rimosso. Le regole nuove (percorso privilegiato R12, detentori censiti, prefisso errori `CA`) sono in `apps/api/CLAUDE.md`; i test in `apps/api/test/cancellazione.spec.ts` (37 casi, scritti prima del codice).
 
-**Le impostazioni di privacy si leggono ma non si scrivono**: nascono restrittive e non c'è modo di cambiarle dall'API. È materia di E6.
+**Le impostazioni di privacy si cambiano (15 agosto 2026).** Nascono al valore più chiuso e fino a quel giorno non esisteva alcun endpoint per toccarle: chi si iscriveva vedeva solo i propri post, per sempre, e la bacheca in esercizio da agosto era di fatto a un utente solo. Nessun test se ne era accorto, perché i test aprono un profilo scrivendo diritti nel database — saltando la strada che agli utenti mancava. Ora c'è `PUT /profilo/me/privacy`, che aggiorna i soli assi indicati e non emette alcun evento: la decisione si rilegge, e per questo vale subito. **La contattabilità resta salvata ma non applicata da nessuna regola**, e i client non la mostrano: gli inviti viaggiano per indirizzo email, che può non avere un account, e verificarla lì direbbe a chi invita se quella persona è iscritta a Prome.
 
 ---
 
@@ -148,13 +171,15 @@ Vale la pena conoscerli, perché sono tutti della stessa famiglia: cose che in s
 ## Aperto, in ordine di importanza
 
 1. **M4 non è chiusa finché non è provata dal vivo.** Il codice c'è (E3+E4), ma l'accettazione dell'epica chiede atti che nessun test sostituisce: il giro completo **con due persone reali e invito via email vero**, da un dispositivo diverso da quello di sviluppo; le misure di soglia da registrare (apertura della sala, ingresso dopo l'accettazione, comparsa del messaggio agli altri); la degradazione osservata **spegnendo davvero** archivio, canale email e trasporto; e — poiché lo schema è cambiato — il **ripristino del database riprovato**.
-2. **«Scarica i tuoi dati»** è promesso dalla privacy policy e non esiste. La frase sull'informativa che mancava per M1 (il materiale d'aula sopravvive alla cancellazione) è stata invece aggiunta.
-3. **L'`MX` di `prome.app` punta alla macchina**, che non ha un server di posta: chi risponde all'email di accesso scrive nel vuoto. Mandare i codici funziona lo stesso.
-4. **SSH è aperto al mondo** e prende migliaia di tentativi al giorno. Restringerlo nel pannello Hetzner è più solido di fail2ban, perché blocca prima che sshd veda il pacchetto.
-5. **L'archivio dei file è locale**, su un volume della macchina. Quando arriverà un fornitore con regione UE dichiarata, sarà un adattatore: `ArchivioLocale` usa già lo stesso flusso firmato di un fornitore vero.
-6. **Il profilo dell'account di prova ha dati inventati** («Andrea Trica», Politecnico di Milano): li ho messi io per provare il giro, vanno corretti.
-7. **Il progetto Vercel è ancora attivo** e va dismesso.
-8. **Residui DNS del vecchio hosting**: `ftp`, `mail`, `_cpanel-dcv-test-record`, `_acme-challenge`.
+2. **Il giro dei gruppi va provato a due account** (E7), e comprende la misura che l'epica chiede di registrare: A crea un gruppo e vi colloca un'aula, B accetta l'invito arrivato per email vera ed **entra senza invito all'aula**, poi A rimuove B mentre B è dentro la sala — B deve essere allontanato **entro pochi secondi** e non rientrare. Va verificato dal vivo anche AS6: B moderatore del gruppo entra nell'aula collocata **in sola lettura**.
+3. **«Scarica i tuoi dati»** è promesso dalla privacy policy e non esiste. La frase sull'informativa che mancava per M1 (il materiale d'aula sopravvive alla cancellazione) è stata invece aggiunta.
+4. **La porta S-audio non è attraversabile da qui**: i suoi quattro criteri di uscita — tre o quattro persone che si sentono da reti diverse, funzionamento da telefono, costo del nodo dentro il budget, riavvio non presidiato — si verificano solo con un nodo LiveKit vero. Il timebox è di 2,5 giorni e allo scadere un esito non nettamente positivo **vale come negativo**: l'audio esce dal perimetro e l'aula resta testuale, che è già consegnabile.
+5. **L'`MX` di `prome.app` punta alla macchina**, che non ha un server di posta: chi risponde all'email di accesso scrive nel vuoto. Mandare i codici funziona lo stesso.
+6. **SSH è aperto al mondo** e prende migliaia di tentativi al giorno. Restringerlo nel pannello Hetzner è più solido di fail2ban, perché blocca prima che sshd veda il pacchetto.
+7. **L'archivio dei file è locale**, su un volume della macchina. Quando arriverà un fornitore con regione UE dichiarata, sarà un adattatore: `ArchivioLocale` usa già lo stesso flusso firmato di un fornitore vero.
+8. **Il profilo dell'account di prova ha dati inventati** («Andrea Trica», Politecnico di Milano): li ho messi io per provare il giro, vanno corretti.
+9. **Il progetto Vercel è ancora attivo** e va dismesso.
+10. **Residui DNS del vecchio hosting**: `ftp`, `mail`, `_cpanel-dcv-test-record`, `_acme-challenge`.
 
 ---
 
@@ -165,7 +190,7 @@ pnpm db:up                              # Postgres locale, porta 6400
 pnpm --filter @prome/api exec prisma migrate deploy
 pnpm dev:api                            # API
 pnpm dev:web                            # sito, porta 3500
-pnpm --filter @prome/api test           # 172 test, serve il database
+pnpm --filter @prome/api test           # 236 test, serve il database
 pnpm api:client                         # rigenera il client dopo OGNI modifica agli endpoint
 ```
 
