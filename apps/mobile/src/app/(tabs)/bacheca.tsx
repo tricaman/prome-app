@@ -9,7 +9,7 @@ import { rotte } from '@/content';
 import { useTema } from '@/theme';
 import { useT } from '@/hooks';
 import { FeedBacheca } from '@/components/contenuti';
-import { AzioneTonda, Avatar, Chip, Icona, Text } from '@/components/ui';
+import { AzioneTonda, Avatar, Icona, Text } from '@/components/ui';
 
 /**
  * Bacheca.

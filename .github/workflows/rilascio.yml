@@ -71,6 +71,11 @@ jobs:
 
       - run: pnpm -r typecheck
       - run: pnpm --filter @prome/web lint
+      # Il mobile non passava di qui: la sua configurazione di lint non
+      # esisteva, quindi il controllo non era mai stato eseguito. Adesso esiste
+      # ed è committata, e questa riga è ciò che la rende ripetibile invece che
+      # occasionale.
+      - run: pnpm --filter @prome/mobile lint
       - run: pnpm --filter @prome/api test
 
   immagini:
