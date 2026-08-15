@@ -1,5 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Inject, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { I18nContext } from 'nestjs-i18n';
 import type { FastifyRequest } from 'fastify';
 import type { RichiestaCodiceResponse, VerificaCodiceResponse } from '@prome/contracts';
 import { ApiWrappedResponse, ResponseMessage } from '../../common/decorators';
@@ -10,6 +11,7 @@ import {
   type FornitoreIdentita,
 } from '../../infrastruttura/accesso/better-auth';
 import { traduciErroreDelFornitore } from '../../infrastruttura/accesso/errori-del-fornitore';
+import { CANALE_EMAIL, type CanaleEmail } from '../../infrastruttura/avvisi-in-uscita/canale-email';
 import { CancellazioneErrorCode } from '../cancellazione/constants/error-codes';
 import { CancellazioneService } from '../cancellazione/cancellazione.service';
 import { ProfiloErrorCode } from '../profilo/constants/error-codes';
@@ -39,6 +41,7 @@ import { SenzaAccesso, intestazioniStandard } from './guardia-accesso';
 export class AccessoController {
   constructor(
     @Inject(FORNITORE_IDENTITA) private readonly fornitore: FornitoreIdentita,
+    @Inject(CANALE_EMAIL) private readonly email: CanaleEmail,
     private readonly profilo: ProfiloService,
     private readonly cancellazione: CancellazioneService,
     @Inject(MISURAZIONI) private readonly misurazioni: MisurazioniDiUtilizzo,
@@ -54,15 +57,38 @@ export class AccessoController {
   @ApiWrappedResponse({ type: RichiestaCodiceRispostaDto })
   @ResponseMessage('successes.CODICE_INVIATO')
   async richiediCodice(@Body() corpo: RichiestaCodiceDto): Promise<RichiestaCodiceResponse> {
+    // Il codice lo fa generare al fornitore, ma **l'email la manda Prome**.
+    //
+    // Non è una preferenza: `sendVerificationOTP` esegue l'invio come lavoro
+    // di sfondo e ne inghiotte l'errore, quindi con il canale email guasto
+    // l'utente riceverebbe «ti abbiamo mandato un codice» e aspetterebbe per
+    // sempre un messaggio che non è mai partito. Separando le due cose il
+    // guasto torna visibile, ed è ciò che rende vero PR007.
+    let codice: string;
     try {
-      await this.fornitore.api.sendVerificationOTP({
+      codice = (await this.fornitore.api.createVerificationOTP({
         body: { email: corpo.email, type: 'sign-in' },
-      });
+      })) as unknown as string;
     } catch (errore) {
       throw traduciErroreDelFornitore(errore, {
         codice: ProfiloErrorCode.INVIO_CODICE_FALLITO,
         messaggio: 'INVIO_CODICE_FALLITO',
       });
+    }
+
+    try {
+      // La lingua è quella della richiesta, non una costante: chi scrive in
+      // inglese non deve ricevere un'email in italiano.
+      await this.email.inviaCodiceAccesso(corpo.email, codice, linguaDellaRichiesta());
+    } catch (errore) {
+      // Il dettaglio resta nei log; all'utente arriva una frase che gli dice
+      // cosa fare — riprovare — invece di un 500 muto.
+      throw new AppException(
+        ProfiloErrorCode.INVIO_CODICE_FALLITO,
+        'INVIO_CODICE_FALLITO',
+        HttpStatus.SERVICE_UNAVAILABLE,
+        { causa: errore instanceof Error ? errore.message : 'sconosciuta' },
+      );
     }
 
     // Nessun indirizzo nell'evento: quanti codici partono è una misura, chi
@@ -147,6 +173,14 @@ export class AccessoController {
     await this.fornitore.api.signOut({ headers: intestazioniStandard(richiesta) });
     return null;
   }
+}
+
+/**
+ * La lingua di questa richiesta, con lo stesso ripiego di tutto il resto.
+ * Vive qui e non nel canale email perché è la richiesta a portarla.
+ */
+function linguaDellaRichiesta(): string {
+  return I18nContext.current()?.lang ?? 'it';
 }
 
 /**

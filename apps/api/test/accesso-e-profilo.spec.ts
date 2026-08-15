@@ -275,6 +275,54 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
     });
   });
 
+  describe('quando il canale email non risponde', () => {
+    it('lo dice, invece di promettere un codice che non partirà (PR007)', async () => {
+      // È la degradazione dichiarata del fornitore email, e va provata: senza
+      // questo test l'unica prova che il guasto sia visibile è la lettura del
+      // codice — e finché l'invio è stato un lavoro di sfondo del fornitore,
+      // quella lettura diceva il falso.
+      const guasto = jest
+        .spyOn(email, 'inviaCodiceAccesso')
+        .mockRejectedValue(new Error('SMTP irraggiungibile'));
+
+      let risposta;
+      try {
+        risposta = await chiedi('/accesso/codice', {
+          method: 'POST',
+          payload: { email: nuovoIndirizzo() },
+        });
+      } finally {
+        guasto.mockRestore();
+      }
+
+      expect(risposta.statusCode).toBe(503);
+      expect(risposta.json().errorCode).toBe('PR007');
+      expect(risposta.json().message).toBe(
+        'Non siamo riusciti a mandare il codice. Riprova fra poco.',
+      );
+      // Il dettaglio tecnico resta nei log: all'utente arriva una frase che
+      // dice cosa fare, mai il messaggio del fornitore.
+      expect(JSON.stringify(risposta.json())).not.toContain('SMTP');
+    });
+
+    it('e non lascia credere che un codice sia arrivato', async () => {
+      const indirizzo = nuovoIndirizzo();
+      const guasto = jest
+        .spyOn(email, 'inviaCodiceAccesso')
+        .mockRejectedValue(new Error('SMTP irraggiungibile'));
+      try {
+        await chiedi('/accesso/codice', { method: 'POST', payload: { email: indirizzo } });
+      } finally {
+        guasto.mockRestore();
+      }
+
+      // Il codice esiste nel database — è generato prima dell'invio — ma
+      // nessuno lo conosce, perché non è mai uscito. Chi riprova ne riceve uno
+      // nuovo, e quello vecchio scade da sé.
+      expect(email.ultimoCodicePer(indirizzo)).toBeUndefined();
+    });
+  });
+
   describe('sessione', () => {
     it('nega il profilo senza sessione, con PR006', async () => {
       const risposta = await chiedi('/profilo/me');

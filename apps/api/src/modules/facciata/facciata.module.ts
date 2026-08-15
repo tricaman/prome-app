@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { AccessoModule } from '../../infrastruttura/accesso/accesso.module';
 import { ArchivioFileModule } from '../../infrastruttura/archivio-file/archivio-file.module';
+import { AvvisiInUscitaModule } from '../../infrastruttura/avvisi-in-uscita/avvisi-in-uscita.module';
 import { AulaStudioModule } from '../aula-studio/aula-studio.module';
 import { BachecaModule } from '../bacheca/bacheca.module';
 import { CancellazioneModule } from '../cancellazione/cancellazione.module';
@@ -30,6 +31,7 @@ import { ProfiloController } from './profilo.controller';
 @Module({
   imports: [
     AccessoModule,
+    AvvisiInUscitaModule,
     ProfiloModule,
     BachecaModule,
     AulaStudioModule,
