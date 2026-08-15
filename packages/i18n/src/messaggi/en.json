@@ -464,7 +464,7 @@
       "nPartecipanti": "{numero} participants",
       "nessunMateriale": "No materials yet. Upload the first file and the people studying with you will find it here.",
       "argomentoVuoto": "No materials in this topic",
-      "eliminaArgomento": "Delete topic",
+      "eliminaArgomento": "Delete the topic",
       "caricamentoInCorso": "Uploading…",
       "annulla": "Cancel",
       "ruoli": {
@@ -498,7 +498,10 @@
         "eliminaMateriale": "Delete"
       },
       "eliminaMateriale": "Delete the material",
-      "retrocedi": "Remove as moderator"
+      "retrocedi": "Remove as moderator",
+      "rimuovi": "Remove",
+      "indirizzo": "Email address",
+      "invitaAiuto": "The invitation is valid for seven days and works even for people not yet on Prome."
     },
     "gruppo": {
       "titolo": "Groups",

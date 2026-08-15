@@ -1,12 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Linking, Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { pesoLeggibile } from '@prome/app-core';
+import * as SelettoreFile from 'expo-document-picker';
+import { caricaConAvanzamento, pesoLeggibile, tipoAllegatoDa } from '@prome/app-core';
 import { LUNGHEZZA_MASSIMA_MESSAGGIO } from '@prome/contracts';
 import {
   concediPermesso,
+  condividiMaterialeAula,
+  creaArgomento,
+  eliminaArgomento,
+  eliminaMaterialeAula,
   getApriSalaAulaStudioQueryKey,
+  invitaInAulaStudio,
+  preautorizzaMaterialeAula,
   getElencaAuleStudioQueryKey,
+  promuoviAModeratore,
+  retrocediDaModeratore,
   revocaPermesso,
   rimuoviPartecipante,
   useApriSalaAulaStudio,
@@ -24,6 +33,7 @@ import {
   Button,
   Card,
   Chip,
+  Icona,
   Input,
   Intestazione,
   Screen,
@@ -91,7 +101,9 @@ export default function SchermataAula() {
             {scheda === 'chat' ? (
               <Chat aulaId={id} puoScrivere={data.mieiPermessi.scrivere} />
             ) : null}
-            {scheda === 'materiali' ? <Materiali sala={data} /> : null}
+            {scheda === 'materiali' ? (
+              <Materiali aulaId={id} sala={data} puoCaricare={data.mieiPermessi.caricare} />
+            ) : null}
             {scheda === 'partecipanti' ? (
               <Partecipanti aulaId={id} sala={data} />
             ) : null}
@@ -236,33 +248,175 @@ function Chat({ aulaId, puoScrivere }: { aulaId: string; puoScrivere: boolean })
   );
 }
 
-/** I materiali, raggruppati per argomento; gli sciolti in fondo. */
-function Materiali({ sala }: { sala: SalaDto }) {
+/**
+ * I materiali, raggruppati per argomento; gli sciolti in fondo.
+ *
+ * **Si scrivono, non solo si leggono**: prima da qui si poteva soltanto
+ * guardare l'elenco, e caricare la foto degli appunti — il gesto più naturale
+ * che si faccia da un telefono — richiedeva di aprire il computer.
+ *
+ * Il caricamento è lo stesso a tre tempi del composer dei post, con lo stesso
+ * `expo-document-picker` e la stessa funzione condivisa: si dichiarano nome,
+ * tipo e dimensione, i byte vanno **diritti all'archivio** senza passare dagli
+ * endpoint di dominio, e solo alla fine si cita la chiave. Su React Native il
+ * corpo è il riferimento al file locale, così i byte non finiscono in memoria.
+ */
+function Materiali({
+  aulaId,
+  sala,
+  puoCaricare,
+}: {
+  aulaId: string;
+  sala: SalaDto;
+  puoCaricare: boolean;
+}) {
   const tema = useTema();
   const t = useT();
+  const io = useLeggiMioProfilo();
+  const chiaveSala = getApriSalaAulaStudioQueryKey(aulaId);
+
+  const [nuovoArgomento, setNuovoArgomento] = useState('');
+  const [inCaricamento, setInCaricamento] = useState(false);
+
+  const aggiungiArgomento = useApiMutation({
+    mutationFn: (titolo: string) => creaArgomento(aulaId, { titolo }),
+    invalida: [chiaveSala as never],
+    onSuccess: () => setNuovoArgomento(''),
+  });
+
+  const togliArgomento = useApiMutation({
+    mutationFn: (argomentoId: string) => eliminaArgomento(aulaId, argomentoId),
+    invalida: [chiaveSala as never],
+  });
+
+  const togliFile = useApiMutation({
+    mutationFn: (materialeId: string) => eliminaMaterialeAula(aulaId, materialeId),
+    invalida: [chiaveSala as never],
+  });
+
+  const condividi = useApiMutation({
+    mutationFn: (chiave: string) => condividiMaterialeAula(aulaId, { chiave }),
+    invalida: [chiaveSala as never],
+  });
+
+  /**
+   * Sceglie un file e lo porta nell'aula.
+   *
+   * Il tipo lo si verifica **prima** di chiedere la pre-autorizzazione: un
+   * rifiuto locale è immediato e non consuma una chiave che resterebbe
+   * prenotata a vuoto.
+   */
+  const scegliFile = async () => {
+    const esito = await SelettoreFile.getDocumentAsync({
+      type: ['application/pdf', 'image/*', 'text/*'],
+      copyToCacheDirectory: true,
+    });
+    if (esito.canceled) return;
+
+    const scelto = esito.assets[0];
+    if (!scelto) return;
+
+    const tipo = tipoAllegatoDa(scelto.mimeType);
+    if (!tipo) return;
+
+    setInCaricamento(true);
+    try {
+      const { data } = await preautorizzaMaterialeAula(aulaId, {
+        nome: scelto.name,
+        tipo,
+        dimensione: scelto.size ?? 0,
+      });
+      await caricaConAvanzamento({
+        url: data.url,
+        // Il riferimento al file locale, non i byte: li legge il livello
+        // nativo mentre invia.
+        corpo: {
+          uri: scelto.uri,
+          name: scelto.name,
+          type: scelto.mimeType ?? 'application/octet-stream',
+        },
+        intestazioni: { 'content-type': scelto.mimeType ?? 'application/octet-stream' },
+      });
+      condividi.mutate(data.chiave);
+    } finally {
+      setInCaricamento(false);
+    }
+  };
 
   const gruppi = sala.argomenti.map((argomento) => ({
+    id: argomento.id,
     titolo: argomento.titolo,
     file: sala.allegati.filter((file) => file.argomentoId === argomento.id),
   }));
   const sciolti = sala.allegati.filter((file) => !file.argomentoId);
-  if (sciolti.length) gruppi.push({ titolo: t('app.sala.senzaArgomento'), file: sciolti });
+  if (sciolti.length) {
+    gruppi.push({ id: 'sciolti', titolo: t('app.sala.senzaArgomento'), file: sciolti });
+  }
 
   return (
     <Screen scorrevole>
+      {puoCaricare ? (
+        <Button
+          titolo={t('app.sala.caricaMateriale')}
+          variante="contorno"
+          larghezzaPiena
+          iconaSinistra={<Icona nome="carica" dimensione={18} />}
+          inCaricamento={inCaricamento || condividi.isPending}
+          onPress={() => void scegliFile()}
+        />
+      ) : null}
+
+      {sala.sonoModeratore ? (
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: tema.spaziatura[2] }}>
+          <View style={{ flex: 1 }}>
+            <Input
+              etichetta={t('app.sala.nuovoArgomento')}
+              value={nuovoArgomento}
+              onChangeText={setNuovoArgomento}
+            />
+          </View>
+          <Button
+            titolo={t('comune.salva')}
+            variante="contorno"
+            disabled={!nuovoArgomento.trim()}
+            inCaricamento={aggiungiArgomento.isPending}
+            onPress={() => aggiungiArgomento.mutate(nuovoArgomento.trim())}
+          />
+        </View>
+      ) : null}
+
       {sala.allegati.length === 0 && sala.argomenti.length === 0 ? (
         <Text variante="corpoTenue">{t('app.sala.nessunMateriale')}</Text>
       ) : null}
 
       {gruppi.map((gruppo) => (
-        <View key={gruppo.titolo} style={{ gap: tema.spaziatura[3] }}>
-          <Text variante="etichetta">{gruppo.titolo}</Text>
+        <View key={gruppo.id} style={{ gap: tema.spaziatura[3] }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[2] }}>
+            <Text variante="etichetta" style={{ flex: 1 }}>
+              {gruppo.titolo}
+            </Text>
+            {/* Eliminare un argomento non cancella alcun file: i materiali
+                tornano sciolti, ed è l'opposto di ciò che accade ai post. */}
+            {sala.sonoModeratore && gruppo.id !== 'sciolti' ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('app.sala.eliminaArgomento')}
+                hitSlop={10}
+                onPress={() => togliArgomento.mutate(gruppo.id)}
+              >
+                <Icona nome="cestino" dimensione={17} colore="debole" />
+              </Pressable>
+            ) : null}
+          </View>
+
           <Card style={{ padding: 0, overflow: 'hidden' }}>
             {gruppo.file.map((file, indice) => (
               <RigaMateriale
                 key={file.id}
                 file={file}
                 ultima={indice === gruppo.file.length - 1}
+                puoEliminare={sala.sonoModeratore || file.caricatoDa === io.data?.data.utenteId}
+                onElimina={() => togliFile.mutate(file.id)}
               />
             ))}
             {gruppo.file.length === 0 ? (
@@ -277,8 +431,20 @@ function Materiali({ sala }: { sala: SalaDto }) {
   );
 }
 
-function RigaMateriale({ file, ultima }: { file: MaterialeDto; ultima: boolean }) {
+function RigaMateriale({
+  file,
+  ultima,
+  puoEliminare,
+  onElimina,
+}: {
+  file: MaterialeDto;
+  ultima: boolean;
+  puoEliminare: boolean;
+  onElimina: () => void;
+}) {
   const tema = useTema();
+  const t = useT();
+
   return (
     <View
       style={{
@@ -290,12 +456,28 @@ function RigaMateriale({ file, ultima }: { file: MaterialeDto; ultima: boolean }
         borderBottomColor: tema.colori.superficieAlt2,
       }}
     >
-      <View style={{ flex: 1, minWidth: 0 }}>
+      {/* Il file si apre: portava un indirizzo e non era toccabile. */}
+      <Pressable
+        accessibilityRole="button"
+        style={{ flex: 1, minWidth: 0 }}
+        onPress={() => void Linking.openURL(file.url)}
+      >
         <Text variante="etichetta" numberOfLines={1}>
           {file.nome}
         </Text>
         <Text variante="didascalia">{pesoLeggibile(file.dimensione)}</Text>
-      </View>
+      </Pressable>
+
+      {puoEliminare ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('app.sala.impostazioni.eliminaMateriale')}
+          hitSlop={10}
+          onPress={onElimina}
+        >
+          <Icona nome="cestino" dimensione={17} colore="debole" />
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -327,6 +509,23 @@ function Partecipanti({ aulaId, sala }: { aulaId: string; sala: SalaDto }) {
     onSuccess: () => router.replace(rotte.auleStudio()),
   });
 
+  const chiaveSala = getApriSalaAulaStudioQueryKey(aulaId);
+
+  const promuovi = useApiMutation({
+    mutationFn: (utenteId: string) => promuoviAModeratore(aulaId, utenteId),
+    invalida: [chiaveSala as never],
+  });
+
+  const retrocedi = useApiMutation({
+    mutationFn: (utenteId: string) => retrocediDaModeratore(aulaId, utenteId),
+    invalida: [chiaveSala as never],
+  });
+
+  const rimuovi = useApiMutation({
+    mutationFn: (utenteId: string) => rimuoviPartecipante(aulaId, utenteId),
+    invalida: [chiaveSala as never],
+  });
+
   const cambia = useApiMutation({
     mutationFn: ({
       utenteId,
@@ -345,14 +544,20 @@ function Partecipanti({ aulaId, sala }: { aulaId: string; sala: SalaDto }) {
 
   return (
     <Screen scorrevole>
+      {sala.sonoModeratore ? <Invito aulaId={aulaId} /> : null}
+
       {sala.partecipanti.map((partecipante) => (
         <RigaPartecipante
           key={partecipante.utenteId}
           partecipante={partecipante}
           puoModerare={sala.sonoModeratore}
+          sonoIo={partecipante.utenteId === io.data?.data.utenteId}
           onCambia={(permesso, concedi) =>
             cambia.mutate({ utenteId: partecipante.utenteId, permesso, concedi })
           }
+          onPromuovi={() => promuovi.mutate(partecipante.utenteId)}
+          onRetrocedi={() => retrocedi.mutate(partecipante.utenteId)}
+          onRimuovi={() => rimuovi.mutate(partecipante.utenteId)}
         />
       ))}
       <Text variante="didascalia" style={{ marginTop: tema.spaziatura[2] }}>
@@ -376,14 +581,69 @@ function Partecipanti({ aulaId, sala }: { aulaId: string; sala: SalaDto }) {
   );
 }
 
+/**
+ * Invitare qualcuno per email.
+ *
+ * Il destinatario è un indirizzo, non un utente: si invita anche chi non è
+ * ancora iscritto, e l'invito lo aspetta sette giorni. Dal telefono non si
+ * poteva invitare affatto — si poteva solo entrare dove qualcun altro ti
+ * aveva già chiamato.
+ */
+function Invito({ aulaId }: { aulaId: string }) {
+  const tema = useTema();
+  const t = useT();
+  const [destinatario, setDestinatario] = useState('');
+
+  const invita = useApiMutation({
+    mutationFn: () => invitaInAulaStudio(aulaId, { destinatario: destinatario.trim() }),
+    onSuccess: () => setDestinatario(''),
+  });
+
+  return (
+    <Card style={{ gap: tema.spaziatura[3] }}>
+      <View style={{ gap: 4 }}>
+        <Text variante="etichetta">{t('app.sala.invita')}</Text>
+        <Text variante="didascalia">{t('app.sala.invitaAiuto')}</Text>
+      </View>
+
+      <Input
+        etichetta={t('app.sala.indirizzo')}
+        placeholder="compagno@studenti.unibo.it"
+        value={destinatario}
+        onChangeText={setDestinatario}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoComplete="email"
+      />
+
+      <Button
+        titolo={t('app.sala.invia')}
+        variante="contorno"
+        larghezzaPiena
+        disabled={!destinatario.includes('@')}
+        inCaricamento={invita.isPending}
+        onPress={() => invita.mutate(undefined)}
+      />
+    </Card>
+  );
+}
+
 function RigaPartecipante({
   partecipante,
   puoModerare,
+  sonoIo,
   onCambia,
+  onPromuovi,
+  onRetrocedi,
+  onRimuovi,
 }: {
   partecipante: PartecipanteDto;
   puoModerare: boolean;
+  sonoIo: boolean;
   onCambia: (permesso: NomePermesso, concedi: boolean) => void;
+  onPromuovi: () => void;
+  onRetrocedi: () => void;
+  onRimuovi: () => void;
 }) {
   const tema = useTema();
   const t = useT();
@@ -427,6 +687,33 @@ function RigaPartecipante({
             </View>
           ))
         : null}
+
+      {/* Le tre azioni di moderazione, che sul telefono non c'erano affatto:
+          si poteva concedere un permesso ma non promuovere, non retrocedere e
+          non rimuovere nessuno. Le regole non si duplicano qui — l'ultimo
+          moderatore lo ferma il server (AS2), con il messaggio che dice cosa
+          fare. Su sé stessi non compaiono: uscire è un gesto a parte, in fondo
+          alla scheda. */}
+      {puoModerare && !sonoIo ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: tema.spaziatura[2] }}>
+          <Button
+            titolo={
+              partecipante.moderatore
+                ? t('app.sala.impostazioni.retrocedi')
+                : t('app.sala.promuovi')
+            }
+            variante="contorno"
+            dimensione="md"
+            onPress={partecipante.moderatore ? onRetrocedi : onPromuovi}
+          />
+          <Button
+            titolo={t('app.sala.rimuovi')}
+            variante="fantasma"
+            dimensione="md"
+            onPress={onRimuovi}
+          />
+        </View>
+      ) : null}
     </Card>
   );
 }

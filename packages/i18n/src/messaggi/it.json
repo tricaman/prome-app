@@ -464,7 +464,7 @@
       "nPartecipanti": "{numero} partecipanti",
       "nessunMateriale": "Nessun materiale ancora. Carica il primo file e chi studia con te lo troverà qui.",
       "argomentoVuoto": "Nessun materiale in questo argomento",
-      "eliminaArgomento": "Elimina argomento",
+      "eliminaArgomento": "Elimina l'argomento",
       "caricamentoInCorso": "Caricamento…",
       "annulla": "Annulla",
       "ruoli": {
@@ -498,7 +498,10 @@
         "eliminaMateriale": "Elimina"
       },
       "eliminaMateriale": "Elimina il materiale",
-      "retrocedi": "Non moderatore"
+      "retrocedi": "Non moderatore",
+      "rimuovi": "Rimuovi",
+      "indirizzo": "Indirizzo email",
+      "invitaAiuto": "L'invito vale sette giorni e funziona anche con chi non è ancora iscritto a Prome."
     },
     "gruppo": {
       "titolo": "Gruppi",
