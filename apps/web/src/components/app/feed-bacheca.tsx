@@ -20,6 +20,7 @@ const PER_PAGINA = 20;
 
 export function FeedBacheca() {
   const t = useTranslations('app.feed');
+  const tComune = useTranslations('comune');
 
   /**
    * Le pagine si accumulano invece di sostituirsi: scendendo si continua a
@@ -46,7 +47,9 @@ export function FeedBacheca() {
       {(risposta) => (
         <>
           {risposta.pages.flatMap((pagina) =>
-            pagina.data.map((riga) => <PostBacheca key={riga.id} post={perLaScheda(riga)} />),
+            pagina.data.map((riga) => (
+              <PostBacheca key={riga.id} post={perLaScheda(riga, tComune('utenteRimosso'))} />
+            )),
           )}
           <SentinellaFine
             attiva={post.hasNextPage}
@@ -124,13 +127,15 @@ function SentinellaFine({
  * aggregato a sé, non un campo del post — la scheda leggerà direttamente la
  * risposta e questa funzione sparirà.
  */
-function perLaScheda(post: PostDto): PostDiBacheca {
+function perLaScheda(post: PostDto, utenteRimosso: string): PostDiBacheca {
+  // Un autore senza nome è un account cancellato (contenuto anonimizzato) o
+  // in corso di cancellazione: il contenuto resta, la persona no.
   const autore = [post.autore.nome, post.autore.cognome].filter(Boolean).join(' ');
   const primoAllegato = post.allegati[0];
 
   return {
     id: post.id,
-    autore: autore || '—',
+    autore: autore || utenteRimosso,
     contesto: [post.autore.universita, quando(post.creatoIl)].filter(Boolean).join(' · '),
     corpo: post.testo,
     tag: [],

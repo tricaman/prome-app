@@ -58,7 +58,10 @@ function RigaCommento({
   chiaveElenco: readonly unknown[];
 }) {
   const t = useTranslations('app.post');
-  const autore = [commento.autore.nome, commento.autore.cognome].filter(Boolean).join(' ') || '—';
+  const tComune = useTranslations('comune');
+  const autore =
+    [commento.autore.nome, commento.autore.cognome].filter(Boolean).join(' ') ||
+    tComune('utenteRimosso');
 
   const elimina = useApiMutation({
     mutationFn: () => eliminaCommento(commento.id),

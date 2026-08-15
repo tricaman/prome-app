@@ -9,7 +9,8 @@ import {
   ImpostazioniNotifiche,
   ImpostazioniPrivacy,
 } from '@/components/app/impostazioni-privacy';
-import { Avatar, Button, Card, Heading, Icona } from '@/components/ui';
+import { EliminaAccount } from '@/components/app/elimina-account';
+import { Avatar, Button, Card, Icona } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -112,28 +113,7 @@ export default async function PaginaImpostazioni({
               <RigaAccount etichetta={t('esciDaTutti')} ultima />
             </Card>
 
-            {/* L'azione distruttiva è raggiungibile ma non invitante: bordo
-                rosa, non un bottone rosso pieno che chiede di essere premuto. */}
-            <Card padding="md" className="border-[1.5px] border-tinta-rosa-bordo">
-              <Heading taglia="xs">{t('elimina.titolo')}</Heading>
-              <p className="mb-4 mt-2.5 text-[13.5px] leading-[1.7] text-testo-tenue">
-                {t('elimina.testo')}
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  className="h-11 rounded-xl border-[1.5px] border-tinta-rosa-bordo bg-tinta-rosa-velo px-5 text-[13.5px] font-extrabold text-tinta-rosa-testo"
-                >
-                  {t('elimina.azione')}
-                </button>
-                <span className="text-[12.5px] text-testo-debole">
-                  {t('elimina.pausa')}{' '}
-                  <button type="button" className="font-extrabold text-primario-collegamento">
-                    {t('elimina.disattiva')}
-                  </button>
-                </span>
-              </div>
-            </Card>
+            <EliminaAccount />
           </div>
         </div>
       </div>

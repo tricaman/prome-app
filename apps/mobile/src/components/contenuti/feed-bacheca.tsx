@@ -1,6 +1,7 @@
 import { pesoLeggibile } from '@prome/app-core';
 import { useElencaPost, type PostDto } from '@prome/api-client';
 import type { PostDiBacheca } from '@prome/contenuti';
+import { useT } from '@/hooks';
 import { QueryBoundary } from '@/components/feedback';
 import { PostCard } from './post-card';
 
@@ -12,12 +13,15 @@ import { PostCard } from './post-card';
  * resta solo il caso «ci sono i post».
  */
 export function FeedBacheca() {
+  const t = useT();
   const post = useElencaPost({ limit: 20 });
 
   return (
     <QueryBoundary query={post} eVuoto={(risposta) => risposta.data.length === 0}>
       {(risposta) =>
-        risposta.data.map((riga) => <PostCard key={riga.id} post={perLaScheda(riga)} />)
+        risposta.data.map((riga) => (
+          <PostCard key={riga.id} post={perLaScheda(riga, t('comune.utenteRimosso'))} />
+        ))
       }
     </QueryBoundary>
   );
@@ -31,13 +35,15 @@ export function FeedBacheca() {
  * i commenti — che sono un aggregato a sé, non un campo del post — la scheda
  * leggerà direttamente la risposta e questa funzione sparirà.
  */
-function perLaScheda(post: PostDto): PostDiBacheca {
+function perLaScheda(post: PostDto, utenteRimosso: string): PostDiBacheca {
+  // Un autore senza nome è un account cancellato (contenuto anonimizzato) o
+  // in corso di cancellazione: il contenuto resta, la persona no.
   const autore = [post.autore.nome, post.autore.cognome].filter(Boolean).join(' ');
   const primoAllegato = post.allegati[0];
 
   return {
     id: post.id,
-    autore: autore || '—',
+    autore: autore || utenteRimosso,
     contesto: [post.autore.universita, quando(post.creatoIl)].filter(Boolean).join(' · '),
     corpo: post.testo,
     tag: [],

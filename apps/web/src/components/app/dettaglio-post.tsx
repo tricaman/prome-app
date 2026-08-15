@@ -32,12 +32,15 @@ import { Commenti } from './commenti';
  */
 export function DettaglioPost({ postId }: { postId: string }) {
   const t = useTranslations('app.post');
+  const tComune = useTranslations('comune');
   const post = useLeggiPost(postId);
 
   return (
     <QueryBoundary query={post}>
       {({ data }) => {
-        const autore = [data.autore.nome, data.autore.cognome].filter(Boolean).join(' ') || '—';
+        const autore =
+          [data.autore.nome, data.autore.cognome].filter(Boolean).join(' ') ||
+          tComune('utenteRimosso');
 
         return (
           <div className="flex flex-col gap-5">

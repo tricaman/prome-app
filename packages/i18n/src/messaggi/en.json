@@ -18,7 +18,8 @@
     "opzionale": "optional",
     "ricarica": "Reload the page",
     "riprova": "Try again",
-    "salva": "Save"
+    "salva": "Save",
+    "utenteRimosso": "Removed user"
   },
   "lingua": {
     "etichetta": "Language",
@@ -313,7 +314,8 @@
       "nonArrivato": "Didn't get it?",
       "reinvia": "Send again",
       "provaTitolo": "A tribute to <accento>progress</accento>",
-      "provaTesto": "Every week 28,000 students open a study room, share notes and help each other before exams."
+      "provaTesto": "Every week 28,000 students open a study room, share notes and help each other before exams.",
+      "riattivato": "Welcome back: your deletion request has been cancelled."
     },
     "onboarding": {
       "titolo": "Complete your profile",
@@ -521,8 +523,8 @@
         "titolo": "Delete account",
         "testo": "Your profile disappears immediately. Your posts and comments stay useful to those who study but become anonymous (“Removed user”), and personal data is deleted from backups too within 30 days. If you change your mind, you can reactivate the account within 14 days by signing in again.",
         "azione": "Delete my account",
-        "pausa": "Prefer a break?",
-        "disattiva": "Deactivate temporarily"
+        "parola": "DELETE",
+        "scriviPerConfermare": "Type {parola} to confirm"
       }
     }
   }

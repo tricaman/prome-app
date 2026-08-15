@@ -18,7 +18,8 @@
     "opzionale": "facoltativo",
     "ricarica": "Ricarica la pagina",
     "riprova": "Riprova",
-    "salva": "Salva"
+    "salva": "Salva",
+    "utenteRimosso": "Utente rimosso"
   },
   "lingua": {
     "etichetta": "Lingua",
@@ -313,7 +314,8 @@
       "nonArrivato": "Non ti è arrivato?",
       "reinvia": "Invia di nuovo",
       "provaTitolo": "Tributo al <accento>progresso</accento>",
-      "provaTesto": "Ogni settimana 28.000 studenti aprono un'aula studio, condividono appunti e si danno una mano prima degli appelli."
+      "provaTesto": "Ogni settimana 28.000 studenti aprono un'aula studio, condividono appunti e si danno una mano prima degli appelli.",
+      "riattivato": "Bentornato: la richiesta di cancellazione è stata annullata."
     },
     "onboarding": {
       "titolo": "Completa il profilo",
@@ -521,8 +523,8 @@
         "titolo": "Elimina account",
         "testo": "Il profilo scompare subito. I tuoi post e commenti restano utili a chi studia ma diventano anonimi (“Utente rimosso”), e i dati personali vengono cancellati anche dai backup entro 30 giorni. Se cambi idea, entro 14 giorni puoi riattivare l'account accedendo di nuovo.",
         "azione": "Elimina il mio account",
-        "pausa": "Preferisci una pausa?",
-        "disattiva": "Disattiva temporaneamente"
+        "parola": "ELIMINA",
+        "scriviPerConfermare": "Scrivi {parola} per confermare"
       }
     }
   }

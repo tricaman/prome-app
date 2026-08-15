@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { z } from 'zod';
-import { apriSessione } from '@prome/app-core';
+import { apriSessione, avvisatore } from '@prome/app-core';
 import {
   richiediCodiceAccesso,
   verificaCodiceAccesso,
@@ -115,6 +115,10 @@ function PassoCodice({ email, onCambiaEmail }: { email: string; onCambiaEmail: (
       router.replace(
         data.onboardingCompletato ? percorsiApp.bacheca() : percorsiApp.benvenuto(),
       );
+      // Rientrare entro la grazia di 14 giorni annulla la cancellazione: va
+      // detto, o l'utente non saprà mai che l'account è salvo.
+      const riattivato = data.cancellazioneAnnullata === true;
+      if (riattivato) avvisatore().info(t('riattivato'));
     },
   });
 

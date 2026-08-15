@@ -28,6 +28,7 @@ import { Avatar, Button, Card, Icona, Input, Intestazione, Screen, Text } from '
  */
 export default function SchermataPost() {
   const tema = useTema();
+  const t = useT();
   const { id } = useLocalSearchParams<{ id: string }>();
   const post = useLeggiPost(id);
 
@@ -38,7 +39,8 @@ export default function SchermataPost() {
         <QueryBoundary query={post}>
           {({ data }) => {
             const autore =
-              [data.autore.nome, data.autore.cognome].filter(Boolean).join(' ') || '—';
+              [data.autore.nome, data.autore.cognome].filter(Boolean).join(' ') ||
+              t('comune.utenteRimosso');
 
             return (
               <View style={{ gap: tema.spaziatura[4] }}>
@@ -180,7 +182,9 @@ function RigaCommento({
 }) {
   const tema = useTema();
   const t = useT();
-  const autore = [commento.autore.nome, commento.autore.cognome].filter(Boolean).join(' ') || '—';
+  const autore =
+    [commento.autore.nome, commento.autore.cognome].filter(Boolean).join(' ') ||
+    t('comune.utenteRimosso');
 
   const elimina = useApiMutation({
     mutationFn: () => eliminaCommento(commento.id),

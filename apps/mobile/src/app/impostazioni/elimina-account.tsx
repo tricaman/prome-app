@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { danger } from '@prome/design-tokens';
+import { useQueryClient } from '@tanstack/react-query';
+import { chiudiSessione } from '@prome/app-core';
+import { richiediCancellazioneAccount } from '@prome/api-client';
 import { useTema } from '@/theme';
-import { useT } from '@/hooks';
+import { useApiMutation, useT } from '@/hooks';
 import { Button, Card, Icona, Input, Intestazione, Screen, Text } from '@/components/ui';
-
-/** Parola da digitare per confermare: rende l'atto deliberato, non un tocco. */
-const CONFERMA = 'ELIMINA';
 
 /**
  * Eliminazione dell'account.
@@ -19,13 +18,37 @@ const CONFERMA = 'ELIMINA';
  * dati cancellati entro 30 giorni, riattivazione entro 14 — perché se la
  * schermata e il documento legale si contraddicono, quello che resta è la
  * sfiducia.
+ *
+ * La parola da digitare rende l'atto deliberato, non un tocco; la rete di
+ * sicurezza vera è la grazia: rientrare entro 14 giorni annulla la richiesta.
  */
 export default function SchermataEliminaAccount() {
   const tema = useTema();
   const t = useT();
+  const queryClient = useQueryClient();
   const [conferma, setConferma] = useState('');
 
-  const puoEliminare = conferma.trim().toUpperCase() === CONFERMA;
+  const parola = t('app.impostazioni.elimina.parola');
+  const puoEliminare = conferma.trim().toUpperCase() === parola;
+
+  // L'etichetta è tradotta e la parola dentro va evidenziata: si spezza il
+  // messaggio attorno alla parola invece di cablare l'ordine delle lingue.
+  const [primaDellaParola, dopoLaParola] = t('app.impostazioni.elimina.scriviPerConfermare', {
+    parola,
+  }).split(parola);
+
+  const elimina = useApiMutation({
+    mutationFn: () => richiediCancellazioneAccount(),
+    onSuccess: async () => {
+      // Prima si chiude la sessione (l'endpoint ha già revocato tutto lato
+      // server), poi si esce dalle schermate private, e SOLO DOPO si svuota
+      // la cache: svuotarla prima rimetterebbe in fetch query montate ormai
+      // senza token.
+      await chiudiSessione();
+      router.replace('/');
+      queryClient.clear();
+    },
+  });
 
   return (
     <>
@@ -52,12 +75,14 @@ export default function SchermataEliminaAccount() {
 
         <View style={{ gap: tema.spaziatura[3] }}>
           <Text variante="etichetta">
-            Scrivi <Text colore="errore">{CONFERMA}</Text> per confermare
+            {primaDellaParola}
+            <Text colore="errore">{parola}</Text>
+            {dopoLaParola}
           </Text>
           <Input
             value={conferma}
             onChangeText={setConferma}
-            placeholder={CONFERMA}
+            placeholder={parola}
             autoCapitalize="characters"
             autoCorrect={false}
           />
@@ -68,19 +93,9 @@ export default function SchermataEliminaAccount() {
           variante="distruttiva"
           larghezzaPiena
           disabled={!puoEliminare}
-          onPress={() => router.replace('/')}
+          inCaricamento={elimina.isPending}
+          onPress={() => elimina.mutate(undefined)}
         />
-
-        <Button
-          titolo={t('app.impostazioni.elimina.disattiva')}
-          variante="fantasma"
-          larghezzaPiena
-          onPress={() => router.back()}
-        />
-
-        <Text variante="didascalia" allineamento="center" style={{ color: danger[600] }}>
-          {t('app.impostazioni.elimina.pausa')}
-        </Text>
       </Screen>
     </>
   );

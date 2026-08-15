@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
-import { apriSessione } from '@prome/app-core';
+import { apriSessione, avvisatore } from '@prome/app-core';
 import { verificaCodiceAccesso, type VerificaCodiceDto, type VerificaCodiceAccesso200 } from '@prome/api-client';
 import { useApiMutation, useT } from '@/hooks';
 import { CampoCodice } from '@/components/app/campo-codice';
@@ -30,6 +30,10 @@ export default function SchermataCodice() {
       // Chi non ha ancora compilato il profilo non entra nella bacheca: da
       // qui sappiamo già quale delle due strade prendere.
       router.replace(data.onboardingCompletato ? rotte.bacheca() : rotte.profilo());
+      // Rientrare entro la grazia di 14 giorni annulla la cancellazione: va
+      // detto, o l'utente non saprà mai che l'account è salvo.
+      const riattivato = data.cancellazioneAnnullata === true;
+      if (riattivato) avvisatore().info(t('app.accesso.riattivato'));
     },
   });
 
