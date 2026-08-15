@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import type {
   AllegatoDiAulaStudioResponse,
@@ -32,6 +32,13 @@ import {
   TRASPORTO_TEMPO_REALE,
   type TrasportoInTempoReale,
 } from '../../infrastruttura/tempo-reale/trasporto';
+import {
+  GRUPPO_ELIMINATO,
+  MEMBRO_RIMOSSO,
+  RecapitoFattiDelGruppoService,
+  type PayloadGruppoEliminato,
+  type PayloadMembroRimosso,
+} from '../gruppo/recapito-fatti.service';
 import { PortaIdentitaUtente } from '../profilo/porta-identita-utente';
 import { ProfiloService } from '../profilo/profilo.service';
 import { AulaStudioErrorCode } from './constants/error-codes';
@@ -72,17 +79,24 @@ export const GIORNI_VALIDITA_INVITO = 7;
  */
 @Injectable()
 export class AulaStudioService implements ConsumatoreDiFatti {
+  private readonly logger = new Logger('AulaStudio');
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly profilo: ProfiloService,
     private readonly identita: PortaIdentitaUtente,
     private readonly appartenenza: PortaAppartenenzaGruppo,
     private readonly recapito: RecapitoFattiService,
+    private readonly recapitoDelGruppo: RecapitoFattiDelGruppoService,
     @Inject(ARCHIVIO_DI_FILE) private readonly archivio: ArchivioDiFile,
     @Inject(CANALE_EMAIL) private readonly email: CanaleEmail,
     @Inject(TRASPORTO_TEMPO_REALE) private readonly trasporto: TrasportoInTempoReale,
   ) {
     this.recapito.registra(this);
+    // Anche sui fatti del gruppo: la decadenza dell'appartenenza è una
+    // decisione presa altrove di cui questo contesto deve trarre le
+    // conseguenze, e il canale è quello del contesto che la produce.
+    this.recapitoDelGruppo.registra(this);
     // Il modulo proprietario si presenta come guardiano delle proprie stanze:
     // il trasporto consegna, ma non decide chi può ascoltare.
     this.trasporto.registraGuardiano?.(this);
@@ -234,12 +248,28 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       );
     }
 
+    // AS9: la collocazione è al più una, mai due. Chi colloca dev'essere
+    // membro del gruppo **adesso** — altrimenti si aprirebbe la propria aula a
+    // uno spazio di cui non fa parte, e i suoi membri entrerebbero senza che
+    // nessuno di loro l'abbia chiesto.
+    if (dati.gruppoId) {
+      const membro = await this.appartenenza.eAmmessoPerAppartenenza(utenteId, dati.gruppoId);
+      if (!membro) {
+        throw new AppException(
+          AulaStudioErrorCode.COLLOCAZIONE_NEGATA,
+          'AULA_COLLOCAZIONE_NEGATA',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+    }
+
     const aggiornata = await this.prisma.aulaStudio.update({
       where: { id: aulaId },
       data: {
         ...(titolo ? { titolo } : {}),
         ...(dati.visibilita ? { visibilita: dati.visibilita } : {}),
         ...(dataOraInizio !== undefined ? { dataOraInizio } : {}),
+        ...(dati.gruppoId !== undefined ? { gruppoId: dati.gruppoId } : {}),
         versione: { increment: 1 },
       },
       include: { partecipanti: true },
@@ -290,7 +320,6 @@ export class AulaStudioService implements ConsumatoreDiFatti {
    */
   async entra(utenteId: string, aulaId: string): Promise<void> {
     const aula = await this.aulaEsistente(aulaId);
-    const chiSono = await this.profilo.perUtente(utenteId);
 
     const gia = await this.prisma.partecipante.findUnique({
       where: { aulaStudioId_utenteId: { aulaStudioId: aulaId, utenteId } },
@@ -298,24 +327,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     // AS3 rende la seconda ammissione un'operazione senza effetto, non un errore.
     if (gia) return;
 
-    const invitato = await this.prisma.invito.findFirst({
-      where: {
-        aulaStudioId: aulaId,
-        stato: 'ACCETTATO',
-        accettatoDa: utenteId,
-      },
-    });
-    const perAppartenenza = aula.gruppoId
-      ? await this.appartenenza.eAmmessoPerAppartenenza(utenteId, aula.gruppoId)
-      : false;
-
-    const ammesso =
-      Boolean(invitato) ||
-      perAppartenenza ||
-      aula.visibilita === 'PUBBLICO' ||
-      (aula.visibilita === 'ATENEO' && Boolean(aula.ateneo) && chiSono.universita === aula.ateneo);
-
-    if (!ammesso) {
+    if (!(await this.haTitoloDiAmmissione(utenteId, aula))) {
       throw new AppException(
         AulaStudioErrorCode.AMMISSIONE_NEGATA,
         'AULA_AMMISSIONE_NEGATA',
@@ -326,6 +338,41 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     // Entra in sola lettura: assiste senza interagire, ed è una condizione
     // normale dell'incontro, non un difetto da correggere.
     await this.ammetti(aulaId, utenteId);
+  }
+
+  /**
+   * I titoli per stare in quest'aula, risolti **su dato fresco**.
+   *
+   * Sta in un posto solo perché serve in due momenti opposti — quando qualcuno
+   * chiede di entrare e quando bisogna decidere se chi è già dentro può
+   * restare — e due copie della stessa regola divergerebbero: quella
+   * dimenticata sarebbe la seconda, cioè proprio quella che decide un'uscita.
+   *
+   * L'invito accettato è un titolo **indipendente dal gruppo**: chi ce l'ha
+   * resta anche dopo aver perso l'appartenenza.
+   */
+  private async haTitoloDiAmmissione(
+    utenteId: string,
+    aula: { id: string; visibilita: string; ateneo: string | null; gruppoId: string | null },
+  ): Promise<boolean> {
+    const invitato = await this.prisma.invito.findFirst({
+      where: { aulaStudioId: aula.id, stato: 'ACCETTATO', accettatoDa: utenteId },
+    });
+    if (invitato) return true;
+
+    if (aula.visibilita === 'PUBBLICO') return true;
+
+    if (aula.gruppoId) {
+      // L'appartenenza si chiede adesso: nessuna copia locale di chi è membro.
+      if (await this.appartenenza.eAmmessoPerAppartenenza(utenteId, aula.gruppoId)) return true;
+    }
+
+    if (aula.visibilita === 'ATENEO' && aula.ateneo) {
+      const chiSono = await this.profilo.perUtente(utenteId);
+      return chiSono.universita === aula.ateneo;
+    }
+
+    return false;
   }
 
   /** Uscita volontaria o rimozione da parte di un moderatore. */
@@ -784,15 +831,82 @@ export class AulaStudioService implements ConsumatoreDiFatti {
   // --- Consumo dei fatti ----------------------------------------------------
 
   /**
-   * L'unico fatto consumato oggi: un invito accettato diventa un partecipante.
+   * I fatti che questo contesto consuma: uno proprio, due del gruppo.
    *
-   * L'operazione è idempotente per AS3 — un utente compare al massimo una
-   * volta fra i partecipanti — quindi una doppia consegna non ha effetto.
+   * Tutte e tre le reazioni sono idempotenti — AS3 rende innocua la doppia
+   * ammissione, e rimuovere chi è già stato rimosso non trova nulla da fare —
+   * quindi la doppia consegna non ha effetto.
    */
   async elabora(tipo: string, payload: unknown): Promise<void> {
-    if (tipo !== INVITO_ACCETTATO) return;
-    const { aulaStudioId, utenteId } = payload as PayloadInvitoAccettato;
-    await this.ammetti(aulaStudioId, utenteId);
+    if (tipo === INVITO_ACCETTATO) {
+      const { aulaStudioId, utenteId } = payload as PayloadInvitoAccettato;
+      await this.ammetti(aulaStudioId, utenteId);
+      return;
+    }
+
+    if (tipo === MEMBRO_RIMOSSO) {
+      const { gruppoId, utenteId } = payload as PayloadMembroRimosso;
+      await this.allontanaChiHaPersoIlTitolo(gruppoId, utenteId);
+      return;
+    }
+
+    if (tipo === GRUPPO_ELIMINATO) {
+      const { gruppoId } = payload as PayloadGruppoEliminato;
+      await this.scollegaDalGruppo(gruppoId);
+    }
+  }
+
+  /**
+   * SE1 — chi perde l'appartenenza esce dalle aule collocate in quel gruppo.
+   *
+   * **Non si rimuove chi ha un titolo proprio.** L'appartenenza è uno dei modi
+   * di essere ammessi, non l'unico: chi era entrato con un invito all'aula, o
+   * chi sta in un'aula pubblica, ha un titolo che non veniva dal gruppo e che
+   * la sua uscita non tocca. Il titolo si ri-risolve quindi **su dato fresco**,
+   * uno per uno, e si rimuove solo chi resta senza — sarebbe altrimenti una
+   * rimozione indebita, cioè lo stesso difetto di segno opposto.
+   *
+   * Chi è connesso in quel momento va allontanato **anche dalla stanza**: la
+   * riga nel database smette di ammetterlo alla prossima richiesta, ma una
+   * connessione aperta non fa nuove richieste, e continuerebbe a ricevere i
+   * messaggi di una conversazione a cui non ha più diritto.
+   */
+  private async allontanaChiHaPersoIlTitolo(gruppoId: string, utenteId: string): Promise<void> {
+    const aule = await this.prisma.aulaStudio.findMany({ where: { gruppoId } });
+
+    for (const aula of aule) {
+      const partecipante = await this.prisma.partecipante.findUnique({
+        where: { aulaStudioId_utenteId: { aulaStudioId: aula.id, utenteId } },
+      });
+      if (!partecipante) continue;
+
+      if (await this.haTitoloDiAmmissione(utenteId, aula)) continue;
+
+      await this.prisma.partecipante.delete({
+        where: { aulaStudioId_utenteId: { aulaStudioId: aula.id, utenteId } },
+      });
+      // Un errore di consegna non deve far ritentare la rimozione, che è già
+      // avvenuta: la riga è la verità, la stanza è un'accelerazione.
+      try {
+        await this.trasporto.allontanaDallaStanza?.(stanzaDiAula(aula.id), utenteId);
+      } catch {
+        this.logger.warn(`Allontanamento dalla stanza non riuscito per l'aula ${aula.id}`);
+      }
+    }
+  }
+
+  /**
+   * Il gruppo non c'è più: le aule collocate tornano sciolte e **restano vive**.
+   *
+   * Organizzare è un gesto leggero; eliminare aule con i loro materiali, la
+   * loro chat e la loro storia è tutt'altro. Cancellare un riferimento non
+   * cancella mai la cosa riferita.
+   */
+  private async scollegaDalGruppo(gruppoId: string): Promise<void> {
+    await this.prisma.aulaStudio.updateMany({
+      where: { gruppoId },
+      data: { gruppoId: null },
+    });
   }
 
   // --- Interni --------------------------------------------------------------

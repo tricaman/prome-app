@@ -12,6 +12,7 @@ import {
   Length,
   Max,
   Min,
+  ValidateIf,
 } from 'class-validator';
 import {
   DIMENSIONE_MASSIMA_ALLEGATO,
@@ -81,6 +82,13 @@ export class ModificaAulaStudioDto implements ModificaAulaStudioRequest {
   @IsOptional()
   @IsISO8601()
   dataOraInizio?: string | null;
+
+  /** `null` scioglie la collocazione; un id la stabilisce (AS9). */
+  @ApiPropertyOptional({ nullable: true, description: 'Gruppo in cui collocare l\'aula' })
+  @IsOptional()
+  @ValidateIf((_oggetto, valore) => valore !== null)
+  @IsUUID()
+  gruppoId?: string | null;
 }
 
 export class QueryAuleStudioDto extends PaginationDto {}

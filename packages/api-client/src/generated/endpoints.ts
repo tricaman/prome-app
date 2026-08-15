@@ -26,6 +26,7 @@ import type {
 
 import type {
   AccettaInvito200,
+  AccettaInvitoDiGruppo200,
   AggiornaMiaPrivacy200,
   AggiornaPrivacyDto,
   ApriSalaAulaStudio200,
@@ -39,6 +40,9 @@ import type {
   CreaAulaStudio201,
   CreaAulaStudioDto,
   CreaCommentoDto,
+  CreaGruppo201,
+  CreaGruppoDto,
+  CreaInvitoAlGruppoDto,
   CreaInvitoDto,
   CreaMaterialeDto,
   CreaPostDto,
@@ -46,11 +50,14 @@ import type {
   ElencaAuleStudioParams,
   ElencaCommenti200,
   ElencaCommentiParams,
+  ElencaMieiGruppi200,
+  ElencaMieiGruppiParams,
   ElencaPost200,
   ElencaPostParams,
   EliminaArgomento200,
   EliminaAulaStudio200,
   EliminaCommento200,
+  EliminaGruppo200,
   EliminaMaterialeAula200,
   EliminaPost200,
   EntraInAulaStudio200,
@@ -59,13 +66,18 @@ import type {
   EsciDaTuttiIDispositivi200,
   InviaMessaggioDto,
   InvitaInAulaStudio201,
+  InvitaNelGruppo201,
+  LeggiGruppo200,
   LeggiInvito200,
+  LeggiInvitoDiGruppo200,
   LeggiMessaggiAula200,
   LeggiMessaggiAulaParams,
   LeggiMioProfilo200,
   LeggiPost200,
   ModificaAulaStudio200,
   ModificaAulaStudioDto,
+  ModificaGruppo200,
+  ModificaGruppoDto,
   ModificaPost200,
   ModificaPostDto,
   PreautorizzaAllegato200,
@@ -73,12 +85,15 @@ import type {
   PreautorizzaMaterialeAula201,
   PreautorizzaMaterialeDto,
   PromuoviAModeratore200,
+  PromuoviNelGruppo200,
   PubblicaPost201,
   RetrocediDaModeratore200,
+  RetrocediNelGruppo200,
   RevocaPermesso200,
   RichiediCancellazioneAccount200,
   RichiediCodiceAccesso200,
   RichiestaCodiceDto,
+  RimuoviMembro200,
   RimuoviPartecipante200,
   ScriviInAula201,
   StatoDelServizio200,
@@ -2804,6 +2819,797 @@ export const useAccettaInvito = <TError = ErrorResponseDto,
       > => {
 
       const mutationOptions = getAccettaInvitoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Crea un gruppo
+ */
+export const creaGruppo = (
+    creaGruppoDto: CreaGruppoDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<CreaGruppo201>(
+      {url: `/gruppi`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: creaGruppoDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getCreaGruppoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creaGruppo>>, TError,{data: CreaGruppoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof creaGruppo>>, TError,{data: CreaGruppoDto}, TContext> => {
+
+const mutationKey = ['creaGruppo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof creaGruppo>>, {data: CreaGruppoDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  creaGruppo(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreaGruppoMutationResult = NonNullable<Awaited<ReturnType<typeof creaGruppo>>>
+    export type CreaGruppoMutationBody = CreaGruppoDto
+    export type CreaGruppoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Crea un gruppo
+ */
+export const useCreaGruppo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creaGruppo>>, TError,{data: CreaGruppoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof creaGruppo>>,
+        TError,
+        {data: CreaGruppoDto},
+        TContext
+      > => {
+
+      const mutationOptions = getCreaGruppoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary I gruppi di cui faccio parte
+ */
+export const elencaMieiGruppi = (
+    params?: ElencaMieiGruppiParams,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ElencaMieiGruppi200>(
+      {url: `/gruppi`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getElencaMieiGruppiQueryKey = (params?: ElencaMieiGruppiParams,) => {
+    return [
+    `/gruppi`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getElencaMieiGruppiQueryOptions = <TData = Awaited<ReturnType<typeof elencaMieiGruppi>>, TError = ErrorResponseDto>(params?: ElencaMieiGruppiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaMieiGruppi>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getElencaMieiGruppiQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof elencaMieiGruppi>>> = ({ signal }) => elencaMieiGruppi(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof elencaMieiGruppi>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ElencaMieiGruppiQueryResult = NonNullable<Awaited<ReturnType<typeof elencaMieiGruppi>>>
+export type ElencaMieiGruppiQueryError = ErrorResponseDto
+
+
+export function useElencaMieiGruppi<TData = Awaited<ReturnType<typeof elencaMieiGruppi>>, TError = ErrorResponseDto>(
+ params: undefined |  ElencaMieiGruppiParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaMieiGruppi>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaMieiGruppi>>,
+          TError,
+          Awaited<ReturnType<typeof elencaMieiGruppi>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaMieiGruppi<TData = Awaited<ReturnType<typeof elencaMieiGruppi>>, TError = ErrorResponseDto>(
+ params?: ElencaMieiGruppiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaMieiGruppi>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaMieiGruppi>>,
+          TError,
+          Awaited<ReturnType<typeof elencaMieiGruppi>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaMieiGruppi<TData = Awaited<ReturnType<typeof elencaMieiGruppi>>, TError = ErrorResponseDto>(
+ params?: ElencaMieiGruppiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaMieiGruppi>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary I gruppi di cui faccio parte
+ */
+
+export function useElencaMieiGruppi<TData = Awaited<ReturnType<typeof elencaMieiGruppi>>, TError = ErrorResponseDto>(
+ params?: ElencaMieiGruppiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaMieiGruppi>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getElencaMieiGruppiQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Il gruppo con i suoi membri
+ */
+export const leggiGruppo = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<LeggiGruppo200>(
+      {url: `/gruppi/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getLeggiGruppoQueryKey = (id?: string,) => {
+    return [
+    `/gruppi/${id}`
+    ] as const;
+    }
+
+    
+export const getLeggiGruppoQueryOptions = <TData = Awaited<ReturnType<typeof leggiGruppo>>, TError = ErrorResponseDto>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiGruppo>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getLeggiGruppoQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof leggiGruppo>>> = ({ signal }) => leggiGruppo(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof leggiGruppo>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type LeggiGruppoQueryResult = NonNullable<Awaited<ReturnType<typeof leggiGruppo>>>
+export type LeggiGruppoQueryError = ErrorResponseDto
+
+
+export function useLeggiGruppo<TData = Awaited<ReturnType<typeof leggiGruppo>>, TError = ErrorResponseDto>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiGruppo>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiGruppo>>,
+          TError,
+          Awaited<ReturnType<typeof leggiGruppo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiGruppo<TData = Awaited<ReturnType<typeof leggiGruppo>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiGruppo>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiGruppo>>,
+          TError,
+          Awaited<ReturnType<typeof leggiGruppo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiGruppo<TData = Awaited<ReturnType<typeof leggiGruppo>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiGruppo>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Il gruppo con i suoi membri
+ */
+
+export function useLeggiGruppo<TData = Awaited<ReturnType<typeof leggiGruppo>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiGruppo>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getLeggiGruppoQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Cambia nome o visibilità
+ */
+export const modificaGruppo = (
+    id: string,
+    modificaGruppoDto: ModificaGruppoDto,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<ModificaGruppo200>(
+      {url: `/gruppi/${id}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: modificaGruppoDto
+    },
+      options);
+    }
+  
+
+
+export const getModificaGruppoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modificaGruppo>>, TError,{id: string;data: ModificaGruppoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof modificaGruppo>>, TError,{id: string;data: ModificaGruppoDto}, TContext> => {
+
+const mutationKey = ['modificaGruppo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof modificaGruppo>>, {id: string;data: ModificaGruppoDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  modificaGruppo(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ModificaGruppoMutationResult = NonNullable<Awaited<ReturnType<typeof modificaGruppo>>>
+    export type ModificaGruppoMutationBody = ModificaGruppoDto
+    export type ModificaGruppoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Cambia nome o visibilità
+ */
+export const useModificaGruppo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modificaGruppo>>, TError,{id: string;data: ModificaGruppoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof modificaGruppo>>,
+        TError,
+        {id: string;data: ModificaGruppoDto},
+        TContext
+      > => {
+
+      const mutationOptions = getModificaGruppoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Elimina il gruppo (le aule collocate restano, e tornano sciolte)
+ */
+export const eliminaGruppo = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<EliminaGruppo200>(
+      {url: `/gruppi/${id}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getEliminaGruppoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminaGruppo>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof eliminaGruppo>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['eliminaGruppo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof eliminaGruppo>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  eliminaGruppo(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EliminaGruppoMutationResult = NonNullable<Awaited<ReturnType<typeof eliminaGruppo>>>
+    
+    export type EliminaGruppoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Elimina il gruppo (le aule collocate restano, e tornano sciolte)
+ */
+export const useEliminaGruppo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminaGruppo>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof eliminaGruppo>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getEliminaGruppoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Rimuove un membro, o esce dal gruppo
+ */
+export const rimuoviMembro = (
+    id: string,
+    utenteId: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<RimuoviMembro200>(
+      {url: `/gruppi/${id}/membri/${utenteId}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getRimuoviMembroMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rimuoviMembro>>, TError,{id: string;utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof rimuoviMembro>>, TError,{id: string;utenteId: string}, TContext> => {
+
+const mutationKey = ['rimuoviMembro'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rimuoviMembro>>, {id: string;utenteId: string}> = (props) => {
+          const {id,utenteId} = props ?? {};
+
+          return  rimuoviMembro(id,utenteId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RimuoviMembroMutationResult = NonNullable<Awaited<ReturnType<typeof rimuoviMembro>>>
+    
+    export type RimuoviMembroMutationError = ErrorResponseDto
+
+    /**
+ * @summary Rimuove un membro, o esce dal gruppo
+ */
+export const useRimuoviMembro = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rimuoviMembro>>, TError,{id: string;utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof rimuoviMembro>>,
+        TError,
+        {id: string;utenteId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getRimuoviMembroMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Promuove a moderatore del gruppo
+ */
+export const promuoviNelGruppo = (
+    id: string,
+    utenteId: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<PromuoviNelGruppo200>(
+      {url: `/gruppi/${id}/membri/${utenteId}/moderazione`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getPromuoviNelGruppoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof promuoviNelGruppo>>, TError,{id: string;utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof promuoviNelGruppo>>, TError,{id: string;utenteId: string}, TContext> => {
+
+const mutationKey = ['promuoviNelGruppo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof promuoviNelGruppo>>, {id: string;utenteId: string}> = (props) => {
+          const {id,utenteId} = props ?? {};
+
+          return  promuoviNelGruppo(id,utenteId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PromuoviNelGruppoMutationResult = NonNullable<Awaited<ReturnType<typeof promuoviNelGruppo>>>
+    
+    export type PromuoviNelGruppoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Promuove a moderatore del gruppo
+ */
+export const usePromuoviNelGruppo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof promuoviNelGruppo>>, TError,{id: string;utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof promuoviNelGruppo>>,
+        TError,
+        {id: string;utenteId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getPromuoviNelGruppoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Toglie il ruolo di moderatore
+ */
+export const retrocediNelGruppo = (
+    id: string,
+    utenteId: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<RetrocediNelGruppo200>(
+      {url: `/gruppi/${id}/membri/${utenteId}/moderazione`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getRetrocediNelGruppoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retrocediNelGruppo>>, TError,{id: string;utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof retrocediNelGruppo>>, TError,{id: string;utenteId: string}, TContext> => {
+
+const mutationKey = ['retrocediNelGruppo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof retrocediNelGruppo>>, {id: string;utenteId: string}> = (props) => {
+          const {id,utenteId} = props ?? {};
+
+          return  retrocediNelGruppo(id,utenteId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RetrocediNelGruppoMutationResult = NonNullable<Awaited<ReturnType<typeof retrocediNelGruppo>>>
+    
+    export type RetrocediNelGruppoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Toglie il ruolo di moderatore
+ */
+export const useRetrocediNelGruppo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retrocediNelGruppo>>, TError,{id: string;utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof retrocediNelGruppo>>,
+        TError,
+        {id: string;utenteId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getRetrocediNelGruppoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Invita un indirizzo nel gruppo
+ */
+export const invitaNelGruppo = (
+    id: string,
+    creaInvitoAlGruppoDto: CreaInvitoAlGruppoDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<InvitaNelGruppo201>(
+      {url: `/gruppi/${id}/inviti`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: creaInvitoAlGruppoDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getInvitaNelGruppoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof invitaNelGruppo>>, TError,{id: string;data: CreaInvitoAlGruppoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof invitaNelGruppo>>, TError,{id: string;data: CreaInvitoAlGruppoDto}, TContext> => {
+
+const mutationKey = ['invitaNelGruppo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof invitaNelGruppo>>, {id: string;data: CreaInvitoAlGruppoDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  invitaNelGruppo(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type InvitaNelGruppoMutationResult = NonNullable<Awaited<ReturnType<typeof invitaNelGruppo>>>
+    export type InvitaNelGruppoMutationBody = CreaInvitoAlGruppoDto
+    export type InvitaNelGruppoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Invita un indirizzo nel gruppo
+ */
+export const useInvitaNelGruppo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof invitaNelGruppo>>, TError,{id: string;data: CreaInvitoAlGruppoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof invitaNelGruppo>>,
+        TError,
+        {id: string;data: CreaInvitoAlGruppoDto},
+        TContext
+      > => {
+
+      const mutationOptions = getInvitaNelGruppoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Stato di un invito al gruppo
+ */
+export const leggiInvitoDiGruppo = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<LeggiInvitoDiGruppo200>(
+      {url: `/inviti-gruppo/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getLeggiInvitoDiGruppoQueryKey = (id?: string,) => {
+    return [
+    `/inviti-gruppo/${id}`
+    ] as const;
+    }
+
+    
+export const getLeggiInvitoDiGruppoQueryOptions = <TData = Awaited<ReturnType<typeof leggiInvitoDiGruppo>>, TError = ErrorResponseDto>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiInvitoDiGruppo>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getLeggiInvitoDiGruppoQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof leggiInvitoDiGruppo>>> = ({ signal }) => leggiInvitoDiGruppo(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof leggiInvitoDiGruppo>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type LeggiInvitoDiGruppoQueryResult = NonNullable<Awaited<ReturnType<typeof leggiInvitoDiGruppo>>>
+export type LeggiInvitoDiGruppoQueryError = ErrorResponseDto
+
+
+export function useLeggiInvitoDiGruppo<TData = Awaited<ReturnType<typeof leggiInvitoDiGruppo>>, TError = ErrorResponseDto>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiInvitoDiGruppo>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiInvitoDiGruppo>>,
+          TError,
+          Awaited<ReturnType<typeof leggiInvitoDiGruppo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiInvitoDiGruppo<TData = Awaited<ReturnType<typeof leggiInvitoDiGruppo>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiInvitoDiGruppo>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leggiInvitoDiGruppo>>,
+          TError,
+          Awaited<ReturnType<typeof leggiInvitoDiGruppo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useLeggiInvitoDiGruppo<TData = Awaited<ReturnType<typeof leggiInvitoDiGruppo>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiInvitoDiGruppo>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Stato di un invito al gruppo
+ */
+
+export function useLeggiInvitoDiGruppo<TData = Awaited<ReturnType<typeof leggiInvitoDiGruppo>>, TError = ErrorResponseDto>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leggiInvitoDiGruppo>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getLeggiInvitoDiGruppoQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Accetta l'invito
+ */
+export const accettaInvitoDiGruppo = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<AccettaInvitoDiGruppo200>(
+      {url: `/inviti-gruppo/${id}/accettazione`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getAccettaInvitoDiGruppoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof accettaInvitoDiGruppo>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof accettaInvitoDiGruppo>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['accettaInvitoDiGruppo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof accettaInvitoDiGruppo>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  accettaInvitoDiGruppo(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AccettaInvitoDiGruppoMutationResult = NonNullable<Awaited<ReturnType<typeof accettaInvitoDiGruppo>>>
+    
+    export type AccettaInvitoDiGruppoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Accetta l'invito
+ */
+export const useAccettaInvitoDiGruppo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof accettaInvitoDiGruppo>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof accettaInvitoDiGruppo>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getAccettaInvitoDiGruppoMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

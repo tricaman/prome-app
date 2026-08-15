@@ -19,5 +19,14 @@
     "scadenza": "L’invito vale fino al {scadenza}.",
     "azione": "Entra nell’aula",
     "ignora": "Se non conosci chi ti ha invitato, ignora questo messaggio: senza la tua accettazione non entra nessuno."
+  },
+  "invitoGruppo": {
+    "oggetto": "{invitante} ti invita nel gruppo {nomeGruppo} su Prome",
+    "anteprima": "Apri l’invito per entrare in «{nomeGruppo}».",
+    "titolo": "Sei stato invitato in un gruppo",
+    "istruzioni": "{invitante} ti ha invitato in «{nomeGruppo}», un gruppo di studio su Prome. Chi ne fa parte entra nelle aule studio del gruppo senza bisogno di un invito ogni volta.",
+    "scadenza": "L’invito vale fino al {scadenza}.",
+    "azione": "Entra nel gruppo",
+    "ignora": "Se non conosci chi ti ha invitato, ignora questo messaggio: senza la tua accettazione non entra nessuno."
   }
 }

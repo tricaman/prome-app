@@ -1,15 +1,26 @@
 import { Module } from '@nestjs/common';
+import { AvvisiInUscitaModule } from '../../infrastruttura/avvisi-in-uscita/avvisi-in-uscita.module';
+import { ProfiloModule } from '../profilo/profilo.module';
 import { GruppoService } from './gruppo.service';
+import { RecapitoFattiDelGruppoService } from './recapito-fatti.service';
 
 /**
- * Bounded context GRUPPO — gruppi di studio e loro membri.
+ * Bounded context GRUPPO — lo spazio che resta nel tempo.
  *
  * Posizione nella Context Map:
- * - potrà importare Profilo (upstream condiviso);
- * - NON importa Bacheca né AulaStudio (i contesti pari non si importano tra loro).
- * Per ora nessun import incrociato: modulo vuoto, solo registrato in AppModule.
+ * - importa Profilo (upstream condiviso): prova di onboarding, università su
+ *   cui si congela l'ateneo alla creazione, nomi dei membri;
+ * - **non importa Bacheca né Aula studio**. Verso l'aula pubblica due cose e
+ *   solo quelle: un booleano di appartenenza, chiesto su dato fresco, e i
+ *   fatti della decadenza — che l'aula consuma dal proprio lato.
+ *
+ * È **Aula studio a importare Gruppo**, non il contrario, ed è la direzione
+ * che rende impossibile l'anello: il gruppo non conosce le aule, e infatti non
+ * potrebbe elencarle nemmeno volendo.
  */
 @Module({
-  providers: [GruppoService],
+  imports: [ProfiloModule, AvvisiInUscitaModule],
+  providers: [GruppoService, RecapitoFattiDelGruppoService],
+  exports: [GruppoService, RecapitoFattiDelGruppoService],
 })
 export class GruppoModule {}

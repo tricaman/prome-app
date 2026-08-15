@@ -31,6 +31,8 @@ export const AulaStudioErrorCode = {
   /** MA2: il permesso di scrivere si legge fresco, nell'istante dell'invio. */
   NON_PUOI_SCRIVERE: 'AS018',
   MESSAGGIO_VUOTO: 'AS019',
+  /** AS9: si colloca un'aula solo in un gruppo di cui si fa parte adesso. */
+  COLLOCAZIONE_NEGATA: 'AS020',
 } as const;
 
 export type AulaStudioErrorCode =

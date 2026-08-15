@@ -419,6 +419,12 @@ export interface ModificaAulaStudioRequest {
   titolo?: string;
   visibilita?: VisibilitaAulaStudio;
   dataOraInizio?: string | null;
+  /**
+   * Colloca l'aula in un gruppo, o la scioglie con `null` (AS9: al più una
+   * collocazione, mai due). Chi colloca dev'essere membro di quel gruppo
+   * nell'istante del gesto.
+   */
+  gruppoId?: string | null;
 }
 
 export interface CreaArgomentoRequest {
@@ -477,4 +483,85 @@ export interface MessaggioDiChatResponse {
 
 export interface InviaMessaggioRequest {
   testo: string;
+}
+
+// --- Gruppo -----------------------------------------------------------------
+//
+// Un gruppo è un **contenitore di utenti con appartenenza e visibilità**: non
+// ha feed, chat o notifiche proprie, e quello che manca qui manca di
+// proposito. Verso l'aula studio attraversa il confine **un solo booleano**,
+// mai un elenco di membri.
+
+export type VisibilitaGruppo = 'PRIVATO' | 'ATENEO' | 'PUBBLICO';
+
+/** 120 caratteri, non vuoto dopo il trim (G1). */
+export const LUNGHEZZA_MASSIMA_NOME_GRUPPO = 120;
+
+export interface MembroResponse {
+  utenteId: string;
+  nome: string | null;
+  cognome: string | null;
+  universita: string | null;
+  /** Vero quando l'account non esiste più: il client mostra «Utente rimosso». */
+  rimosso?: boolean;
+  /** Vale SOLO dentro il gruppo: non concede nulla in un'aula collocata (AS6). */
+  moderatore: boolean;
+  entratoIl: string;
+}
+
+export interface GruppoResponse {
+  id: string;
+  nome: string;
+  visibilita: VisibilitaGruppo;
+  /** Congelato alla creazione dall'università del creatore (G5). */
+  ateneo: string | null;
+  creatoIl: string;
+  membri: number;
+  /** Posizione di chi legge, dichiarata dal server e mai dedotta dal client. */
+  sonoMembro: boolean;
+  sonoModeratore: boolean;
+}
+
+/** Il gruppo e il suo insieme di membri, in una risposta sola. */
+export interface DettaglioGruppoResponse {
+  gruppo: GruppoResponse;
+  membri: MembroResponse[];
+}
+
+export interface CreaGruppoRequest {
+  nome: string;
+  visibilita?: VisibilitaGruppo;
+}
+
+/**
+ * L'ateneo non c'è, e non è una dimenticanza: è congelato alla creazione (G5).
+ * Un gruppo non cambia pubblico dopo essere nato.
+ */
+export interface ModificaGruppoRequest {
+  nome?: string;
+  visibilita?: VisibilitaGruppo;
+}
+
+// --- Inviti al gruppo -------------------------------------------------------
+
+export type StatoInvitoAlGruppo = 'IN_ATTESA' | 'ACCETTATO' | 'SCADUTO';
+
+export interface InvitoAlGruppoResponse {
+  id: string;
+  gruppoId: string;
+  nomeGruppo: string;
+  destinatario: string;
+  stato: StatoInvitoAlGruppo;
+  scadeIl: string;
+  emessoIl: string;
+  /**
+   * Falso subito dopo l'accettazione: il membro non nasce nella stessa
+   * transazione (IG3), compare entro pochi secondi. È la finestra che il
+   * dominio dichiara, esposta al client invece di essere nascosta.
+   */
+  membroCreato: boolean;
+}
+
+export interface CreaInvitoAlGruppoRequest {
+  destinatario: string;
 }

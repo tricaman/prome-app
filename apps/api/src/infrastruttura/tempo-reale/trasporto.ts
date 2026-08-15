@@ -20,6 +20,22 @@ export interface TrasportoInTempoReale {
   pubblicaInStanza(stanza: string, evento: string, dato: unknown): Promise<void>;
 
   /**
+   * Toglie una persona da una stanza, subito.
+   *
+   * **Non è una decisione del trasporto**: la decisione è già stata presa dal
+   * modulo proprietario — qualcuno ha perso il titolo per stare lì — e qui si
+   * esegue soltanto. La riga nel database smette di ammetterlo alla richiesta
+   * successiva, ma chi è connesso non ne fa alcuna: continuerebbe a ricevere i
+   * messaggi di una conversazione a cui non ha più diritto, e sarebbe una
+   * finestra di visibilità indebita aperta per tutta la durata della
+   * connessione.
+   *
+   * Facoltativa come `registraGuardiano`: un adattatore che non ha stanze non
+   * ha nessuno da allontanare.
+   */
+  allontanaDallaStanza?(stanza: string, utenteId: string): Promise<void>;
+
+  /**
    * Il modulo proprietario si presenta come guardiano delle proprie stanze.
    *
    * Si registra a runtime invece di essere iniettato perché il verso opposto

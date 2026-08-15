@@ -19,5 +19,14 @@
     "scadenza": "The invitation is valid until {scadenza}.",
     "azione": "Join the room",
     "ignora": "If you do not know who invited you, ignore this message: nobody joins without your acceptance."
+  },
+  "invitoGruppo": {
+    "oggetto": "{invitante} invites you to the group {nomeGruppo} on Prome",
+    "anteprima": "Open the invitation to join «{nomeGruppo}».",
+    "titolo": "You have been invited to a group",
+    "istruzioni": "{invitante} invited you to «{nomeGruppo}», a study group on Prome. Members join the group’s study rooms without needing an invitation each time.",
+    "scadenza": "The invitation is valid until {scadenza}.",
+    "azione": "Join the group",
+    "ignora": "If you do not know who invited you, ignore this message: nobody joins without your acceptance."
   }
 }

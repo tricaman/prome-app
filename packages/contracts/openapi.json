@@ -2317,6 +2317,671 @@
         ]
       }
     },
+    "/gruppi": {
+      "post": {
+        "operationId": "creaGruppo",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreaGruppoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/GruppoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Crea un gruppo",
+        "tags": [
+          "gruppi"
+        ]
+      },
+      "get": {
+        "operationId": "elencaMieiGruppi",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Campo di ordinamento (dipende dalla risorsa)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "asc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/GruppoDto"
+                      }
+                    },
+                    "meta": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ResponseMetaDto"
+                        },
+                        {
+                          "properties": {
+                            "pagination": {
+                              "$ref": "#/components/schemas/PaginationMetaDto"
+                            }
+                          },
+                          "required": [
+                            "pagination"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "I gruppi di cui faccio parte",
+        "tags": [
+          "gruppi"
+        ]
+      }
+    },
+    "/gruppi/{id}": {
+      "get": {
+        "operationId": "leggiGruppo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/DettaglioGruppoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Il gruppo con i suoi membri",
+        "tags": [
+          "gruppi"
+        ]
+      },
+      "patch": {
+        "operationId": "modificaGruppo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModificaGruppoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/GruppoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cambia nome o visibilità",
+        "tags": [
+          "gruppi"
+        ]
+      },
+      "delete": {
+        "operationId": "eliminaGruppo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Gruppo eliminato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Elimina il gruppo (le aule collocate restano, e tornano sciolte)",
+        "tags": [
+          "gruppi"
+        ]
+      }
+    },
+    "/gruppi/{id}/membri/{utenteId}": {
+      "delete": {
+        "operationId": "rimuoviMembro",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "utenteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membro rimosso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Rimuove un membro, o esce dal gruppo",
+        "tags": [
+          "gruppi"
+        ]
+      }
+    },
+    "/gruppi/{id}/membri/{utenteId}/moderazione": {
+      "post": {
+        "operationId": "promuoviNelGruppo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "utenteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Promosso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Promuove a moderatore del gruppo",
+        "tags": [
+          "gruppi"
+        ]
+      },
+      "delete": {
+        "operationId": "retrocediNelGruppo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "utenteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrocesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Toglie il ruolo di moderatore",
+        "tags": [
+          "gruppi"
+        ]
+      }
+    },
+    "/gruppi/{id}/inviti": {
+      "post": {
+        "operationId": "invitaNelGruppo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreaInvitoAlGruppoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/InvitoAlGruppoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Invita un indirizzo nel gruppo",
+        "tags": [
+          "gruppi"
+        ]
+      }
+    },
+    "/inviti-gruppo/{id}": {
+      "get": {
+        "operationId": "leggiInvitoDiGruppo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/InvitoAlGruppoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Stato di un invito al gruppo",
+        "tags": [
+          "gruppi"
+        ]
+      }
+    },
+    "/inviti-gruppo/{id}/accettazione": {
+      "post": {
+        "operationId": "accettaInvitoDiGruppo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/InvitoAlGruppoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Accetta l'invito",
+        "tags": [
+          "gruppi"
+        ]
+      }
+    },
     "/account/cancellazione": {
       "post": {
         "operationId": "richiediCancellazioneAccount",
@@ -3197,6 +3862,11 @@
           "dataOraInizio": {
             "type": "object",
             "nullable": true
+          },
+          "gruppoId": {
+            "type": "object",
+            "nullable": true,
+            "description": "Gruppo in cui collocare l'aula"
           }
         }
       },
@@ -3414,6 +4084,203 @@
         },
         "required": [
           "chiave"
+        ]
+      },
+      "GruppoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "visibilita": {
+            "type": "string",
+            "enum": [
+              "PRIVATO",
+              "ATENEO",
+              "PUBBLICO"
+            ]
+          },
+          "ateneo": {
+            "type": "string",
+            "nullable": true,
+            "description": "Congelato alla creazione"
+          },
+          "creatoIl": {
+            "type": "string"
+          },
+          "membri": {
+            "type": "number"
+          },
+          "sonoMembro": {
+            "type": "boolean"
+          },
+          "sonoModeratore": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "visibilita",
+          "ateneo",
+          "creatoIl",
+          "membri",
+          "sonoMembro",
+          "sonoModeratore"
+        ]
+      },
+      "CreaGruppoDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "example": "Ingegneria informatica – 2° anno"
+          },
+          "visibilita": {
+            "type": "string",
+            "enum": [
+              "PRIVATO",
+              "ATENEO",
+              "PUBBLICO"
+            ],
+            "default": "PRIVATO"
+          }
+        },
+        "required": [
+          "nome"
+        ]
+      },
+      "MembroDto": {
+        "type": "object",
+        "properties": {
+          "utenteId": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "cognome": {
+            "type": "string",
+            "nullable": true
+          },
+          "universita": {
+            "type": "string",
+            "nullable": true
+          },
+          "rimosso": {
+            "type": "boolean",
+            "description": "Vero se l'account non esiste più"
+          },
+          "moderatore": {
+            "type": "boolean",
+            "description": "Vale solo dentro il gruppo: non concede nulla in un'aula"
+          },
+          "entratoIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "utenteId",
+          "nome",
+          "cognome",
+          "universita",
+          "moderatore",
+          "entratoIl"
+        ]
+      },
+      "DettaglioGruppoDto": {
+        "type": "object",
+        "properties": {
+          "gruppo": {
+            "$ref": "#/components/schemas/GruppoDto"
+          },
+          "membri": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MembroDto"
+            }
+          }
+        },
+        "required": [
+          "gruppo",
+          "membri"
+        ]
+      },
+      "ModificaGruppoDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "visibilita": {
+            "type": "string",
+            "enum": [
+              "PRIVATO",
+              "ATENEO",
+              "PUBBLICO"
+            ]
+          }
+        }
+      },
+      "InvitoAlGruppoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "gruppoId": {
+            "type": "string"
+          },
+          "nomeGruppo": {
+            "type": "string"
+          },
+          "destinatario": {
+            "type": "string"
+          },
+          "stato": {
+            "type": "string",
+            "enum": [
+              "IN_ATTESA",
+              "ACCETTATO",
+              "SCADUTO"
+            ]
+          },
+          "scadeIl": {
+            "type": "string"
+          },
+          "emessoIl": {
+            "type": "string"
+          },
+          "membroCreato": {
+            "type": "boolean",
+            "description": "Falso subito dopo l'accettazione: il membro nasce dopo (IG3)"
+          }
+        },
+        "required": [
+          "id",
+          "gruppoId",
+          "nomeGruppo",
+          "destinatario",
+          "stato",
+          "scadeIl",
+          "emessoIl",
+          "membroCreato"
+        ]
+      },
+      "CreaInvitoAlGruppoDto": {
+        "type": "object",
+        "properties": {
+          "destinatario": {
+            "type": "string",
+            "example": "compagno@studenti.unibo.it"
+          }
+        },
+        "required": [
+          "destinatario"
         ]
       },
       "CancellazioneRichiestaRispostaDto": {

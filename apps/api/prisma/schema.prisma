@@ -737,6 +737,7 @@ model RichiestaDiCancellazione {
   // la prima volta. Un timestamp è insieme stato e traccia.
   // >>> PUNTO DA AGGIORNARE A OGNI NUOVO DETENTORE (con DETENTORI_CENSITI) <<<
   bachecaAnonimizzataIl DateTime?
+  gruppiLiberatiIl      DateTime?
   auleStudioLiberateIl  DateTime?
   profiloEliminatoIl    DateTime?
   accessoEliminatoIl    DateTime?

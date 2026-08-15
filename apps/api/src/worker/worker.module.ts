@@ -6,6 +6,7 @@ import { MisurazioniModule } from '../infrastruttura/misurazioni/misurazioni.mod
 import { AulaStudioModule } from '../modules/aula-studio/aula-studio.module';
 import { BachecaModule } from '../modules/bacheca/bacheca.module';
 import { CancellazioneModule } from '../modules/cancellazione/cancellazione.module';
+import { GruppoModule } from '../modules/gruppo/gruppo.module';
 import { WorkerService } from './worker.service';
 
 /**
@@ -21,9 +22,10 @@ import { WorkerService } from './worker.service';
  *   (pattern outbox) dai contesti che li producono a quelli che li ascoltano.
  *
  * Oggi esegue le pulizie della Bacheca (i commenti dei post eliminati e i
- * caricamenti abbandonati) e la catena di cancellazione degli account (V5):
- * grazia, eliminazione, anonimizzazione e verifica del residuo. Il recapito
- * dei fatti arriverà con E3.
+ * caricamenti abbandonati), la catena di cancellazione degli account (V5) —
+ * grazia, eliminazione, anonimizzazione e verifica del residuo — e la corsia
+ * rapida dei fatti, che porta **due** outbox: quella dell'aula studio e
+ * quella del gruppo.
  */
 @Module({
   imports: [
@@ -39,6 +41,7 @@ import { WorkerService } from './worker.service';
     BachecaModule,
     AulaStudioModule,
     CancellazioneModule,
+    GruppoModule,
   ],
   providers: [WorkerService],
 })

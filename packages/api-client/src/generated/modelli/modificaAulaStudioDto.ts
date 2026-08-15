@@ -7,6 +7,7 @@
  */
 import type { ModificaAulaStudioDtoVisibilita } from './modificaAulaStudioDtoVisibilita';
 import type { ModificaAulaStudioDtoDataOraInizio } from './modificaAulaStudioDtoDataOraInizio';
+import type { ModificaAulaStudioDtoGruppoId } from './modificaAulaStudioDtoGruppoId';
 
 export interface ModificaAulaStudioDto {
   /** @maxLength 200 */
@@ -14,4 +15,9 @@ export interface ModificaAulaStudioDto {
   visibilita?: ModificaAulaStudioDtoVisibilita;
   /** @nullable */
   dataOraInizio?: ModificaAulaStudioDtoDataOraInizio;
+  /**
+   * Gruppo in cui collocare l'aula
+   * @nullable
+   */
+  gruppoId?: ModificaAulaStudioDtoGruppoId;
 }

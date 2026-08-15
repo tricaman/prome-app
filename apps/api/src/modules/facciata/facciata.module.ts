@@ -6,12 +6,14 @@ import { AvvisiInUscitaModule } from '../../infrastruttura/avvisi-in-uscita/avvi
 import { AulaStudioModule } from '../aula-studio/aula-studio.module';
 import { BachecaModule } from '../bacheca/bacheca.module';
 import { CancellazioneModule } from '../cancellazione/cancellazione.module';
+import { GruppoModule } from '../gruppo/gruppo.module';
 import { ProfiloModule } from '../profilo/profilo.module';
 import { AccessoController } from './accesso.controller';
 import { ArchivioController } from './archivio.controller';
 import { AulaStudioController } from './aula-studio.controller';
 import { BachecaController } from './bacheca.controller';
 import { CancellazioneController } from './cancellazione.controller';
+import { GruppoController, InvitiAlGruppoController } from './gruppo.controller';
 import { InvitiController } from './inviti.controller';
 import { GuardiaAccesso } from './guardia-accesso';
 import { HealthController } from './health.controller';
@@ -37,6 +39,7 @@ import { ProfiloController } from './profilo.controller';
     AulaStudioModule,
     ArchivioFileModule,
     CancellazioneModule,
+    GruppoModule,
   ],
   controllers: [
     HealthController,
@@ -45,6 +48,8 @@ import { ProfiloController } from './profilo.controller';
     BachecaController,
     AulaStudioController,
     InvitiController,
+    GruppoController,
+    InvitiAlGruppoController,
     ArchivioController,
     CancellazioneController,
   ],

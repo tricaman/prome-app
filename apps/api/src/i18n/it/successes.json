@@ -34,5 +34,13 @@
   "MATERIALE_ELIMINATO": "Materiale eliminato",
   "MESSAGGIO_INVIATO": "Messaggio inviato",
   "MESSAGGI_ELENCATI": "Conversazione caricata",
-  "PRIVACY_AGGIORNATA": "Impostazioni di privacy aggiornate"
+  "PRIVACY_AGGIORNATA": "Impostazioni di privacy aggiornate",
+  "GRUPPO_CREATO": "Gruppo creato",
+  "GRUPPO_MODIFICATO": "Gruppo aggiornato",
+  "GRUPPO_ELIMINATO": "Gruppo eliminato",
+  "GRUPPO_MEMBRO_RIMOSSO": "Membro rimosso",
+  "GRUPPO_MODERATORE_PROMOSSO": "Ora è moderatore del gruppo",
+  "GRUPPO_MODERATORE_RETROCESSO": "Non è più moderatore del gruppo",
+  "GRUPPO_INVITO_EMESSO": "Invito inviato",
+  "GRUPPO_INVITO_ACCETTATO": "Invito accettato: stiamo aggiungendoti al gruppo"
 }

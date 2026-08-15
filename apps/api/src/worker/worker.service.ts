@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PuliziaAulaStudioService } from '../modules/aula-studio/pulizia-aula-studio.service';
 import { RecapitoFattiService } from '../modules/aula-studio/recapito-fatti.service';
+import { RecapitoFattiDelGruppoService } from '../modules/gruppo/recapito-fatti.service';
 import { PuliziaBachecaService } from '../modules/bacheca/pulizia-bacheca.service';
 import { CancellazioneService } from '../modules/cancellazione/cancellazione.service';
 
@@ -44,6 +45,7 @@ export class WorkerService implements OnApplicationBootstrap, OnApplicationShutd
     private readonly puliziaBacheca: PuliziaBachecaService,
     private readonly puliziaAule: PuliziaAulaStudioService,
     private readonly recapitoFatti: RecapitoFattiService,
+    private readonly recapitoFattiDelGruppo: RecapitoFattiDelGruppoService,
     private readonly cancellazione: CancellazioneService,
   ) {}
 
@@ -73,7 +75,11 @@ export class WorkerService implements OnApplicationBootstrap, OnApplicationShutd
     if (this.giroFattiInCorso) return;
     this.giroFattiInCorso = true;
     try {
+      // Due canali, una corsia sola: sono outbox distinte per schema, ma
+      // hanno la stessa urgenza — di là qualcuno aspetta davanti allo
+      // schermo, di qua qualcuno sta leggendo ciò che non dovrebbe più.
       await this.recapitoFatti.eseguiGiro();
+      await this.recapitoFattiDelGruppo.eseguiGiro();
     } catch (errore) {
       this.logger.error(
         'Il recapito dei fatti è fallito: si riprova al prossimo giro',

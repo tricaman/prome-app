@@ -99,6 +99,26 @@ Cinque aggregati (`AulaStudio`, `Argomento`, `AllegatoDiAulaStudio`, `Invito`, e
 - **`PortaAppartenenzaGruppo`** è l'anti-corruption layer verso il Gruppo: passa **un booleano** tradotto in titolo di ammissione, e **la parola «Membro» non entra nel core**. Oggi risponde sempre di no; E7 si attaccherà lì senza toccare l'ammissione.
 - Codici errore: prefisso **AS**. Il contesto ha **due sole dipendenze di dominio** (Profilo e, in futuro, l'appartenenza al Gruppo): una terza è una modifica della Context Map, non un dettaglio interno.
 
+## Gruppo (E7) — lo spazio che resta
+
+Un gruppo è un **contenitore di utenti con appartenenza e visibilità**: niente feed, niente chat, niente notifiche proprie. Ciò che manca manca di proposito — è l'ipotesi che la porta a timebox ha confermato, e allargarla è una decisione di prodotto, non un dettaglio implementativo.
+
+- **G4 e G2 sono la stessa preoccupazione in due momenti**: chi crea è moderatore **nella stessa scrittura** (non esiste l'istante in cui un gruppo c'è e nessuno può amministrarlo), e l'ultimo moderatore non si rimuove né si retrocede. La via d'uscita non è un'eccezione ma un verbo che il dominio possiede già: **promuovere**. La gara fra due retrocessioni la respinge il blocco ottimistico sulla `versione` del gruppo — con tre rifiuti tutti legittimi a seconda dell'intreccio (403, 409, 422), e il gruppo che resta governabile in ogni caso.
+- **G3 è nella chiave primaria**, non in un controllo: `@@id([gruppoId, utenteId])`. Aggiungere due volte la stessa persona è quindi **un'operazione senza effetto**, non un errore da gestire, ed è ciò che rende innocua la doppia consegna di un fatto.
+- **G5 — l'ateneo è congelato alla creazione** dall'università del creatore. Se seguisse il profilo, un gruppo cambierebbe pubblico perché una persona si è trasferita. L'università di chi legge si interroga invece **fresca**: dato anagrafico propagato, decisione di autorizzazione interrogata.
+- **`gruppo` ha la propria outbox** (`FattoInUscitaDelGruppo`), gemella di quella dell'aula: una tabella per schema, perché il fatto va scritto nella stessa transazione dell'aggregato che lo produce. Porta tre fatti — invito accettato, membro rimosso, gruppo eliminato — e gira sulla **stessa corsia rapida da 1 s**: di là qualcuno aspetta davanti allo schermo, di qua qualcuno sta leggendo ciò che non dovrebbe più.
+
+### Il confine con l'aula studio
+
+**La dipendenza va in un verso solo: Aula studio importa Gruppo, mai il contrario.** È ciò che rende impossibile l'anello fra i due moduli, e il motivo per cui il gruppo non elenca le aule collocate — non le conosce affatto. Chi le vuole le chiede al contesto che le possiede.
+
+- Attraversa il confine **un solo booleano** (`PortaAppartenenzaGruppo`), chiesto su dato fresco (IA4): la parola «Membro» non entra nel core. Per questo **essere moderatore del gruppo non concede nulla dentro un'aula collocata** (AS6): l'informazione non passa proprio.
+- **`haTitoloDiAmmissione` sta in un posto solo** e serve in due momenti opposti — chi chiede di entrare e chi, già dentro, deve poter restare. Due copie divergerebbero, e quella dimenticata sarebbe la seconda: cioè proprio quella che decide un'uscita.
+- **SE1**: alla rimozione di un membro il fatto viaggia sulla corsia rapida e il core **ri-risolve il titolo su dato fresco**, rimuovendo **solo chi resta senza**. Chi era entrato con un invito proprio non si tocca — sarebbe una rimozione indebita, lo stesso difetto di segno opposto.
+- Chi è **connesso** va tolto anche dalla stanza (`allontanaDallaStanza`): la riga smette di ammetterlo alla richiesta successiva, ma una connessione aperta non ne fa nessuna e continuerebbe a ricevere i messaggi. Il trasporto continua a non decidere niente — esegue una decisione già presa.
+- **Eliminare un gruppo non elimina alcuna aula**: le collocate tornano sciolte, in differita e per fatto. Cancellare un riferimento non cancella mai la cosa riferita, come per gli argomenti.
+- **Chi cancella l'account** esce da tutti i gruppi; dove lascerebbe uno spazio senza moderatori il ruolo passa al **membro più anziano**, perché qui non c'è più nessuno che possa promuovere, e un gruppo ingovernabile danneggia gli altri. Un gruppo rimasto vuoto si elimina. `gruppo` è ora fra i `DETENTORI_CENSITI`.
+
 ## Chat dell'aula (E4)
 
 Il messaggio è un aggregato **minuscolo**: nessuna versione, immutabile dopo l'invio (MA1) — è un fatto, non un documento. Non condivide alcun modello con la futura chat del Gruppo: ciò che si verifica prima di scrivere è diverso (qui un permesso, là l'appartenenza), e la duplicazione è un costo già messo a bilancio.

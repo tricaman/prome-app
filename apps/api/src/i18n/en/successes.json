@@ -34,5 +34,13 @@
   "MATERIALE_ELIMINATO": "Material deleted",
   "MESSAGGIO_INVIATO": "Message sent",
   "MESSAGGI_ELENCATI": "Conversation loaded",
-  "PRIVACY_AGGIORNATA": "Privacy settings updated"
+  "PRIVACY_AGGIORNATA": "Privacy settings updated",
+  "GRUPPO_CREATO": "Group created",
+  "GRUPPO_MODIFICATO": "Group updated",
+  "GRUPPO_ELIMINATO": "Group deleted",
+  "GRUPPO_MEMBRO_RIMOSSO": "Member removed",
+  "GRUPPO_MODERATORE_PROMOSSO": "They are now a group moderator",
+  "GRUPPO_MODERATORE_RETROCESSO": "They are no longer a group moderator",
+  "GRUPPO_INVITO_EMESSO": "Invitation sent",
+  "GRUPPO_INVITO_ACCETTATO": "Invitation accepted: we are adding you to the group"
 }

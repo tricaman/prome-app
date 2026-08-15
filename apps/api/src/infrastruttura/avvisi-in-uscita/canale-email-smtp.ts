@@ -3,7 +3,11 @@ import { createTransport, type Transporter } from 'nodemailer';
 import { I18nService } from 'nestjs-i18n';
 import { env } from '../../config/env';
 import { DURATA_CODICE_SECONDI } from '../accesso/better-auth';
-import type { CanaleEmail, InvitoDaRecapitare } from './canale-email';
+import type {
+  CanaleEmail,
+  InvitoAlGruppoDaRecapitare,
+  InvitoDaRecapitare,
+} from './canale-email';
 import {
   azione,
   codice as bloccoCodice,
@@ -102,6 +106,38 @@ export class CanaleEmailSmtp implements CanaleEmail {
 
     // Nel log finisce che è partito, mai chi ha invitato chi.
     this.logger.log(`Invito all'aula studio inviato (lingua ${lingua})`);
+  }
+
+  async inviaInvitoAlGruppo(
+    destinatario: string,
+    invito: InvitoAlGruppoDaRecapitare,
+    lingua: string,
+  ): Promise<void> {
+    const scadenza = invito.scadeIl.toLocaleDateString(lingua === 'en' ? 'en-GB' : 'it-IT', {
+      day: 'numeric',
+      month: 'long',
+    });
+    const argomenti = {
+      invitante: invito.invitatoDa,
+      nomeGruppo: invito.nomeGruppo,
+      scadenza,
+    };
+    const t = (chiave: string) => this.traduci(`email.invitoGruppo.${chiave}`, lingua, argomenti);
+
+    await this.recapita(destinatario, lingua, {
+      oggetto: t('oggetto'),
+      anteprima: t('anteprima'),
+      blocchi: [
+        titolo(t('titolo')),
+        paragrafo(t('istruzioni')),
+        azione(t('azione'), invito.collegamento),
+        nota(t('scadenza')),
+        separatore(),
+        nota(t('ignora')),
+      ],
+    });
+
+    this.logger.log(`Invito al gruppo inviato (lingua ${lingua})`);
   }
 
   /**

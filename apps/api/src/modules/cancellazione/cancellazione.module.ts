@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AccessoModule } from '../../infrastruttura/accesso/accesso.module';
 import { AulaStudioModule } from '../aula-studio/aula-studio.module';
 import { BachecaModule } from '../bacheca/bacheca.module';
+import { GruppoModule } from '../gruppo/gruppo.module';
 import { ProfiloModule } from '../profilo/profilo.module';
 import { CancellazioneService } from './cancellazione.service';
 
@@ -21,7 +22,7 @@ import { CancellazioneService } from './cancellazione.service';
  * ogni detentore nuovo (vedi DETENTORI_CENSITI nel service).
  */
 @Module({
-  imports: [ProfiloModule, BachecaModule, AulaStudioModule, AccessoModule],
+  imports: [ProfiloModule, BachecaModule, GruppoModule, AulaStudioModule, AccessoModule],
   providers: [CancellazioneService],
   exports: [CancellazioneService],
 })

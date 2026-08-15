@@ -179,6 +179,12 @@ describe('Cancellazione dell\'account (V5/SE3)', () => {
       post: await prisma.post.count({ where: { autoreId: utenteId } }),
       commenti: await prisma.commento.count({ where: { autoreId: utenteId } }),
       prenotazioni: await prisma.allegatoInAttesa.count({ where: { autoreId: utenteId } }),
+      // >>> DETENTORE NUOVO (E7): l'elenco è speculare a DETENTORI_CENSITI <<<
+      appartenenze: await prisma.membro.count({ where: { utenteId } }),
+      invitiAlGruppo: await prisma.invitoAlGruppo.count({
+        where: { OR: [{ accettatoDa: utenteId }, { invitatoDa: utenteId }] },
+      }),
+      gruppiCreati: await prisma.gruppo.count({ where: { creatoDa: utenteId } }),
     };
   }
 
@@ -193,6 +199,9 @@ describe('Cancellazione dell\'account (V5/SE3)', () => {
       post: 0,
       commenti: 0,
       prenotazioni: 0,
+      appartenenze: 0,
+      invitiAlGruppo: 0,
+      gruppiCreati: 0,
     });
   };
 

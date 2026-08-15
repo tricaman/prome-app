@@ -20,11 +20,30 @@ export interface InvitoDaRecapitare {
   scadeIl: Date;
 }
 
+/**
+ * L'invito a un gruppo è un'email diversa da quella dell'aula, e non per
+ * simmetria: chi la riceve viene invitato a uno spazio che resta nel tempo,
+ * non a un incontro che si apre adesso. La scadenza è la stessa, ciò che si
+ * promette no.
+ */
+export interface InvitoAlGruppoDaRecapitare {
+  nomeGruppo: string;
+  invitatoDa: string;
+  /** Indirizzo su cui atterra chi accetta, anche se deve ancora registrarsi. */
+  collegamento: string;
+  scadeIl: Date;
+}
+
 export interface CanaleEmail {
   inviaCodiceAccesso(destinatario: string, codice: string, lingua: string): Promise<void>;
   inviaInvitoAulaStudio(
     destinatario: string,
     invito: InvitoDaRecapitare,
+    lingua: string,
+  ): Promise<void>;
+  inviaInvitoAlGruppo(
+    destinatario: string,
+    invito: InvitoAlGruppoDaRecapitare,
     lingua: string,
   ): Promise<void>;
 }

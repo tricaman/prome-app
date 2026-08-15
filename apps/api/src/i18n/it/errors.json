@@ -52,5 +52,17 @@
   "AULA_CONFLITTO_DI_VERSIONE": "Qualcun altro ha appena modificato l’aula: riprova",
   "AULA_NON_PUOI_SCRIVERE": "Non hai il permesso di scrivere in quest’aula",
   "MESSAGGIO_VUOTO": "Scrivi qualcosa prima di inviare",
-  "PRIVACY_SENZA_MODIFICHE": "Indica almeno una delle due impostazioni"
+  "PRIVACY_SENZA_MODIFICHE": "Indica almeno una delle due impostazioni",
+  "GRUPPO_NOT_FOUND": "Gruppo non trovato",
+  "GRUPPO_NOME_VUOTO": "Il gruppo deve avere un nome",
+  "GRUPPO_NON_SEI_MODERATORE": "Solo un moderatore del gruppo può farlo",
+  "GRUPPO_ULTIMO_MODERATORE": "Sei l’unico moderatore: promuovi qualcun altro prima di uscire",
+  "GRUPPO_MEMBRO_NOT_FOUND": "Questa persona non fa parte del gruppo",
+  "GRUPPO_NON_SEI_MEMBRO": "Non fai parte di questo gruppo",
+  "GRUPPO_INVITO_NOT_FOUND": "Invito non trovato",
+  "GRUPPO_INVITO_SCADUTO": "Questo invito è scaduto",
+  "GRUPPO_INVITO_GIA_CHIUSO": "Questo invito è già stato usato",
+  "GRUPPO_INVITO_DI_UN_ALTRO": "Questo invito non è per te",
+  "GRUPPO_CONFLITTO_DI_VERSIONE": "Qualcun altro ha appena cambiato i membri: riprova",
+  "AULA_COLLOCAZIONE_NEGATA": "Puoi collocare un’aula solo in un gruppo di cui fai parte"
 }

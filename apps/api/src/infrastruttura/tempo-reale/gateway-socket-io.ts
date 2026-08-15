@@ -87,6 +87,26 @@ export class GatewaySocketIo implements TrasportoInTempoReale, OnGatewayConnecti
     return { ascolto: false };
   }
 
+  /**
+   * Toglie dalla stanza tutte le connessioni di quella persona — può averne
+   * più d'una, da dispositivi diversi, e lasciarne aperta una vanificherebbe
+   * l'allontanamento.
+   *
+   * Prima si avvisa e poi si toglie: chi riceve `allontanato` sa perché la
+   * conversazione si è fermata, invece di vedere una chat che smette di
+   * aggiornarsi senza spiegazione.
+   */
+  async allontanaDallaStanza(stanza: string, utenteId: string): Promise<void> {
+    if (!this.server) return;
+
+    const connessioni = await this.server.in(stanza).fetchSockets();
+    for (const connessione of connessioni) {
+      if (connessione.data.utenteId !== utenteId) continue;
+      connessione.emit('allontanato', { stanza });
+      await connessione.leave(stanza);
+    }
+  }
+
   pubblicaInStanza(stanza: string, evento: string, dato: unknown): Promise<void> {
     // Se il server non è ancora in piedi non è un errore da propagare: chi
     // scrive ha già il proprio messaggio salvato, e chi legge lo troverà.

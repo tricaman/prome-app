@@ -52,5 +52,17 @@
   "AULA_CONFLITTO_DI_VERSIONE": "Someone just changed the room: try again",
   "AULA_NON_PUOI_SCRIVERE": "You do not have permission to write in this room",
   "MESSAGGIO_VUOTO": "Write something before sending",
-  "PRIVACY_SENZA_MODIFICHE": "Choose at least one of the two settings"
+  "PRIVACY_SENZA_MODIFICHE": "Choose at least one of the two settings",
+  "GRUPPO_NOT_FOUND": "Group not found",
+  "GRUPPO_NOME_VUOTO": "The group needs a name",
+  "GRUPPO_NON_SEI_MODERATORE": "Only a group moderator can do this",
+  "GRUPPO_ULTIMO_MODERATORE": "You are the only moderator: promote someone else before leaving",
+  "GRUPPO_MEMBRO_NOT_FOUND": "This person is not in the group",
+  "GRUPPO_NON_SEI_MEMBRO": "You are not in this group",
+  "GRUPPO_INVITO_NOT_FOUND": "Invitation not found",
+  "GRUPPO_INVITO_SCADUTO": "This invitation has expired",
+  "GRUPPO_INVITO_GIA_CHIUSO": "This invitation has already been used",
+  "GRUPPO_INVITO_DI_UN_ALTRO": "This invitation is not for you",
+  "GRUPPO_CONFLITTO_DI_VERSIONE": "Someone just changed the members: try again",
+  "AULA_COLLOCAZIONE_NEGATA": "You can place a room only in a group you belong to"
 }

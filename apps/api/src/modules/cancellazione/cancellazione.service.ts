@@ -9,6 +9,7 @@ import {
 } from '../../infrastruttura/misurazioni/misurazioni';
 import { CancellazioneAulaStudioService } from '../aula-studio/cancellazione-aula-studio.service';
 import { CancellazioneBachecaService } from '../bacheca/cancellazione-bacheca.service';
+import { GruppoService } from '../gruppo/gruppo.service';
 import { ProfiloService } from '../profilo/profilo.service';
 
 export const GIORNI_DI_GRAZIA = 14;
@@ -41,7 +42,7 @@ const GIORNO_MS = 24 * 60 * 60 * 1000;
  * Domani: gruppo.*, altre tabelle outbox, log solo se la loro conservazione
  * supererà i 14 giorni.
  */
-const DETENTORI_CENSITI = ['accesso', 'profilo', 'bacheca', 'aula_studio'] as const;
+const DETENTORI_CENSITI = ['accesso', 'profilo', 'bacheca', 'gruppo', 'aula_studio'] as const;
 
 /**
  * CancellazioneDellAccount — componente TRASVERSALE, non un contesto di
@@ -63,6 +64,7 @@ export class CancellazioneService {
     private readonly prisma: PrismaService,
     private readonly profilo: ProfiloService,
     private readonly bacheca: CancellazioneBachecaService,
+    private readonly gruppi: GruppoService,
     private readonly aule: CancellazioneAulaStudioService,
     private readonly accesso: CancellazioneAccesso,
     @Inject(MISURAZIONI) private readonly misurazioni: MisurazioniDiUtilizzo,
@@ -274,6 +276,19 @@ export class CancellazioneService {
       );
     }
 
+    // Gruppo: si esce da tutti i gruppi, e dove si lascerebbe uno spazio
+    // senza moderatori il ruolo passa al membro più anziano — un gruppo che
+    // nessuno può amministrare sarebbe un danno agli altri, non a chi se ne va.
+    try {
+      await this.gruppi.rimuoviAppartenenzeDi(utenteId);
+      if (!voce.gruppiLiberatiIl) marca.gruppiLiberatiIl = new Date();
+    } catch (errore) {
+      this.logger.warn(
+        `Passo gruppo fallito per l'utente ${utenteId}: si riprova al prossimo giro`,
+        errore instanceof Error ? errore.stack : undefined,
+      );
+    }
+
     // Aula studio: il partecipante esce onorando AS2, gli inviti spariscono, e
     // il materiale resta con il solo caricatore anonimizzato — è la sola
     // eccezione alla cancellazione, dichiarata nell'informativa.
@@ -338,13 +353,17 @@ export class CancellazioneService {
     // I proprietari, insieme: l'elenco è DETENTORI_CENSITI.
     void DETENTORI_CENSITI;
     const indirizzo = await this.accesso.indirizzoDi(utenteId);
-    const [accesso, profilo, bacheca, aule] = await Promise.all([
+    const [accesso, profilo, bacheca, gruppi, aule] = await Promise.all([
       this.accesso.contaResiduiDi(utenteId),
       this.profilo.contaResiduiDi(utenteId),
       this.bacheca.contaResiduiDi(utenteId),
+      this.gruppi.contaResiduiDi(utenteId),
       this.aule.contaResiduiDi(utenteId, indirizzo),
     ]);
-    return { record: accesso + profilo + bacheca.record + aule, file: bacheca.file };
+    return {
+      record: accesso + profilo + bacheca.record + gruppi + aule,
+      file: bacheca.file,
+    };
   }
 
   private async registraEsito(

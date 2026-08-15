@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { CanaleEmail, InvitoDaRecapitare } from './canale-email';
+import type {
+  CanaleEmail,
+  InvitoAlGruppoDaRecapitare,
+  InvitoDaRecapitare,
+} from './canale-email';
 
 /**
  * Canale email di sviluppo: scrive il codice nei log e non manda niente.
@@ -22,6 +26,8 @@ export class CanaleEmailSviluppo implements CanaleEmail {
   /** Ultimo invito per destinatario, con lo stesso scopo. */
   private readonly ultimiInviti = new Map<string, InvitoDaRecapitare>();
 
+  private readonly ultimiInvitiAlGruppo = new Map<string, InvitoAlGruppoDaRecapitare>();
+
   inviaCodiceAccesso(destinatario: string, codice: string, lingua: string): Promise<void> {
     this.ultimiCodici.set(destinatario.toLowerCase(), codice);
     this.logger.warn(
@@ -42,6 +48,18 @@ export class CanaleEmailSviluppo implements CanaleEmail {
     return Promise.resolve();
   }
 
+  inviaInvitoAlGruppo(
+    destinatario: string,
+    invito: InvitoAlGruppoDaRecapitare,
+    lingua: string,
+  ): Promise<void> {
+    this.ultimiInvitiAlGruppo.set(destinatario.toLowerCase(), invito);
+    this.logger.warn(
+      `[SVILUPPO] Invito al gruppo «${invito.nomeGruppo}» per ${destinatario} (lingua ${lingua}): ${invito.collegamento} — nessuna email inviata.`,
+    );
+    return Promise.resolve();
+  }
+
   /** Solo per i test: l'ultimo codice mandato a quell'indirizzo. */
   ultimoCodicePer(destinatario: string): string | undefined {
     return this.ultimiCodici.get(destinatario.toLowerCase());
@@ -50,5 +68,10 @@ export class CanaleEmailSviluppo implements CanaleEmail {
   /** Solo per i test: l'ultimo invito mandato a quell'indirizzo. */
   ultimoInvitoPer(destinatario: string): InvitoDaRecapitare | undefined {
     return this.ultimiInviti.get(destinatario.toLowerCase());
+  }
+
+  /** Solo per i test: l'ultimo invito a un gruppo mandato a quell'indirizzo. */
+  ultimoInvitoAlGruppoPer(destinatario: string): InvitoAlGruppoDaRecapitare | undefined {
+    return this.ultimiInvitiAlGruppo.get(destinatario.toLowerCase());
   }
 }
