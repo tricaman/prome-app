@@ -64,5 +64,6 @@
   "GRUPPO_INVITO_GIA_CHIUSO": "Questo invito è già stato usato",
   "GRUPPO_INVITO_DI_UN_ALTRO": "Questo invito non è per te",
   "GRUPPO_CONFLITTO_DI_VERSIONE": "Qualcun altro ha appena cambiato i membri: riprova",
-  "AULA_COLLOCAZIONE_NEGATA": "Puoi collocare un’aula solo in un gruppo di cui fai parte"
+  "AULA_COLLOCAZIONE_NEGATA": "Puoi collocare un’aula solo in un gruppo di cui fai parte",
+  "BLOCCO_NON_VALIDO": "Non puoi bloccare te stesso"
 }

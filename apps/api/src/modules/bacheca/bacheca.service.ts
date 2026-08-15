@@ -7,6 +7,9 @@ import {
   type TipoAllegato,
 } from '@prome/contracts';
 import { Prisma } from '@prisma/client';
+
+type PostSalvato = Prisma.PostGetPayload<Record<string, never>>;
+type PostConAllegati = Prisma.PostGetPayload<{ include: { allegati: true } }>;
 import { PrismaService } from '../../database/prisma.service';
 import { AppException } from '../../common/exceptions';
 import {
@@ -288,12 +291,43 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
    * «esiste ma non puoi vederlo» racconta comunque che esiste.
    */
   async leggi(lettoreId: string, postId: string): Promise<PostResponse> {
-    const post = await this.prisma.post.findUnique({
-      where: { id: postId },
+    const { post } = await this.postVisibilePer(lettoreId, postId, {
       include: { allegati: true },
     });
 
-    const lettore = await this.profilo.perUtente(lettoreId);
+    const autori = await this.profilo.perUtenti([post.autoreId]);
+    return this.perIlClient(post, autori.get(post.autoreId), lettoreId);
+  }
+
+  /**
+   * Il post, se chi legge può vederlo: esistenza E visibilità insieme, con la
+   * **stessa** risposta per i due casi — «esiste ma non puoi vederlo»
+   * racconta comunque che esiste.
+   *
+   * È un posto solo di proposito, usato da `leggi`, `commenta`, `commentiDi`
+   * e dalla lettura per le segnalazioni: la copia dimenticata di questa
+   * regola sarebbe esattamente quella che decide una fuga. La visibilità
+   * comprende privacy (E6.2) **e blocchi**, perché `autoriVisibiliA` risponde
+   * a entrambe le domande.
+   */
+  private async postVisibilePer(
+    lettoreId: string,
+    postId: string,
+    opzioni: { include: { allegati: true } },
+  ): Promise<{ post: PostConAllegati; visibili: string[] }>;
+  private async postVisibilePer(
+    lettoreId: string,
+    postId: string,
+  ): Promise<{ post: PostSalvato; visibili: string[] }>;
+  private async postVisibilePer(
+    lettoreId: string,
+    postId: string,
+    opzioni?: { include: { allegati: true } },
+  ): Promise<{ post: PostSalvato | PostConAllegati; visibili: string[] }> {
+    const [post, lettore] = await Promise.all([
+      this.prisma.post.findUnique({ where: { id: postId }, ...(opzioni ?? {}) }),
+      this.profilo.perUtente(lettoreId),
+    ]);
     const visibili = await this.profilo.autoriVisibiliA(lettore);
 
     const anonimo = post?.autoreId.startsWith(PREFISSO_AUTORE_ANONIMO) ?? false;
@@ -304,9 +338,7 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
         HttpStatus.NOT_FOUND,
       );
     }
-
-    const autori = await this.profilo.perUtenti([post.autoreId]);
-    return this.perIlClient(post, autori.get(post.autoreId), lettoreId);
+    return { post, visibili };
   }
 
   /**
@@ -373,14 +405,11 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
    */
   async commenta(utenteId: string, postId: string, testo: string): Promise<CommentoResponse> {
     await this.profilo.provaDiOnboarding(utenteId);
-    const post = await this.prisma.post.findUnique({ where: { id: postId } });
-    if (!post) {
-      throw new AppException(
-        BachecaErrorCode.POST_NOT_FOUND,
-        'POST_NOT_FOUND',
-        HttpStatus.NOT_FOUND,
-      );
-    }
+    // Si commenta ciò che si vede: un post invisibile — per privacy o per
+    // blocco — risponde 404 come se non esistesse. Verificare la sola
+    // esistenza lascerebbe commentare per identificativo ciò che il feed non
+    // mostrerebbe mai.
+    const { post } = await this.postVisibilePer(utenteId, postId);
 
     const pulito = testo.trim();
     if (!pulito) {
@@ -431,19 +460,24 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
     postId: string,
     pagina: { page: number; limit: number },
   ): Promise<PaginatedResult<CommentoResponse>> {
-    const post = await this.prisma.post.findUnique({ where: { id: postId } });
-    if (!post) {
-      throw new AppException(
-        BachecaErrorCode.POST_NOT_FOUND,
-        'POST_NOT_FOUND',
-        HttpStatus.NOT_FOUND,
-      );
-    }
+    const { post, visibili } = await this.postVisibilePer(lettoreId, postId);
 
+    // Un commento segue la visibilità del suo autore, come un post (E6.2: la
+    // schermata delle impostazioni promette «vale per i post e i commenti che
+    // pubblichi», e PRIVATO significa «solo tu» — anche sotto il post di un
+    // altro). Il filtro sta nella `where`, su conteggio E lettura: la
+    // paginazione resta onesta per costruzione.
+    const dove = {
+      postId,
+      OR: [
+        { autoreId: { in: visibili } },
+        { autoreId: { startsWith: PREFISSO_AUTORE_ANONIMO } },
+      ],
+    };
     const [totale, righe] = await Promise.all([
-      this.prisma.commento.count({ where: { postId } }),
+      this.prisma.commento.count({ where: dove }),
       this.prisma.commento.findMany({
-        where: { postId },
+        where: dove,
         orderBy: { creatoIl: 'asc' },
         skip: (pagina.page - 1) * pagina.limit,
         take: pagina.limit,

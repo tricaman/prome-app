@@ -1,11 +1,12 @@
-import { Body, Controller, Get, Inject, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Put, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { ProfiloResponse } from '@prome/contracts';
-import { ApiWrappedResponse, ResponseMessage } from '../../common/decorators';
+import type { BloccatoResponse, PaginatedResult, ProfiloResponse } from '@prome/contracts';
+import { ApiPaginatedResponse, ApiWrappedResponse, ResponseMessage } from '../../common/decorators';
 import { ProfiloService } from '../profilo/profilo.service';
 import { MISURAZIONI, type MisurazioniDiUtilizzo } from '../../infrastruttura/misurazioni/misurazioni';
 import type { UtenteDiDominio } from '../profilo/porta-identita-utente';
-import { AggiornaPrivacyDto, CompletaProfiloDto, ProfiloDto } from './dtos/profilo.dto';
+import { PaginationDto } from '../../common/dto';
+import { AggiornaPrivacyDto, BloccatoDto, CompletaProfiloDto, ProfiloDto } from './dtos/profilo.dto';
 import { Utente } from './guardia-accesso';
 
 /**
@@ -69,5 +70,48 @@ export class ProfiloController {
     @Body() corpo: AggiornaPrivacyDto,
   ): Promise<ProfiloResponse> {
     return this.profilo.aggiornaImpostazioni(utente.id, corpo);
+  }
+
+  // --- Blocchi ---------------------------------------------------------------
+  //
+  // Il blocco vale per la bacheca — la superficie non scelta — in entrambe le
+  // direzioni, e vince su ogni impostazione di privacy. Dentro un'aula o un
+  // gruppo condivisi non decide niente: lì restano l'uscita e la moderazione.
+
+  @Put('me/blocchi/:utenteId')
+  @ApiOperation({
+    operationId: 'bloccaUtente',
+    summary: 'Blocca una persona: non vedrete più i contenuti l\'uno dell\'altro',
+  })
+  @ApiWrappedResponse({ description: 'Utente bloccato' })
+  @ResponseMessage('successes.UTENTE_BLOCCATO')
+  async blocca(
+    @Utente() utente: UtenteDiDominio,
+    @Param('utenteId') bloccatoId: string,
+  ): Promise<null> {
+    await this.profilo.blocca(utente.id, bloccatoId);
+    return null;
+  }
+
+  @Delete('me/blocchi/:utenteId')
+  @ApiOperation({ operationId: 'sbloccaUtente', summary: 'Toglie un blocco' })
+  @ApiWrappedResponse({ description: 'Utente sbloccato' })
+  @ResponseMessage('successes.UTENTE_SBLOCCATO')
+  async sblocca(
+    @Utente() utente: UtenteDiDominio,
+    @Param('utenteId') bloccatoId: string,
+  ): Promise<null> {
+    await this.profilo.sblocca(utente.id, bloccatoId);
+    return null;
+  }
+
+  @Get('me/blocchi')
+  @ApiOperation({ operationId: 'elencaBlocchi', summary: 'Le persone che hai bloccato' })
+  @ApiPaginatedResponse({ type: BloccatoDto })
+  elencaBlocchi(
+    @Utente() utente: UtenteDiDominio,
+    @Query() pagina: PaginationDto,
+  ): Promise<PaginatedResult<BloccatoResponse>> {
+    return this.profilo.bloccati(utente.id, pagina);
   }
 }

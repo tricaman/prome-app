@@ -54,28 +54,31 @@ export class PuliziaBachecaService {
   /**
    * I commenti il cui post non esiste più.
    *
-   * Si guardano i `postId` distinti e non i singoli commenti: un post con
-   * duecento commenti è una domanda sola, non duecento.
+   * La domanda al database è direttamente «quali postId riferiti non hanno
+   * più il post», con un NOT EXISTS **fra due tabelle dello stesso schema**:
+   * C3 vieta la foreign key sull'aggregato, non una lettura di
+   * riconciliazione dentro il contesto che li possiede entrambi.
+   *
+   * La prima versione caricava i primi `PER_GIRO` postId distinti — vivi
+   * compresi — e scartava i vivi dopo: quando i post vivi commentati
+   * superano il lotto, gli orfani possono non entrarci **mai**, e la
+   * riconciliazione smette di riconciliare in silenzio. I test l'hanno
+   * mostrato prima dell'esercizio: il lotto pieno di post altrui era il
+   * modo in cui la suite parallela lo rendeva visibile.
    */
   private async rimuoviCommentiSenzaPost(): Promise<number> {
-    const riferiti = await this.prisma.commento.findMany({
-      distinct: ['postId'],
-      select: { postId: true },
-      take: PER_GIRO,
-    });
-    if (!riferiti.length) return 0;
-
-    const postId = riferiti.map((r) => r.postId);
-    const vivi = await this.prisma.post.findMany({
-      where: { id: { in: postId } },
-      select: { id: true },
-    });
-
-    const insiemeVivi = new Set(vivi.map((p) => p.id));
-    const morti = postId.filter((id) => !insiemeVivi.has(id));
+    // Le colonne non hanno @map: nel database restano in camelCase, virgolettate.
+    const morti = await this.prisma.$queryRaw<Array<{ postId: string }>>`
+      SELECT DISTINCT c."postId"
+      FROM bacheca.commento c
+      WHERE NOT EXISTS (SELECT 1 FROM bacheca.post p WHERE p.id = c."postId")
+      LIMIT ${PER_GIRO}
+    `;
     if (!morti.length) return 0;
 
-    const esito = await this.prisma.commento.deleteMany({ where: { postId: { in: morti } } });
+    const esito = await this.prisma.commento.deleteMany({
+      where: { postId: { in: morti.map((riga) => riga.postId) } },
+    });
     return esito.count;
   }
 

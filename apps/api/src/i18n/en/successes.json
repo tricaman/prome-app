@@ -45,5 +45,7 @@
   "GRUPPO_INVITO_ACCETTATO": "Invitation accepted: we are adding you to the group",
   "DISPOSITIVO_REGISTRATO": "Device registered",
   "DISPOSITIVO_DIMENTICATO": "We will no longer send notices to this device",
-  "PREFERENZE_AGGIORNATE": "Preferences updated"
+  "PREFERENZE_AGGIORNATE": "Preferences updated",
+  "UTENTE_BLOCCATO": "User blocked: you will no longer see each other’s content",
+  "UTENTE_SBLOCCATO": "User unblocked"
 }

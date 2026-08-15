@@ -22,6 +22,8 @@ import { ProfiloService } from '../profilo/profilo.service';
  * Tre regole che vivono qui, e nei test:
  * - **mai a sé stessi**: nessuno vuole sapere di aver commentato il proprio
  *   post, e un avviso così non è un fastidio ma un errore visibile;
+ * - **mai fra persone in coppia bloccata**: bloccare qualcuno spegne anche il
+ *   suo modo di farsi sentire sul telefono, in entrambe le direzioni;
  * - **mai a chi l'ha spento**, e la preferenza si legge nell'istante
  *   dell'invio, non da una copia presa quando il fatto è nato;
  * - **mai un dato personale nel messaggio**: il titolo e il corpo sono frasi
@@ -56,6 +58,13 @@ export class AvvisiService {
     if (autoreId && autoreId === destinatarioId) return;
 
     try {
+      // Mai fra persone in coppia bloccata, in nessuna direzione — e si legge
+      // **all'istante dell'invio**, come la preferenza: un commento nato
+      // visibile e consegnato dopo il blocco non deve più suonare. Sta dentro
+      // il try per la stessa promessa di tutto il metodo: un errore su questa
+      // lettura degrada in un avviso perso, mai in una richiesta fallita.
+      if (autoreId && (await this.profilo.esisteBloccoFra(destinatarioId, autoreId))) return;
+
       const dispositivi = await this.profilo.dispositiviDaAvvisare(destinatarioId, tipo);
       if (!dispositivi.length) return;
       await this.canale.recapita(dispositivi, avviso);

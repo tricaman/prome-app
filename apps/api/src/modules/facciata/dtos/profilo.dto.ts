@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString, Length } from 'class-validator';
 import { Transform } from 'class-transformer';
 import type {
+  BloccatoResponse,
   AggiornaImpostazioniPrivacyRequest,
   CompletaProfiloRequest,
   ImpostazioniDiPrivacyResponse,
@@ -96,4 +97,16 @@ export class AggiornaPrivacyDto implements AggiornaImpostazioniPrivacyRequest {
   @IsOptional()
   @IsEnum(VISIBILITA)
   visibilita?: Visibilita;
+}
+
+export class BloccatoDto implements BloccatoResponse {
+  @ApiProperty() utenteId!: string;
+  @ApiProperty({ nullable: true, type: String }) nome!: string | null;
+  @ApiProperty({ nullable: true, type: String }) cognome!: string | null;
+  @ApiProperty() bloccatoIl!: string;
+
+  @ApiPropertyOptional({
+    description: 'L\'account non esiste più o è in cancellazione: il nome non si mostra, la riga resta sbloccabile.',
+  })
+  rimosso?: boolean;
 }

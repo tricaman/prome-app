@@ -45,5 +45,7 @@
   "GRUPPO_INVITO_ACCETTATO": "Invito accettato: stiamo aggiungendoti al gruppo",
   "DISPOSITIVO_REGISTRATO": "Dispositivo registrato",
   "DISPOSITIVO_DIMENTICATO": "Non manderemo più avvisi a questo dispositivo",
-  "PREFERENZE_AGGIORNATE": "Preferenze aggiornate"
+  "PREFERENZE_AGGIORNATE": "Preferenze aggiornate",
+  "UTENTE_BLOCCATO": "Utente bloccato: non vedrete più i contenuti l’uno dell’altro",
+  "UTENTE_SBLOCCATO": "Utente sbloccato"
 }

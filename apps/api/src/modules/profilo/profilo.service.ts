@@ -1,7 +1,9 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import type {
   AggiornaImpostazioniPrivacyRequest,
+  BloccatoResponse,
   CompletaProfiloRequest,
+  PaginatedResult,
   ProfiloResponse,
 } from '@prome/contracts';
 import { PrismaService } from '../../database/prisma.service';
@@ -203,14 +205,26 @@ export class ProfiloService {
       });
     }
 
+    // Il blocco è la stessa domanda con il segno opposto — «chi NON voglio
+    // vedere, e chi non vuole essere visto da me» — e si risponde qui, nello
+    // stesso punto della privacy, in entrambe le direzioni. Vince su ogni
+    // impostazione: un profilo PUBBLICO bloccato non è visibile.
+    const coppie = await this.coppieBloccateCon(lettore.utenteId);
+
     const visibili = await this.prisma.profilo.findMany({
       // Chi è in cancellazione «scompare subito» (grazia di 14 giorni): il
       // profilo esiste ancora — la riattivazione deve trovarlo intatto — ma
       // nessuna lettura lo espone più.
-      where: { OR: condizioni, inCancellazioneDal: null },
+      where: {
+        OR: condizioni,
+        inCancellazioneDal: null,
+        ...(coppie.length ? { utenteId: { notIn: coppie } } : {}),
+      },
       select: { utenteId: true },
     });
 
+    // Sé stessi DOPO la sottrazione: nessun blocco può togliere una persona
+    // dalla vista dei propri contenuti.
     return [...new Set([lettore.utenteId, ...visibili.map((v) => v.utenteId)])];
   }
 
@@ -228,6 +242,120 @@ export class ProfiloService {
     });
 
     return new Map(profili.map((p) => [p.utenteId, this.perIlClient(p)]));
+  }
+
+  // --- Blocchi ---------------------------------------------------------------
+
+  /**
+   * Blocca una persona. Idempotente per chiave primaria (stile G3): bloccare
+   * due volte è un'operazione senza effetto, non un errore.
+   *
+   * Il bersaglio deve esistere: `perUtente` lancia PR001 dal suo punto
+   * sancito, e un id `anonimo-` — che un profilo non l'ha mai avuto — cade
+   * nello stesso modo. Bloccare chi è in grazia di cancellazione è invece
+   * legittimo: se torna, il blocco lo aspetta; se la catena finisce, la
+   * cascata porta via la riga.
+   */
+  async blocca(bloccanteId: string, bloccatoId: string): Promise<void> {
+    if (bloccanteId === bloccatoId) {
+      throw new AppException(
+        ProfiloErrorCode.BLOCCO_DI_SE_STESSI,
+        'BLOCCO_NON_VALIDO',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    await this.esisteProfilo(bloccatoId);
+
+    await this.prisma.blocco.upsert({
+      where: { bloccanteId_bloccatoId: { bloccanteId, bloccatoId } },
+      create: { bloccanteId, bloccatoId },
+      update: {},
+    });
+  }
+
+  /** Sblocca. Idempotente: togliere un blocco che non c'è non è un errore. */
+  async sblocca(bloccanteId: string, bloccatoId: string): Promise<void> {
+    await this.prisma.blocco.deleteMany({ where: { bloccanteId, bloccatoId } });
+  }
+
+  /**
+   * Chi ho bloccato, con il nome fresco: è la lista da cui si torna indietro.
+   * Chi nel frattempo è entrato in grazia di cancellazione compare come
+   * «rimosso» — il nome non si mostra più, ma la riga resta sbloccabile.
+   */
+  async bloccati(
+    utenteId: string,
+    pagina: { page: number; limit: number },
+  ): Promise<PaginatedResult<BloccatoResponse>> {
+    const [righe, totale] = await Promise.all([
+      this.prisma.blocco.findMany({
+        where: { bloccanteId: utenteId },
+        orderBy: { creatoIl: 'desc' },
+        skip: (pagina.page - 1) * pagina.limit,
+        take: pagina.limit,
+      }),
+      this.prisma.blocco.count({ where: { bloccanteId: utenteId } }),
+    ]);
+
+    const profili = await this.perUtenti(righe.map((riga) => riga.bloccatoId));
+    return {
+      data: righe.map((riga) => {
+        const profilo = profili.get(riga.bloccatoId);
+        return {
+          utenteId: riga.bloccatoId,
+          nome: profilo?.nome ?? null,
+          cognome: profilo?.cognome ?? null,
+          bloccatoIl: riga.creatoIl.toISOString(),
+          ...(profilo ? {} : { rimosso: true as const }),
+        };
+      }),
+      meta: {
+        total: totale,
+        page: pagina.page,
+        limit: pagina.limit,
+        totalPages: Math.max(1, Math.ceil(totale / pagina.limit)),
+      },
+    };
+  }
+
+  /**
+   * Le due direzioni insieme: chi ho bloccato e chi ha bloccato me. È
+   * l'insieme che la visibilità sottrae, e si interroga **fresco a ogni
+   * lettura** come le impostazioni di privacy — una copia sarebbe una
+   * decisione presa su un dato vecchio.
+   */
+  async coppieBloccateCon(utenteId: string): Promise<string[]> {
+    const righe = await this.prisma.blocco.findMany({
+      where: { OR: [{ bloccanteId: utenteId }, { bloccatoId: utenteId }] },
+      select: { bloccanteId: true, bloccatoId: true },
+    });
+    return righe.map((riga) =>
+      riga.bloccanteId === utenteId ? riga.bloccatoId : riga.bloccanteId,
+    );
+  }
+
+  /** C'è un blocco fra i due, in una direzione qualunque? Per gli avvisi. */
+  async esisteBloccoFra(unoId: string, altroId: string): Promise<boolean> {
+    const conteggio = await this.prisma.blocco.count({
+      where: {
+        OR: [
+          { bloccanteId: unoId, bloccatoId: altroId },
+          { bloccanteId: altroId, bloccatoId: unoId },
+        ],
+      },
+    });
+    return conteggio > 0;
+  }
+
+  /** Esiste un profilo con questo id? PR001 altrimenti, dal punto sancito. */
+  private async esisteProfilo(utenteId: string): Promise<void> {
+    const profilo = await this.prisma.profilo.findUnique({
+      where: { utenteId },
+      select: { utenteId: true },
+    });
+    if (!profilo) {
+      throw new AppException(ProfiloErrorCode.NOT_FOUND, 'PROFILO_NOT_FOUND', HttpStatus.NOT_FOUND);
+    }
   }
 
   // --- Cancellazione dell'account (V5) --------------------------------------

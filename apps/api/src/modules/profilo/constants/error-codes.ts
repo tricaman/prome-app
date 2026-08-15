@@ -21,6 +21,8 @@ export const ProfiloErrorCode = {
   VERIFICA_FALLITA: 'PR008',
   /** IP2: si cambia un asse o l'altro, ma una richiesta vuota non è un cambio. */
   PRIVACY_SENZA_MODIFICHE: 'PR009',
+  /** Bloccare sé stessi non significa niente, e la riga vieterebbe di vedersi. */
+  BLOCCO_DI_SE_STESSI: 'PR010',
 } as const;
 
 export type ProfiloErrorCode = (typeof ProfiloErrorCode)[keyof typeof ProfiloErrorCode];

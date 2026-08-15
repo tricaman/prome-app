@@ -64,5 +64,6 @@
   "GRUPPO_INVITO_GIA_CHIUSO": "This invitation has already been used",
   "GRUPPO_INVITO_DI_UN_ALTRO": "This invitation is not for you",
   "GRUPPO_CONFLITTO_DI_VERSIONE": "Someone just changed the members: try again",
-  "AULA_COLLOCAZIONE_NEGATA": "You can place a room only in a group you belong to"
+  "AULA_COLLOCAZIONE_NEGATA": "You can place a room only in a group you belong to",
+  "BLOCCO_NON_VALIDO": "You cannot block yourself"
 }

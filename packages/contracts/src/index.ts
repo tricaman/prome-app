@@ -254,6 +254,36 @@ export interface AllegatoResponse {
   url: string;
 }
 
+/** Una riga dell'elenco «utenti bloccati»: da qui si torna indietro. */
+export interface BloccatoResponse {
+  utenteId: string;
+  nome: string | null;
+  cognome: string | null;
+  bloccatoIl: string;
+  /** L'account non esiste più o è in cancellazione: il nome non si mostra, la riga resta sbloccabile. */
+  rimosso?: boolean;
+}
+
+/** Cosa si può segnalare. Elenco chiuso: i messaggi d'aula restano fuori per ora. */
+export type TipoDiSoggettoSegnalato = 'POST' | 'COMMENTO';
+
+/** Perché. Elenco chiuso: un campo libero sarebbe un canale da presidiare. */
+export type MotivoDiSegnalazione = 'SPAM' | 'MOLESTIE' | 'CONTENUTO_INAPPROPRIATO';
+
+export interface CreaSegnalazioneRequest {
+  tipo: TipoDiSoggettoSegnalato;
+  soggettoId: string;
+  motivo: MotivoDiSegnalazione;
+}
+
+/** Una segnalazione già fatta, per l'esportazione dei propri dati. */
+export interface SegnalazioneResponse {
+  tipo: TipoDiSoggettoSegnalato;
+  soggettoId: string;
+  motivo: MotivoDiSegnalazione;
+  creatoIl: string;
+}
+
 export interface AutoreResponse {
   utenteId: string;
   nome: string | null;
