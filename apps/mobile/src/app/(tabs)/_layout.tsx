@@ -10,11 +10,9 @@ import { Icona } from '@/components/ui';
  * di queste. La composizione di un post non è una scheda ma un'azione, e ha un
  * pulsante fluttuante nella bacheca.
  *
- * **I gruppi non ci sono ancora**, e la scheda è stata tolta invece di essere
- * lasciata lì: mostrava tre gruppi inventati di una persona che non esiste,
- * mentre sul web i gruppi sono diventati veri. Le schermate native sono E12 —
- * la scheda torna con loro, e l'app non è ancora su nessuno store, quindi
- * nessuno se ne accorgerà.
+ * La scheda dei gruppi era stata **tolta** perché mostrava tre gruppi
+ * inventati di una persona che non esiste, mentre sul web i gruppi diventavano
+ * veri. È tornata con E12.1, e adesso mostra i gruppi di chi guarda.
  */
 export default function LayoutSchede() {
   const tema = useTema();
@@ -51,6 +49,15 @@ export default function LayoutSchede() {
           title: t('app.nav.aule'),
           tabBarIcon: ({ focused }) => (
             <Icona nome="aule" dimensione={24} colore={focused ? 'primario' : 'tenue'} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="gruppi"
+        options={{
+          title: t('app.nav.gruppi'),
+          tabBarIcon: ({ focused }) => (
+            <Icona nome="gruppi" dimensione={24} colore={focused ? 'primario' : 'tenue'} />
           ),
         }}
       />

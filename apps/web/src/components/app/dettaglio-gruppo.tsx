@@ -81,7 +81,7 @@ function Contenuto({
               {gruppo.nome}
             </h1>
             <p className="mt-1 text-[13.5px] text-testo-tenue">
-              {t('membri', { numero: gruppo.membri })}
+              {gruppo.membri === 1 ? t('unMembro') : t('nMembri', { numero: gruppo.membri })}
               {gruppo.ateneo ? ` · ${gruppo.ateneo}` : ''}
             </p>
             <div className="mt-2.5 flex flex-wrap items-center gap-2">
@@ -99,7 +99,7 @@ function Contenuto({
       {gruppo.sonoModeratore ? <ImpostazioniGruppo gruppo={gruppo} /> : null}
       {gruppo.sonoModeratore ? <Invito gruppoId={gruppoId} /> : null}
 
-      <EtichettaSezione>{t('membri', { numero: gruppo.membri })}</EtichettaSezione>
+      <EtichettaSezione>{gruppo.membri === 1 ? t('unMembro') : t('nMembri', { numero: gruppo.membri })}</EtichettaSezione>
       <Card padding="nessuno" className="mb-6 overflow-hidden">
         <ul>
           {membri.map((membro, indice) => (

@@ -119,6 +119,16 @@ Ora la sala ha una scheda «Impostazioni» — titolo, visibilità, data, colloc
 
 **Un difetto silenzioso corretto nel dominio**: l'ateneo dello spazio si salvava solo se la visibilità nasceva `ATENEO`, quindi un'aula nata privata che fosse stata aperta all'ateneo sarebbe diventata visibile **a nessuno**. Ora si salva sempre alla creazione, che è ciò che AS7 e G5 dicono; si consulta solo quando serve, quindi non cambia nulla di ciò che esiste.
 
+### E12.1 — i gruppi in tasca ✅
+
+La scheda «Gruppi» è tornata sul telefono, e questa volta mostra i gruppi di chi guarda. Si crea un gruppo, si invita per email, si amministrano i membri (promuovi, retrocedi, rimuovi), si esce, si cambiano nome e visibilità, si elimina — e si vedono **le aule collocate nel gruppo**, comprese quelle in cui non si è ancora entrati, con il bottone per entrarci.
+
+Nessuna regola è stata ricopiata nel telefono, com'è giusto per una superficie: G2 la fa rispettare il server e il messaggio arriva già tradotto. L'unica cosa che il client fa è **non offrire** ciò che sarebbe rifiutato — i gesti di moderazione a chi non modera, e la visibilità di ateneo a un gruppo nato senza ateneo.
+
+Resta fuori l'atterraggio dell'invito **dentro** l'app: l'email punta a un indirizzo web, e aprirlo nell'app è E12.4 (link universali e app sugli store). Chi riceve l'invito lo accetta dal browser, e da quel momento il gruppo compare nella scheda.
+
+Per strada è stato tolto un plurale ICU (`{numero, plural, …}`) che avevo introdotto sui membri: il `traduci` condiviso fa **solo interpolazione**, quindi sul telefono sarebbe uscita la stringa grezza. Ora sono due chiavi, come già faceva la sala per i partecipanti.
+
 ### Mobile (Expo) — parziale
 
 Esistono e funzionano: accesso, inserimento del codice, completamento del profilo, bacheca, composer, dettaglio del post con commenti, **aule studio con materiali, permessi e chat in tempo reale**, impostazioni con privacy e uscita. Rientrando dal background il socket si riapre e la cronologia si rilegge.
@@ -199,13 +209,14 @@ Vale la pena conoscerli, perché sono tutti della stessa famiglia: cose che in s
 1. **M4 non è chiusa finché non è provata dal vivo.** Il codice c'è (E3+E4), ma l'accettazione dell'epica chiede atti che nessun test sostituisce: il giro completo **con due persone reali e invito via email vero**, da un dispositivo diverso da quello di sviluppo; le misure di soglia da registrare (apertura della sala, ingresso dopo l'accettazione, comparsa del messaggio agli altri); la degradazione osservata **spegnendo davvero** archivio, canale email e trasporto; e — poiché lo schema è cambiato — il **ripristino del database riprovato**.
 2. **Il giro dei gruppi va provato a due account** (E7), e comprende la misura che l'epica chiede di registrare: A crea un gruppo e vi colloca un'aula, B accetta l'invito arrivato per email vera ed **entra senza invito all'aula**, poi A rimuove B mentre B è dentro la sala — B deve essere allontanato **entro pochi secondi** e non rientrare. Va verificato dal vivo anche AS6: B moderatore del gruppo entra nell'aula collocata **in sola lettura**.
 3. **«Scarica i tuoi dati» esiste (15 agosto 2026), ma solo sul web.** `GET /account/dati` produce la copia completa che la privacy policy promette per nome, composta dalla facciata interrogando gli stessi detentori che la cancellazione deve svuotare — i due elenchi vanno aggiornati insieme, altrimenti la copia si dichiara completa senza esserlo. Sul telefono manca: salvare un file richiede `expo-file-system` e `expo-sharing`, che sono moduli nativi non installati e comportano una ricostruzione del dev client. Da fare quando si toccherà il pacchetto nativo.
-4. **La porta S-audio non è attraversabile da qui**: i suoi quattro criteri di uscita — tre o quattro persone che si sentono da reti diverse, funzionamento da telefono, costo del nodo dentro il budget, riavvio non presidiato — si verificano solo con un nodo LiveKit vero. Il timebox è di 2,5 giorni e allo scadere un esito non nettamente positivo **vale come negativo**: l'audio esce dal perimetro e l'aula resta testuale, che è già consegnabile.
-5. **L'`MX` di `prome.app` punta alla macchina**, che non ha un server di posta: chi risponde all'email di accesso scrive nel vuoto. Mandare i codici funziona lo stesso.
-6. **SSH è aperto al mondo** e prende migliaia di tentativi al giorno. Restringerlo nel pannello Hetzner è più solido di fail2ban, perché blocca prima che sshd veda il pacchetto.
-7. **L'archivio dei file è locale**, su un volume della macchina. Quando arriverà un fornitore con regione UE dichiarata, sarà un adattatore: `ArchivioLocale` usa già lo stesso flusso firmato di un fornitore vero.
-8. **Il profilo dell'account di prova ha dati inventati** («Andrea Trica», Politecnico di Milano): li ho messi io per provare il giro, vanno corretti.
-9. **Il progetto Vercel è ancora attivo** e va dismesso.
-10. **Residui DNS del vecchio hosting**: `ftp`, `mail`, `_cpanel-dcv-test-record`, `_acme-challenge`.
+4. **La suite dell'API è a volte rossa su una macchina carica.** Due fallimenti in dodici giri, sempre con altro in esecuzione in parallelo (typecheck o build), e dieci giri verdi di fila quando gira da sola — compreso uno lanciato di proposito sotto carico. Non sono riuscito a riprodurlo né a catturare quale caso fallisse, quindi **non è diagnosticato**: la configurazione ha già `testTimeout: 30000` e `maxWorkers: 50%` per la contesa sul database, e questo somiglia allo stesso problema, ma somigliare non basta. Una suite che a volte è rossa insegna a rilanciarla invece che a indagare, ed è il modo in cui un difetto vero passa inosservato.
+5. **La porta S-audio non è attraversabile da qui**: i suoi quattro criteri di uscita — tre o quattro persone che si sentono da reti diverse, funzionamento da telefono, costo del nodo dentro il budget, riavvio non presidiato — si verificano solo con un nodo LiveKit vero. Il timebox è di 2,5 giorni e allo scadere un esito non nettamente positivo **vale come negativo**: l'audio esce dal perimetro e l'aula resta testuale, che è già consegnabile.
+6. **L'`MX` di `prome.app` punta alla macchina**, che non ha un server di posta: chi risponde all'email di accesso scrive nel vuoto. Mandare i codici funziona lo stesso.
+7. **SSH è aperto al mondo** e prende migliaia di tentativi al giorno. Restringerlo nel pannello Hetzner è più solido di fail2ban, perché blocca prima che sshd veda il pacchetto.
+8. **L'archivio dei file è locale**, su un volume della macchina. Quando arriverà un fornitore con regione UE dichiarata, sarà un adattatore: `ArchivioLocale` usa già lo stesso flusso firmato di un fornitore vero.
+9. **Il profilo dell'account di prova ha dati inventati** («Andrea Trica», Politecnico di Milano): li ho messi io per provare il giro, vanno corretti.
+10. **Il progetto Vercel è ancora attivo** e va dismesso.
+11. **Residui DNS del vecchio hosting**: `ftp`, `mail`, `_cpanel-dcv-test-record`, `_acme-challenge`.
 
 ---
 

@@ -98,6 +98,7 @@ function Navigazione() {
         {/* Aprire un'aula è la stessa cosa: un'azione che si apre sopra
             l'elenco e si chiude tornando dov'eri. */}
         <Stack.Screen name="crea-aula" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="crea-gruppo" options={{ presentation: 'modal' }} />
       </Stack>
     </>
   );

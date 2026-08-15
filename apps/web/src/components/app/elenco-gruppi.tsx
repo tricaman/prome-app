@@ -85,7 +85,7 @@ function SchedaGruppo({ gruppo }: { gruppo: GruppoDto }) {
               {gruppo.nome}
             </span>
             <span className="mt-0.5 block text-[12.5px] text-testo-tenue">
-              {t('membri', { numero: gruppo.membri })}
+              {gruppo.membri === 1 ? t('unMembro') : t('nMembri', { numero: gruppo.membri })}
               {gruppo.ateneo ? ` · ${gruppo.ateneo}` : ''}
             </span>
           </span>
