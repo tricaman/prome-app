@@ -13,7 +13,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["accesso", "profilo", "bacheca", "gruppo", "aula_studio", "cancellazione"]
+  schemas  = ["accesso", "profilo", "bacheca", "gruppo", "aula_studio", "cancellazione", "segnalazione"]
 }
 
 // ---------------------------------------------------------------------------
@@ -134,8 +134,42 @@ model Profilo {
   impostazioniPrivacy ImpostazioniDiPrivacy?
   preferenzeNotifiche PreferenzeDiNotifica?
   dispositivi         DispositivoDiNotifica[]
+  blocchiFatti        Blocco[]                @relation("bloccante")
+  blocchiSubiti       Blocco[]                @relation("bloccato")
 
   @@map("profilo")
+  @@schema("profilo")
+}
+
+/// Chi non vuole più vedere chi, in bacheca.
+///
+/// Posseduto da Profilo perché è una decisione della persona sulle proprie
+/// letture, come le impostazioni di privacy — e come quelle si interroga
+/// **alla lettura**, mai propagata e mai in cache (SE2: il cambio vale alla
+/// lettura successiva, senza finestra).
+///
+/// La chiave primaria composta È l'idempotenza (stile G3): bloccare due volte
+/// la stessa persona è un'operazione senza effetto, non un errore. Le due
+/// cascate portano via la riga alla cancellazione di **uno qualunque** dei
+/// due profili — e il residuo va comunque contato in entrambe le direzioni,
+/// perché una verifica che non guarda una colonna si dichiara totale senza
+/// esserlo.
+///
+/// Vale per la sola bacheca — la superficie non scelta. Dentro un'aula o un
+/// gruppo, dove entrambi hanno scelto di stare, restano l'uscita e la
+/// moderazione: filtrare per coppia una stanza condivisa romperebbe le
+/// conversazioni e il modello del trasporto, che consegna per stanza.
+model Blocco {
+  bloccanteId String
+  bloccatoId  String
+  creatoIl    DateTime @default(now())
+
+  bloccante Profilo @relation("bloccante", fields: [bloccanteId], references: [utenteId], onDelete: Cascade)
+  bloccato  Profilo @relation("bloccato", fields: [bloccatoId], references: [utenteId], onDelete: Cascade)
+
+  @@id([bloccanteId, bloccatoId])
+  @@index([bloccatoId])
+  @@map("blocco")
   @@schema("profilo")
 }
 
@@ -826,11 +860,12 @@ model RichiestaDiCancellazione {
   // Stato per detentore: null = da eseguire, valorizzato = quando è riuscito
   // la prima volta. Un timestamp è insieme stato e traccia.
   // >>> PUNTO DA AGGIORNARE A OGNI NUOVO DETENTORE (con DETENTORI_CENSITI) <<<
-  bachecaAnonimizzataIl DateTime?
-  gruppiLiberatiIl      DateTime?
-  auleStudioLiberateIl  DateTime?
-  profiloEliminatoIl    DateTime?
-  accessoEliminatoIl    DateTime?
+  bachecaAnonimizzataIl    DateTime?
+  gruppiLiberatiIl         DateTime?
+  auleStudioLiberateIl     DateTime?
+  segnalazioniEliminateIl  DateTime?
+  profiloEliminatoIl       DateTime?
+  accessoEliminatoIl       DateTime?
 
   // Verifica del residuo (SE3): l'ultima eseguita e la prima TOTALE pulita.
   ultimaVerificaIl    DateTime?
@@ -847,4 +882,54 @@ model RichiestaDiCancellazione {
   @@index([verificataATotaleIl])
   @@map("richiesta_di_cancellazione")
   @@schema("cancellazione")
+}
+
+/// ---------------------------------------------------------------------------
+/// SEGNALAZIONE — la coda che qualcuno guarda.
+/// ---------------------------------------------------------------------------
+
+/// Cosa si può segnalare. Elenco chiuso: i messaggi d'aula restano fuori per
+/// ora — sono spazi a moderazione propria — e aggiungerli è una decisione,
+/// non un dettaglio.
+enum TipoDiSoggettoSegnalato {
+  POST
+  COMMENTO
+
+  @@map("tipo_di_soggetto_segnalato")
+  @@schema("segnalazione")
+}
+
+/// Perché. Elenco chiuso, come gli eventi di prodotto e per lo stesso motivo:
+/// un campo libero diventa in poche settimane un canale di comunicazione da
+/// presidiare, e nomi simili rendono la coda illeggibile.
+enum MotivoDiSegnalazione {
+  SPAM
+  MOLESTIE
+  CONTENUTO_INAPPROPRIATO
+
+  @@map("motivo_di_segnalazione")
+  @@schema("segnalazione")
+}
+
+/// Una segnalazione: chi, cosa, perché, quando. Niente altro.
+///
+/// **Il contenuto segnalato non entra qui** — la riga riferisce il soggetto
+/// per identità (nessuna FK fra schemi), e l'estratto viaggia solo
+/// nell'email al supporto: conservarlo farebbe di questo schema un detentore
+/// di contenuti di terzi senza via di cancellazione.
+///
+/// Il vincolo unico rende la doppia segnalazione un'operazione senza effetto
+/// (e senza seconda email): la stessa persona sullo stesso soggetto conta uno.
+model Segnalazione {
+  id           String                  @id @default(uuid())
+  segnalanteId String
+  tipo         TipoDiSoggettoSegnalato
+  soggettoId   String
+  motivo       MotivoDiSegnalazione
+  creatoIl     DateTime                @default(now())
+
+  @@unique([segnalanteId, tipo, soggettoId])
+  @@index([creatoIl])
+  @@map("segnalazione")
+  @@schema("segnalazione")
 }
