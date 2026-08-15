@@ -115,7 +115,7 @@ Esistono e funzionano: accesso, inserimento del codice, completamento del profil
 
 **Le superfici finte sono state rimosse** invece di essere lasciate lì: la scheda gruppi con la sua schermata di dettaglio (sono E12), la schermata di richiesta notifiche — irraggiungibile, e il suo bottone «attiva» non chiedeva alcun permesso — gli interruttori delle notifiche nelle impostazioni, e infine il tab profilo, che ora mostra il profilo vero.
 
-**Un limite da conoscere**: il feed del telefono carica **una sola pagina da 20 post** e non ne carica altre scorrendo. Il web usa `useInfiniteQuery`, il mobile no: non è una bugia a schermo, è una funzione incompleta.
+Il feed del telefono ora **carica altre pagine** come quello del web (`useInfiniteQuery` + un bottone «Carica altri»): prima si fermava a venti post, e il ventunesimo semplicemente non esisteva per chi usava il telefono — il feed finiva, e sembrava che non ci fosse altro.
 
 **Il lint del mobile non era mai stato configurato**: `expo lint` genera la propria configurazione al primo avvio, e finché nessuno l'ha eseguito il codice nativo è cresciuto senza controllo. Ora la configurazione è committata, la CI la esegue, e i sette errori che aveva fatto emergere in `providers/avvisi-provider.tsx` sono corretti — erano difetti veri: il conto alla rovescia dell'avviso ripartiva a ogni disegno del padre, e un messaggio in uscita poteva spegnere quello appena arrivato.
 
@@ -179,6 +179,8 @@ Vale la pena conoscerli, perché sono tutti della stessa famiglia: cose che in s
 ---
 
 ## Aperto, in ordine di importanza
+
+0. **Un difetto trovato oggi, e corretto: la pagina di atterraggio dell'invito a un'aula non esisteva.** L'email di invito la nomina dal giorno in cui gli inviti sono in esercizio — punta a `/app/inviti/<id>` — e chi apriva quel collegamento trovava «Pagina non trovata». Il server faceva la sua parte da sempre: mancava soltanto la schermata. **Nessun test dell'API poteva vederlo**, perché non era l'API a essere rotta, ed è esattamente ciò che il giro dal vivo del punto 1 avrebbe scoperto al primo tentativo.
 
 1. **M4 non è chiusa finché non è provata dal vivo.** Il codice c'è (E3+E4), ma l'accettazione dell'epica chiede atti che nessun test sostituisce: il giro completo **con due persone reali e invito via email vero**, da un dispositivo diverso da quello di sviluppo; le misure di soglia da registrare (apertura della sala, ingresso dopo l'accettazione, comparsa del messaggio agli altri); la degradazione osservata **spegnendo davvero** archivio, canale email e trasporto; e — poiché lo schema è cambiato — il **ripristino del database riprovato**.
 2. **Il giro dei gruppi va provato a due account** (E7), e comprende la misura che l'epica chiede di registrare: A crea un gruppo e vi colloca un'aula, B accetta l'invito arrivato per email vera ed **entra senza invito all'aula**, poi A rimuove B mentre B è dentro la sala — B deve essere allontanato **entro pochi secondi** e non rientrare. Va verificato dal vivo anche AS6: B moderatore del gruppo entra nell'aula collocata **in sola lettura**.

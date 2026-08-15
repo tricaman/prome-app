@@ -14,6 +14,7 @@ export const percorsiApp = {
   aulaStudio: (id: string) => `/app/aule-studio/${id}`,
   gruppi: () => '/app/gruppi',
   gruppo: (id: string) => `/app/gruppi/${id}`,
+  invito: (id: string) => `/app/inviti/${id}`,
   invitoGruppo: (id: string) => `/app/inviti-gruppo/${id}`,
   impostazioni: () => '/app/impostazioni',
 } as const;

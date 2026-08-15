@@ -403,6 +403,12 @@
       },
       "nessuna": "Non sei ancora in nessuna aula studio: creane una e invita chi studia con te."
     },
+    "invito": {
+      "titolo": "Sei stato invitato in un'aula studio",
+      "entra": "Entra nell'aula",
+      "inCorso": "Ti stiamo facendo entrare…",
+      "scaduto": "Questo invito è scaduto. Chiedi a chi ti ha invitato di mandartene uno nuovo."
+    },
     "sala": {
       "schede": {
         "chat": "Chat",

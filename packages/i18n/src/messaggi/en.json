@@ -403,6 +403,12 @@
       },
       "nessuna": "You are not in any study room yet: create one and invite the people you study with."
     },
+    "invito": {
+      "titolo": "You have been invited to a study room",
+      "entra": "Join the room",
+      "inCorso": "We are letting you in…",
+      "scaduto": "This invitation has expired. Ask whoever invited you to send a new one."
+    },
     "sala": {
       "schede": {
         "chat": "Chat",
