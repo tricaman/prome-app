@@ -385,6 +385,214 @@
         ]
       }
     },
+    "/profilo/me/blocchi/{utenteId}": {
+      "put": {
+        "operationId": "bloccaUtente",
+        "parameters": [
+          {
+            "name": "utenteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Utente bloccato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Blocca una persona: non vedrete più i contenuti l'uno dell'altro",
+        "tags": [
+          "profilo"
+        ]
+      },
+      "delete": {
+        "operationId": "sbloccaUtente",
+        "parameters": [
+          {
+            "name": "utenteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Utente sbloccato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Toglie un blocco",
+        "tags": [
+          "profilo"
+        ]
+      }
+    },
+    "/profilo/me/blocchi": {
+      "get": {
+        "operationId": "elencaBlocchi",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Campo di ordinamento (dipende dalla risorsa)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "asc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BloccatoDto"
+                      }
+                    },
+                    "meta": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ResponseMetaDto"
+                        },
+                        {
+                          "properties": {
+                            "pagination": {
+                              "$ref": "#/components/schemas/PaginationMetaDto"
+                            }
+                          },
+                          "required": [
+                            "pagination"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Le persone che hai bloccato",
+        "tags": [
+          "profilo"
+        ]
+      }
+    },
     "/bacheca/allegati/pre-autorizzazione": {
       "post": {
         "operationId": "preautorizzaAllegato",
@@ -2527,6 +2735,60 @@
         ]
       }
     },
+    "/segnalazioni": {
+      "post": {
+        "operationId": "segnalaContenuto",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreaSegnalazioneDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Segnalazione ricevuta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Segnala un post o un commento: qualcuno lo guarda entro 24 ore",
+        "tags": [
+          "segnalazioni"
+        ]
+      }
+    },
     "/gruppi": {
       "post": {
         "operationId": "creaGruppo",
@@ -3617,6 +3879,35 @@
           }
         }
       },
+      "BloccatoDto": {
+        "type": "object",
+        "properties": {
+          "utenteId": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "cognome": {
+            "type": "string",
+            "nullable": true
+          },
+          "bloccatoIl": {
+            "type": "string"
+          },
+          "rimosso": {
+            "type": "boolean",
+            "description": "L'account non esiste più o è in cancellazione: il nome non si mostra, la riga resta sbloccabile."
+          }
+        },
+        "required": [
+          "utenteId",
+          "nome",
+          "cognome",
+          "bloccatoIl"
+        ]
+      },
       "PreautorizzaAllegatoRispostaDto": {
         "type": "object",
         "properties": {
@@ -4392,6 +4683,35 @@
           }
         }
       },
+      "CreaSegnalazioneDto": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "POST",
+              "COMMENTO"
+            ]
+          },
+          "soggettoId": {
+            "type": "string",
+            "description": "Identificativo del contenuto segnalato"
+          },
+          "motivo": {
+            "type": "string",
+            "enum": [
+              "SPAM",
+              "MOLESTIE",
+              "CONTENUTO_INAPPROPRIATO"
+            ]
+          }
+        },
+        "required": [
+          "tipo",
+          "soggettoId",
+          "motivo"
+        ]
+      },
       "GruppoDto": {
         "type": "object",
         "properties": {
@@ -4659,6 +4979,21 @@
           "registratoIl"
         ]
       },
+      "BloccoEsportatoDto": {
+        "type": "object",
+        "properties": {
+          "utenteId": {
+            "type": "string"
+          },
+          "bloccatoIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "utenteId",
+          "bloccatoIl"
+        ]
+      },
       "ProfiloEsportatoDto": {
         "type": "object",
         "properties": {
@@ -4692,6 +5027,13 @@
             "items": {
               "$ref": "#/components/schemas/DispositivoEsportatoDto"
             }
+          },
+          "bloccati": {
+            "description": "Chi hai bloccato. Chi ha bloccato te non è un tuo dato.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BloccoEsportatoDto"
+            }
           }
         },
         "required": [
@@ -4702,7 +5044,8 @@
           "onboardingCompletato",
           "impostazioniPrivacy",
           "preferenzeDiNotifica",
-          "dispositiviRegistrati"
+          "dispositiviRegistrati",
+          "bloccati"
         ]
       },
       "FileEsportatoDto": {
@@ -4909,6 +5252,38 @@
           "messaggi"
         ]
       },
+      "SegnalazioneEsportataDto": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "POST",
+              "COMMENTO"
+            ]
+          },
+          "soggettoId": {
+            "type": "string"
+          },
+          "motivo": {
+            "type": "string",
+            "enum": [
+              "SPAM",
+              "MOLESTIE",
+              "CONTENUTO_INAPPROPRIATO"
+            ]
+          },
+          "creatoIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "tipo",
+          "soggettoId",
+          "motivo",
+          "creatoIl"
+        ]
+      },
       "EsportazioneDatiDto": {
         "type": "object",
         "properties": {
@@ -4932,6 +5307,12 @@
           },
           "auleStudio": {
             "$ref": "#/components/schemas/AuleEsportateDto"
+          },
+          "segnalazioni": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SegnalazioneEsportataDto"
+            }
           }
         },
         "required": [
@@ -4940,7 +5321,8 @@
           "profilo",
           "bacheca",
           "gruppi",
-          "auleStudio"
+          "auleStudio",
+          "segnalazioni"
         ]
       }
     }

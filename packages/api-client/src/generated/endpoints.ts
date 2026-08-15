@@ -32,6 +32,7 @@ import type {
   AggiornaPreferenzeNotifiche200,
   AggiornaPrivacyDto,
   ApriSalaAulaStudio200,
+  BloccaUtente200,
   CommentaPost201,
   CompletaMioProfilo200,
   CompletaProfiloDto,
@@ -48,9 +49,12 @@ import type {
   CreaInvitoDto,
   CreaMaterialeDto,
   CreaPostDto,
+  CreaSegnalazioneDto,
   DimenticaDispositivo200,
   ElencaAuleStudio200,
   ElencaAuleStudioParams,
+  ElencaBlocchi200,
+  ElencaBlocchiParams,
   ElencaCommenti200,
   ElencaCommentiParams,
   ElencaMieiGruppi200,
@@ -101,8 +105,10 @@ import type {
   RichiestaCodiceDto,
   RimuoviMembro200,
   RimuoviPartecipante200,
+  SbloccaUtente200,
   ScaricaMieiDati200,
   ScriviInAula201,
+  SegnalaContenuto201,
   StatoDelServizio200,
   VerificaCodiceAccesso200,
   VerificaCodiceDto
@@ -683,6 +689,224 @@ export const useAggiornaMiaPrivacy = <TError = ErrorResponseDto,
       return useMutation(mutationOptions, queryClient);
     }
     
+/**
+ * @summary Blocca una persona: non vedrete più i contenuti l'uno dell'altro
+ */
+export const bloccaUtente = (
+    utenteId: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<BloccaUtente200>(
+      {url: `/profilo/me/blocchi/${utenteId}`, method: 'PUT'
+    },
+      options);
+    }
+  
+
+
+export const getBloccaUtenteMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bloccaUtente>>, TError,{utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof bloccaUtente>>, TError,{utenteId: string}, TContext> => {
+
+const mutationKey = ['bloccaUtente'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof bloccaUtente>>, {utenteId: string}> = (props) => {
+          const {utenteId} = props ?? {};
+
+          return  bloccaUtente(utenteId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BloccaUtenteMutationResult = NonNullable<Awaited<ReturnType<typeof bloccaUtente>>>
+    
+    export type BloccaUtenteMutationError = ErrorResponseDto
+
+    /**
+ * @summary Blocca una persona: non vedrete più i contenuti l'uno dell'altro
+ */
+export const useBloccaUtente = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bloccaUtente>>, TError,{utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof bloccaUtente>>,
+        TError,
+        {utenteId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getBloccaUtenteMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Toglie un blocco
+ */
+export const sbloccaUtente = (
+    utenteId: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<SbloccaUtente200>(
+      {url: `/profilo/me/blocchi/${utenteId}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getSbloccaUtenteMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sbloccaUtente>>, TError,{utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof sbloccaUtente>>, TError,{utenteId: string}, TContext> => {
+
+const mutationKey = ['sbloccaUtente'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sbloccaUtente>>, {utenteId: string}> = (props) => {
+          const {utenteId} = props ?? {};
+
+          return  sbloccaUtente(utenteId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SbloccaUtenteMutationResult = NonNullable<Awaited<ReturnType<typeof sbloccaUtente>>>
+    
+    export type SbloccaUtenteMutationError = ErrorResponseDto
+
+    /**
+ * @summary Toglie un blocco
+ */
+export const useSbloccaUtente = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sbloccaUtente>>, TError,{utenteId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof sbloccaUtente>>,
+        TError,
+        {utenteId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getSbloccaUtenteMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Le persone che hai bloccato
+ */
+export const elencaBlocchi = (
+    params?: ElencaBlocchiParams,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ElencaBlocchi200>(
+      {url: `/profilo/me/blocchi`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getElencaBlocchiQueryKey = (params?: ElencaBlocchiParams,) => {
+    return [
+    `/profilo/me/blocchi`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getElencaBlocchiQueryOptions = <TData = Awaited<ReturnType<typeof elencaBlocchi>>, TError = ErrorResponseDto>(params?: ElencaBlocchiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaBlocchi>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getElencaBlocchiQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof elencaBlocchi>>> = ({ signal }) => elencaBlocchi(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof elencaBlocchi>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ElencaBlocchiQueryResult = NonNullable<Awaited<ReturnType<typeof elencaBlocchi>>>
+export type ElencaBlocchiQueryError = ErrorResponseDto
+
+
+export function useElencaBlocchi<TData = Awaited<ReturnType<typeof elencaBlocchi>>, TError = ErrorResponseDto>(
+ params: undefined |  ElencaBlocchiParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaBlocchi>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaBlocchi>>,
+          TError,
+          Awaited<ReturnType<typeof elencaBlocchi>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaBlocchi<TData = Awaited<ReturnType<typeof elencaBlocchi>>, TError = ErrorResponseDto>(
+ params?: ElencaBlocchiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaBlocchi>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaBlocchi>>,
+          TError,
+          Awaited<ReturnType<typeof elencaBlocchi>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaBlocchi<TData = Awaited<ReturnType<typeof elencaBlocchi>>, TError = ErrorResponseDto>(
+ params?: ElencaBlocchiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaBlocchi>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Le persone che hai bloccato
+ */
+
+export function useElencaBlocchi<TData = Awaited<ReturnType<typeof elencaBlocchi>>, TError = ErrorResponseDto>(
+ params?: ElencaBlocchiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaBlocchi>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getElencaBlocchiQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
 /**
  * @summary Autorizza il caricamento di un file e prenota la sua chiave
  */
@@ -3110,6 +3334,71 @@ export const useAggiornaPreferenzeNotifiche = <TError = ErrorResponseDto,
       > => {
 
       const mutationOptions = getAggiornaPreferenzeNotificheMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Segnala un post o un commento: qualcuno lo guarda entro 24 ore
+ */
+export const segnalaContenuto = (
+    creaSegnalazioneDto: CreaSegnalazioneDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<SegnalaContenuto201>(
+      {url: `/segnalazioni`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: creaSegnalazioneDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getSegnalaContenutoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof segnalaContenuto>>, TError,{data: CreaSegnalazioneDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof segnalaContenuto>>, TError,{data: CreaSegnalazioneDto}, TContext> => {
+
+const mutationKey = ['segnalaContenuto'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof segnalaContenuto>>, {data: CreaSegnalazioneDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  segnalaContenuto(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SegnalaContenutoMutationResult = NonNullable<Awaited<ReturnType<typeof segnalaContenuto>>>
+    export type SegnalaContenutoMutationBody = CreaSegnalazioneDto
+    export type SegnalaContenutoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Segnala un post o un commento: qualcuno lo guarda entro 24 ore
+ */
+export const useSegnalaContenuto = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof segnalaContenuto>>, TError,{data: CreaSegnalazioneDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof segnalaContenuto>>,
+        TError,
+        {data: CreaSegnalazioneDto},
+        TContext
+      > => {
+
+      const mutationOptions = getSegnalaContenutoMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

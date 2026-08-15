@@ -10,6 +10,7 @@ import type { ProfiloEsportatoDto } from './profiloEsportatoDto';
 import type { BachecaEsportataDto } from './bachecaEsportataDto';
 import type { GruppoEsportatoDto } from './gruppoEsportatoDto';
 import type { AuleEsportateDto } from './auleEsportateDto';
+import type { SegnalazioneEsportataDto } from './segnalazioneEsportataDto';
 
 export interface EsportazioneDatiDto {
   generataIl: string;
@@ -18,4 +19,5 @@ export interface EsportazioneDatiDto {
   bacheca: BachecaEsportataDto;
   gruppi: GruppoEsportatoDto[];
   auleStudio: AuleEsportateDto;
+  segnalazioni: SegnalazioneEsportataDto[];
 }
