@@ -217,6 +217,39 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
       expect(risposta.json().message).toBe('Il codice è scaduto. Chiedine uno nuovo.');
     });
 
+    it('la verifica di uno non cancella il codice scaduto di un altro', async () => {
+      // Il caso di sopra è stato rosso a intermittenza per mesi, e la causa
+      // era qui: il fornitore d'identità, a ogni lettura di una verifica,
+      // cancellava TUTTE le righe scadute della tabella — per conto di
+      // chiunque. La riga scaduta di una persona spariva mentre un'altra
+      // verificava il proprio codice, e «scaduto» diventava indistinguibile
+      // da «inesistente»: PR003 invece di PR004, cioè la risposta che non
+      // dice cosa fare.
+      //
+      // Si prova sul comportamento e non sulla concorrenza: due identificativi,
+      // uno scaduto e uno vivo, e la verifica del secondo non deve toccare il
+      // primo. Un test che tentasse di riprodurre la corsa sarebbe a sua volta
+      // a intermittenza.
+      const scaduto = nuovoIndirizzo();
+      await codicePer(scaduto);
+      await prisma.verification.updateMany({
+        where: { identifier: { contains: scaduto } },
+        data: { expiresAt: new Date(Date.now() - 60_000) },
+      });
+
+      const vivo = nuovoIndirizzo();
+      const codiceVivo = await codicePer(vivo);
+      const risposta = await chiedi('/accesso/verifica', {
+        method: 'POST',
+        payload: { email: vivo, codice: codiceVivo },
+      });
+      expect(risposta.statusCode).toBe(200);
+
+      expect(
+        await prisma.verification.count({ where: { identifier: { contains: scaduto } } }),
+      ).toBe(1);
+    });
+
     it('brucia il codice dopo troppi tentativi sbagliati (PR005)', async () => {
       const indirizzo = nuovoIndirizzo();
       const codice = await codicePer(indirizzo);

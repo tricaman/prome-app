@@ -45,6 +45,28 @@ export function creaFornitoreIdentita(prisma: PrismaClient, canaleEmail: CanaleE
     // Nessuna password: l'unica credenziale è il codice che arriva per email.
     emailAndPassword: { enabled: false },
 
+    /**
+     * **La pulizia automatica del fornitore è spenta, e non è una scorciatoia.**
+     *
+     * Il fornitore, a ogni lettura di una verifica, esegue un `DELETE` di
+     * tutte le righe scadute della tabella — senza filtro per identificativo,
+     * senza margine, per conto di chiunque stia chiedendo. Da lì un difetto
+     * vero: la riga scaduta di una persona sparisce mentre un'altra qualunque
+     * verifica il proprio codice, e chi arriva un istante dopo con un codice
+     * scaduto si sente rispondere «codice non valido» invece di «è scaduto,
+     * chiedine uno nuovo» — cioè l'unica risposta che dice cosa fare. In
+     * esercizio è raro e invisibile; nella suite in parallelo si vedeva come
+     * un test rosso a intermittenza (PR003 al posto di PR004).
+     *
+     * La pulizia esiste comunque, ed è nostra: `purgaVerificheScadute()` è il
+     * primo passo del giro del worker, ogni cinque minuti, **per tutti** e non
+     * solo per chi cancella l'account. L'identificativo di quelle righe
+     * contiene l'email, quindi la conservazione è un impegno: al più ~65
+     * minuti oltre la scadenza del codice (margine di un'ora + cadenza del
+     * giro).
+     */
+    verification: { disableCleanup: true },
+
     session: {
       expiresIn: DURATA_SESSIONE_SECONDI,
       // Ogni giorno di utilizzo sposta in avanti la scadenza: chi usa Prome
