@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { Animated, Pressable, View } from 'react-native';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { Animated, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { configuraFeedback, type Avvisatore } from '@prome/app-core';
 import { useTema } from '@/theme';
@@ -29,11 +29,21 @@ const DURATA_MS = 4000;
 export function AvvisiProvider({ children }: { children: ReactNode }) {
   const [avviso, setAvviso] = useState<Avviso | null>(null);
   const { t } = useI18n();
-  const traduci = useRef(t);
-  traduci.current = t;
 
   const mostra = useCallback((nuovo: Omit<Avviso, 'id'>) => {
     setAvviso({ ...nuovo, id: Date.now() });
+  }, []);
+
+  /**
+   * Si chiude **per identificativo**, non «l'avviso corrente».
+   *
+   * L'animazione di uscita chiama questa funzione quando finisce, e in quel
+   * momento potrebbe già esserci un avviso nuovo: azzerare alla cieca farebbe
+   * sparire il messaggio appena arrivato, che è il difetto peggiore proprio
+   * perché sembra un caso isolato e non si riproduce a comando.
+   */
+  const chiudi = useCallback((id: number) => {
+    setAvviso((corrente) => (corrente?.id === id ? null : corrente));
   }, []);
 
   useEffect(() => {
@@ -46,12 +56,15 @@ export function AvvisiProvider({ children }: { children: ReactNode }) {
         mostra({ tipo: 'info', messaggio, descrizione: opzioni?.descrizione }),
     };
 
+    // I due messaggi predefiniti si rileggono a ogni cambio di lingua: la
+    // dipendenza da `t` è la ragione per cui la configurazione si rifà, e
+    // costa una riconfigurazione per un gesto che capita di rado.
     configuraFeedback({
       avvisatore,
-      messaggioSuccessoPredefinito: () => traduci.current('comune.operazioneCompletata'),
-      messaggioErrorePredefinito: () => traduci.current('errori.generico.titolo'),
+      messaggioSuccessoPredefinito: () => t('comune.operazioneCompletata'),
+      messaggioErrorePredefinito: () => t('errori.generico.titolo'),
     });
-  }, [mostra]);
+  }, [mostra, t]);
 
   return (
     <>
@@ -60,7 +73,7 @@ export function AvvisiProvider({ children }: { children: ReactNode }) {
         <AvvisoInSovrimpressione
           key={avviso.id}
           avviso={avviso}
-          onChiudi={() => setAvviso(null)}
+          onChiudi={chiudi}
         />
       ) : null}
     </>
@@ -72,11 +85,17 @@ function AvvisoInSovrimpressione({
   onChiudi,
 }: {
   avviso: Avviso;
-  onChiudi: () => void;
+  onChiudi: (id: number) => void;
 }) {
   const tema = useTema();
   const bordi = useSafeAreaInsets();
-  const animazione = useRef(new Animated.Value(0)).current;
+
+  // Costruito **una volta sola**: con un ref il valore animato nascerebbe a
+  // ogni disegno per essere subito buttato via, e leggerlo durante il render
+  // è proprio ciò che React non garantisce più.
+  const [animazione] = useState(() => new Animated.Value(0));
+
+  const id = avviso.id;
 
   useEffect(() => {
     Animated.spring(animazione, {
@@ -86,16 +105,20 @@ function AvvisoInSovrimpressione({
       stiffness: 180,
     }).start();
 
+    // Le dipendenze sono solo valori stabili: il conto alla rovescia parte una
+    // volta e arriva in fondo. Con una funzione ricreata a ogni disegno del
+    // padre, il timer ripartiva da capo e l'avviso restava a schermo più a
+    // lungo del previsto — un difetto che si vede solo guardando l'orologio.
     const timer = setTimeout(() => {
       Animated.timing(animazione, {
         toValue: 0,
         duration: 180,
         useNativeDriver: true,
-      }).start(onChiudi);
+      }).start(() => onChiudi(id));
     }, DURATA_MS);
 
     return () => clearTimeout(timer);
-  }, [animazione, onChiudi]);
+  }, [animazione, id, onChiudi]);
 
   const sfondi: Record<TipoAvviso, string> = {
     successo: tema.colori.successo,
@@ -108,6 +131,8 @@ function AvvisoInSovrimpressione({
     info: tema.colori.testo,
   };
 
+  const scorrimento = animazione.interpolate({ inputRange: [0, 1], outputRange: [-24, 0] });
+
   return (
     <Animated.View
       pointerEvents="box-none"
@@ -117,13 +142,11 @@ function AvvisoInSovrimpressione({
         left: tema.spaziatura[4],
         right: tema.spaziatura[4],
         opacity: animazione,
-        transform: [
-          { translateY: animazione.interpolate({ inputRange: [0, 1], outputRange: [-24, 0] }) },
-        ],
+        transform: [{ translateY: scorrimento }],
       }}
     >
       <Pressable
-        onPress={onChiudi}
+        onPress={() => onChiudi(id)}
         accessibilityRole="alert"
         accessibilityLabel={avviso.messaggio}
         style={[
