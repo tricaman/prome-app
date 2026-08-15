@@ -5,6 +5,12 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "tsConfigPath": "tsconfig.build.json",
-    "assets": [{ "include": "i18n/**/*", "watchAssets": true }]
+    "assets": [
+      { "include": "i18n/**/*", "watchAssets": true },
+      {
+        "include": "infrastruttura/avvisi-in-uscita/modello-email/*.png",
+        "watchAssets": true
+      }
+    ]
   }
 }

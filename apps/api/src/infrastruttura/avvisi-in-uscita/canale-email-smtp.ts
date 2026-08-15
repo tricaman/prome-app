@@ -4,6 +4,18 @@ import { I18nService } from 'nestjs-i18n';
 import { env } from '../../config/env';
 import { DURATA_CODICE_SECONDI } from '../accesso/better-auth';
 import type { CanaleEmail, InvitoDaRecapitare } from './canale-email';
+import {
+  azione,
+  codice as bloccoCodice,
+  componiEmail,
+  nota,
+  paragrafo,
+  separatore,
+  titolo,
+  type ContenutoEmail,
+  type EmailComposta,
+  type TestiInvolucro,
+} from './modello-email';
 
 /**
  * Invio via SMTP.
@@ -14,9 +26,11 @@ import type { CanaleEmail, InvitoDaRecapitare } from './canale-email';
  * modo per sbloccare la messa in esercizio senza decidere al posto di chi deve
  * scegliere.
  *
- * Il messaggio è in **testo semplice oltre che in HTML**: un codice di sei
- * cifre non ha bisogno di impaginazione, e le email di solo HTML finiscono
- * nello spam molto più spesso.
+ * **Qui non si scrive HTML.** Ogni messaggio si dichiara come una sequenza di
+ * blocchi e passa da `componiEmail`, che gli dà l'involucro comune: stessa
+ * scheda, stesso marchio, stesso piè di pagina, stessa parte in testo semplice
+ * ricavata dagli stessi blocchi. È il motivo per cui questa classe è corta e
+ * per cui la ventesima email somiglierà alla prima.
  */
 @Injectable()
 export class CanaleEmailSmtp implements CanaleEmail {
@@ -37,19 +51,19 @@ export class CanaleEmailSmtp implements CanaleEmail {
 
   async inviaCodiceAccesso(destinatario: string, codice: string, lingua: string): Promise<void> {
     const minuti = Math.round(DURATA_CODICE_SECONDI / 60);
-    const testi = {
-      oggetto: this.traduci('email.codice.oggetto', lingua, { codice }),
-      titolo: this.traduci('email.codice.titolo', lingua),
-      istruzioni: this.traduci('email.codice.istruzioni', lingua, { minuti }),
-      ignora: this.traduci('email.codice.ignora', lingua),
-    };
+    const t = (chiave: string, args?: Record<string, unknown>) =>
+      this.traduci(`email.codice.${chiave}`, lingua, args);
 
-    await this.trasporto.sendMail({
-      from: env.SMTP_MITTENTE,
-      to: destinatario,
-      subject: testi.oggetto,
-      text: `${testi.titolo}\n\n${codice}\n\n${testi.istruzioni}\n\n${testi.ignora}`,
-      html: corpoHtml(codice, testi),
+    await this.recapita(destinatario, lingua, {
+      oggetto: t('oggetto', { codice }),
+      anteprima: t('anteprima', { minuti }),
+      blocchi: [
+        titolo(t('titolo')),
+        bloccoCodice(codice),
+        paragrafo(t('istruzioni', { minuti })),
+        separatore(),
+        nota(t('ignora')),
+      ],
     });
 
     // Nel log finisce che è partita, mai il codice: chi legge i log non deve
@@ -71,25 +85,56 @@ export class CanaleEmailSmtp implements CanaleEmail {
       titoloAula: invito.titoloAula,
       scadenza,
     };
-    const testi = {
-      oggetto: this.traduci('email.invitoAula.oggetto', lingua, argomenti),
-      titolo: this.traduci('email.invitoAula.titolo', lingua),
-      istruzioni: this.traduci('email.invitoAula.istruzioni', lingua, argomenti),
-      scadenza: this.traduci('email.invitoAula.scadenza', lingua, argomenti),
-      azione: this.traduci('email.invitoAula.azione', lingua),
-      ignora: this.traduci('email.invitoAula.ignora', lingua),
-    };
+    const t = (chiave: string) => this.traduci(`email.invitoAula.${chiave}`, lingua, argomenti);
 
-    await this.trasporto.sendMail({
-      from: env.SMTP_MITTENTE,
-      to: destinatario,
-      subject: testi.oggetto,
-      text: `${testi.titolo}\n\n${testi.istruzioni}\n\n${invito.collegamento}\n\n${testi.scadenza}\n\n${testi.ignora}`,
-      html: corpoInvito(invito.collegamento, testi),
+    await this.recapita(destinatario, lingua, {
+      oggetto: t('oggetto'),
+      anteprima: t('anteprima'),
+      blocchi: [
+        titolo(t('titolo')),
+        paragrafo(t('istruzioni')),
+        azione(t('azione'), invito.collegamento),
+        nota(t('scadenza')),
+        separatore(),
+        nota(t('ignora')),
+      ],
     });
 
     // Nel log finisce che è partito, mai chi ha invitato chi.
     this.logger.log(`Invito all'aula studio inviato (lingua ${lingua})`);
+  }
+
+  /**
+   * L'unico punto che parla con il trasporto.
+   *
+   * Ogni email esce da qui, quindi ogni email ha il marchio in linea e le due
+   * parti — HTML e testo semplice — coerenti fra loro: non c'è una seconda
+   * strada da cui possa uscirne una senza.
+   */
+  private async recapita(
+    destinatario: string,
+    lingua: string,
+    contenuto: ContenutoEmail,
+  ): Promise<void> {
+    const messaggio: EmailComposta = componiEmail(contenuto, lingua, this.testiInvolucro(lingua));
+
+    await this.trasporto.sendMail({
+      from: env.SMTP_MITTENTE,
+      to: destinatario,
+      subject: messaggio.oggetto,
+      text: messaggio.testo,
+      html: messaggio.html,
+      attachments: [...messaggio.allegati],
+    });
+  }
+
+  /** I testi fissi dell'involucro, nella lingua della richiesta. */
+  private testiInvolucro(lingua: string): TestiInvolucro {
+    return {
+      marchio: this.traduci('email.involucro.marchio', lingua),
+      piedeMarchio: this.traduci('email.involucro.piedeMarchio', lingua),
+      piedeNota: this.traduci('email.involucro.piedeNota', lingua),
+    };
   }
 
   /**
@@ -99,41 +144,4 @@ export class CanaleEmailSmtp implements CanaleEmail {
   private traduci(chiave: string, lingua: string, args?: Record<string, unknown>): string {
     return this.i18n.translate(chiave, { lang: lingua, args }) as string;
   }
-}
-
-/** Stessa forma del codice di accesso: una tabella, nessun foglio esterno. */
-function corpoInvito(
-  collegamento: string,
-  testi: { titolo: string; istruzioni: string; scadenza: string; azione: string; ignora: string },
-): string {
-  return `<!doctype html><html><body style="margin:0;background:#F7F9FB;font-family:-apple-system,Segoe UI,Roboto,sans-serif">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
-    <table role="presentation" width="100%" style="max-width:480px;background:#fff;border:1px solid #E6EAF0;border-radius:20px" cellpadding="0" cellspacing="0">
-      <tr><td style="padding:32px">
-        <p style="margin:0 0 20px;font-size:20px;font-weight:800;color:#181D25">${testi.titolo}</p>
-        <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#5A6C87">${testi.istruzioni}</p>
-        <p style="margin:0 0 24px"><a href="${collegamento}" style="display:inline-block;padding:12px 22px;background:#0A705F;color:#fff;text-decoration:none;border-radius:999px;font-size:14px;font-weight:800">${testi.azione}</a></p>
-        <p style="margin:0;font-size:12.5px;line-height:1.6;color:#6C809D">${testi.scadenza}</p>
-        <p style="margin:16px 0 0;font-size:12.5px;line-height:1.6;color:#6C809D">${testi.ignora}</p>
-      </td></tr>
-    </table>
-  </td></tr></table></body></html>`;
-}
-
-/** Corpo HTML: una tabella e nessun foglio di stile esterno, come vuole la posta. */
-function corpoHtml(
-  codice: string,
-  testi: { titolo: string; istruzioni: string; ignora: string },
-): string {
-  return `<!doctype html><html><body style="margin:0;background:#F7F9FB;font-family:-apple-system,Segoe UI,Roboto,sans-serif">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
-    <table role="presentation" width="100%" style="max-width:480px;background:#fff;border:1px solid #E6EAF0;border-radius:20px" cellpadding="0" cellspacing="0">
-      <tr><td style="padding:32px">
-        <p style="margin:0 0 20px;font-size:20px;font-weight:800;color:#181D25">${testi.titolo}</p>
-        <p style="margin:0 0 8px;font-size:34px;font-weight:800;letter-spacing:8px;color:#0A705F">${codice}</p>
-        <p style="margin:20px 0 0;font-size:14px;line-height:1.6;color:#5A6C87">${testi.istruzioni}</p>
-        <p style="margin:16px 0 0;font-size:12.5px;line-height:1.6;color:#6C809D">${testi.ignora}</p>
-      </td></tr>
-    </table>
-  </td></tr></table></body></html>`;
 }

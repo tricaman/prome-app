@@ -1,12 +1,19 @@
 {
+  "involucro": {
+    "marchio": "Prome",
+    "piedeMarchio": "Prome · prome.app",
+    "piedeNota": "Automated message: please do not reply to this address."
+  },
   "codice": {
     "oggetto": "{codice} is your code to enter Prome",
+    "anteprima": "The code is valid for {minuti} minutes.",
     "titolo": "Your access code",
     "istruzioni": "Enter it in Prome within {minuti} minutes. After that it expires and you need a new one.",
     "ignora": "If you didn't ask to sign in, ignore this message: without the code nobody can get in."
   },
   "invitoAula": {
     "oggetto": "{invitante} invites you to a study room on Prome",
+    "anteprima": "Open the invitation to join “{titoloAula}”.",
     "titolo": "You have been invited to a study room",
     "istruzioni": "{invitante} invited you to “{titoloAula}”. Open the invitation to join: if you do not have an account yet, all it takes is an email address and a minute.",
     "scadenza": "The invitation is valid until {scadenza}.",
