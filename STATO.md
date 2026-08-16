@@ -231,6 +231,38 @@ Cosa si è rotto di proposito, e va saputo:
 
 La suite dell'API è a **301** casi (era 290) e ha fatto tre giri verdi di fila; il giro dal vivo — ricerca degli atenei per sigla, corsi con classe e durata, onboarding, aula riservata all'ateneo con il nome giusto nella pastiglia, esportazione — è stato provato contro l'API vera prima di scrivere questa riga.
 
+### La sezione Profilo del telefono, ridisegnata ✅ (16 agosto 2026) — solo client
+
+**Sette schermate al posto di due.** La tab Profilo era una scheda e un bottone «Impostazioni», con due terzi di schermo vuoti; tutto il resto viveva in un'unica lista dove scelte di privacy, interruttori, righe di navigazione e azioni distruttive stavano aperti nella stessa colonna. Ora la tab è un **hub** (identità, numeri, attività, impostazioni e supporto, documenti legali in fondo) e le impostazioni sono un **indice** di quattro gruppi corti — Account, Privacy e avvisi, Informazioni, I tuoi dati — in cui ogni riga porta a destra il valore corrente: quasi sempre chi apre le impostazioni vuole verificare, non cambiare, e se il valore si legge lì non apre niente.
+
+Nuove: `impostazioni/modifica-profilo` (era una scheda dentro la lista; ora è un modulo con «Salva» in intestazione e la domanda prima di uscire con modifiche pendenti), `impostazioni/privacy`, `impostazioni/notifiche`, `impostazioni/privacy-policy`. Riscritte: la tab, l'indice, `elimina-account`. **Nessuna modifica al server, al contratto o al web.**
+
+**La privacy policy è in-app, e non ha una parola propria**: legge `PRIVACY_IN_BREVE`, `PRIVACY_SEZIONI` ed `EMAIL_PRIVACY` da `@prome/contenuti`, gli stessi testi che pubblica il sito. Mancava del tutto ed è un requisito degli store; ora si raggiunge da tre punti. Termini e linee guida restano collegamenti al sito: cambiano senza che l'app si aggiorni, e una copia dentro il fascio sarebbe vecchia il giorno dopo.
+
+**Il disegno prometteva più prodotto di quanto ce ne sia, e la differenza è dichiarata invece che nascosta.** La convenzione sta in `apps/mobile/src/lib/segnaposto.ts`, che **è** l'elenco del debito: `rg SEGNAPOSTO_ apps/mobile/src` lo conta in un comando. Una riga segnaposto è inerte, porta una pastiglia «Presto» e non mostra alcun valore; un comando sospeso passa da `gestoSospeso(SEGNAPOSTO_…)`, così il legame col debito non vive in un commento. È la stessa forma che il pannello degli avvisi sul web aveva già trovato: una scheda che dichiara il proprio stato non è una promessa falsa, una che lo nasconde sì.
+
+Sono segnaposto: i tuoi post, le aule create, i materiali salvati (nessun elenco filtra per autore), la foto del profilo, l'email e la password (il profilo non espone l'email di proposito, e l'accesso è a codice), i dispositivi collegati (si registrano, ma non c'è un `GET` che li elenchi), il tema (sul telefono segue il sistema), i promemoria e la pausa notturna, la condivisione del profilo, l'aiuto. Tre cose del disegno **non sono state ritagliate affatto** perché non si possono dire senza mentire: l'anno di corso (`ProfiloDto` non ce l'ha), «le notifiche push sono attive su questo dispositivo» — al suo posto il riquadro ambra che dice la verità — e l'invito al primo post per un profilo nuovo, che richiederebbe di sapere quanti post ha scritto, cioè esattamente ciò che manca. L'unico contatore vero è quello dei gruppi, che il server sa contare.
+
+Il disegno chiedeva anche di rimettere «metti in pausa l'account» fra le alternative alla cancellazione: **non è stato fatto**, la pausa era stata tolta perché non definita da nessun documento, e le alternative offerte sono le tre che esistono (spegnere gli avvisi, restringere la visibilità, bloccare qualcuno). Corretti in silenzio altri quattro testi del disegno che contraddicevano il prodotto: «pagine pubbliche di prome.app» (mai: `contenuti.pubblico` dice «mai il web»), `privacy@prome.app` (indirizzo morto, l'MX non ha una casella), «Prome 2.4.1» (la versione la tiene EAS e si legge a runtime) e «3 avvisi attivi» (gli assi sono due).
+
+Estratti tre pezzi di design system che erano copiati a mano: `Elenco`/`RigaElenco` (il divisorio lo mette l'elenco, non la riga — spariscono tre copie di `ultima={indice === …}`), `SceltaRadio` (ne esistevano due, e la schermata privacy ne vuole due sole) e `Foglio`. La regola dei fogli: **destinazione → rotta, decisione → `Foglio`**; non si usa `usePreventRemove`, che expo-router 57 contiene ma non esporta.
+
+### La stessa sezione sul web ✅ (16 agosto 2026) — solo client
+
+**Il profilo era il quadro elettrico.** La voce «Profilo» della colonna di navigazione portava alle impostazioni, e una pagina di profilo non esisteva: c'era solo dove cambiare come funziona l'app, non dove vedere chi sei e cosa hai prodotto. Ora sono tre destinazioni con tre indirizzi — `/app/profilo`, `/app/profilo/modifica`, `/app/impostazioni` — come sul telefono, ma con la separazione che sul web conta di più perché è nell'URL.
+
+**Le impostazioni non sono più una pagina sola con cinque ancore.** Ogni sezione è una rotta (`/app/impostazioni/{privacy,notifiche,aspetto,dati,elimina}`), quindi si salva fra i preferiti, si manda a qualcuno e il tasto indietro funziona; l'indice sta nel layout, in quattro gruppi corti, e porta a destra il valore corrente di ogni voce. `/app/impostazioni` rimanda alla privacy: era nella navigazione e nei preferiti, e romperlo sarebbe un guasto per chi non c'entra.
+
+**La contattabilità è tornata a schermo, spenta.** Era assente per una ragione scritta — un interruttore che non protegge da niente è peggio di uno che manca — e la ragione resta vera: nessuna regola legge quell'asse. Ma la differenza che conta non è essere a schermo, è che **non si salva**: chi la impostasse su «Privato» crederebbe di essersi protetto. Spenta e con lo stato dichiarato è la stessa forma del pannello degli avvisi.
+
+Segnaposto anche qui, con la stessa convenzione (`apps/web/src/lib/segnaposto.ts`, `rg SEGNAPOSTO_ apps/web/src`): contatori di post, aule e materiali, foto, biografia, anno di corso, email e password, dispositivi collegati. `gestoSospeso()` avvisa in sviluppo se un comando sospeso torna premibile — è il difetto che questa convenzione può produrre, e conviene vederlo subito.
+
+**La pagina pubblica del profilo non è stata fatta**, ed è la deviazione più grossa dal disegno. Il mockup poggia su `prome.app/u/{nome}` con schema `ProfilePage + Person`, e la contraddizione non è tecnica: `apps/web/CLAUDE.md` la chiama regola non negoziabile — nessun contenuto degli utenti è raggiungibile da chi non ha un account, profili compresi — e vieta esplicitamente quello schema. Servirebbe anche un `GET /profilo/:id` che non esiste. Il bottone «Vedi profilo pubblico» resta spento e dichiarato, così il prossimo che disegna quella pagina sa che era stato tolto apposta.
+
+Corretti in silenzio altri quattro punti: «Richiedi l'archivio, fino a 48 ore, link valido 7 giorni» (l'endpoint risponde subito — mettere davanti un'attesa che non esiste sarebbe peggiorare il prodotto per somigliare a qualcun altro), «il tema si applica su tutti i tuoi dispositivi» (sta in `localStorage`, quindi vale su questo browser), le quattro righe di avvisi (gli assi sono due) e «disattiva temporaneamente» accanto all'eliminazione, che era stata tolta perché mai definita.
+
+Estratti sul web i due pezzi che mancavano: `Elenco`/`RigaElenco` e `SceltaRadio`, quest'ultimo copiato a mano in **quattro** punti. `Card` ora inoltra le proprie props all'elemento scelto con `come`, senza il quale una scheda resa come collegamento non poteva ricevere il proprio `href`.
+
 ---
 
 ## Cosa non c'è ancora

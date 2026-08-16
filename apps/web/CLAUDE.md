@@ -83,7 +83,21 @@ Due aree, due cornici: il sito pubblico usa `SiteShell`, l'app usa `AppShell` (c
 
 Le regole di privacy si mostrano **solo come il server le ha confermate**: `impostazioni-privacy.tsx` legge il profilo e scrive con `useApiMutation`, senza alcuno stato locale. Niente aggiornamento ottimistico qui, mai — un valore a schermo che non è stato salvato è la bugia peggiore che questa schermata possa dire, perché chi legge «Pubblico» crede di essere visibile e nessuno lo smentirà. I valori sono quelli del contratto (`PRIVATO|ATENEO|PUBBLICO`); le etichette e le descrizioni stanno in i18n e devono descrivere **ciò che il server applica davvero**, non il modello di dominio nella sua interezza.
 
-Per lo stesso motivo l'interfaccia mostra un asse solo, la visibilità dei contenuti: la contattabilità è un valore vero e salvato, ma **nessuna regola la legge ancora** (vedi `apps/api/CLAUDE.md`), e un interruttore che non protegge da niente è peggio di un interruttore che manca. Quando qualcosa la applicherà, il riquadro torna.
+**Un asse solo si può cambiare**, la visibilità dei contenuti. La contattabilità è un valore vero e salvato, ma **nessuna regola la legge ancora** (vedi `apps/api/CLAUDE.md`): la sua scheda esiste (`impostazioni-contattabilita.tsx`), è spenta, e dichiara in chiaro che la scelta non è ancora applicata. La differenza che conta non è essere a schermo o no — è che **non si salva**: chi la impostasse su «Privato» crederebbe di essersi protetto, e nessuno lo smentirebbe. Quando qualcosa la applicherà, la scheda si accende e basta.
+
+### Il profilo e le impostazioni sono due destinazioni
+
+`/app/profilo` è una pagina di **contenuto** — chi sei, cosa hai prodotto — e `/app/impostazioni` una pagina di **controllo**. Fino al 16 agosto 2026 la voce «Profilo» della colonna di navigazione portava alle impostazioni, e una pagina di profilo non esisteva. `/app/profilo/modifica` è una terza destinazione: cinque campi e una ricerca con suggerimenti stanno stretti in un modale, ed è la stessa scelta fatta sul telefono.
+
+**Ogni sezione delle impostazioni è una rotta** (`/app/impostazioni/{privacy,notifiche,aspetto,dati,elimina}`), non un'ancora dentro una pagina sola: su un browser l'indirizzo si salva fra i preferiti, si manda a qualcuno, e il tasto indietro fa quello che ci si aspetta. L'indice sta in `impostazioni/layout.tsx` e porta a destra il valore corrente di ogni voce — è ciò che rende un indice migliore di una lista di controlli, perché quasi sempre chi apre le impostazioni vuole verificare, non cambiare. `/app/impostazioni` resta valido e rimanda alla privacy: era nella navigazione e nei preferiti, e romperlo per una riorganizzazione interna sarebbe un guasto per chi non c'entra.
+
+### Segnaposto: quello che il disegno prevede e il prodotto non ha
+
+`lib/segnaposto.ts` **è** l'elenco del debito: `rg SEGNAPOSTO_ apps/web/src` lo conta in un comando, e quando l'endpoint arriva si cancella la riga e il compilatore indica ogni punto da sistemare. Non contraddice la regola di questa sezione — «qui c'è solo ciò che funziona» — la rende applicabile a un disegno più ricco del prodotto: **la struttura si ritaglia intera, ma nulla di ciò che non funziona può somigliare a qualcosa che funziona.**
+
+Tre marcatori, sempre insieme: la costante in quel file; `presto={SEGNAPOSTO_…}` su `RigaElenco` (spegne la riga, mostra «Presto», toglie valore e freccia) oppure `gestoSospeso(SEGNAPOSTO_…)` accanto a `isDisabled` per un comando; e una riga `SEGNAPOSTO:` nel docblock del file. Un numero che non c'è si scrive `—`, mai `0`.
+
+**`SEGNAPOSTO_PROFILO_PUBBLICO` è diverso dagli altri**: non è «non ancora fatto», è fuori dal prodotto per la decisione dichiarata più su in questo documento. Il bottone «Vedi profilo pubblico» resta spento perché la domanda che pone è giusta e perché, se sparisse, il prossimo che disegna quella pagina lo rimetterebbe senza sapere che era stato tolto apposta.
 
 ### Preferenze di notifica
 

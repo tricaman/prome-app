@@ -19,7 +19,8 @@
     "ricarica": "Reload the page",
     "riprova": "Try again",
     "salva": "Save",
-    "utenteRimosso": "Removed user"
+    "utenteRimosso": "Removed user",
+    "presto": "Soon"
   },
   "lingua": {
     "etichetta": "Language",
@@ -631,7 +632,29 @@
         "testo": "Your profile disappears immediately. Your posts and comments stay useful to those who study but become anonymous (“Removed user”), and personal data is deleted from backups too within 30 days. If you change your mind, you can reactivate the account within 14 days by signing in again.",
         "azione": "Delete my account",
         "parola": "DELETE",
-        "scriviPerConfermare": "Type {parola} to confirm"
+        "scriviPerConfermare": "Type {parola} to confirm",
+        "introTitolo": "Before you go, here's what happens",
+        "introTesto": "No surprises: we explain it now, so you can decide calmly.",
+        "punti": {
+          "uno": {
+            "titolo": "Your profile disappears right away",
+            "testo": "Name, university and course will no longer be visible to anyone."
+          },
+          "due": {
+            "titolo": "Posts and comments become anonymous",
+            "testo": "They stay useful to whoever is studying, but without your name: they will appear as “Removed user”."
+          },
+          "tre": {
+            "titolo": "Full deletion within 30 days",
+            "testo": "Personal data disappears from backups too within 30 days. If you change your mind, you can reactivate the account within 14 days by signing in again."
+          }
+        },
+        "alternativa": "Was it something fixable? You can also turn off alerts, narrow who sees what you write, or block whoever is bothering you, without losing anything.",
+        "resto": "I'm staying on Prome",
+        "foglio": {
+          "titolo": "Confirm deletion?",
+          "azione": "Delete permanently"
+        }
       },
       "notifiche": {
         "titolo": "When we notify you",
@@ -643,6 +666,16 @@
         "inviti": {
           "titolo": "Invitations",
           "testo": "When someone invites you to a study room or a group."
+        },
+        "cosaTiAvvisa": "What alerts you",
+        "silenzia": "Mute",
+        "promemoria": {
+          "titolo": "Scheduled study room reminders",
+          "testo": "10 minutes before it starts"
+        },
+        "pausaNotturna": {
+          "titolo": "Night pause",
+          "testo": "No alerts from 11:00 pm to 8:00 am"
         }
       },
       "bloccati": {
@@ -651,6 +684,78 @@
         "vuoto": "You have not blocked anyone.",
         "dal": "Since {data}",
         "sblocca": "Unblock"
+      },
+      "esciSubTelefono": "This phone only",
+      "temaSistema": "System",
+      "persone": "People",
+      "nessunaAttiva": "None",
+      "unaAttiva": "1 on",
+      "attive": "{numero} on",
+      "gruppi": {
+        "account": "Account",
+        "privacyNotifiche": "Privacy and alerts",
+        "informazioni": "Information",
+        "tuoiDati": "Your data"
+      },
+      "voci": {
+        "profilo": "Profile and studies",
+        "profiloSub": "Name, surname, university, course",
+        "email": "Email and password",
+        "emailSub": "You sign in with a code by email, no password",
+        "dispositivi": "Connected devices",
+        "dispositiviSub": "The list of open sessions",
+        "privacySub": "Who can contact you and see what you write",
+        "notificheSub": "Comments, invitations, reminders",
+        "aspettoSub": "Follows the system theme",
+        "privacyPolicySub": "What data we collect and why",
+        "termini": "Terms of service",
+        "lineeGuida": "Community guidelines",
+        "eliminaSub": "Content anonymised, data deleted within 30 days",
+        "scaricaSub": "A copy of everything, in a readable format",
+        "apreIlSito": "Opens in the browser"
+      },
+      "modificaProfilo": {
+        "titolo": "Edit profile",
+        "cambiaFoto": "Change photo",
+        "studi": "Studies",
+        "profiloPubblico": "Public profile",
+        "chiVede": "Who sees what you write",
+        "chiVedeSub": "Change it in the privacy settings",
+        "scegliUniversita": "Choose your university",
+        "scegliCorso": "Choose your course",
+        "nonSalvate": {
+          "titolo": "Save your changes?",
+          "testo": "You changed something and haven't saved it yet.",
+          "esci": "Leave without saving"
+        },
+        "foto": "Profile photo",
+        "fotoTesto": "Instead of a photo, Prome uses your initials on a colour derived from your name.",
+        "carica": "Upload",
+        "datiPersonali": "Personal details",
+        "bio": "Bio",
+        "bioTesto": "A line about you, under your name.",
+        "anno": "Year of study",
+        "emailAltrove": "The address you sign in with can't be changed here, and doesn't appear in your profile: the session carries only an identifier, and showing it would mean letting it out of sign-in."
+      },
+      "contattabilita": {
+        "titolo": "Who can contact you",
+        "testo": "Who can message you privately and invite you to study rooms and groups.",
+        "nonApplicata": "This choice isn't applied yet: invitations travel by email address, which may not have an account. We keep it visible because the day it counts, it will count for what you chose.",
+        "privato": "Only people already in your groups or study rooms",
+        "ateneo": "Only people studying at your university",
+        "pubblico": "Any student signed up to Prome"
+      },
+      "leggiPrivacy": {
+        "titolo": "Read the privacy policy",
+        "testo": "What data we collect and why"
+      },
+      "tornaAlProfilo": "Back to profile",
+      "pannello": {
+        "privacy": "Two separate decisions: who can reach you, and who can see what you write.",
+        "notifiche": "Choose what reaches you. You can turn everything off and keep using Prome.",
+        "aspetto": "The theme applies to this browser, right away.",
+        "dati": "A complete copy of posts, comments, materials and profile data.",
+        "elimina": "Before you go ahead, read what happens to your content."
       }
     },
     "segnala": {
@@ -667,6 +772,36 @@
       "bloccaConferma": "You will no longer see each other’s content.",
       "bloccaDavvero": "Block",
       "annulla": "Cancel"
+    },
+    "profilo": {
+      "modifica": "Edit profile",
+      "condividi": "Share profile",
+      "attivita": "Your activity",
+      "impostazioniSupporto": "Settings and support",
+      "contatori": {
+        "post": "Posts",
+        "aule": "Study rooms",
+        "gruppi": "Groups"
+      },
+      "tuoiPost": "Your posts",
+      "auleCreate": "Study rooms you created",
+      "impostazioniSub": "Privacy, alerts, theme, account",
+      "aiuto": {
+        "titolo": "Help and contact",
+        "testo": "Guides, reports, write to us"
+      },
+      "piede": {
+        "termini": "Terms of service",
+        "lineeGuida": "Guidelines"
+      },
+      "versione": "Prome {versione} · {motto}",
+      "vediPubblico": "View public profile",
+      "contenuti": "Your content",
+      "nessunGruppo": "You are not part of any group yet."
+    },
+    "privacy": {
+      "titolo": "Privacy policy",
+      "condividi": "Share the document"
     }
   }
 }

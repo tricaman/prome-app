@@ -1,269 +1,210 @@
-import { Pressable, View } from 'react-native';
+import { Linking, View } from 'react-native';
 import { router } from 'expo-router';
-import { useQueryClient } from '@tanstack/react-query';
-import { useEsci, type Portata } from '@prome/app-core';
-import {
-  aggiornaMiaPrivacy,
-  getLeggiMioProfiloQueryKey,
-  useLeggiMioProfilo,
-  type AggiornaPrivacyDtoVisibilita,
-  type LeggiMioProfilo200,
-  type ProfiloDto,
-} from '@prome/api-client';
-import { rotte } from '@/content';
+import { useEsci } from '@prome/app-core';
+import { useLeggiPreferenzeNotifiche, useLeggiMioProfilo } from '@prome/api-client';
+import { paginaDelSito, rotte } from '@/content';
 import { useTema } from '@/theme';
-import { useApiMutation, useT } from '@/hooks';
-import { QueryBoundary } from '@/components/feedback';
-import { ModificaProfilo } from '@/components/app/modifica-profilo';
-import { ScaricaDati } from '@/components/app/scarica-dati';
-import { Avatar, Button, Card, Icona, Intestazione, Screen, Text } from '@/components/ui';
+import { useT } from '@/hooks';
+import { useI18n } from '@/i18n/i18n-provider';
+import {
+  SEGNAPOSTO_DISPOSITIVI,
+  SEGNAPOSTO_EMAIL,
+  SEGNAPOSTO_TEMA,
+} from '@/lib/segnaposto';
+import { useScaricaDati } from '@/components/app/scarica-dati';
+import {
+  Button,
+  Elenco,
+  Icona,
+  Intestazione,
+  RigaElenco,
+  Screen,
+  Text,
+  TitoloSezione,
+} from '@/components/ui';
+import { VersioneApp } from '@/components/app/versione-app';
 
-const OPZIONI: readonly {
-  valore: AggiornaPrivacyDtoVisibilita;
-  chiave: 'privato' | 'ateneo' | 'pubblico';
-}[] = [
-  { valore: 'PRIVATO', chiave: 'privato' },
-  { valore: 'ATENEO', chiave: 'ateneo' },
-  { valore: 'PUBBLICO', chiave: 'pubblico' },
-];
+const CHIAVI = { PRIVATO: 'privato', ATENEO: 'ateneo', PUBBLICO: 'pubblico' } as const;
 
 /**
- * Impostazioni.
+ * Impostazioni: un indice, non un pannello.
  *
- * La privacy è la stessa del web e viene dalla stessa API: chi vede quello che
- * scrivi. Il valore mostrato è quello confermato dal server, mai una scelta in
- * attesa — su una decisione di privacy un valore a schermo che non è stato
- * salvato è la bugia peggiore possibile, e questa schermata la diceva: mostrava
- * «Ateneo» a chiunque mentre il valore vero era «Privato».
+ * Il difetto della lista di prima era che tutti i controlli stavano aperti
+ * nella stessa colonna — scelte di privacy, interruttori, righe di navigazione
+ * e azioni distruttive — e la schermata sembrava infinita. Qui i controlli
+ * veri vivono ognuno nella sua schermata, e questa diventa quattro gruppi
+ * corti: account, privacy e avvisi, informazioni, i tuoi dati.
  *
- * L'altro asse del modello — chi può contattarti — non è qui: l'API lo accetta,
- * ma nessuna regola lo legge ancora (gli inviti viaggiano per indirizzo email,
- * che può non avere un account). Un interruttore che non protegge da niente è
- * peggio di un interruttore che manca.
+ * **Ogni riga porta a destra il valore corrente.** È quello che rende un
+ * indice migliore di una lista di controlli: quasi sempre chi apre le
+ * impostazioni vuole verificare, non cambiare, e se il valore si legge qui non
+ * apre niente. Il valore è sempre quello che il server ha confermato: su una
+ * decisione di privacy un valore a schermo non salvato è la bugia peggiore.
  *
- * Delle tre righe tolte a luglio perché non avevano niente dietro — notifiche,
- * download dei dati, uscita da tutti i dispositivi — **due sono tornate vere**:
- * l'uscita da tutti i dispositivi con la sessione, e «Scarica i tuoi dati» con
- * i moduli nativi. Resta fuori il solo pannello delle notifiche, e non perché
- * manchi il codice: manca un fornitore che le recapiti, e mostrare interruttori
- * per avvisi che nessuno consegna sarebbe di nuovo il difetto di allora — in
- * una schermata di impostazioni, credere di aver messo a posto una cosa è
- * indistinguibile dall'averlo fatto davvero.
+ * «Esci» sta in fondo e fuori dai gruppi perché è un'azione, non
+ * un'impostazione. Restano due modi di uscire, come prima, perché rispondono a
+ * due domande diverse — «ho finito» e «qualcuno potrebbe essere entrato» — ma
+ * il secondo è una riga dentro Account, accanto ai dispositivi: è lì che uno
+ * ci pensa. Nessuna conferma su nessuno dei due: uscire è annullabile con un
+ * altro codice, e una conferma su un gesto reversibile insegna solo a premere
+ * due volte senza leggere.
+ *
+ * SEGNAPOSTO: email e password, dispositivi collegati, aspetto. Il profilo non
+ * espone l'email di proposito e l'accesso è a codice, quindi non c'è nemmeno
+ * una password; i dispositivi si registrano ma non esiste un `GET` che li
+ * elenchi; il tema sul telefono segue il sistema e non è una scelta.
  */
 export default function SchermataImpostazioni() {
+  const tema = useTema();
   const t = useT();
-  const queryClient = useQueryClient();
+  const { lingua } = useI18n();
+  const { esci, inCorso } = useEsci();
   const profilo = useLeggiMioProfilo();
+  const preferenze = useLeggiPreferenzeNotifiche();
+  const scarica = useScaricaDati();
 
-  const salva = useApiMutation({
-    mutationFn: (visibilita: AggiornaPrivacyDtoVisibilita) => aggiornaMiaPrivacy({ visibilita }),
-    // In cache va il profilo che il server ha appena confermato, non una
-    // previsione; l'invalidazione serve alle altre schermate che lo leggono.
-    onSuccess: (risposta) => {
-      queryClient.setQueryData<LeggiMioProfilo200>(getLeggiMioProfiloQueryKey(), risposta);
-    },
-    invalida: [getLeggiMioProfiloQueryKey() as never],
-  });
+  const visibilita = profilo.data?.data.impostazioniPrivacy.visibilita;
+  const avvisiAccesi = preferenze.data
+    ? Number(preferenze.data.data.commenti) + Number(preferenze.data.data.inviti)
+    : undefined;
+
+  const riassuntoAvvisi =
+    avvisiAccesi === undefined
+      ? undefined
+      : avvisiAccesi === 0
+        ? t('app.impostazioni.nessunaAttiva')
+        : avvisiAccesi === 1
+          ? t('app.impostazioni.unaAttiva')
+          : t('app.impostazioni.attive', { numero: String(avvisiAccesi) });
+
+  const apriSulSito = (percorso: string) => () => {
+    void Linking.openURL(paginaDelSito(percorso, lingua));
+  };
 
   return (
     <>
       <Intestazione conIndietro titolo={t('app.impostazioni.titolo')} />
 
       <Screen scorrevole>
-        <QueryBoundary query={profilo}>
-          {({ data }) => (
-            <>
-              <SchedaProfilo profilo={data} />
-              <ModificaProfilo profilo={data} />
-              <SceltaVisibilita
-                valore={data.impostazioniPrivacy.visibilita}
-                inCorso={salva.isPending}
-                onScegli={(visibilita) => salva.mutate(visibilita)}
-              />
-            </>
-          )}
-        </QueryBoundary>
+        <TitoloSezione>{t('app.impostazioni.gruppi.account')}</TitoloSezione>
+        <Elenco>
+          <RigaElenco
+            icona="matita"
+            tinta="menta"
+            etichetta={t('app.impostazioni.voci.profilo')}
+            sottotitolo={t('app.impostazioni.voci.profiloSub')}
+            onPress={() => router.push(rotte.modificaProfilo())}
+          />
+          <RigaElenco
+            icona="posta"
+            etichetta={t('app.impostazioni.voci.email')}
+            sottotitolo={t('app.impostazioni.voci.emailSub')}
+            presto={SEGNAPOSTO_EMAIL}
+          />
+          <RigaElenco
+            icona="dispositivo"
+            etichetta={t('app.impostazioni.voci.dispositivi')}
+            sottotitolo={t('app.impostazioni.voci.dispositiviSub')}
+            presto={SEGNAPOSTO_DISPOSITIVI}
+          />
+          <RigaElenco
+            icona="esci"
+            etichetta={t('app.impostazioni.esciDaTutti')}
+            sottotitolo={t('app.impostazioni.esciDaTuttiSub')}
+            disabilitato={inCorso}
+            onPress={() => void esci('tutti-i-dispositivi')}
+          />
+        </Elenco>
 
-        <Button
-          titolo={t('app.impostazioni.bloccati.titolo')}
-          variante="contorno"
-          larghezzaPiena
-          onPress={() => router.push(rotte.utentiBloccati())}
-        />
+        <TitoloSezione>{t('app.impostazioni.gruppi.privacyNotifiche')}</TitoloSezione>
+        <Elenco>
+          <RigaElenco
+            icona="scudo"
+            tinta="menta"
+            etichetta={t('app.impostazioni.privacy')}
+            sottotitolo={t('app.impostazioni.voci.privacySub')}
+            valore={visibilita ? t(`app.impostazioni.visibilita.${CHIAVI[visibilita]}`) : undefined}
+            onPress={() => router.push(rotte.privacy())}
+          />
+          <RigaElenco
+            icona="campana"
+            tinta="ambra"
+            etichetta={t('app.impostazioni.notifiche.titolo')}
+            sottotitolo={t('app.impostazioni.voci.notificheSub')}
+            valore={riassuntoAvvisi}
+            onPress={() => router.push(rotte.notifiche())}
+          />
+          <RigaElenco
+            icona="luna"
+            etichetta={t('app.impostazioni.aspetto')}
+            sottotitolo={t('app.impostazioni.voci.aspettoSub')}
+            valore={t('app.impostazioni.temaSistema')}
+            presto={SEGNAPOSTO_TEMA}
+          />
+        </Elenco>
 
-        <SessioneAccount />
+        <TitoloSezione>{t('app.impostazioni.gruppi.informazioni')}</TitoloSezione>
+        <Elenco>
+          <RigaElenco
+            icona="documento"
+            etichetta={t('app.privacy.titolo')}
+            sottotitolo={t('app.impostazioni.voci.privacyPolicySub')}
+            onPress={() => router.push(rotte.privacyPolicy())}
+          />
+          <RigaElenco
+            icona="documento"
+            etichetta={t('app.impostazioni.voci.termini')}
+            sottotitolo={t('app.impostazioni.voci.apreIlSito')}
+            onPress={apriSulSito('/termini')}
+          />
+          <RigaElenco
+            icona="documento"
+            etichetta={t('app.impostazioni.voci.lineeGuida')}
+            sottotitolo={t('app.impostazioni.voci.apreIlSito')}
+            onPress={apriSulSito('/linee-guida')}
+          />
+        </Elenco>
 
-        <ScaricaDati />
+        <TitoloSezione>{t('app.impostazioni.gruppi.tuoiDati')}</TitoloSezione>
+        <Elenco>
+          <RigaElenco
+            icona="scarica"
+            tinta="blu"
+            etichetta={t('app.impostazioni.dati.titolo')}
+            sottotitolo={
+              scarica.isPending
+                ? t('app.impostazioni.dati.inCorso')
+                : t('app.impostazioni.dati.nonMiei')
+            }
+            disabilitato={scarica.isPending}
+            onPress={() => scarica.mutate(undefined)}
+          />
+          <RigaElenco
+            icona="cestino"
+            distruttiva
+            etichetta={t('app.impostazioni.elimina.titolo')}
+            sottotitolo={t('app.impostazioni.voci.eliminaSub')}
+            onPress={() => router.push(rotte.eliminaAccount())}
+          />
+        </Elenco>
 
-        <Button
-          titolo={t('app.impostazioni.elimina.titolo')}
-          variante="contorno"
-          larghezzaPiena
-          onPress={() => router.push(rotte.eliminaAccount())}
-        />
+        <View style={{ gap: tema.spaziatura[4], marginTop: tema.spaziatura[2] }}>
+          <Button
+            titolo={t('app.impostazioni.esci')}
+            variante="contorno"
+            larghezzaPiena
+            // Spento mentre una uscita lavora: la sessione sta per cadere, e un
+            // secondo gesto partirebbe con un token che fra un istante non vale.
+            disabled={inCorso}
+            iconaSinistra={<Icona nome="esci" dimensione={18} colore="tenue" />}
+            onPress={() => void esci('questo-dispositivo')}
+          />
+          <Text variante="didascalia" allineamento="center">
+            {t('app.impostazioni.esciSubTelefono')}
+          </Text>
+          <VersioneApp />
+        </View>
       </Screen>
     </>
-  );
-}
-
-/**
- * Uscire da Prome.
- *
- * Due righe e non una, perché rispondono a due domande diverse: «ho finito»
- * (questo telefono) e «qualcuno potrebbe essere entrato» (tutti i
- * dispositivi). La seconda non è la prima fatta meglio — chiude sessioni che
- * chi preme non ha in mano — quindi dice a parole cosa sta per succedere.
- *
- * Nessuna conferma: uscire è sempre annullabile con un altro codice, e una
- * conferma su un gesto reversibile insegna solo a premere due volte senza
- * leggere. Il ritorno al benvenuto lo fa la guardia in `_layout`, che vede la
- * sessione sparire: qui non si naviga, così esiste un modo solo di uscire.
- */
-function SessioneAccount() {
-  const t = useT();
-  const { esci, inCorso } = useEsci();
-
-  const righe: readonly { chiave: 'esci' | 'esciDaTutti'; portata: Portata }[] = [
-    { chiave: 'esci', portata: 'questo-dispositivo' },
-    { chiave: 'esciDaTutti', portata: 'tutti-i-dispositivi' },
-  ];
-
-  return (
-    <Card style={{ padding: 0, overflow: 'hidden' }}>
-      {righe.map((riga, indice) => (
-        <RigaSessione
-          key={riga.chiave}
-          etichetta={t(`app.impostazioni.${riga.chiave}`)}
-          dettaglio={t(`app.impostazioni.${riga.chiave}Sub`)}
-          inCorso={inCorso}
-          ultima={indice === righe.length - 1}
-          onPremi={() => void esci(riga.portata)}
-        />
-      ))}
-    </Card>
-  );
-}
-
-function RigaSessione({
-  etichetta,
-  dettaglio,
-  inCorso,
-  ultima,
-  onPremi,
-}: {
-  etichetta: string;
-  dettaglio: string;
-  inCorso: boolean;
-  ultima: boolean;
-  onPremi: () => void;
-}) {
-  const tema = useTema();
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled: inCorso }}
-      // Spente entrambe mentre una lavora: la sessione sta per cadere, e un
-      // secondo gesto partirebbe con un token che fra un istante non vale più.
-      disabled={inCorso}
-      onPress={onPremi}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: tema.spaziatura[3],
-        padding: tema.spaziatura[4],
-        borderBottomWidth: ultima ? 0 : 1,
-        borderBottomColor: tema.colori.superficieAlt2,
-        opacity: inCorso ? 0.6 : 1,
-      }}
-    >
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <Text variante="corpo" style={{ fontSize: 14 }}>
-          {etichetta}
-        </Text>
-        <Text variante="didascalia">{dettaglio}</Text>
-      </View>
-      <Icona nome="esci" dimensione={18} colore="debole" />
-    </Pressable>
-  );
-}
-
-/**
- * Chi sei. Senza email: la sessione porta solo un identificativo, e il profilo
- * non la espone — mostrarla vorrebbe dire farla uscire da Accesso.
- */
-function SchedaProfilo({ profilo }: { profilo: ProfiloDto }) {
-  const tema = useTema();
-  const t = useT();
-
-  const nome = [profilo.nome, profilo.cognome].filter(Boolean).join(' ');
-  const studi = [profilo.corso?.nome, profilo.universita?.nome].filter(Boolean).join(' · ');
-
-  return (
-    <Card style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[4] }}>
-      <Avatar nome={nome || '?'} dimensione={64} />
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <Text variante="sottotitolo">{nome || t('app.impostazioni.senzaNome')}</Text>
-        {studi ? <Text variante="didascalia">{studi}</Text> : null}
-      </View>
-    </Card>
-  );
-}
-
-function SceltaVisibilita({
-  valore,
-  inCorso,
-  onScegli,
-}: {
-  valore: AggiornaPrivacyDtoVisibilita;
-  inCorso: boolean;
-  onScegli: (valore: AggiornaPrivacyDtoVisibilita) => void;
-}) {
-  const tema = useTema();
-  const t = useT();
-
-  return (
-    <Card style={{ gap: tema.spaziatura[3] }}>
-      <View style={{ gap: 4 }}>
-        <Text variante="sottotitolo" style={{ fontSize: 15.5 }}>
-          {t('app.impostazioni.contenuti.titolo')}
-        </Text>
-        <Text variante="didascalia">{t('app.impostazioni.contenuti.testo')}</Text>
-      </View>
-
-      <View accessibilityRole="radiogroup" style={{ gap: tema.spaziatura[2] }}>
-        {OPZIONI.map((opzione) => {
-          const scelta = opzione.valore === valore;
-          return (
-            <Pressable
-              key={opzione.valore}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: scelta, disabled: inCorso }}
-              disabled={inCorso}
-              // Riscegliere ciò che è già scelto non è un cambio: evita una
-              // richiesta e un avviso che confermerebbe una cosa già vera.
-              onPress={() => !scelta && onScegli(opzione.valore)}
-              style={{
-                borderRadius: tema.raggio.lg,
-                borderWidth: 2,
-                borderColor: scelta ? tema.colori.primario : tema.colori.bordo,
-                backgroundColor: scelta ? tema.colori.primarioTenue : tema.colori.superficie,
-                padding: tema.spaziatura[3],
-                gap: 3,
-                opacity: inCorso ? 0.6 : 1,
-              }}
-            >
-              <Text
-                variante="etichetta"
-                style={{ color: scelta ? tema.colori.primarioTesto : tema.colori.testo }}
-              >
-                {t(`app.impostazioni.visibilita.${opzione.chiave}`)}
-              </Text>
-              <Text variante="didascalia">{t(`app.impostazioni.contenuti.${opzione.chiave}`)}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
-    </Card>
   );
 }

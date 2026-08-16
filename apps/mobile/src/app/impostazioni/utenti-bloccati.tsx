@@ -1,4 +1,3 @@
-import { View } from 'react-native';
 import {
   getElencaBlocchiQueryKey,
   getElencaPostQueryKey,
@@ -6,10 +5,18 @@ import {
   useElencaBlocchi,
   type BloccatoDto,
 } from '@prome/api-client';
-import { useTema } from '@/theme';
 import { useApiMutation, useT } from '@/hooks';
 import { QueryBoundary } from '@/components/feedback';
-import { Avatar, Button, Card, Intestazione, Screen, Text } from '@/components/ui';
+import {
+  Avatar,
+  Button,
+  Card,
+  Elenco,
+  Intestazione,
+  RigaElenco,
+  Screen,
+  Text,
+} from '@/components/ui';
 
 /**
  * Le persone bloccate, e la strada per tornare indietro.
@@ -40,15 +47,11 @@ export default function SchermataUtentiBloccati() {
           }
         >
           {(risposta) => (
-            <Card style={{ gap: 0, padding: 0, overflow: 'hidden' }}>
-              {risposta.data.map((bloccato, indice) => (
-                <RigaBloccato
-                  key={bloccato.utenteId}
-                  bloccato={bloccato}
-                  ultima={indice === risposta.data.length - 1}
-                />
+            <Elenco>
+              {risposta.data.map((bloccato) => (
+                <RigaBloccato key={bloccato.utenteId} bloccato={bloccato} />
               ))}
-            </Card>
+            </Elenco>
           )}
         </QueryBoundary>
       </Screen>
@@ -56,8 +59,7 @@ export default function SchermataUtentiBloccati() {
   );
 }
 
-function RigaBloccato({ bloccato, ultima }: { bloccato: BloccatoDto; ultima: boolean }) {
-  const tema = useTema();
+function RigaBloccato({ bloccato }: { bloccato: BloccatoDto }) {
   const t = useT();
   const nome =
     [bloccato.nome, bloccato.cognome].filter(Boolean).join(' ') || t('comune.utenteRimosso');
@@ -70,33 +72,20 @@ function RigaBloccato({ bloccato, ultima }: { bloccato: BloccatoDto; ultima: boo
   });
 
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: tema.spaziatura[3],
-        padding: tema.spaziatura[4],
-        borderBottomWidth: ultima ? 0 : 1,
-        borderBottomColor: tema.colori.superficieAlt2,
-      }}
-    >
-      <Avatar nome={nome} dimensione={34} />
-      <View style={{ flex: 1 }}>
-        <Text variante="etichetta" numberOfLines={1}>
-          {nome}
-        </Text>
-        <Text variante="didascalia">
-          {t('app.impostazioni.bloccati.dal', {
-            data: new Date(bloccato.bloccatoIl).toLocaleDateString(),
-          })}
-        </Text>
-      </View>
-      <Button
-        titolo={t('app.impostazioni.bloccati.sblocca')}
-        variante="contorno"
-        inCaricamento={sblocca.isPending}
-        onPress={() => sblocca.mutate(undefined)}
-      />
-    </View>
+    <RigaElenco
+      guida={<Avatar nome={nome} dimensione={34} />}
+      etichetta={nome}
+      sottotitolo={t('app.impostazioni.bloccati.dal', {
+        data: new Date(bloccato.bloccatoIl).toLocaleDateString(),
+      })}
+      coda={
+        <Button
+          titolo={t('app.impostazioni.bloccati.sblocca')}
+          variante="contorno"
+          inCaricamento={sblocca.isPending}
+          onPress={() => sblocca.mutate(undefined)}
+        />
+      }
+    />
   );
 }

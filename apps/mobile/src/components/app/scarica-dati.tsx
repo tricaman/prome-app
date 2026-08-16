@@ -3,7 +3,6 @@ import { File, Paths } from 'expo-file-system';
 import * as Condivisione from 'expo-sharing';
 import { scaricaMieiDati } from '@prome/api-client';
 import { useApiMutation, useT } from '@/hooks';
-import { Button, Card, Text } from '@/components/ui';
 
 /**
  * «Scarica i tuoi dati» sul telefono.
@@ -22,12 +21,16 @@ import { Button, Card, Text } from '@/components/ui';
  * Nessun avviso di riuscita: il foglio di condivisione **è** l'esito, e un
  * messaggio sopra sarebbe rumore. L'errore invece passa dall'avviso standard,
  * perché tutto sta dentro la mutazione.
+ *
+ * È un hook e non una scheda perché il disegno della voce cambia col posto in
+ * cui sta — una riga nell'indice delle impostazioni, non più una card — mentre
+ * quello che fa non cambia mai.
  */
-export function ScaricaDati() {
+export function useScaricaDati() {
   const t = useT();
   const [nomeFile] = useState(() => `prome-dati-${new Date().toISOString().slice(0, 10)}.json`);
 
-  const scarica = useApiMutation({
+  return useApiMutation({
     mutationFn: async () => {
       const risposta = await scaricaMieiDati();
       const documento = JSON.stringify(risposta.data, null, 2);
@@ -46,28 +49,4 @@ export function ScaricaDati() {
     },
     mostraAvvisoSuccesso: false,
   });
-
-  return (
-    <Card>
-      <Text variante="sottotitolo">{t('app.impostazioni.dati.titolo')}</Text>
-      <Text variante="corpoTenue" style={{ marginTop: 4 }}>
-        {t('app.impostazioni.dati.testo')}
-      </Text>
-      <Text variante="didascalia" style={{ marginTop: 8 }}>
-        {t('app.impostazioni.dati.nonMiei')}
-      </Text>
-      <Button
-        titolo={
-          scarica.isPending
-            ? t('app.impostazioni.dati.inCorso')
-            : t('app.impostazioni.dati.azione')
-        }
-        variante="contorno"
-        larghezzaPiena
-        inCaricamento={scarica.isPending}
-        onPress={() => scarica.mutate(undefined)}
-        style={{ marginTop: 12 }}
-      />
-    </Card>
-  );
 }

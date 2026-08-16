@@ -1,8 +1,8 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import type { CreaGruppoDtoVisibilita } from '@prome/api-client';
 import { useTema } from '@/theme';
 import { useT } from '@/hooks';
-import { Text } from '@/components/ui';
+import { SceltaRadio, Text } from '@/components/ui';
 
 const OPZIONI: readonly {
   valore: CreaGruppoDtoVisibilita;
@@ -38,37 +38,17 @@ export function SceltaVisibilitaGruppo({
 
   return (
     <View style={{ gap: tema.spaziatura[2] }}>
-      {OPZIONI.map((opzione) => {
-        const impossibile = senzaAteneo && opzione.valore === 'ATENEO';
-        const scelta = opzione.valore === valore;
-
-        return (
-          <Pressable
-            key={opzione.valore}
-            accessibilityRole="radio"
-            accessibilityState={{ selected: scelta, disabled: impossibile }}
-            disabled={impossibile}
-            onPress={() => onScegli(opzione.valore)}
-            style={{
-              borderRadius: tema.raggio.lg,
-              borderWidth: 2,
-              borderColor: scelta ? tema.colori.primario : tema.colori.bordo,
-              backgroundColor: scelta ? tema.colori.primarioTenue : tema.colori.superficie,
-              padding: tema.spaziatura[3],
-              gap: 3,
-              opacity: impossibile ? 0.5 : 1,
-            }}
-          >
-            <Text
-              variante="etichetta"
-              style={{ color: scelta ? tema.colori.primarioTesto : tema.colori.testo }}
-            >
-              {t(`app.gruppo.visibilita.${opzione.chiave}`)}
-            </Text>
-            <Text variante="didascalia">{t(`app.gruppo.visibilita.${opzione.chiave}Testo`)}</Text>
-          </Pressable>
-        );
-      })}
+      <SceltaRadio
+        opzioni={OPZIONI.map((opzione) => ({
+          valore: opzione.valore,
+          etichetta: t(`app.gruppo.visibilita.${opzione.chiave}`),
+          descrizione: t(`app.gruppo.visibilita.${opzione.chiave}Testo`),
+          impossibile: senzaAteneo && opzione.valore === 'ATENEO',
+        }))}
+        valore={valore}
+        etichetta={t('app.gruppo.visibilita.privato')}
+        onScegli={onScegli}
+      />
 
       {senzaAteneo ? (
         <Text variante="didascalia">{t('app.gruppo.ateneoNonDisponibile')}</Text>

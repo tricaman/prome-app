@@ -9,6 +9,14 @@ export interface CardProps {
   padding?: 'nessuno' | 'sm' | 'md' | 'lg';
   className?: string;
   children: ReactNode;
+  /**
+   * Il resto passa all'elemento scelto con `come`.
+   *
+   * Senza, `come` sarebbe mezzo inutile: una scheda resa come collegamento non
+   * potrebbe ricevere il proprio `href`, che è il motivo principale per cui si
+   * cambia elemento.
+   */
+  [altro: string]: unknown;
 }
 
 const VARIANTI = {
@@ -35,9 +43,11 @@ export function Card({
   padding = 'md',
   className,
   children,
+  ...resto
 }: CardProps) {
   return (
     <Elemento
+      {...resto}
       className={cn('rounded-2xl border', VARIANTI[variante], PADDING[padding], className)}
     >
       {children}

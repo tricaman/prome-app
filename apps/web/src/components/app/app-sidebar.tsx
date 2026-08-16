@@ -25,7 +25,10 @@ const VOCI: readonly VoceApp[] = [
   { chiave: 'bacheca', icona: 'bacheca', href: percorsiApp.bacheca() },
   { chiave: 'aule', icona: 'aule', href: percorsiApp.auleStudio() },
   { chiave: 'gruppi', icona: 'gruppi', href: percorsiApp.gruppi() },
-  { chiave: 'profilo', icona: 'profilo', href: percorsiApp.impostazioni() },
+  // Portava alle impostazioni, che è come chiamare «casa» il quadro elettrico:
+  // adesso il profilo è una pagina sua, e le impostazioni si aprono da lì o
+  // dalla scheda in fondo a questa colonna.
+  { chiave: 'profilo', icona: 'profilo', href: percorsiApp.profilo() },
 ];
 
 /**

@@ -16,7 +16,20 @@ export const percorsiApp = {
   gruppo: (id: string) => `/app/gruppi/${id}`,
   invito: (id: string) => `/app/inviti/${id}`,
   invitoGruppo: (id: string) => `/app/inviti-gruppo/${id}`,
+  profilo: () => '/app/profilo',
+  modificaProfilo: () => '/app/profilo/modifica',
+  /**
+   * Le impostazioni non sono una pagina sola: ogni sezione ha il proprio
+   * indirizzo, così ci si arriva da un segnalibro o da un collegamento in una
+   * mail, e chi apre le impostazioni con un obiettivo preciso — «cambiare gli
+   * avvisi» — non deve cercarlo scorrendo. `impostazioni()` porta alla prima.
+   */
   impostazioni: () => '/app/impostazioni',
+  impostazioniPrivacy: () => '/app/impostazioni/privacy',
+  impostazioniNotifiche: () => '/app/impostazioni/notifiche',
+  impostazioniAspetto: () => '/app/impostazioni/aspetto',
+  impostazioniDati: () => '/app/impostazioni/dati',
+  impostazioniElimina: () => '/app/impostazioni/elimina',
 } as const;
 
 /** Il parametro con cui l'accesso sa dove riportare chi è stato rimandato lì. */

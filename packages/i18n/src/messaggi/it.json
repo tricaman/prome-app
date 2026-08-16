@@ -19,7 +19,8 @@
     "ricarica": "Ricarica la pagina",
     "riprova": "Riprova",
     "salva": "Salva",
-    "utenteRimosso": "Utente rimosso"
+    "utenteRimosso": "Utente rimosso",
+    "presto": "Presto"
   },
   "lingua": {
     "etichetta": "Lingua",
@@ -631,7 +632,29 @@
         "testo": "Il profilo scompare subito. I tuoi post e commenti restano utili a chi studia ma diventano anonimi (“Utente rimosso”), e i dati personali vengono cancellati anche dai backup entro 30 giorni. Se cambi idea, entro 14 giorni puoi riattivare l'account accedendo di nuovo.",
         "azione": "Elimina il mio account",
         "parola": "ELIMINA",
-        "scriviPerConfermare": "Scrivi {parola} per confermare"
+        "scriviPerConfermare": "Scrivi {parola} per confermare",
+        "introTitolo": "Prima che tu vada, ecco cosa succede",
+        "introTesto": "Nessuna sorpresa: te lo spieghiamo adesso, così decidi con calma.",
+        "punti": {
+          "uno": {
+            "titolo": "Il profilo scompare subito",
+            "testo": "Nome, università e corso non saranno più visibili a nessuno."
+          },
+          "due": {
+            "titolo": "Post e commenti diventano anonimi",
+            "testo": "Restano utili a chi studia, ma senza il tuo nome: appariranno come “Utente rimosso”."
+          },
+          "tre": {
+            "titolo": "Cancellazione completa entro 30 giorni",
+            "testo": "I dati personali spariscono anche dai backup entro 30 giorni. Se cambi idea, entro 14 giorni riattivi l'account accedendo di nuovo."
+          }
+        },
+        "alternativa": "Era un problema risolvibile? Puoi anche spegnere gli avvisi, restringere chi vede quello che scrivi o bloccare chi ti dà fastidio, senza perdere niente.",
+        "resto": "Resto su Prome",
+        "foglio": {
+          "titolo": "Confermi l'eliminazione?",
+          "azione": "Elimina definitivamente"
+        }
       },
       "notifiche": {
         "titolo": "Quando ti avvisiamo",
@@ -643,6 +666,16 @@
         "inviti": {
           "titolo": "Inviti",
           "testo": "Quando qualcuno ti invita in un’aula studio o in un gruppo."
+        },
+        "cosaTiAvvisa": "Cosa ti avvisa",
+        "silenzia": "Silenzia",
+        "promemoria": {
+          "titolo": "Promemoria aule programmate",
+          "testo": "10 minuti prima che inizi"
+        },
+        "pausaNotturna": {
+          "titolo": "Pausa notturna",
+          "testo": "Nessun avviso dalle 23:00 alle 8:00"
         }
       },
       "bloccati": {
@@ -651,6 +684,78 @@
         "vuoto": "Non hai bloccato nessuno.",
         "dal": "Da {data}",
         "sblocca": "Sblocca"
+      },
+      "esciSubTelefono": "Solo da questo telefono",
+      "temaSistema": "Sistema",
+      "persone": "Persone",
+      "nessunaAttiva": "Nessuno",
+      "unaAttiva": "1 attivo",
+      "attive": "{numero} attivi",
+      "gruppi": {
+        "account": "Account",
+        "privacyNotifiche": "Privacy e avvisi",
+        "informazioni": "Informazioni",
+        "tuoiDati": "I tuoi dati"
+      },
+      "voci": {
+        "profilo": "Profilo e studi",
+        "profiloSub": "Nome, cognome, università, corso",
+        "email": "Email e password",
+        "emailSub": "Entri con un codice via email, senza password",
+        "dispositivi": "Dispositivi collegati",
+        "dispositiviSub": "L'elenco delle sessioni aperte",
+        "privacySub": "Chi può contattarti e vedere quello che scrivi",
+        "notificheSub": "Commenti, inviti, promemoria",
+        "aspettoSub": "Segue il tema del sistema",
+        "privacyPolicySub": "Quali dati raccogliamo e perché",
+        "termini": "Termini di servizio",
+        "lineeGuida": "Linee guida della community",
+        "eliminaSub": "Contenuti anonimizzati, dati cancellati entro 30 giorni",
+        "scaricaSub": "Una copia di tutto, in formato leggibile",
+        "apreIlSito": "Si apre nel browser"
+      },
+      "modificaProfilo": {
+        "titolo": "Modifica profilo",
+        "cambiaFoto": "Cambia foto",
+        "studi": "Studi",
+        "profiloPubblico": "Profilo pubblico",
+        "chiVede": "Chi vede quello che scrivi",
+        "chiVedeSub": "Si cambia dalle impostazioni privacy",
+        "scegliUniversita": "Scegli l'università",
+        "scegliCorso": "Scegli il corso di studi",
+        "nonSalvate": {
+          "titolo": "Salvare le modifiche?",
+          "testo": "Hai cambiato qualcosa e non l'hai ancora salvato.",
+          "esci": "Esci senza salvare"
+        },
+        "foto": "Foto del profilo",
+        "fotoTesto": "Al posto della foto Prome usa le tue iniziali, su un colore ricavato dal nome.",
+        "carica": "Carica",
+        "datiPersonali": "Dati personali",
+        "bio": "Bio",
+        "bioTesto": "Una riga su di te, sotto al nome.",
+        "anno": "Anno di corso",
+        "emailAltrove": "L'indirizzo con cui accedi non si cambia da qui, e non compare nel profilo: la sessione porta solo un identificativo, e mostrarlo vorrebbe dire farlo uscire dall'accesso."
+      },
+      "contattabilita": {
+        "titolo": "Chi può contattarti",
+        "testo": "Chi può scriverti in privato e invitarti in aule studio e gruppi.",
+        "nonApplicata": "Questa scelta non è ancora applicata: gli inviti viaggiano per indirizzo email, che può non avere un account. La lasciamo in vista perché il giorno in cui varrà, varrà per quello che hai scelto.",
+        "privato": "Solo chi è già nei tuoi gruppi o nelle tue aule studio",
+        "ateneo": "Solo chi studia nel tuo ateneo",
+        "pubblico": "Qualunque studente iscritto a Prome"
+      },
+      "leggiPrivacy": {
+        "titolo": "Leggi la privacy policy",
+        "testo": "Quali dati raccogliamo e perché"
+      },
+      "tornaAlProfilo": "Torna al profilo",
+      "pannello": {
+        "privacy": "Due decisioni separate: chi può raggiungerti e chi può vedere quello che scrivi.",
+        "notifiche": "Scegli cosa ti arriva. Puoi spegnere tutto e continuare a usare Prome.",
+        "aspetto": "Il tema vale su questo browser e si applica subito.",
+        "dati": "Una copia completa di post, commenti, materiali e dati del profilo.",
+        "elimina": "Prima di procedere, leggi cosa succede ai tuoi contenuti."
       }
     },
     "segnala": {
@@ -667,6 +772,36 @@
       "bloccaConferma": "Non vedrete più i contenuti l’uno dell’altro.",
       "bloccaDavvero": "Blocca",
       "annulla": "Annulla"
+    },
+    "profilo": {
+      "modifica": "Modifica profilo",
+      "condividi": "Condividi profilo",
+      "attivita": "La tua attività",
+      "impostazioniSupporto": "Impostazioni e supporto",
+      "contatori": {
+        "post": "Post",
+        "aule": "Aule studio",
+        "gruppi": "Gruppi"
+      },
+      "tuoiPost": "I tuoi post",
+      "auleCreate": "Aule studio create",
+      "impostazioniSub": "Privacy, avvisi, tema, account",
+      "aiuto": {
+        "titolo": "Aiuto e contatti",
+        "testo": "Guide, segnalazioni, scrivici"
+      },
+      "piede": {
+        "termini": "Termini di servizio",
+        "lineeGuida": "Linee guida"
+      },
+      "versione": "Prome {versione} · {motto}",
+      "vediPubblico": "Vedi profilo pubblico",
+      "contenuti": "I tuoi contenuti",
+      "nessunGruppo": "Non fai ancora parte di nessun gruppo."
+    },
+    "privacy": {
+      "titolo": "Privacy policy",
+      "condividi": "Condividi il documento"
     }
   }
 }

@@ -99,6 +99,11 @@ function Navigazione() {
             l'elenco e si chiude tornando dov'eri. */}
         <Stack.Screen name="crea-aula" options={{ presentation: 'modal' }} />
         <Stack.Screen name="crea-gruppo" options={{ presentation: 'modal' }} />
+        {/* Il gesto di ritorno è spento perché questa schermata è un modulo e
+            chiede prima di lasciar andare le modifiche non salvate: senza
+            questa riga su iOS si scivola fuori col pollice e la domanda non
+            arriva mai, cioè il controllo esiste solo sulla carta. */}
+        <Stack.Screen name="impostazioni/modifica-profilo" options={{ gestureEnabled: false }} />
       </Stack>
     </>
   );

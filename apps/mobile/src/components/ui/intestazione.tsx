@@ -13,6 +13,14 @@ export interface IntestazioneProps {
   sottotitolo?: string;
   /** Mostra il tasto indietro: da usare su ogni schermata impilata. */
   conIndietro?: boolean;
+  /**
+   * Cosa fa il tasto indietro. Senza, torna alla schermata precedente.
+   *
+   * Serve a chi deve chiedere qualcosa prima di lasciare andare — un modulo
+   * compilato a metà — e va sempre insieme al tasto di sistema e al gesto,
+   * altrimenti è un blocco che si aggira scivolando col pollice.
+   */
+  onIndietro?: () => void;
   /** Contenuto a destra: azioni della schermata. */
   azioni?: ReactNode;
   /** Con `false` non aggiunge il margine per la barra di stato. */
@@ -30,6 +38,7 @@ export function Intestazione({
   titolo,
   sottotitolo,
   conIndietro = false,
+  onIndietro,
   azioni,
   conAreaSicura = true,
 }: IntestazioneProps) {
@@ -51,7 +60,7 @@ export function Intestazione({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('comune.indietro')}
-          onPress={() => router.back()}
+          onPress={onIndietro ?? (() => router.back())}
           style={{
             width: 40,
             height: 40,
@@ -87,11 +96,13 @@ export function AzioneTonda({
   icona,
   etichetta,
   conPallino = false,
+  disabilitato = false,
   onPress,
 }: {
   icona: Parameters<typeof Icona>[0]['nome'];
   etichetta: string;
   conPallino?: boolean;
+  disabilitato?: boolean;
   onPress?: () => void;
 }) {
   const tema = useTema();
@@ -100,6 +111,8 @@ export function AzioneTonda({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={etichetta}
+      accessibilityState={{ disabled: disabilitato }}
+      disabled={disabilitato}
       onPress={onPress}
       style={[
         {
@@ -109,6 +122,7 @@ export function AzioneTonda({
           backgroundColor: tema.colori.superficie,
           alignItems: 'center',
           justifyContent: 'center',
+          opacity: disabilitato ? 0.45 : 1,
         },
         tema.ombra.sm,
       ]}
