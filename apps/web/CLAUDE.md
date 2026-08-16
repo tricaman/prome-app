@@ -206,7 +206,11 @@ Sbagliare insieme non produce un errore, produce un colore che scompare. I due c
 
 ### Tema chiaro e scuro
 
-Il tema segue l'impostazione di sistema e si può cambiare dal selettore nell'intestazione (sito) e nella barra dell'app, o scegliere in **Impostazioni → Aspetto**. La scelta la conserva `next-themes`, che la rilegge prima della prima pittura: nessun lampo chiaro aprendo una pagina scura.
+Il tema segue l'impostazione di sistema e si può cambiare dal selettore nell'intestazione (sito) e nella barra dell'app, o scegliere in **Impostazioni → Aspetto**. Lo gestisce `providers/tema.tsx` (non più `next-themes`, rimosso): la scelta sta in `localStorage` sotto la chiave `theme` con i valori `system|light|dark`, e si legge **dopo il montaggio** — leggerla durante l'idratazione farebbe disegnare al browser qualcosa di diverso dal server, che è il modo classico di far fallire l'idratazione.
+
+Ad applicare il tema prima della prima pittura è `SCRIPT_TEMA` (`lib/tema.ts`), servito dal layout di lingua. **Va scritto come HTML grezzo dentro un contenitore, non come elemento React**, e non è un vezzo: React 19 vieta di *creare* un tag `<script>` durante un disegno lato browser, e un disegno lato browser dell'intera pagina avviene ogni volta che l'idratazione fallisce — per esempio quando un'estensione (MetaMask e simili) infila un nodo nel `<body>` prima di React. Con il tag dentro `dangerouslySetInnerHTML` di un `<div>`, React non crea mai uno script: reimposta l'HTML del contenitore, e uno script inserito via `innerHTML` il browser non lo esegue. Alla prima lettura invece sì, perché lì lo legge l'analizzatore della pagina.
+
+Perché non si può fare più semplice: applicare il tema dal server (da un cookie) renderebbe **dinamiche** tutte le pagine pubbliche, che oggi sono generate in anticipo; farlo dopo l'idratazione riporterebbe il lampo chiaro. Lo script inline è il prezzo di quelle due cose insieme.
 
 Le superfici scure non sono la rampa neutra rovesciata ma una scala propria (`scuro` in `colori.ts`), più fredda e con scatti brevi fra un livello e l'altro. Una schermata nuova va guardata in tutti e due i temi prima di dirla finita.
 

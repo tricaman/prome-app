@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { ImageResponse } from 'next/og';
 import { COLORE_MARCHIO, temaScuro } from '@prome/design-tokens';
 import { catalogoDi, eLinguaSupportata, LINGUA_DI_RIPIEGO } from '@prome/i18n';
@@ -10,10 +11,23 @@ import { catalogoDi, eLinguaSupportata, LINGUA_DI_RIPIEGO } from '@prome/i18n';
  * server stesso, che non ha motivo di scaricare da sé un file che ha già. È un
  * PNG e non l'SVG perché il motore che compone l'immagine lavora su mappe di
  * pixel.
+ *
+ * Il percorso va convertito in stringa: il `fs` con cui gira questo modulo non
+ * accetta un oggetto `URL`, e la lettura falliva **solo durante la build** —
+ * un errore che non si vede in sviluppo e che lascia senza anteprima ogni
+ * collegamento condiviso.
+ *
+ * La lettura è avviata al primo disegno e non all'importazione: se fallisse
+ * all'importazione, il modulo intero fallirebbe con lei.
  */
-const logo = readFile(new URL('./logo-anteprima.png', import.meta.url)).then(
-  (dati) => `data:image/png;base64,${dati.toString('base64')}`,
-);
+let logo: Promise<string> | undefined;
+
+function marchioIncorporato(): Promise<string> {
+  logo ??= readFile(fileURLToPath(new URL('./logo-anteprima.png', import.meta.url))).then(
+    (dati) => `data:image/png;base64,${dati.toString('base64')}`,
+  );
+  return logo;
+}
 
 /**
  * Anteprima mostrata quando un collegamento viene condiviso.
@@ -33,7 +47,7 @@ export default async function AnteprimaSocial({
   const { locale } = await params;
   const lingua = eLinguaSupportata(locale) ? locale : LINGUA_DI_RIPIEGO;
   const messaggi = catalogoDi(lingua);
-  const marchio = await logo;
+  const marchio = await marchioIncorporato();
 
   return new ImageResponse(
     (

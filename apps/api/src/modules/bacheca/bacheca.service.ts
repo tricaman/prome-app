@@ -1,9 +1,11 @@
+import { randomUUID } from 'node:crypto';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import {
   LUNGHEZZA_MASSIMA_COMMENTO,
   type CommentoResponse,
   type PaginatedResult,
   type PostResponse,
+  type ProfiloResponse,
   type TipoAllegato,
 } from '@prome/contracts';
 import { Prisma } from '@prisma/client';
@@ -100,20 +102,23 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
       dimensione: dati.dimensione,
     });
 
-    const prenotazione = await this.prisma.allegatoInAttesa.create({
+    // L'identificativo si genera **qui**, prima della scrittura, perché la
+    // chiave lo contiene. Nasceva invece con la riga, che veniva scritta con
+    // `chiave: ''` e corretta subito dopo: due prenotazioni nello stesso
+    // istante scrivevano allora la stessa chiave vuota, e la seconda cadeva
+    // sul vincolo di unicità con un 500 che non spiegava niente — un difetto
+    // che in sviluppo non si vede, perché a caricare si è da soli.
+    const id = randomUUID();
+    const chiave = chiaveAllegato(id, dati.nome);
+    await this.prisma.allegatoInAttesa.create({
       data: {
+        id,
         autoreId: utenteId,
         nome: dati.nome,
         tipo: dati.tipo,
         dimensione: dati.dimensione,
-        chiave: '',
+        chiave,
       },
-    });
-
-    const chiave = chiaveAllegato(prenotazione.id, dati.nome);
-    await this.prisma.allegatoInAttesa.update({
-      where: { id: prenotazione.id },
-      data: { chiave },
     });
 
     const preautorizzazione = await this.archivio.preautorizzaCaricamento(chiave, dati.tipo);
@@ -641,7 +646,7 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
 
   private commentoPerIlClient(
     commento: { id: string; testo: string; creatoIl: Date; autoreId: string },
-    autore: { nome: string | null; cognome: string | null; universita: string | null } | undefined,
+    autore: ProfiloResponse | undefined,
     autoreDelPost: string,
     lettoreId: string,
   ): CommentoResponse {
@@ -653,7 +658,7 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
         utenteId: commento.autoreId,
         nome: autore?.nome ?? null,
         cognome: autore?.cognome ?? null,
-        universita: autore?.universita ?? null,
+        universita: autore?.universita?.nome ?? null,
         // Senza profilo dietro: account cancellato (contenuto anonimizzato)
         // o in corso di cancellazione. Il client mostra «Utente rimosso».
         ...(autore ? {} : { rimosso: true }),
@@ -672,7 +677,7 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
       autoreId: string;
       allegati: { id: string; nome: string; tipo: TipoAllegato; dimensione: number; chiave: string }[];
     },
-    autore?: { utenteId: string; nome: string | null; cognome: string | null; universita: string | null },
+    autore?: ProfiloResponse,
     lettoreId?: string,
   ): PostResponse {
     return {
@@ -683,7 +688,7 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
         utenteId: post.autoreId,
         nome: autore?.nome ?? null,
         cognome: autore?.cognome ?? null,
-        universita: autore?.universita ?? null,
+        universita: autore?.universita?.nome ?? null,
         // Senza profilo dietro: account cancellato (contenuto anonimizzato)
         // o in corso di cancellazione. Il client mostra «Utente rimosso».
         ...(autore ? {} : { rimosso: true }),

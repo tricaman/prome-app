@@ -41,6 +41,15 @@ echo "→ rilascio della versione ${VERSIONE}"
 echo "→ migrazioni"
 "${COMPOSE[@]}" run --rm -T api npx prisma migrate deploy </dev/null
 
+# Il catalogo accademico subito dopo lo schema e prima del codice nuovo: è
+# chiuso, quindi un database senza catalogo è un onboarding che non si può
+# completare — e sarebbe un guasto invisibile in sviluppo, dove il catalogo c'è
+# da sempre. La semina è idempotente e non cancella nulla. Si invoca il file
+# compilato e non `pnpm catalogo:semina`, che ricostruirebbe con un CLI che
+# nell'immagine di produzione non c'è.
+echo "→ catalogo accademico"
+"${COMPOSE[@]}" run --rm -T api node dist/scripts/semina-catalogo.js </dev/null
+
 echo "→ avvio"
 "${COMPOSE[@]}" up -d
 

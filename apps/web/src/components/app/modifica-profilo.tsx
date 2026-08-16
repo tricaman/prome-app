@@ -7,12 +7,13 @@ import {
   getLeggiMioProfiloQueryKey,
   useLeggiMioProfilo,
   type CompletaProfiloDto,
+  type ProfiloDto,
 } from '@prome/api-client';
 import { useApiMutation, useForm } from '@/hooks';
 import { Form, FormInput } from '@/components/form';
 import { Button, Card } from '@/components/ui';
 import { QueryBoundary } from '@/components/feedback';
-import { SceltaAteneo } from './scelta-ateneo';
+import { SceltaCorso } from './scelta-corso';
 
 /**
  * Correggere i propri dati.
@@ -24,9 +25,9 @@ import { SceltaAteneo } from './scelta-ateneo';
  * ammesso, quindi un errore di battitura nell'onboarding restava per sempre e
  * cambiava in silenzio il tuo pubblico.
  *
- * I quattro campi si mandano insieme perché insieme sono un dato solo: il
- * profilo è completo se e solo se ci sono tutti e quattro, e il server non
- * conosce un aggiornamento parziale.
+ * I campi si mandano insieme perché insieme sono un dato solo: il profilo è
+ * completo se e solo se ci sono tutti, e il server non conosce un
+ * aggiornamento parziale.
  */
 export function ModificaProfilo() {
   const profilo = useLeggiMioProfilo();
@@ -37,20 +38,15 @@ export function ModificaProfilo() {
         <Modulo
           // Il modulo nasce con i valori del server: rimontarlo quando
           // cambiano evita di lasciare a schermo una copia vecchia.
-          key={`${data.nome}-${data.cognome}-${data.universita}-${data.corso}`}
-          iniziali={{
-            nome: data.nome ?? '',
-            cognome: data.cognome ?? '',
-            universita: data.universita ?? '',
-            corso: data.corso ?? '',
-          }}
+          key={`${data.nome}-${data.cognome}-${data.corso?.id ?? ''}`}
+          profilo={data}
         />
       )}
     </QueryBoundary>
   );
 }
 
-function Modulo({ iniziali }: { iniziali: CompletaProfiloDto }) {
+function Modulo({ profilo }: { profilo: ProfiloDto }) {
   const t = useTranslations('app.impostazioni.profilo');
   const tCampi = useTranslations('app.onboarding');
   const tValidazione = useTranslations('validazione');
@@ -60,10 +56,13 @@ function Modulo({ iniziali }: { iniziali: CompletaProfiloDto }) {
     schema: z.object({
       nome: z.string().min(1, obbligatorio),
       cognome: z.string().min(1, obbligatorio),
-      universita: z.string().min(2, obbligatorio),
-      corso: z.string().min(2, obbligatorio),
+      corsoId: z.string().min(1, obbligatorio),
     }),
-    defaultValues: iniziali,
+    defaultValues: {
+      nome: profilo.nome ?? '',
+      cognome: profilo.cognome ?? '',
+      corsoId: profilo.corso?.id ?? '',
+    },
   });
 
   const salva = useApiMutation<unknown, CompletaProfiloDto>({
@@ -93,21 +92,13 @@ function Modulo({ iniziali }: { iniziali: CompletaProfiloDto }) {
           />
         </div>
 
-        <SceltaAteneo
-          etichetta={tCampi('universita')}
-          segnaposto={tCampi('cercaUniversita')}
-          nessunRisultato={tCampi('nessunRisultato')}
-          valore={form.watch('universita')}
-          onScelta={(nome) =>
-            form.setValue('universita', nome, { shouldValidate: true, shouldDirty: true })
+        <SceltaCorso
+          ateneoIniziale={profilo.universita}
+          corsoIniziale={profilo.corso}
+          onCorso={(corsoId) =>
+            form.setValue('corsoId', corsoId, { shouldValidate: true, shouldDirty: true })
           }
-        />
-
-        <FormInput
-          name="corso"
-          etichetta={tCampi('corso')}
-          segnaposto={tCampi('corsoSegnaposto')}
-          obbligatorio
+          errore={form.formState.errors.corsoId?.message}
         />
       </Form>
 

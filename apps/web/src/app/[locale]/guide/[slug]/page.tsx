@@ -28,6 +28,9 @@ export async function generateMetadata({ params }: { params: Promise<Parametri> 
     percorso: percorsi.guida(guida.slug),
     titolo: guida.titolo,
     descrizione: guida.sommario,
+    // È un articolo, non una schermata del prodotto: `og:type` cambia, e con
+    // esso la data e la firma che i social mostrano nell'anteprima.
+    pubblicatoIl: guida.dataIso,
   });
 }
 
@@ -56,7 +59,6 @@ export default async function PaginaGuida({ params }: { params: Promise<Parametr
   return (
     <SiteShell sfondo="piena">
       <StructuredData
-        lingua={lingua}
         oggetti={[briciole(lingua, voci), articolo(lingua, guida, percorsi.guida(guida.slug))]}
       />
 

@@ -6,6 +6,10 @@ import { creaValidationPipe } from '../src/common/pipes/validation.pipe';
 import { registraCorpiBinari } from '../src/config/fastify';
 import { PrismaService } from '../src/database/prisma.service';
 import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/canale-email-sviluppo';
+import {
+  assicuraCatalogoDiProva,
+  type CatalogoDiProva,
+} from './catalogo';
 
 /**
  * Post con allegato (E0.5), provato per intero contro un database vero.
@@ -19,6 +23,7 @@ import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/cana
 describe('Bacheca — post con allegato (E0.5)', () => {
   let app: NestFastifyApplication;
   let prisma: PrismaService;
+  let catalogo: CatalogoDiProva;
   let email: CanaleEmailSviluppo;
 
   let contatore = 0;
@@ -39,7 +44,7 @@ describe('Bacheca — post con allegato (E0.5)', () => {
     } as Parameters<NestFastifyApplication['inject']>[0]);
 
   /** Un utente entrato e con l'onboarding fatto: la condizione normale per pubblicare. */
-  async function utenteCompleto(universita = 'Università di Bologna'): Promise<string> {
+  async function utenteCompleto(corsoId?: string): Promise<string> {
     const indirizzo = nuovoIndirizzo();
     await chiedi('/accesso/codice', { method: 'POST', payload: { email: indirizzo } });
     const verifica = await chiedi('/accesso/verifica', {
@@ -51,7 +56,11 @@ describe('Bacheca — post con allegato (E0.5)', () => {
     await chiedi('/profilo/me', {
       method: 'PUT',
       headers: { authorization: `Bearer ${token}` },
-      payload: { nome: 'Marta', cognome: 'Rossi', universita, corso: 'Ingegneria informatica' },
+      payload: {
+        nome: 'Marta',
+        cognome: 'Rossi',
+        corsoId: corsoId ?? catalogo.corsoInformatica,
+      },
     });
     return token;
   }
@@ -102,6 +111,8 @@ describe('Bacheca — post con allegato (E0.5)', () => {
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
     prisma = app.get(PrismaService);
+    // Il catalogo è chiuso: senza, nessun onboarding arriva in fondo.
+    catalogo = await assicuraCatalogoDiProva(prisma);
     email = app.get(CanaleEmailSviluppo);
   });
 
@@ -440,15 +451,16 @@ describe('Bacheca — post con allegato (E0.5)', () => {
     });
 
     it('con visibilità ATENEO li vede solo chi ha dichiarato la stessa università', async () => {
-      const autore = await utenteCompleto('Università di Bologna');
-      const compagno = await utenteCompleto('Università di Bologna');
-      const altrove = await utenteCompleto('Politecnico di Milano');
+      const autore = await utenteCompleto();
+      // Stesso ateneo, corso diverso: la regola guarda l'ateneo.
+      const compagno = await utenteCompleto(catalogo.corsoLettere);
+      const altrove = await utenteCompleto(catalogo.altroCorso);
 
       const profilo = await chiedi('/profilo/me', { headers: comeUtente(autore) });
       await chiedi('/bacheca', {
         method: 'POST',
         headers: comeUtente(autore),
-        payload: { testo: 'Solo per chi studia a Bologna' },
+        payload: { testo: 'Solo per chi studia nel mio ateneo' },
       });
       await prisma.impostazioniDiPrivacy.update({
         where: { utenteId: profilo.json().data.utenteId },
@@ -459,10 +471,10 @@ describe('Bacheca — post con allegato (E0.5)', () => {
       const fuori = await chiedi('/bacheca?limit=50', { headers: comeUtente(altrove) });
 
       expect(dentro.json().data.map((p: { testo: string }) => p.testo)).toContain(
-        'Solo per chi studia a Bologna',
+        'Solo per chi studia nel mio ateneo',
       );
       expect(fuori.json().data.map((p: { testo: string }) => p.testo)).not.toContain(
-        'Solo per chi studia a Bologna',
+        'Solo per chi studia nel mio ateneo',
       );
     });
 

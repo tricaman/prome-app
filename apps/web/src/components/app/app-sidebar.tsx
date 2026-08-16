@@ -43,7 +43,7 @@ export function AppSidebar() {
   const gruppi = useElencaMieiGruppi({ limit: 8 });
 
   const nome = [profilo.data?.data.nome, profilo.data?.data.cognome].filter(Boolean).join(' ');
-  const studi = [profilo.data?.data.corso, profilo.data?.data.universita]
+  const studi = [profilo.data?.data.corso?.nome, profilo.data?.data.universita?.nome]
     .filter(Boolean)
     .join(' · ');
   const mieiGruppi = gruppi.data?.data ?? [];

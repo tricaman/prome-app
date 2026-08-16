@@ -5,10 +5,13 @@ import type {
   BloccatoResponse,
   AggiornaImpostazioniPrivacyRequest,
   CompletaProfiloRequest,
+  CorsoResponse,
   ImpostazioniDiPrivacyResponse,
   ProfiloResponse,
+  UniversitaResponse,
   Visibilita,
 } from '@prome/contracts';
+import { CorsoDto, UniversitaDto } from './catalogo.dto';
 
 const VISIBILITA = ['PRIVATO', 'ATENEO', 'PUBBLICO'] as const;
 
@@ -34,11 +37,15 @@ export class ProfiloDto implements ProfiloResponse {
   @ApiProperty({ nullable: true, type: String })
   cognome!: string | null;
 
-  @ApiProperty({ nullable: true, type: String })
-  universita!: string | null;
+  @ApiProperty({
+    nullable: true,
+    type: UniversitaDto,
+    description: 'L\'ateneo del corso scelto: non è un dato a sé, viene dal corso.',
+  })
+  universita!: UniversitaResponse | null;
 
-  @ApiProperty({ nullable: true, type: String })
-  corso!: string | null;
+  @ApiProperty({ nullable: true, type: CorsoDto })
+  corso!: CorsoResponse | null;
 
   @ApiProperty()
   onboardingCompletato!: boolean;
@@ -48,9 +55,14 @@ export class ProfiloDto implements ProfiloResponse {
 }
 
 /**
- * I quattro dati arrivano insieme: l'onboarding è completo se e solo se ci
- * sono tutti e quattro, quindi non esiste un aggiornamento parziale da
- * modellare. L'università è autodichiarata e non viene verificata.
+ * I dati arrivano insieme: l'onboarding è completo se e solo se ci sono tutti,
+ * quindi non esiste un aggiornamento parziale da modellare.
+ *
+ * L'università non compare, e la pipe rifiuta chi prova a mandarla: il corso
+ * appartiene già a un ateneo, e accettarli entrambi vorrebbe dire dover
+ * respingere la coppia incoerente. Che il corso esista **e sia ancora
+ * offerto** è una regola di dominio e vive nel modulo, non qui: il DTO
+ * protegge dalla richiesta malformata, non dall'aggregato incoerente.
  */
 export class CompletaProfiloDto implements CompletaProfiloRequest {
   @ApiProperty({ example: 'Marta' })
@@ -65,17 +77,13 @@ export class CompletaProfiloDto implements CompletaProfiloRequest {
   @Length(1, 80)
   cognome!: string;
 
-  @ApiProperty({ example: 'Università di Bologna' })
+  @ApiProperty({
+    description: 'Identificativo di un corso del catalogo (GET /catalogo/universita/:id/corsi)',
+  })
   @Transform(ripulisci)
   @IsString()
-  @Length(2, 160)
-  universita!: string;
-
-  @ApiProperty({ example: 'Ingegneria informatica' })
-  @Transform(ripulisci)
-  @IsString()
-  @Length(2, 160)
-  corso!: string;
+  @Length(1, 64)
+  corsoId!: string;
 }
 
 /**

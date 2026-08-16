@@ -153,7 +153,7 @@ export default function SchermataComponi() {
           <Avatar nome={nome || '?'} dimensione={40} />
           <View style={{ flex: 1 }}>
             <Text variante="etichetta">{nome}</Text>
-            <Text variante="didascalia">{profilo.data?.data.corso ?? ''}</Text>
+            <Text variante="didascalia">{profilo.data?.data.corso?.nome ?? ''}</Text>
           </View>
         </View>
 

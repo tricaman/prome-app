@@ -5,6 +5,8 @@
  * Facciata REST versionata di Prome.
  * OpenAPI spec version: v1
  */
+import type { ProfiloDtoUniversita } from './profiloDtoUniversita';
+import type { ProfiloDtoCorso } from './profiloDtoCorso';
 import type { ImpostazioniDiPrivacyDto } from './impostazioniDiPrivacyDto';
 
 export interface ProfiloDto {
@@ -13,10 +15,13 @@ export interface ProfiloDto {
   nome: string | null;
   /** @nullable */
   cognome: string | null;
+  /**
+   * L'ateneo del corso scelto: non è un dato a sé, viene dal corso.
+   * @nullable
+   */
+  universita: ProfiloDtoUniversita;
   /** @nullable */
-  universita: string | null;
-  /** @nullable */
-  corso: string | null;
+  corso: ProfiloDtoCorso;
   onboardingCompletato: boolean;
   impostazioniPrivacy: ImpostazioniDiPrivacyDto;
 }

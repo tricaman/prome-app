@@ -78,12 +78,12 @@
     "descrizione": "Prome helps you find new study partners and get organised throughout your academic journey."
   },
   "home": {
-    "occhiello": "Used in 42 Italian universities",
+    "occhiello": "Collaborative study for Italian university students",
     "titolo": "Study together, stop hunting for things",
-    "sommario": "Your course board, study rooms with audio and shared materials, groups that last. All in one place, free for students.",
+    "sommario": "Your course board, study rooms with shared materials and real-time chat, groups that last. All in one place, free for students.",
     "ctaPrincipale": "Start for free",
     "ctaSecondaria": "See how it looks",
-    "prova": "More than <forte>28,000 students</forte> study on Prome every week",
+    "prova": "<forte>Free</forte> for students: no ads, no data sold.",
     "anteprima": {
       "nome": "Chiara Moretti",
       "chiParla": "Chiara is speaking",
@@ -99,17 +99,17 @@
         "testo": "Questions, notes and attachments up to 25 MB. Posts stay, organised by topic."
       },
       "aule": {
-        "titolo": "Study rooms with audio",
-        "testo": "Chat, audio chat and shared materials. Scheduled or opened on the spot, with permissions for each participant."
+        "titolo": "Real-time study rooms",
+        "testo": "Real-time chat and shared materials, sorted by topic. Scheduled or opened on the spot, with permissions decided participant by participant."
       },
       "gruppi": {
         "titolo": "Groups that last",
-        "testo": "Your course, your project team, your Erasmus: folders up to 5 levels with study rooms placed inside."
+        "testo": "Your course, your project team, your Erasmus: members walk into the group’s study rooms without needing an invitation every time."
       }
     },
     "chiusura": {
       "titolo": "A tribute to <accento>progress</accento>",
-      "testo": "Prome is free for university students. Sign up with your university email and find your course straight away."
+      "testo": "Prome is free for university students. Sign in with your email — a code arrives, no password — and find your course straight away."
     },
     "comeFunziona": {
       "titolo": "How a study room works",
@@ -121,14 +121,15 @@
         },
         "invita": {
           "titolo": "Invite who you want",
-          "testo": "A link valid for seven days. Whoever joins finds chat, audio and materials already organised by topic."
+          "testo": "An email invitation valid for seven days. Whoever joins finds chat and materials already sorted by topic."
         },
         "studiate": {
           "titolo": "Study together",
-          "testo": "Everyone with their own permissions: speak, write, upload. Anyone who prefers to just listen can, and that is fine."
+          "testo": "Everyone with their own permissions: who writes, who uploads materials, and whoever prefers to just read stays read-only."
         }
       }
-    }
+    },
+    "atenei": "Universities with a page on Prome"
   },
   "sito": {
     "nav": {
@@ -139,8 +140,6 @@
       "chiSiamo": "About"
     },
     "accedi": "Log in",
-    "registrati": "Sign up",
-    "registratiGratis": "Sign up free",
     "iniziaGratis": "Start for free",
     "scaricaApp": "Get the app",
     "vediTutte": "See all",
@@ -164,10 +163,11 @@
       "termini": "Terms",
       "cookie": "Cookies",
       "sitemap": "Sitemap",
-      "diritti": "© {anno} Prome · Bologna",
+      "diritti": "© {anno} Prome · Brescia",
       "argomenti": "Topics",
       "guide": "Study guides",
-      "chiSiamo": "About"
+      "chiSiamo": "About",
+      "autore": "An independent project, designed and built by Marius Trica."
     },
     "motto1": "A tribute to",
     "motto2": "progress"
@@ -179,7 +179,7 @@
       "entra": "Join now",
       "apriApp": "Open in the app",
       "boxTitolo": "Join the study room",
-      "boxTesto": "Free, you only need an account with your university email.",
+      "boxTesto": "Free, all it takes is your email: a code arrives and you are in.",
       "ateneo": "University",
       "argomento": "Topic",
       "iniziata": "Started",
@@ -242,26 +242,28 @@
       }
     },
     "chiSiamo": {
-      "titolo": "We built what we were missing",
-      "sommario": "Prome was born in Bologna in 2024 from three students swapping notes across scattered chats, losing files, links and study sessions. Today it is the platform 28,000 Italian students organise with.",
+      "titolo": "I built what I was missing",
+      "sommario": "Prome is an independent project by Marius Trica, from Brescia, Italy. There is no company and no team: one person writes the code, reads the reports and decides what goes into the product.",
       "motto": {
         "titolo": "A tribute to progress",
-        "p1": "Our motto is not a marketing slogan: it is how we decide what to build. Every feature must move someone forward, not keep them inside the app.",
-        "p2": "That is why there are no likes, no leaderboards and no invented notifications: only tools to study together and leave when you are done."
+        "p1": "It is not a marketing slogan: it is how I decide what to build. Every feature has to move someone forward in their studies, not keep them inside the app.",
+        "p2": "That is why there are no likes, no leaderboards and no invented notifications: only tools to study together, and an open door when you are done."
       },
       "sostegno": {
-        "titolo": "How we sustain ourselves",
-        "p1": "Prome is free for students and will stay that way. We are funded through agreements with universities that want collaborative study tools for their courses.",
-        "p2": "We do not sell data, we do not profile for advertising and we do not train models on your notes."
+        "titolo": "How it is funded",
+        "p1": "Prome is free for students and will stay that way. Today it has no revenue: the server, the domain and the time are mine, which is also why it grows slowly and without promises.",
+        "p2": "If it ever needs support, it will come from agreements with universities that want collaborative study tools for their courses. Never advertising, never selling data, never training models on your notes."
       },
       "statistiche": {
-        "studenti": "Active students",
-        "atenei": "Italian universities",
-        "aule": "Study rooms in 2026",
-        "dati": "Data sold"
+        "persone": "People behind Prome",
+        "dati": "Data sold",
+        "cookie": "Tracking cookies",
+        "dove": "Where your data lives"
       },
-      "team": "The team",
-      "fotoTeam": "Team photo"
+      "team": "Who is behind it",
+      "ruolo": "Founder and developer",
+      "bio": "I write the code, read the reports and decide what goes into Prome. From Brescia, on my own, one piece at a time.",
+      "scrivimi": "Write to me"
     },
     "guide": {
       "titolo": "Study guides",
@@ -276,18 +278,42 @@
     },
     "privacy": {
       "titolo": "Privacy policy",
-      "vigore": "In force from 1 July 2026 · version 3.1",
+      "descrizione": "What data Prome collects, why, for how long and how to exercise your rights. An independent project by Marius Trica, with servers in the European Union.",
+      "vigore": "In force since 15 August 2026 · version 1.0",
       "documenti": "Documents",
       "inQuestaPagina": "On this page",
       "inBreve": "In short, without legalese",
       "contatto": {
         "titolo": "Questions about your data?",
-        "testo": "Write to our data protection officer: we reply within 30 days as required by the GDPR."
+        "testo": "Write directly to whoever runs Prome: we reply within 30 days, as the GDPR requires."
       },
       "soloItaliano": "This document is available in Italian only."
     },
+    "termini": {
+      "titolo": "Terms of service",
+      "descrizione": "The terms of use for Prome: what the service is, what stays yours, how to behave and what is not guaranteed.",
+      "vigore": "In force since 15 August 2026 · version 1.0",
+      "documenti": "Documents",
+      "inQuestaPagina": "On this page",
+      "inBreve": "In short, without legalese",
+      "contatto": {
+        "titolo": "Questions about these terms?",
+        "testo": "Write to whoever runs Prome: it is one person, and they answer."
+      },
+      "soloItaliano": "This document is available in Italian only: a written translation will come, a machine one will not."
+    },
+    "cookie": {
+      "titolo": "Cookie policy",
+      "descrizione": "One cookie only, to remember your language. No profiling, no third-party analytics, no banner to dismiss.",
+      "vigore": "In force since 15 August 2026 · version 1.0",
+      "documenti": "Documents",
+      "inQuestaPagina": "On this page",
+      "inBreve": "In short",
+      "soloItaliano": "This document is available in Italian only: a written translation will come, a machine one will not."
+    },
     "lineeGuida": {
       "titolo": "Community guidelines",
+      "descrizione": "Prome’s community guidelines: what is not allowed, how to report content and how to block someone.",
       "documenti": "Documents",
       "inQuestaPagina": "On this page",
       "inBreve": "In short",
@@ -310,9 +336,8 @@
     "accesso": {
       "titolo": "Enter Prome",
       "sommario": "We email you a code. No password to remember.",
-      "primoAccesso": "If it's your first time, your account is created as you sign in: there's no separate sign-up.",
-      "email": "University email",
-      "inviaCodice": "Send me the code",
+      "email": "Email",
+      "inviaCodice": "Continue with email",
       "codiceTitolo": "Check your inbox",
       "codiceSommario": "We sent a 6-digit code to {email}.",
       "codice": "6-digit code",
@@ -321,8 +346,8 @@
       "cambiaEmail": "Change email",
       "nonArrivato": "Didn't get it?",
       "reinvia": "Send again",
-      "provaTitolo": "A tribute to <accento>progress</accento>",
-      "provaTesto": "Every week 28,000 students open a study room, share notes and help each other before exams.",
+      "provaTitolo": "A new way to <accento>study together</accento>",
+      "provaTesto": "Your course board, study rooms with shared materials and real-time chat, groups that last. Built from scratch for Italian university students: no password to remember, no ads, your notes stay yours.",
       "riattivato": "Welcome back: your deletion request has been cancelled."
     },
     "onboarding": {
@@ -338,11 +363,16 @@
       "nome": "First name",
       "cognome": "Last name",
       "corso": "Course of study",
-      "corsoSegnaposto": "E.g. Computer engineering",
-      "universitaSceltaAltro": "Type your university's name",
+      "corsoSegnaposto": "Search for your course of study",
       "completa": "Enter Prome",
       "indietro": "Back",
-      "continua": "Continue"
+      "continua": "Continue",
+      "cercaCorso": "Search for your course of study",
+      "nessunCorsoTrovato": "No course with that name.",
+      "primaLAteneo": "Choose your university first.",
+      "catalogoChiuso": "These are the university's official courses: if yours is missing, tell us and we'll add it.",
+      "nonTroviCorso": "Can't find your course?",
+      "durataAnni": "{numero} years"
     },
     "feed": {
       "composer": "What do you want to share, {nome}?",

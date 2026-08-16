@@ -12,6 +12,8 @@
   "SERVICE_UNAVAILABLE": "Servizio momentaneamente non disponibile",
   "PROFILO_NOT_FOUND": "Profilo non trovato",
   "ONBOARDING_INCOMPLETO": "Completa l'onboarding per continuare",
+  "CORSO_NON_TROVATO": "Corso di studi non trovato",
+  "CORSO_NON_ATTIVO": "Questo corso di studi non è più disponibile: scegline un altro",
   "CODICE_NON_VALIDO": "Codice non valido. Controlla le cifre e riprova.",
   "CODICE_SCADUTO": "Il codice è scaduto. Chiedine uno nuovo.",
   "TROPPI_TENTATIVI": "Troppi tentativi con questo codice. Chiedine uno nuovo.",

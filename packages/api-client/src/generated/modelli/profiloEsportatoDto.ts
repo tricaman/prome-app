@@ -5,6 +5,7 @@
  * Facciata REST versionata di Prome.
  * OpenAPI spec version: v1
  */
+import type { ProfiloEsportatoDtoCorso } from './profiloEsportatoDtoCorso';
 import type { ImpostazioniDiPrivacyDto } from './impostazioniDiPrivacyDto';
 import type { PreferenzeEsportateDto } from './preferenzeEsportateDto';
 import type { DispositivoEsportatoDto } from './dispositivoEsportatoDto';
@@ -18,7 +19,7 @@ export interface ProfiloEsportatoDto {
   /** @nullable */
   universita: string | null;
   /** @nullable */
-  corso: string | null;
+  corso: ProfiloEsportatoDtoCorso;
   onboardingCompletato: boolean;
   impostazioniPrivacy: ImpostazioniDiPrivacyDto;
   preferenzeDiNotifica: PreferenzeEsportateDto;

@@ -57,10 +57,14 @@ import type {
   ElencaBlocchiParams,
   ElencaCommenti200,
   ElencaCommentiParams,
+  ElencaCorsiDiUniversita200,
+  ElencaCorsiDiUniversitaParams,
   ElencaMieiGruppi200,
   ElencaMieiGruppiParams,
   ElencaPost200,
   ElencaPostParams,
+  ElencaUniversita200,
+  ElencaUniversitaParams,
   EliminaArgomento200,
   EliminaAulaStudio200,
   EliminaCommento200,
@@ -895,6 +899,201 @@ export function useElencaBlocchi<TData = Awaited<ReturnType<typeof elencaBlocchi
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
 
   const queryOptions = getElencaBlocchiQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Gli atenei del catalogo, con ricerca per nome, sigla o città
+ */
+export const elencaUniversita = (
+    params?: ElencaUniversitaParams,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ElencaUniversita200>(
+      {url: `/catalogo/universita`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getElencaUniversitaQueryKey = (params?: ElencaUniversitaParams,) => {
+    return [
+    `/catalogo/universita`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getElencaUniversitaQueryOptions = <TData = Awaited<ReturnType<typeof elencaUniversita>>, TError = ErrorResponseDto>(params?: ElencaUniversitaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaUniversita>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getElencaUniversitaQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof elencaUniversita>>> = ({ signal }) => elencaUniversita(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof elencaUniversita>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ElencaUniversitaQueryResult = NonNullable<Awaited<ReturnType<typeof elencaUniversita>>>
+export type ElencaUniversitaQueryError = ErrorResponseDto
+
+
+export function useElencaUniversita<TData = Awaited<ReturnType<typeof elencaUniversita>>, TError = ErrorResponseDto>(
+ params: undefined |  ElencaUniversitaParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaUniversita>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaUniversita>>,
+          TError,
+          Awaited<ReturnType<typeof elencaUniversita>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaUniversita<TData = Awaited<ReturnType<typeof elencaUniversita>>, TError = ErrorResponseDto>(
+ params?: ElencaUniversitaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaUniversita>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaUniversita>>,
+          TError,
+          Awaited<ReturnType<typeof elencaUniversita>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaUniversita<TData = Awaited<ReturnType<typeof elencaUniversita>>, TError = ErrorResponseDto>(
+ params?: ElencaUniversitaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaUniversita>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Gli atenei del catalogo, con ricerca per nome, sigla o città
+ */
+
+export function useElencaUniversita<TData = Awaited<ReturnType<typeof elencaUniversita>>, TError = ErrorResponseDto>(
+ params?: ElencaUniversitaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaUniversita>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getElencaUniversitaQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary I corsi ancora offerti da un ateneo
+ */
+export const elencaCorsiDiUniversita = (
+    universitaId: string,
+    params?: ElencaCorsiDiUniversitaParams,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ElencaCorsiDiUniversita200>(
+      {url: `/catalogo/universita/${universitaId}/corsi`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getElencaCorsiDiUniversitaQueryKey = (universitaId?: string,
+    params?: ElencaCorsiDiUniversitaParams,) => {
+    return [
+    `/catalogo/universita/${universitaId}/corsi`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getElencaCorsiDiUniversitaQueryOptions = <TData = Awaited<ReturnType<typeof elencaCorsiDiUniversita>>, TError = ErrorResponseDto>(universitaId: string,
+    params?: ElencaCorsiDiUniversitaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaCorsiDiUniversita>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getElencaCorsiDiUniversitaQueryKey(universitaId,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof elencaCorsiDiUniversita>>> = ({ signal }) => elencaCorsiDiUniversita(universitaId,params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(universitaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof elencaCorsiDiUniversita>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ElencaCorsiDiUniversitaQueryResult = NonNullable<Awaited<ReturnType<typeof elencaCorsiDiUniversita>>>
+export type ElencaCorsiDiUniversitaQueryError = ErrorResponseDto
+
+
+export function useElencaCorsiDiUniversita<TData = Awaited<ReturnType<typeof elencaCorsiDiUniversita>>, TError = ErrorResponseDto>(
+ universitaId: string,
+    params: undefined |  ElencaCorsiDiUniversitaParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaCorsiDiUniversita>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaCorsiDiUniversita>>,
+          TError,
+          Awaited<ReturnType<typeof elencaCorsiDiUniversita>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaCorsiDiUniversita<TData = Awaited<ReturnType<typeof elencaCorsiDiUniversita>>, TError = ErrorResponseDto>(
+ universitaId: string,
+    params?: ElencaCorsiDiUniversitaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaCorsiDiUniversita>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaCorsiDiUniversita>>,
+          TError,
+          Awaited<ReturnType<typeof elencaCorsiDiUniversita>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaCorsiDiUniversita<TData = Awaited<ReturnType<typeof elencaCorsiDiUniversita>>, TError = ErrorResponseDto>(
+ universitaId: string,
+    params?: ElencaCorsiDiUniversitaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaCorsiDiUniversita>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary I corsi ancora offerti da un ateneo
+ */
+
+export function useElencaCorsiDiUniversita<TData = Awaited<ReturnType<typeof elencaCorsiDiUniversita>>, TError = ErrorResponseDto>(
+ universitaId: string,
+    params?: ElencaCorsiDiUniversitaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaCorsiDiUniversita>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getElencaCorsiDiUniversitaQueryOptions(universitaId,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
 

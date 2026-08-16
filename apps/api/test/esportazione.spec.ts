@@ -2,9 +2,15 @@ import { Test } from '@nestjs/testing';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { AppModule } from '../src/app.module';
 import { creaValidationPipe } from '../src/common/pipes/validation.pipe';
+import { PrismaService } from '../src/database/prisma.service';
 import { registraCorpiBinari } from '../src/config/fastify';
 import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/canale-email-sviluppo';
 import { RecapitoFattiDelGruppoService } from '../src/modules/gruppo/recapito-fatti.service';
+import {
+  assicuraCatalogoDiProva,
+  NOME_ATENEO,
+  type CatalogoDiProva,
+} from './catalogo';
 
 /**
  * «Scarica i tuoi dati» — la promessa scritta nella privacy policy.
@@ -21,6 +27,7 @@ import { RecapitoFattiDelGruppoService } from '../src/modules/gruppo/recapito-fa
 describe('Esportazione dei propri dati', () => {
   let app: NestFastifyApplication;
   let email: CanaleEmailSviluppo;
+  let catalogo: CatalogoDiProva;
   let recapitoGruppo: RecapitoFattiDelGruppoService;
 
   let contatore = 0;
@@ -55,12 +62,7 @@ describe('Esportazione dei propri dati', () => {
     const profilo = await chiedi('/profilo/me', {
       method: 'PUT',
       headers: comeUtente(token),
-      payload: {
-        nome,
-        cognome: 'Rossi',
-        universita: 'Università di Bologna',
-        corso: 'Ingegneria informatica',
-      },
+      payload: { nome, cognome: 'Rossi', corsoId: catalogo.corsoInformatica },
     });
     return { token, utenteId: profilo.json().data.utenteId as string, indirizzo };
   }
@@ -86,6 +88,7 @@ describe('Esportazione dei propri dati', () => {
     await app.getHttpAdapter().getInstance().ready();
     email = app.get(CanaleEmailSviluppo);
     recapitoGruppo = app.get(RecapitoFattiDelGruppoService);
+    catalogo = await assicuraCatalogoDiProva(app.get(PrismaService));
   });
 
   afterAll(async () => {
@@ -101,7 +104,15 @@ describe('Esportazione dei propri dati', () => {
     const dati = risposta.json().data;
     expect(dati.account).toEqual({ utenteId: io.utenteId, email: io.indirizzo });
     expect(dati.profilo.nome).toBe('Marta');
-    expect(dati.profilo.universita).toBe('Università di Bologna');
+    expect(dati.profilo.universita).toBe(NOME_ATENEO);
+    // Il corso esce per esteso e non come identificativo: una copia dei propri
+    // dati deve restare leggibile da sola, senza il catalogo accanto.
+    expect(dati.profilo.corso).toEqual({
+      nome: 'Ingegneria informatica',
+      codiceCorso: 'PROVA-INF',
+      classe: 'L-8 — Ingegneria dell\'informazione',
+      durataAnni: 3,
+    });
     expect(dati.profilo.impostazioniPrivacy).toEqual({
       contattabilita: 'PRIVATO',
       visibilita: 'PRIVATO',

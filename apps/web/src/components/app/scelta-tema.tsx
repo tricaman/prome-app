@@ -1,16 +1,23 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
-import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
+import { useTema } from '@/providers/tema';
+import type { SceltaTema } from '@/lib/tema';
 import { cn } from '@/lib/utils';
 
 const SCELTE = ['sistema', 'chiaro', 'scuro'] as const;
 
 type Scelta = (typeof SCELTE)[number];
 
-/** I nomi delle scelte nella lingua del progetto ↔ quelli di `next-themes`. */
-const VALORE: Record<Scelta, string> = {
+/**
+ * I nomi delle scelte nella lingua del progetto ↔ quelli conservati.
+ *
+ * I secondi restano in inglese perché sono ciò che sta scritto in
+ * `localStorage` da prima: tradurli significherebbe non riconoscere più la
+ * scelta di chi l'aveva già fatta.
+ */
+const VALORE: Record<Scelta, SceltaTema> = {
   sistema: 'system',
   chiaro: 'light',
   scuro: 'dark',
@@ -33,7 +40,7 @@ const CAMPIONE: Record<Scelta, string> = {
  */
 export function SceltaTema() {
   const t = useTranslations('tema');
-  const { theme, setTheme } = useTheme();
+  const { scelta: sceltaCorrente, imposta } = useTema();
   // "Siamo nel browser?" senza effetti: sul server la terza funzione risponde
   // `false`, dopo l'idratazione la seconda risponde `true`. Il negozio non ha
   // nulla da notificare, quindi l'iscrizione non fa niente.
@@ -46,14 +53,14 @@ export function SceltaTema() {
   return (
     <div role="radiogroup" aria-label={t('etichetta')} className="grid gap-2.5 sm:grid-cols-3">
       {SCELTE.map((scelta) => {
-        const attiva = montato && theme === VALORE[scelta];
+        const attiva = montato && sceltaCorrente === VALORE[scelta];
         return (
           <button
             key={scelta}
             type="button"
             role="radio"
             aria-checked={attiva}
-            onClick={() => setTheme(VALORE[scelta])}
+            onClick={() => imposta(VALORE[scelta])}
             className={cn(
               'rounded-[14px] border-2 p-3 text-left transition-colors',
               attiva

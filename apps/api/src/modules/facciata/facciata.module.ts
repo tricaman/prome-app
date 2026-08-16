@@ -13,6 +13,7 @@ import { AccessoController } from './accesso.controller';
 import { ArchivioController } from './archivio.controller';
 import { AulaStudioController } from './aula-studio.controller';
 import { BachecaController } from './bacheca.controller';
+import { CatalogoController } from './catalogo.controller';
 import { CancellazioneController } from './cancellazione.controller';
 import { EsportazioneController } from './esportazione.controller';
 import { GruppoController, InvitiAlGruppoController } from './gruppo.controller';
@@ -50,6 +51,7 @@ import { ProfiloController } from './profilo.controller';
     HealthController,
     AccessoController,
     ProfiloController,
+    CatalogoController,
     BachecaController,
     AulaStudioController,
     InvitiController,

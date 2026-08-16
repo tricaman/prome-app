@@ -21,7 +21,7 @@ export function SchedaProfilo() {
     <QueryBoundary query={profilo}>
       {({ data }) => {
         const nome = [data.nome, data.cognome].filter(Boolean).join(' ');
-        const studi = [data.corso, data.universita].filter(Boolean).join(' · ');
+        const studi = [data.corso?.nome, data.universita?.nome].filter(Boolean).join(' · ');
 
         return (
           <Card padding="md" className="mb-6 flex flex-wrap items-center gap-4">

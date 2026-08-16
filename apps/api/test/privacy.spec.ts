@@ -5,6 +5,10 @@ import { creaValidationPipe } from '../src/common/pipes/validation.pipe';
 import { registraCorpiBinari } from '../src/config/fastify';
 import { PrismaService } from '../src/database/prisma.service';
 import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/canale-email-sviluppo';
+import {
+  assicuraCatalogoDiProva,
+  type CatalogoDiProva,
+} from './catalogo';
 
 /**
  * Impostazioni di privacy (E6.1 minimo + E6.4).
@@ -32,6 +36,7 @@ import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/cana
 describe('Impostazioni di privacy (E6)', () => {
   let app: NestFastifyApplication;
   let prisma: PrismaService;
+  let catalogo: CatalogoDiProva;
   let email: CanaleEmailSviluppo;
 
   let contatore = 0;
@@ -63,7 +68,7 @@ describe('Impostazioni di privacy (E6)', () => {
     });
   }
 
-  async function utenteCompleto(universita = 'Università di Bologna'): Promise<Utente> {
+  async function utenteCompleto(corsoId?: string): Promise<Utente> {
     const indirizzo = nuovoIndirizzo();
     const verifica = await entra(indirizzo);
     const token = verifica.json().data.token as string;
@@ -73,8 +78,7 @@ describe('Impostazioni di privacy (E6)', () => {
       payload: {
         nome: 'Marta',
         cognome: 'Rossi',
-        universita,
-        corso: 'Ingegneria informatica',
+        corsoId: corsoId ?? catalogo.corsoInformatica,
       },
     });
     return { token, utenteId: profilo.json().data.utenteId as string, indirizzo };
@@ -130,6 +134,8 @@ describe('Impostazioni di privacy (E6)', () => {
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
     prisma = app.get(PrismaService);
+    // Il catalogo è chiuso: senza, nessun onboarding arriva in fondo.
+    catalogo = await assicuraCatalogoDiProva(prisma);
     email = app.get(CanaleEmailSviluppo);
   });
 
@@ -165,7 +171,7 @@ describe('Impostazioni di privacy (E6)', () => {
   describe('aprire e richiudere (SE2: nessuna finestra)', () => {
     it('con PUBBLICO i post si vedono alla lettura successiva', async () => {
       const autore = await utenteCompleto();
-      const estraneo = await utenteCompleto('Università di Padova');
+      const estraneo = await utenteCompleto(catalogo.altroCorso);
       const post = await pubblica(autore.token, 'Aperto a tutti gli iscritti');
       expect(await vedeNelFeed(estraneo.token, post.id)).toBe(false);
 
@@ -194,8 +200,8 @@ describe('Impostazioni di privacy (E6)', () => {
     });
 
     it('con ATENEO vede solo chi dichiara lo stesso ateneo, su dato fresco', async () => {
-      const autore = await utenteCompleto('Università di Bologna');
-      const altrove = await utenteCompleto('Università di Padova');
+      const autore = await utenteCompleto();
+      const altrove = await utenteCompleto(catalogo.altroCorso);
       await cambiaPrivacy(autore.token, { visibilita: 'ATENEO' });
       const post = await pubblica(autore.token, 'Solo per chi studia qui');
 
@@ -206,15 +212,21 @@ describe('Impostazioni di privacy (E6)', () => {
       await chiedi('/profilo/me', {
         method: 'PUT',
         headers: comeUtente(altrove.token),
-        payload: {
-          nome: 'Luca',
-          cognome: 'Bianchi',
-          universita: 'Università di Bologna',
-          corso: 'Matematica',
-        },
+        payload: { nome: 'Luca', cognome: 'Bianchi', corsoId: catalogo.corsoInformatica },
       });
 
       expect(await vedeNelFeed(altrove.token, post.id)).toBe(true);
+    });
+
+    it('con ATENEO vede anche chi è dello stesso ateneo ma di un altro corso', async () => {
+      // La regola guarda l'ateneo, non il corso: è la regressione che il
+      // passaggio da una stringa alla relazione con il corso può introdurre.
+      const autore = await utenteCompleto();
+      const compagno = await utenteCompleto(catalogo.corsoLettere);
+      await cambiaPrivacy(autore.token, { visibilita: 'ATENEO' });
+      const post = await pubblica(autore.token, 'Vale per tutto l\'ateneo');
+
+      expect(await vedeNelFeed(compagno.token, post.id)).toBe(true);
     });
   });
 
@@ -294,12 +306,7 @@ describe('Impostazioni di privacy (E6)', () => {
       await chiedi('/profilo/me', {
         method: 'PUT',
         headers: comeUtente(tale.token),
-        payload: {
-          nome: 'Marta',
-          cognome: 'Verdi',
-          universita: 'Università di Bologna',
-          corso: 'Fisica',
-        },
+        payload: { nome: 'Marta', cognome: 'Verdi', corsoId: catalogo.corsoLettere },
       });
 
       expect(await impostazioniDi(tale.token)).toEqual({

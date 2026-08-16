@@ -38,7 +38,6 @@ export default async function PaginaArgomenti({
   return (
     <SiteShell>
       <StructuredData
-        lingua={lingua}
         oggetti={[
           briciole(lingua, voci),
           raccolta(

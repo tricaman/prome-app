@@ -7,8 +7,9 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { COLORE_MARCHIO, temaScuro } from '@prome/design-tokens';
 import { eLinguaSupportata, LINGUE_SUPPORTATE } from '@prome/i18n';
 import { creaMetadata } from '@/lib/seo';
+import { SCRIPT_TEMA } from '@/lib/tema';
 import { Providers } from '@/providers/providers';
-import { StructuredData } from '@/components/seo/structured-data';
+import { DatiStrutturatiDelSito } from '@/components/seo/structured-data';
 import '../globals.css';
 
 /**
@@ -84,15 +85,40 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       className={`${fontTitoli.variable} ${fontCorpo.variable} h-full`}
+      // Lo scorrimento morbido lo dichiariamo anche come attributo: il router
+      // di Next lo cerca lì per sospenderlo durante un cambio di pagina, e
+      // senza, ogni navigazione parte con una scivolata.
+      data-scroll-behavior="smooth"
       // Il tema viene applicato dal browser prima dell'idratazione: la
       // differenza sull'attributo di classe è attesa.
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
+        {/*
+          Il tema, applicato mentre il browser legge questa riga: prima di
+          qualunque pittura, prima di React.
+
+          Lo `<script>` non è scritto come elemento React ma come HTML grezzo
+          dentro un contenitore, e la differenza non è di stile. React 19 vieta
+          di *creare* un tag script durante un disegno lato browser, e un
+          disegno lato browser dell'intera pagina succede tutte le volte che
+          l'idratazione fallisce — per esempio quando un'estensione infila un
+          nodo nel `<body>` prima di React, che è ciò che fa MetaMask. Con il
+          tag scritto così React non crea mai uno script: reimposta l'HTML del
+          contenitore, e uno script inserito via `innerHTML` il browser non lo
+          esegue nemmeno. Alla prima lettura invece sì, perché lì a leggerlo è
+          l'analizzatore della pagina, che gli script li esegue sempre.
+        */}
+        <div
+          hidden
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: `<script>${SCRIPT_TEMA}</script>` }}
+        />
+
         <NextIntlClientProvider messages={messaggiDelClient}>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
-        <StructuredData lingua={locale} />
+        <DatiStrutturatiDelSito lingua={locale} />
       </body>
     </html>
   );

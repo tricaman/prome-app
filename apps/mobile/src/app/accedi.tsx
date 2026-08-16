@@ -48,7 +48,7 @@ export default function SchermataAccedi() {
           <FormInput
             name="email"
             etichetta={t('app.accesso.email')}
-            placeholder="nome.cognome@studenti.unibo.it"
+            placeholder="nome@esempio.it"
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
@@ -62,8 +62,6 @@ export default function SchermataAccedi() {
             onSubmit={(valori) => invio.mutate(valori as RichiestaCodiceDto)}
           />
         </Form>
-
-        <Text variante="didascalia">{t('app.accesso.primoAccesso')}</Text>
       </Screen>
     </>
   );

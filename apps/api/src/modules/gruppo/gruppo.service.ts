@@ -17,6 +17,7 @@ import { CANALE_EMAIL, type CanaleEmail } from '../../infrastruttura/avvisi-in-u
 import { env } from '../../config/env';
 import { AvvisiService } from '../avvisi/avvisi.service';
 import { ProfiloService } from '../profilo/profilo.service';
+import { CatalogoService } from '../profilo/catalogo/catalogo.service';
 import { PortaIdentitaUtente } from '../profilo/porta-identita-utente';
 import { GruppoErrorCode } from './constants/error-codes';
 import {
@@ -61,6 +62,7 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
   constructor(
     private readonly prisma: PrismaService,
     private readonly profilo: ProfiloService,
+    private readonly catalogo: CatalogoService,
     private readonly identita: PortaIdentitaUtente,
     private readonly recapito: RecapitoFattiDelGruppoService,
     @Inject(CANALE_EMAIL) private readonly email: CanaleEmail,
@@ -86,7 +88,7 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
     const nascita = costruisciGruppo({
       nome: dati.nome,
       visibilita: dati.visibilita,
-      universitaDelCreatore: chiSono.universita,
+      universitaIdDelCreatore: chiSono.universita?.id ?? null,
     });
 
     const gruppo = await this.prisma.gruppo.create({
@@ -98,7 +100,12 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
       include: { membri: true },
     });
 
-    return this.gruppoPerIlClient(gruppo, gruppo.membri, utenteId);
+    return this.gruppoPerIlClient(
+      gruppo,
+      gruppo.membri,
+      utenteId,
+      await this.nomiDegliAtenei([gruppo]),
+    );
   }
 
   /** I gruppi di cui si fa parte. Gli altri non compaiono, nemmeno i pubblici. */
@@ -120,8 +127,12 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
       this.prisma.gruppo.count({ where: { membri: { some: { utenteId } } } }),
     ]);
 
+    // I nomi degli atenei in una domanda sola per l'intera pagina, come i
+    // profili dei membri.
+    const nomiAtenei = await this.nomiDegliAtenei(gruppi);
+
     return {
-      data: gruppi.map((g) => this.gruppoPerIlClient(g, g.membri, utenteId)),
+      data: gruppi.map((g) => this.gruppoPerIlClient(g, g.membri, utenteId, nomiAtenei)),
       meta: { total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)) },
     };
   }
@@ -130,10 +141,13 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
   async dettaglio(utenteId: string, gruppoId: string): Promise<DettaglioGruppoResponse> {
     const gruppo = await this.gruppoVisibileA(utenteId, gruppoId);
 
-    const profili = await this.profilo.perUtenti(gruppo.membri.map((m) => m.utenteId));
+    const [profili, nomiAtenei] = await Promise.all([
+      this.profilo.perUtenti(gruppo.membri.map((m) => m.utenteId)),
+      this.nomiDegliAtenei([gruppo]),
+    ]);
 
     return {
-      gruppo: this.gruppoPerIlClient(gruppo, gruppo.membri, utenteId),
+      gruppo: this.gruppoPerIlClient(gruppo, gruppo.membri, utenteId, nomiAtenei),
       membri: gruppo.membri
         .slice()
         .sort((a, b) => a.entratoIl.getTime() - b.entratoIl.getTime())
@@ -143,7 +157,7 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
             utenteId: membro.utenteId,
             nome: profilo?.nome ?? null,
             cognome: profilo?.cognome ?? null,
-            universita: profilo?.universita ?? null,
+            universita: profilo?.universita?.nome ?? null,
             ...(profilo ? {} : { rimosso: true }),
             moderatore: membro.moderatore,
             entratoIl: membro.entratoIl.toISOString(),
@@ -173,7 +187,12 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
       include: { membri: true },
     });
 
-    return this.gruppoPerIlClient(aggiornato, aggiornato.membri, utenteId);
+    return this.gruppoPerIlClient(
+      aggiornato,
+      aggiornato.membri,
+      utenteId,
+      await this.nomiDegliAtenei([aggiornato]),
+    );
   }
 
   /**
@@ -571,7 +590,7 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
     // L'università di chi legge si legge fresca: è un dato del Profilo, non
     // dello spazio.
     const chiSono = eMembro ? null : await this.profilo.perUtente(utenteId);
-    if (!puoVedere(gruppo, { eMembro, universita: chiSono?.universita ?? null })) {
+    if (!puoVedere(gruppo, { eMembro, universitaId: chiSono?.universita?.id ?? null })) {
       throw new AppException(
         GruppoErrorCode.NOT_FOUND,
         'GRUPPO_NOT_FOUND',
@@ -670,23 +689,40 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
     });
   }
 
+  /**
+   * I nomi degli atenei congelati in questi gruppi, in una domanda sola. Il
+   * gruppo conserva l'identificativo (G5); il nome lo traduce il catalogo, che
+   * sta in Profilo — il contesto che questo modulo già importa.
+   */
+  private nomiDegliAtenei(gruppi: { ateneoId: string | null }[]): Promise<Map<string, string>> {
+    return this.catalogo.nomiDiAtenei(
+      gruppi.map((gruppo) => gruppo.ateneoId).filter(Boolean) as string[],
+    );
+  }
+
+  /**
+   * `nomiAtenei` è **obbligatorio** e senza ripiego: il gruppo conserva un
+   * identificativo, e chi lo mostra deve averne risolto il nome. Un parametro
+   * facoltativo produrrebbe elenchi con l'ateneo vuoto e nessun errore.
+   */
   private gruppoPerIlClient(
     gruppo: {
       id: string;
       nome: string;
       visibilita: string;
-      ateneo: string | null;
+      ateneoId: string | null;
       creatoIl: Date;
     },
     membri: { utenteId: string; moderatore: boolean }[],
     lettoreId: string,
+    nomiAtenei: Map<string, string>,
   ): GruppoResponse {
     const io = membri.find((m) => m.utenteId === lettoreId);
     return {
       id: gruppo.id,
       nome: gruppo.nome,
       visibilita: gruppo.visibilita as GruppoResponse['visibilita'],
-      ateneo: gruppo.ateneo,
+      ateneo: gruppo.ateneoId ? (nomiAtenei.get(gruppo.ateneoId) ?? null) : null,
       creatoIl: gruppo.creatoIl.toISOString(),
       membri: membri.length,
       sonoMembro: Boolean(io),

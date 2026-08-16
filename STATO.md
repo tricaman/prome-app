@@ -1,4 +1,4 @@
-# Stato di Prome v2 — 15 agosto 2026
+# Stato di Prome v2 — 16 agosto 2026
 
 Documento di passaggio di consegne. Racconta **cosa funziona davvero**, cosa no, e quali decisioni sono già state prese, così chi riprende non deve ricostruirlo dal codice.
 
@@ -10,7 +10,7 @@ Le regole vincolanti stanno altrove e vanno lette: [`apps/api/CLAUDE.md`](apps/a
 
 Prome è in esercizio su prome.app. Una persona può ricevere un codice via email, entrare, compilare il profilo, pubblicare un post con allegato e commentare, e — dal 15 agosto — creare un'aula di studio, invitarci qualcuno, condividerci materiali e scriverci in tempo reale. Le stesse aule, con la chat, funzionano anche sul telefono. Sempre il 15 agosto sono arrivate le **impostazioni di privacy** (prima nascevano chiuse e non c'era modo di cambiarle, quindi la bacheca era di fatto a un utente solo) e i **gruppi**, con l'appartenenza che apre le aule collocate. Restano fuori audio e notifiche.
 
-Il giro completo è stato **provato in produzione il 15 agosto**, non dedotto: codice ricevuto via email, accesso, onboarding, allegato caricato e riscaricato identico all'originale.
+Il giro completo è stato **provato in produzione il 15 agosto**, non dedotto: codice ricevuto via email, accesso, onboarding, allegato caricato e riscaricato identico all'originale. Dal 16 agosto il **corso di studi è un'entità del catalogo** e non più una stringa scritta a mano: al prossimo rilascio tutti rifanno l'onboarding.
 
 ---
 
@@ -50,7 +50,7 @@ Le due unità dell'API escono dalla stessa build e si distinguono solo per confi
 
 **Si pubblica facendo `push` su `main`.** Il resto è automatico e sta in [`.github/workflows/rilascio.yml`](.github/workflows/rilascio.yml):
 
-1. **Verifica** — database vero come servizio, migrazioni, `pnpm -r build`, typecheck, lint, 252 test dell'API.
+1. **Verifica** — database vero come servizio, migrazioni, `pnpm -r build`, typecheck, lint, 301 test dell'API.
 2. **Immagini** — costruite in CI (non sulla macchina, che ha due core e serve traffico) e pubblicate su `ghcr.io` etichettate con lo sha del commit.
 3. **Rilascio** — rsync della configurazione (`--delete`, così la macchina corrisponde al commit), poi [`deploy/rilascia.sh`](deploy/rilascia.sh) via SSH.
 
@@ -64,10 +64,10 @@ Un rilascio alla volta (`concurrency`), quindi i push ravvicinati si mettono in 
 
 ### E0 — online e utilizzabile da capo a fondo ✅
 
-- **E0.1** Scheletro API e schema dati. Postgres con sei schemi (`accesso`, `profilo`, `bacheca`, `gruppo`, `aula_studio`, `cancellazione`), foreign key **solo dentro** lo schema, riferimenti fra contesti come identificatori nudi. Undici migrazioni versionate. Due unità di esecuzione dalla stessa immagine.
+- **E0.1** Scheletro API e schema dati. Postgres con sei schemi (`accesso`, `profilo`, `bacheca`, `gruppo`, `aula_studio`, `cancellazione`), foreign key **solo dentro** lo schema, riferimenti fra contesti come identificatori nudi. Quattordici migrazioni versionate. Due unità di esecuzione dalla stessa immagine.
 - **E0.2** Accesso con email e codice. **Un solo modo di entrare**: niente password, niente social, nessuna registrazione separata — chi verifica un codice per la prima volta ottiene account e profilo.
 - **E0.3** Shell web: home, chi siamo, guide, atenei, argomenti, privacy, accesso, feed.
-- **E0.4** Onboarding del profilo (nome, cognome, università, corso) con `ImpostazioniDiPrivacy` create nella stessa scrittura e **default restrittivo** (`PRIVATO` su entrambe le voci).
+- **E0.4** Onboarding del profilo (nome, cognome, corso di studi scelto dal catalogo — l'ateneo viene dal corso) con `ImpostazioniDiPrivacy` create nella stessa scrittura e **default restrittivo** (`PRIVATO` su entrambe le voci).
 - **E0.5** Post con allegato. Tre tempi: pre-autorizzazione (verifica tipo e dimensione *prima*, prenota la chiave), `PUT` su URL firmato con scadenza, poi creazione del post che cita le chiavi. **I byte non attraversano gli endpoint di dominio.**
 - **E0.6** Composer con allegato e lista dei post, ordinamento cronologico.
 - **E0.7** Messa in esercizio, con giro completo verificato dal vero.
@@ -208,6 +208,31 @@ Il feed del telefono ora **carica altre pagine** come quello del web (`useInfini
 
 ---
 
+### Il catalogo accademico — il corso è un'entità ✅ (16 agosto 2026)
+
+Fino al 15 agosto l'identità accademica erano **due stringhe libere**: chi faceva l'onboarding scriveva a mano università e corso. Il difetto non era estetico. La visibilità `ATENEO`, l'ammissione alle aule e la visibilità dei gruppi confrontano l'ateneo **per uguaglianza di stringa**: «Università di Bologna», «UniBo» e «universita di bologna» erano tre atenei diversi, e chi ne scriveva una variante smetteva di vedere la propria bacheca senza che niente lo segnalasse. Il corso, poi, non era interrogabile affatto — nessun codice, nessuna classe, nessun ateneo a cui appartenesse.
+
+Ora **Università, Classe di corso e Corso** sono entità con relazioni vere (un corso appartiene a un ateneo, un ateneo ha più corsi), il profilo riferisce **solo il corso** — l'ateneo viene da lì — e ogni confronto è fra identificativi. Il corso porta codice dell'ateneo, classe ministeriale (`L-18 R`) e durata, che è quanto basta a distinguere due corsi omonimi dello stesso ateneo. Le regole vivono in `apps/api/CLAUDE.md`, sezione «Catalogo accademico».
+
+Tre decisioni prese, che vale la pena non rimettere in discussione:
+
+- **Il catalogo è chiuso**: si sceglie da un elenco, non si scrive. La conseguenza va tenuta a mente ogni volta che si guarda `modules/profilo/catalogo/dati/catalogo.ts` — **un corso che manca lì è una persona che non può entrare in Prome**. Finché gli atenei sono cinque, quel file è anche la lista d'attesa del prodotto.
+- **La fonte di verità è il repo**: la semina (idempotente, mai distruttiva) porta il file nel database a ogni rilascio, subito dopo le migration. Non esiste un endpoint che scriva il catalogo: una riga creata via HTTP non comparirebbe in nessuna diff e sparirebbe al primo ripristino.
+- **Il catalogo non è un dato personale**: non si cancella con l'account, non si conta nel residuo, e nell'esportazione il corso esce per esteso — nome, codice, classe, durata — non come identificativo.
+
+Cosa si è rotto di proposito, e va saputo:
+
+- **`ProfiloResponse` e `CompletaProfiloRequest` cambiano forma** (`universita`/`corso` da stringhe a oggetti; in ingresso il solo `corsoId`). È l'unica rottura non additiva del contratto, ed è stata fatta **prima della sottomissione agli store**: dopo sarebbe costata due campi paralleli mantenuti per 90 giorni.
+- **Tutti rifanno l'onboarding.** La migration azzera università e corso e riporta `onboardingCompletato` a falso: le stringhe libere non erano rimappabili su un catalogo che in quel momento è ancora vuoto, e un profilo «completo» senza corso non vedrebbe più nulla del proprio ateneo senza sapere perché.
+- **Gli spazi riservati all'ateneo tornano privati.** L'ateneo congelato di aule e gruppi è ora un identificativo, e i nomi congelati prima non si possono risolvere: uno spazio con visibilità `ATENEO` e ateneo nullo sarebbe visibile **a nessuno**, in silenzio. Una restrizione dichiarata è preferibile — chi li ha creati può riaprirli dopo aver rifatto l'onboarding.
+- **I codici dei corsi sono in gran parte da verificare.** Solo quello di Economia e commercio a Bologna (6612) è stato preso dal catalogo dell'ateneo; gli altri sono marcati `daVerificare: true` e la semina li conta a ogni giro. Un codice inventato che nessuno dichiara tale è indistinguibile da uno vero.
+
+**Divergenza dai documenti, registrata qui perché non si scopra leggendo il codice**: `documentation/domain-model-v1.md` dice che l'Università è «autodichiarata» e non verificata contro alcun elenco. Da oggi non è più vero. I file di `documentation/` **non si modificano a mano**: la correzione va fatta risalire alla pipeline donumAI.
+
+La suite dell'API è a **301** casi (era 290) e ha fatto tre giri verdi di fila; il giro dal vivo — ricerca degli atenei per sigla, corsi con classe e durata, onboarding, aula riservata all'ateneo con il nome giusto nella pastiglia, esportazione — è stato provato contro l'API vera prima di scrivere questa riga.
+
+---
+
 ## Cosa non c'è ancora
 
 **E1.1–E1.5 sono superate da una decisione di prodotto.** Il piano prevedeva accesso Google, Apple ed email con password: è stato deciso l'**accesso unificato email + OTP e basta**. Quei tre work package non vanno realizzati così come sono scritti. Restano validi E1.4 (stati di errore) ed E1.5 (homepage e pagine informative complete), in parte già coperti.
@@ -244,6 +269,7 @@ Il prossimo passo della fila è la porta a timebox sull'audio (S-audio → E5), 
 4. **Better Auth è usato come libreria, non come router.** Le sue rotte HTTP **non sono montate**: i controller lo chiamano come funzioni, così l'envelope e il formato d'errore restano quelli del contratto.
 5. **I pacchetti condivisi consumati da web e mobile esportano i sorgenti TypeScript**, non `dist`. Un pacchetto compilato in CommonJS che importa `@tanstack/react-query` ne ottiene una copia diversa da quella dell'app: due istanze, due contesti React, e un `QueryClientProvider` corretto che produce comunque «No QueryClient set».
 6. **La visibilità si risolve alla lettura**, interrogando le impostazioni dell'autore. Il Post **non ha** un attributo di visibilità: cambiare le proprie impostazioni ha effetto immediato su ciò che si è già pubblicato.
+7. **Il catalogo accademico è chiuso e vive nel repo.** Si sceglie ateneo e corso da un elenco, non si scrive: un corso che manca nel file è una persona che non entra, e la strada per farla entrare è aggiungerlo lì e rilasciare — non una INSERT sulla macchina.
 
 ---
 
@@ -266,6 +292,7 @@ Vale la pena conoscerli, perché sono tutti della stessa famiglia: cose che in s
 - **Il primo caricamento in produzione è finito in 500.** `EACCES` sull'archivio: un volume Docker vuoto eredita i permessi dalla cartella che trova nell'immagine, e lì non c'era — è nato di root, e il processo non ci poteva scrivere. In sviluppo l'archivio è una cartella del progetto e appartiene a chi lancia il processo, quindi il difetto era invisibile.
 - **Il worker girava in ciclo di riavvio** perché mandava email senza avere i18n registrato.
 - **`backup.sh` sorgeva `.env`**, dove `SMTP_MITTENTE=Prome <accesso@prome.app>` è una redirezione della shell. Un file di segreti si legge, non si esegue.
+- **Due caricamenti nello stesso istante ne rompevano uno** (trovato il 16 agosto, mentre il catalogo cambiava i tempi della suite). La pre-autorizzazione scriveva la prenotazione con `chiave: ''` e la correggeva subito dopo, perché la chiave contiene l'identificativo della riga: due richieste contemporanee scrivevano allora la stessa chiave vuota e la seconda cadeva sul vincolo di unicità, con un 500 muto. Ora l'identificativo si genera prima della scrittura e la riga nasce già con la sua chiave, in una query sola. In sviluppo era invisibile: a caricare si è da soli.
 
 ---
 
@@ -299,9 +326,10 @@ Vale la pena conoscerli, perché sono tutti della stessa famiglia: cose che in s
 ```bash
 pnpm db:up                              # Postgres locale, porta 6400
 pnpm --filter @prome/api exec prisma migrate deploy
+pnpm --filter @prome/api catalogo:semina  # catalogo accademico: senza, l'onboarding non si completa
 pnpm dev:api                            # API
 pnpm dev:web                            # sito, porta 3500
-pnpm --filter @prome/api test           # 252 test, serve il database
+pnpm --filter @prome/api test           # 301 test, serve il database
 pnpm api:client                         # rigenera il client dopo OGNI modifica agli endpoint
 ```
 

@@ -23,6 +23,12 @@ export const ProfiloErrorCode = {
   PRIVACY_SENZA_MODIFICHE: 'PR009',
   /** Bloccare sé stessi non significa niente, e la riga vieterebbe di vedersi. */
   BLOCCO_DI_SE_STESSI: 'PR010',
+
+  // Catalogo accademico. Il catalogo è chiuso: un corso che non c'è non si
+  // sceglie, e i due casi si distinguono perché a chi li riceve dicono cose
+  // diverse — «quel corso non esiste» e «quel corso non si offre più».
+  CORSO_NON_TROVATO: 'PR011',
+  CORSO_NON_ATTIVO: 'PR012',
 } as const;
 
 export type ProfiloErrorCode = (typeof ProfiloErrorCode)[keyof typeof ProfiloErrorCode];

@@ -30,6 +30,13 @@ export function SiteFooter() {
             <p className="mt-2.5 max-w-[250px] text-[12.5px] leading-relaxed text-superficie-inversa-tenue">
               {t('footer.claim')}
             </p>
+            {/* Chi c'è dietro, detto per intero: una persona sola. È
+                un'informazione, non una nota di colore — chi affida i propri
+                appunti a una piattaforma ha diritto di sapere se dall'altra
+                parte c'è un'azienda o qualcuno che la costruisce da sé. */}
+            <p className="mt-2.5 max-w-[250px] text-[12.5px] leading-relaxed text-superficie-inversa-debole">
+              {t('footer.autore')}
+            </p>
           </div>
 
           {COLONNE_FOOTER.map((colonna) => (
@@ -59,10 +66,10 @@ export function SiteFooter() {
             <Link href={percorsi.privacy()} className="hover:text-primary-500">
               {t('footer.privacy')}
             </Link>
-            <Link href={percorsi.privacy()} className="hover:text-primary-500">
+            <Link href={percorsi.termini()} className="hover:text-primary-500">
               {t('footer.termini')}
             </Link>
-            <Link href={percorsi.privacy()} className="hover:text-primary-500">
+            <Link href={percorsi.cookie()} className="hover:text-primary-500">
               {t('footer.cookie')}
             </Link>
           </span>

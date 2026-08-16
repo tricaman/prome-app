@@ -29,8 +29,9 @@ export interface MembroDelGruppo {
 export function costruisciGruppo(dati: {
   nome: string;
   visibilita?: VisibilitaGruppo;
-  universitaDelCreatore: string | null;
-}): { nome: string; visibilita: VisibilitaGruppo; ateneo: string | null } {
+  /** Identificativo dell'ateneo, non il suo nome: la regola lo confronta. */
+  universitaIdDelCreatore: string | null;
+}): { nome: string; visibilita: VisibilitaGruppo; ateneoId: string | null } {
   const nome = dati.nome.trim();
   if (!nome || nome.length > LUNGHEZZA_MASSIMA_NOME_GRUPPO) {
     throw new AppException(
@@ -51,7 +52,7 @@ export function costruisciGruppo(dati: {
     // dopo — la regola confronta questo campo con l'università di chi legge, e
     // un campo vuoto non corrisponde a nessuno. Non cambia alcun
     // comportamento: si consulta solo quando la visibilità è ATENEO.
-    ateneo: dati.universitaDelCreatore,
+    ateneoId: dati.universitaIdDelCreatore,
   };
 }
 
@@ -105,13 +106,13 @@ export function verificaNonSiaLUltimoModeratore(
  * confrontato con l'università **fresca** di chi legge.
  */
 export function puoVedere(
-  gruppo: { visibilita: VisibilitaGruppo; ateneo: string | null },
-  lettore: { eMembro: boolean; universita: string | null },
+  gruppo: { visibilita: VisibilitaGruppo; ateneoId: string | null },
+  lettore: { eMembro: boolean; universitaId: string | null },
 ): boolean {
   if (lettore.eMembro) return true;
   if (gruppo.visibilita === 'PUBBLICO') return true;
   if (gruppo.visibilita === 'ATENEO') {
-    return Boolean(gruppo.ateneo) && lettore.universita === gruppo.ateneo;
+    return Boolean(gruppo.ateneoId) && lettore.universitaId === gruppo.ateneoId;
   }
   return false;
 }

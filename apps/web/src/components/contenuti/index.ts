@@ -8,6 +8,7 @@ export {
   RichiamoMenta,
   type TestataPaginaProps,
 } from './blocchi';
+export { DocumentoLegale, type DocumentoLegaleProps } from './documento-legale';
 export {
   TONO_STATO_AULA,
   ETICHETTA_STATO_AULA,

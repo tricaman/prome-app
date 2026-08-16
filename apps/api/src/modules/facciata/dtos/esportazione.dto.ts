@@ -107,11 +107,26 @@ class SegnalazioneEsportataDto implements SegnalazioneResponse {
   @ApiProperty() creatoIl!: string;
 }
 
+/**
+ * Il corso per esteso, non il suo identificativo: una copia dei propri dati
+ * deve restare leggibile da sola, mesi dopo, senza il catalogo accanto per
+ * tradurre un uuid.
+ */
+class CorsoEsportatoDto {
+  @ApiProperty({ example: 'Economia e commercio' }) nome!: string;
+  @ApiProperty({ example: '6612' }) codiceCorso!: string;
+
+  @ApiProperty({ example: 'L-18 R — Scienze dell\'economia e della gestione aziendale' })
+  classe!: string;
+
+  @ApiProperty({ example: 3 }) durataAnni!: number;
+}
+
 class ProfiloEsportatoDto {
   @ApiProperty({ nullable: true, type: String }) nome!: string | null;
   @ApiProperty({ nullable: true, type: String }) cognome!: string | null;
   @ApiProperty({ nullable: true, type: String }) universita!: string | null;
-  @ApiProperty({ nullable: true, type: String }) corso!: string | null;
+  @ApiProperty({ nullable: true, type: CorsoEsportatoDto }) corso!: CorsoEsportatoDto | null;
   @ApiProperty() onboardingCompletato!: boolean;
   @ApiProperty({ type: ImpostazioniDiPrivacyDto })
   impostazioniPrivacy!: ImpostazioniDiPrivacyDto;

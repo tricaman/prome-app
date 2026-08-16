@@ -9,6 +9,10 @@ import { ArchivioLocale } from '../src/infrastruttura/archivio-file/archivio-loc
 import { MisurazioniSenzaFornitore } from '../src/infrastruttura/misurazioni/misurazioni-senza-fornitore';
 import { PuliziaBachecaService } from '../src/modules/bacheca/pulizia-bacheca.service';
 import { CancellazioneService } from '../src/modules/cancellazione/cancellazione.service';
+import {
+  assicuraCatalogoDiProva,
+  type CatalogoDiProva,
+} from './catalogo';
 
 const GIORNO_MS = 24 * 60 * 60 * 1000;
 /** Tolleranza per confrontare istanti calcolati dal server: cinque minuti. */
@@ -34,6 +38,7 @@ const vicinoA = (iso: string | Date, atteso: number) =>
 describe('Cancellazione dell\'account (V5/SE3)', () => {
   let app: NestFastifyApplication;
   let prisma: PrismaService;
+  let catalogo: CatalogoDiProva;
   let email: CanaleEmailSviluppo;
   let archivio: ArchivioLocale;
   let misurazioni: MisurazioniSenzaFornitore;
@@ -78,12 +83,7 @@ describe('Cancellazione dell\'account (V5/SE3)', () => {
     const profilo = await chiedi('/profilo/me', {
       method: 'PUT',
       headers: comeUtente(token),
-      payload: {
-        nome: 'Marta',
-        cognome: 'Rossi',
-        universita: 'Università di Bologna',
-        corso: 'Ingegneria informatica',
-      },
+      payload: { nome: 'Marta', cognome: 'Rossi', corsoId: catalogo.corsoInformatica },
     });
     return { token, utenteId: profilo.json().data.utenteId as string, indirizzo };
   }
@@ -227,6 +227,8 @@ describe('Cancellazione dell\'account (V5/SE3)', () => {
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
     prisma = app.get(PrismaService);
+    // Il catalogo è chiuso: senza, nessun onboarding arriva in fondo.
+    catalogo = await assicuraCatalogoDiProva(prisma);
     email = app.get(CanaleEmailSviluppo);
     archivio = app.get(ArchivioLocale);
     misurazioni = app.get(MisurazioniSenzaFornitore);
@@ -557,8 +559,26 @@ describe('Cancellazione dell\'account (V5/SE3)', () => {
       expect(voce!.verificataATotaleIl!.getTime()).toBeLessThanOrEqual(voce!.scadenza.getTime());
       expect(voce!.ultimoResiduoRecord).toBe(0);
       expect(voce!.ultimoResiduoFile).toBe(0);
-      expect(esitoGiro.catene).toBeGreaterThanOrEqual(1);
-      expect(esitoGiro.completate).toBeGreaterThanOrEqual(1);
+      // L'esito totale di **questa** voce è già l'affermazione che conta (due
+      // righe più su): i contatori del giro contano invece il lavoro di tutti,
+      // e le suite condividono un database solo — un giro lanciato da un'altra
+      // suite un istante prima porta via il pendente e lascia qui uno zero
+      // legittimo. Restano guardati per quello che dicono davvero: il giro non
+      // può aver contato più catene di quante ne abbia completate.
+      expect(esitoGiro.catene).toBeGreaterThanOrEqual(esitoGiro.completate);
+    });
+
+    it('non porta via il catalogo accademico: non è un dato di questa persona', async () => {
+      // Il corso che l'utente aveva scelto è ancora lì, e con lui il suo
+      // ateneo: cancellare un account non chiude un'università. Nessuna riga
+      // del catalogo porta un utenteId, ed è il motivo per cui non entra
+      // nella verifica del residuo.
+      const corso = await prisma.corso.findUnique({
+        where: { id: catalogo.corsoInformatica },
+        include: { universita: true },
+      });
+      expect(corso).not.toBeNull();
+      expect(corso!.universita.id).toBe(catalogo.ateneoId);
     });
 
     it('il registro sopravvive al completamento e non contiene nient\'altro che l\'identificatore', async () => {

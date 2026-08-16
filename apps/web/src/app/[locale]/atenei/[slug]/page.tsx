@@ -74,7 +74,6 @@ export default async function PaginaAteneo({ params }: { params: Promise<Paramet
   return (
     <SiteShell>
       <StructuredData
-        lingua={lingua}
         oggetti={[
           briciole(lingua, voci),
           organizzazioneEducativa(lingua, ateneo.nome, ateneo.citta, percorsi.ateneo(ateneo.slug)),
@@ -162,7 +161,7 @@ export default async function PaginaAteneo({ params }: { params: Promise<Paramet
             testo={t('elenco.sommario')}
             azioni={
               <ButtonLink href={percorsi.home()} dimensione="lg" className="h-12 px-6 text-base">
-                {tSito('registratiGratis')}
+                {tSito('iniziaGratis')}
               </ButtonLink>
             }
           />

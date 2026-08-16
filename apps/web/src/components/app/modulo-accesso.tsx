@@ -85,20 +85,26 @@ function PassoEmail({ onInviato }: { onInviato: (email: string) => void }) {
     <>
       <Intestazione titolo={t('titolo')} sommario={t('sommario')} />
       <Form form={form} onSubmit={(valori) => invio.mutate(valori)}>
+        {/* Un'email qualunque, non per forza quella dell'ateneo: chiederla
+            universitaria escludeva chi non ce l'ha ancora, chi l'ha persa con
+            la laurea e chi semplicemente legge un'altra casella — e nessuna
+            regola del server ha mai preteso un dominio accademico. */}
         <FormInput
           name="email"
           tipo="email"
           etichetta={t('email')}
-          segnaposto="nome.cognome@studenti.unibo.it"
+          segnaposto="nome@esempio.it"
           autoComplete="email"
           obbligatorio
         />
 
+        {/* Il bottone dice cosa succede premendolo, quindi la riga che
+            spiegava «se è la prima volta l'account si crea da sé» non serve
+            più: non c'è una registrazione da cercare altrove, e dirlo faceva
+            sorgere il dubbio che invece ci fosse. */}
         <FormSubmit className="h-[50px] w-full justify-center text-[15.5px] shadow-marchio">
           {t('inviaCodice')}
         </FormSubmit>
-
-        <p className="text-[13px] leading-relaxed text-testo-tenue">{t('primoAccesso')}</p>
       </Form>
     </>
   );

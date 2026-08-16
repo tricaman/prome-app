@@ -7,6 +7,11 @@ import { PrismaService } from '../src/database/prisma.service';
 import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/canale-email-sviluppo';
 import { RecapitoFattiDelGruppoService } from '../src/modules/gruppo/recapito-fatti.service';
 import { RecapitoFattiService } from '../src/modules/aula-studio/recapito-fatti.service';
+import {
+  assicuraCatalogoDiProva,
+  NOME_ATENEO,
+  type CatalogoDiProva,
+} from './catalogo';
 
 const GIORNO_MS = 24 * 60 * 60 * 1000;
 
@@ -37,6 +42,7 @@ const GIORNO_MS = 24 * 60 * 60 * 1000;
 describe('Gruppo (E7)', () => {
   let app: NestFastifyApplication;
   let prisma: PrismaService;
+  let catalogo: CatalogoDiProva;
   let email: CanaleEmailSviluppo;
   let recapito: RecapitoFattiDelGruppoService;
   /** L'outbox dell'aula: serve dove il titolo di ammissione viene da un invito. */
@@ -63,7 +69,7 @@ describe('Gruppo (E7)', () => {
 
   type Utente = { token: string; utenteId: string; indirizzo: string };
 
-  async function utenteCompleto(universita = 'Università di Bologna'): Promise<Utente> {
+  async function utenteCompleto(corsoId?: string): Promise<Utente> {
     const indirizzo = nuovoIndirizzo();
     await chiedi('/accesso/codice', { method: 'POST', payload: { email: indirizzo } });
     const verifica = await chiedi('/accesso/verifica', {
@@ -77,8 +83,7 @@ describe('Gruppo (E7)', () => {
       payload: {
         nome: 'Marta',
         cognome: 'Rossi',
-        universita,
-        corso: 'Ingegneria informatica',
+        corsoId: corsoId ?? catalogo.corsoInformatica,
       },
     });
     return { token, utenteId: profilo.json().data.utenteId as string, indirizzo };
@@ -162,6 +167,8 @@ describe('Gruppo (E7)', () => {
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
     prisma = app.get(PrismaService);
+    // Il catalogo è chiuso: senza, nessun onboarding arriva in fondo.
+    catalogo = await assicuraCatalogoDiProva(prisma);
     email = app.get(CanaleEmailSviluppo);
     recapito = app.get(RecapitoFattiDelGruppoService);
     recapitoAula = app.get(RecapitoFattiService);
@@ -205,25 +212,22 @@ describe('Gruppo (E7)', () => {
     });
 
     it('congela l\'ateneo alla creazione: non segue il profilo del creatore (G5)', async () => {
-      const creatore = await utenteCompleto('Università di Bologna');
+      const creatore = await utenteCompleto();
       const gruppo = await creaGruppo(creatore.token, { visibilita: 'ATENEO' });
-      expect(gruppo.ateneo).toBe('Università di Bologna');
+      // Nella risposta l'ateneo è il **nome**, risolto dal catalogo: quello
+      // che il client mostra. Congelato è l'identificativo.
+      expect(gruppo.ateneo).toBe(NOME_ATENEO);
 
       // Il creatore si trasferisce.
       await chiedi('/profilo/me', {
         method: 'PUT',
         headers: comeUtente(creatore.token),
-        payload: {
-          nome: 'Marta',
-          cognome: 'Rossi',
-          universita: 'Politecnico di Milano',
-          corso: 'Ingegneria informatica',
-        },
+        payload: { nome: 'Marta', cognome: 'Rossi', corsoId: catalogo.corsoDiPassaggio },
       });
 
       // Il gruppo non cambia pubblico perché una persona ha cambiato ateneo.
       const dopo = await dettaglio(creatore.token, gruppo.id);
-      expect(dopo.json().data.gruppo.ateneo).toBe('Università di Bologna');
+      expect(dopo.json().data.gruppo.ateneo).toBe(NOME_ATENEO);
     });
 
     it('l\'ateneo non è modificabile nemmeno chiedendolo', async () => {
@@ -233,7 +237,7 @@ describe('Gruppo (E7)', () => {
       const risposta = await chiedi(`/gruppi/${gruppo.id}`, {
         method: 'PATCH',
         headers: comeUtente(creatore.token),
-        payload: { ateneo: 'Politecnico di Milano' },
+        payload: { ateneoId: 'un-altro-ateneo' },
       });
 
       // Campo non previsto dal contratto: la pipe lo rifiuta, non lo ignora.

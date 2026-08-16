@@ -8,6 +8,10 @@ import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/cana
 import { CanaleNotificheSenzaFornitore } from '../src/infrastruttura/avvisi-in-uscita/canale-notifiche-senza-fornitore';
 import { RecapitoFattiDellaBachecaService } from '../src/modules/bacheca/recapito-fatti.service';
 import { CancellazioneService } from '../src/modules/cancellazione/cancellazione.service';
+import {
+  assicuraCatalogoDiProva,
+  type CatalogoDiProva,
+} from './catalogo';
 
 /**
  * Segnalazione e blocco — scritti prima del codice, perché qui il difetto è
@@ -30,6 +34,7 @@ import { CancellazioneService } from '../src/modules/cancellazione/cancellazione
 describe('Segnalazioni e blocchi', () => {
   let app: NestFastifyApplication;
   let prisma: PrismaService;
+  let catalogo: CatalogoDiProva;
   let email: CanaleEmailSviluppo;
   let notifiche: CanaleNotificheSenzaFornitore;
   let recapito: RecapitoFattiDellaBachecaService;
@@ -67,12 +72,7 @@ describe('Segnalazioni e blocchi', () => {
     const profilo = await chiedi('/profilo/me', {
       method: 'PUT',
       headers: comeUtente(token),
-      payload: {
-        nome,
-        cognome: 'Rossi',
-        universita: 'Università di Bologna',
-        corso: 'Ingegneria informatica',
-      },
+      payload: { nome, cognome: 'Rossi', corsoId: catalogo.corsoInformatica },
     });
     await chiedi('/profilo/me/privacy', {
       method: 'PUT',
@@ -132,6 +132,8 @@ describe('Segnalazioni e blocchi', () => {
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
     prisma = app.get(PrismaService);
+    // Il catalogo è chiuso: senza, nessun onboarding arriva in fondo.
+    catalogo = await assicuraCatalogoDiProva(prisma);
     email = app.get(CanaleEmailSviluppo);
     notifiche = app.get(CanaleNotificheSenzaFornitore);
     recapito = app.get(RecapitoFattiDellaBachecaService);

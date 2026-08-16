@@ -58,20 +58,14 @@ export function SiteHeader() {
         <div className="ml-auto flex flex-none items-center gap-2.5">
           <ThemeToggle className="hidden sm:grid" />
           <LanguageSwitcher className="hidden sm:inline-flex" />
-          {/* Due inviti, una sola destinazione: l'accesso è unificato — si
-              scrive l'email e arriva un codice — e chi non ha ancora un
-              account lo ottiene percorrendo lo stesso modulo. Le due etichette
-              restano perché parlano a due intenzioni diverse, non a due flussi
-              diversi. */}
-          <ButtonLink
-            href={percorsiApp.accedi()}
-            variante="fantasma"
-            className="h-10 px-4 text-sm font-bold"
-          >
-            {t('accedi')}
-          </ButtonLink>
+          {/* Un invito solo. Prima erano due — «Accedi» e «Registrati» — che
+              portavano allo stesso indirizzo: l'accesso è unificato, si scrive
+              l'email e arriva un codice, e l'account nasce da lì. Due bottoni
+              affiancati promettevano due strade dove ce n'è una, e la seconda
+              chiedeva di iscriversi a qualcosa che non ha un modulo di
+              iscrizione. */}
           <ButtonLink href={percorsiApp.accedi()} className="h-10 px-5 text-sm shadow-marchio">
-            {t('registrati')}
+            {t('accedi')}
           </ButtonLink>
         </div>
       </Container>

@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef, type ReactNode } from 'react';
-import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
 import { toast, Toaster } from 'sonner';
 import { configuraFeedback } from '@prome/app-core';
+import { useTema } from './tema';
 
 /**
  * Collega il canale di feedback condiviso alla libreria di avvisi del web.
@@ -15,7 +15,7 @@ import { configuraFeedback } from '@prome/app-core';
  */
 export function AvvisiProvider({ children }: { children: ReactNode }) {
   const t = useTranslations();
-  const { resolvedTheme } = useTheme();
+  const { risolto } = useTema();
 
   // Il riferimento tiene aggiornata la funzione di traduzione senza dover
   // riconfigurare il canale a ogni cambio di lingua.
@@ -52,7 +52,7 @@ export function AvvisiProvider({ children }: { children: ReactNode }) {
         richColors
         closeButton
         containerAriaLabel={t('comune.avvisi')}
-        theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
+        theme={risolto === 'dark' ? 'dark' : 'light'}
         toastOptions={{
           classNames: { toast: 'rounded-2xl' },
           closeButtonAriaLabel: t('comune.chiudi'),

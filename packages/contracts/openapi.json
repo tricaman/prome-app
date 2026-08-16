@@ -593,6 +593,240 @@
         ]
       }
     },
+    "/catalogo/universita": {
+      "get": {
+        "operationId": "elencaUniversita",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Campo di ordinamento (dipende dalla risorsa)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "asc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "ricerca",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "polimi",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UniversitaDto"
+                      }
+                    },
+                    "meta": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ResponseMetaDto"
+                        },
+                        {
+                          "properties": {
+                            "pagination": {
+                              "$ref": "#/components/schemas/PaginationMetaDto"
+                            }
+                          },
+                          "required": [
+                            "pagination"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Gli atenei del catalogo, con ricerca per nome, sigla o città",
+        "tags": [
+          "catalogo"
+        ]
+      }
+    },
+    "/catalogo/universita/{universitaId}/corsi": {
+      "get": {
+        "operationId": "elencaCorsiDiUniversita",
+        "parameters": [
+          {
+            "name": "universitaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Campo di ordinamento (dipende dalla risorsa)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "asc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "ricerca",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "polimi",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CorsoDto"
+                      }
+                    },
+                    "meta": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ResponseMetaDto"
+                        },
+                        {
+                          "properties": {
+                            "pagination": {
+                              "$ref": "#/components/schemas/PaginationMetaDto"
+                            }
+                          },
+                          "required": [
+                            "pagination"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "I corsi ancora offerti da un ateneo",
+        "tags": [
+          "catalogo"
+        ]
+      }
+    },
     "/bacheca/allegati/pre-autorizzazione": {
       "post": {
         "operationId": "preautorizzaAllegato",
@@ -3763,6 +3997,99 @@
           "codice"
         ]
       },
+      "UniversitaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Lo stesso della pagina pubblica di ateneo"
+          },
+          "nome": {
+            "type": "string",
+            "example": "Università di Bologna"
+          },
+          "nomeBreve": {
+            "type": "string",
+            "example": "UniBo"
+          },
+          "citta": {
+            "type": "string",
+            "example": "Bologna"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "nome",
+          "nomeBreve",
+          "citta"
+        ]
+      },
+      "ClasseDiCorsoDto": {
+        "type": "object",
+        "properties": {
+          "codice": {
+            "type": "string",
+            "example": "L-18 R",
+            "description": "Codice ministeriale della classe"
+          },
+          "nome": {
+            "type": "string",
+            "example": "Scienze dell'economia e della gestione aziendale"
+          },
+          "livello": {
+            "type": "string",
+            "enum": [
+              "TRIENNALE",
+              "MAGISTRALE",
+              "CICLO_UNICO"
+            ]
+          }
+        },
+        "required": [
+          "codice",
+          "nome",
+          "livello"
+        ]
+      },
+      "CorsoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "codice": {
+            "type": "string",
+            "example": "6612",
+            "description": "Codice dell'ateneo: unico dentro l'ateneo"
+          },
+          "nome": {
+            "type": "string",
+            "example": "Economia e commercio"
+          },
+          "durataAnni": {
+            "type": "number",
+            "example": 3
+          },
+          "classe": {
+            "$ref": "#/components/schemas/ClasseDiCorsoDto"
+          },
+          "universita": {
+            "$ref": "#/components/schemas/UniversitaDto"
+          }
+        },
+        "required": [
+          "id",
+          "codice",
+          "nome",
+          "durataAnni",
+          "classe",
+          "universita"
+        ]
+      },
       "ImpostazioniDiPrivacyDto": {
         "type": "object",
         "properties": {
@@ -3805,12 +4132,23 @@
             "nullable": true
           },
           "universita": {
-            "type": "string",
-            "nullable": true
+            "nullable": true,
+            "description": "L'ateneo del corso scelto: non è un dato a sé, viene dal corso.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UniversitaDto"
+              }
+            ]
           },
           "corso": {
-            "type": "string",
-            "nullable": true
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CorsoDto"
+              }
+            ]
           },
           "onboardingCompletato": {
             "type": "boolean"
@@ -3840,20 +4178,15 @@
             "type": "string",
             "example": "Rossi"
           },
-          "universita": {
+          "corsoId": {
             "type": "string",
-            "example": "Università di Bologna"
-          },
-          "corso": {
-            "type": "string",
-            "example": "Ingegneria informatica"
+            "description": "Identificativo di un corso del catalogo (GET /catalogo/universita/:id/corsi)"
           }
         },
         "required": [
           "nome",
           "cognome",
-          "universita",
-          "corso"
+          "corsoId"
         ]
       },
       "AggiornaPrivacyDto": {
@@ -4949,6 +5282,33 @@
           "email"
         ]
       },
+      "CorsoEsportatoDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "example": "Economia e commercio"
+          },
+          "codice": {
+            "type": "string",
+            "example": "6612"
+          },
+          "classe": {
+            "type": "string",
+            "example": "L-18 R — Scienze dell'economia e della gestione aziendale"
+          },
+          "durataAnni": {
+            "type": "number",
+            "example": 3
+          }
+        },
+        "required": [
+          "nome",
+          "codice",
+          "classe",
+          "durataAnni"
+        ]
+      },
       "PreferenzeEsportateDto": {
         "type": "object",
         "properties": {
@@ -5010,8 +5370,13 @@
             "nullable": true
           },
           "corso": {
-            "type": "string",
-            "nullable": true
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CorsoEsportatoDto"
+              }
+            ]
           },
           "onboardingCompletato": {
             "type": "boolean"

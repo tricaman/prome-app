@@ -12,6 +12,8 @@
   "SERVICE_UNAVAILABLE": "Service temporarily unavailable",
   "PROFILO_NOT_FOUND": "Profile not found",
   "ONBOARDING_INCOMPLETO": "Complete the onboarding to continue",
+  "CORSO_NON_TROVATO": "Degree programme not found",
+  "CORSO_NON_ATTIVO": "This degree programme is no longer available: pick another one",
   "CODICE_NON_VALIDO": "Invalid code. Check the digits and try again.",
   "CODICE_SCADUTO": "The code has expired. Ask for a new one.",
   "TROPPI_TENTATIVI": "Too many attempts with this code. Ask for a new one.",

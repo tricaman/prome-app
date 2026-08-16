@@ -11,6 +11,7 @@ import type {
   PaginatedResult,
   PartecipanteResponse,
   PermessoAulaStudio,
+  ProfiloResponse,
   SalaResponse,
   TipoAllegato,
 } from '@prome/contracts';
@@ -39,6 +40,7 @@ import {
   type PayloadGruppoEliminato,
   type PayloadMembroRimosso,
 } from '../gruppo/recapito-fatti.service';
+import { CatalogoService } from '../profilo/catalogo/catalogo.service';
 import { PortaIdentitaUtente } from '../profilo/porta-identita-utente';
 import { ProfiloService } from '../profilo/profilo.service';
 import { AulaStudioErrorCode } from './constants/error-codes';
@@ -85,6 +87,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
   constructor(
     private readonly prisma: PrismaService,
     private readonly profilo: ProfiloService,
+    private readonly catalogo: CatalogoService,
     private readonly identita: PortaIdentitaUtente,
     private readonly appartenenza: PortaAppartenenzaGruppo,
     private readonly recapito: RecapitoFattiService,
@@ -114,7 +117,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       titolo: dati.titolo,
       visibilita: dati.visibilita,
       dataOraInizio: dati.dataOraInizio ? new Date(dati.dataOraInizio) : null,
-      universitaDelCreatore: chiSono.universita,
+      universitaIdDelCreatore: chiSono.universita?.id ?? null,
     });
 
     // Un'aula può nascere già collocata (AS9), ma solo in un gruppo di cui chi
@@ -129,7 +132,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       data: {
         titolo: daScrivere.titolo,
         visibilita: daScrivere.visibilita,
-        ateneo: daScrivere.ateneo,
+        ateneoId: daScrivere.ateneoId,
         dataOraInizio: daScrivere.dataOraInizio,
         ...(dati.gruppoId ? { gruppoId: dati.gruppoId } : {}),
         partecipanti: {
@@ -145,7 +148,12 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       include: { partecipanti: true },
     });
 
-    return this.aulaPerIlClient(aula, aula.partecipanti, utenteId);
+    return this.aulaPerIlClient(
+      aula,
+      aula.partecipanti,
+      utenteId,
+      await this.nomiDegliAtenei([aula]),
+    );
   }
 
   /**
@@ -183,8 +191,12 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       }),
     ]);
 
+    // Una domanda sola per l'intera pagina: i nomi degli atenei si risolvono
+    // in lotto, come i profili degli autori.
+    const nomiAtenei = await this.nomiDegliAtenei(righe);
+
     return {
-      data: righe.map((riga) => this.aulaPerIlClient(riga, riga.partecipanti, utenteId)),
+      data: righe.map((riga) => this.aulaPerIlClient(riga, riga.partecipanti, utenteId, nomiAtenei)),
       meta: {
         total: totale,
         page: pagina.page,
@@ -216,7 +228,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       { visibilita: 'PUBBLICO' },
     ];
     if (chiSono.universita) {
-      visibili.push({ visibilita: 'ATENEO', ateneo: chiSono.universita });
+      visibili.push({ visibilita: 'ATENEO', ateneoId: chiSono.universita.id });
     }
     // Chi è del gruppo vede tutte le aule collocate lì, comprese le private:
     // è il titolo che la collocazione gli dà, ed è ciò che rende utile
@@ -234,8 +246,10 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       }),
     ]);
 
+    const nomiAtenei = await this.nomiDegliAtenei(righe);
+
     return {
-      data: righe.map((riga) => this.aulaPerIlClient(riga, riga.partecipanti, utenteId)),
+      data: righe.map((riga) => this.aulaPerIlClient(riga, riga.partecipanti, utenteId, nomiAtenei)),
       meta: {
         total: totale,
         page: pagina.page,
@@ -271,11 +285,14 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       }),
     ]);
 
-    const profili = await this.profilo.perUtenti([...new Set(partecipanti.map((p) => p.utenteId))]);
+    const [profili, nomiAtenei] = await Promise.all([
+      this.profilo.perUtenti([...new Set(partecipanti.map((p) => p.utenteId))]),
+      this.nomiDegliAtenei([aula]),
+    ]);
     const io = partecipanti.find((p) => p.utenteId === utenteId);
 
     return {
-      aula: this.aulaPerIlClient(aula, partecipanti, utenteId),
+      aula: this.aulaPerIlClient(aula, partecipanti, utenteId, nomiAtenei),
       partecipanti: partecipanti.map((p) => {
         const profilo = profili.get(p.utenteId);
         const permessi = permessiEffettivi(p);
@@ -283,7 +300,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
           utenteId: p.utenteId,
           nome: profilo?.nome ?? null,
           cognome: profilo?.cognome ?? null,
-          universita: profilo?.universita ?? null,
+          universita: profilo?.universita?.nome ?? null,
           // Senza profilo dietro: account cancellato o in cancellazione.
           ...(profilo ? {} : { rimosso: true }),
           moderatore: p.moderatore,
@@ -342,7 +359,12 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       include: { partecipanti: true },
     });
 
-    return this.aulaPerIlClient(aggiornata, aggiornata.partecipanti, utenteId);
+    return this.aulaPerIlClient(
+      aggiornata,
+      aggiornata.partecipanti,
+      utenteId,
+      await this.nomiDegliAtenei([aggiornata]),
+    );
   }
 
   /**
@@ -420,7 +442,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
    */
   private async haTitoloDiAmmissione(
     utenteId: string,
-    aula: { id: string; visibilita: string; ateneo: string | null; gruppoId: string | null },
+    aula: { id: string; visibilita: string; ateneoId: string | null; gruppoId: string | null },
   ): Promise<boolean> {
     const invitato = await this.prisma.invito.findFirst({
       where: { aulaStudioId: aula.id, stato: 'ACCETTATO', accettatoDa: utenteId },
@@ -434,9 +456,9 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       if (await this.appartenenza.eAmmessoPerAppartenenza(utenteId, aula.gruppoId)) return true;
     }
 
-    if (aula.visibilita === 'ATENEO' && aula.ateneo) {
+    if (aula.visibilita === 'ATENEO' && aula.ateneoId) {
       const chiSono = await this.profilo.perUtente(utenteId);
-      return chiSono.universita === aula.ateneo;
+      return chiSono.universita?.id === aula.ateneoId;
     }
 
     return false;
@@ -1093,7 +1115,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     if (aula.visibilita === 'PUBBLICO') return aula;
     if (aula.visibilita === 'ATENEO') {
       const chiSono = await this.profilo.perUtente(utenteId);
-      if (aula.ateneo && chiSono.universita === aula.ateneo) return aula;
+      if (aula.ateneoId && chiSono.universita?.id === aula.ateneoId) return aula;
     }
     throw new AppException(AulaStudioErrorCode.NOT_FOUND, 'AULA_NOT_FOUND', HttpStatus.NOT_FOUND);
   }
@@ -1182,25 +1204,45 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     });
   }
 
+  /**
+   * I nomi degli atenei congelati in queste aule, in una domanda sola.
+   *
+   * L'ateneo dell'aula è un identificativo (AS7), ma a schermo è una
+   * pastiglia con un nome: la traduzione la chiede il catalogo, che sta in
+   * Profilo — il contesto che questo modulo già importa.
+   */
+  private nomiDegliAtenei(aule: { ateneoId: string | null }[]): Promise<Map<string, string>> {
+    return this.catalogo.nomiDiAtenei(aule.map((aula) => aula.ateneoId).filter(Boolean) as string[]);
+  }
+
+  /**
+   * L'aula per il client.
+   *
+   * `nomiAtenei` è **obbligatorio** e non ha un valore di ripiego: l'aula
+   * conserva l'identificativo dell'ateneo, e chi la mostra deve averne
+   * risolto il nome. Un parametro facoltativo qui produrrebbe elenchi con la
+   * pastiglia dell'ateneo vuota senza che nessun errore lo segnali.
+   */
   private aulaPerIlClient(
     aula: {
       id: string;
       titolo: string;
       visibilita: string;
-      ateneo: string | null;
+      ateneoId: string | null;
       dataOraInizio: Date | null;
       gruppoId: string | null;
       creatoIl: Date;
     },
     partecipanti: { utenteId: string; moderatore: boolean }[],
     lettoreId: string,
+    nomiAtenei: Map<string, string>,
   ): AulaStudioResponse {
     const io = partecipanti.find((p) => p.utenteId === lettoreId);
     return {
       id: aula.id,
       titolo: aula.titolo,
       visibilita: aula.visibilita as AulaStudioResponse['visibilita'],
-      ateneo: aula.ateneo,
+      ateneo: aula.ateneoId ? (nomiAtenei.get(aula.ateneoId) ?? null) : null,
       // Assente = estemporanea. Nessuno stato dietro: lo deriva il client.
       dataOraInizio: aula.dataOraInizio?.toISOString() ?? null,
       gruppoId: aula.gruppoId,
@@ -1235,7 +1277,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
 
   private messaggioPerIlClient(
     messaggio: { id: string; testo: string; inviatoIl: Date; autoreId: string },
-    autore: { nome: string | null; cognome: string | null; universita: string | null } | undefined,
+    autore: ProfiloResponse | undefined,
     lettoreId: string,
   ): MessaggioDiChatResponse {
     return {
@@ -1246,7 +1288,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
         utenteId: messaggio.autoreId,
         nome: autore?.nome ?? null,
         cognome: autore?.cognome ?? null,
-        universita: autore?.universita ?? null,
+        universita: autore?.universita?.nome ?? null,
         ...(autore ? {} : { rimosso: true }),
       },
       mio: messaggio.autoreId === lettoreId,

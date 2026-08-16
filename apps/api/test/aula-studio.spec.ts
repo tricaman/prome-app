@@ -8,6 +8,10 @@ import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/cana
 import { ArchivioLocale } from '../src/infrastruttura/archivio-file/archivio-locale';
 import { RecapitoFattiService } from '../src/modules/aula-studio/recapito-fatti.service';
 import { PuliziaAulaStudioService } from '../src/modules/aula-studio/pulizia-aula-studio.service';
+import {
+  assicuraCatalogoDiProva,
+  type CatalogoDiProva,
+} from './catalogo';
 
 const GIORNO_MS = 24 * 60 * 60 * 1000;
 
@@ -36,6 +40,7 @@ const GIORNO_MS = 24 * 60 * 60 * 1000;
 describe('Aula studio (E3)', () => {
   let app: NestFastifyApplication;
   let prisma: PrismaService;
+  let catalogo: CatalogoDiProva;
   let email: CanaleEmailSviluppo;
   let archivio: ArchivioLocale;
   let recapito: RecapitoFattiService;
@@ -70,7 +75,7 @@ describe('Aula studio (E3)', () => {
     });
   }
 
-  async function utenteCompleto(universita = 'Università di Bologna'): Promise<Utente> {
+  async function utenteCompleto(corsoId?: string): Promise<Utente> {
     const indirizzo = nuovoIndirizzo();
     const verifica = await entra(indirizzo);
     const token = verifica.json().data.token as string;
@@ -80,8 +85,7 @@ describe('Aula studio (E3)', () => {
       payload: {
         nome: 'Marta',
         cognome: 'Rossi',
-        universita,
-        corso: 'Ingegneria informatica',
+        corsoId: corsoId ?? catalogo.corsoInformatica,
       },
     });
     return { token, utenteId: profilo.json().data.utenteId as string, indirizzo };
@@ -170,6 +174,8 @@ describe('Aula studio (E3)', () => {
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
     prisma = app.get(PrismaService);
+    // Il catalogo è chiuso: senza, nessun onboarding arriva in fondo.
+    catalogo = await assicuraCatalogoDiProva(prisma);
     email = app.get(CanaleEmailSviluppo);
     archivio = app.get(ArchivioLocale);
     recapito = app.get(RecapitoFattiService);
@@ -240,29 +246,26 @@ describe('Aula studio (E3)', () => {
     });
 
     it('congela l\'ateneo alla creazione quando la visibilità è di ateneo (AS7)', async () => {
-      const creatore = await utenteCompleto('Università di Padova');
+      const creatore = await utenteCompleto();
       const aula = await creaAula(creatore.token, { visibilita: 'ATENEO' });
 
       const riga = await prisma.aulaStudio.findUnique({ where: { id: aula.id } });
-      expect(riga!.ateneo).toBe('Università di Padova');
+      // Si congela l'**identificativo** dell'ateneo: un nome copiato non
+      // corrisponderebbe più al giorno in cui l'ateneo cambia denominazione.
+      expect(riga!.ateneoId).toBe(catalogo.ateneoId);
 
       // Il creatore cambia ateneo: lo spazio non cambia pubblico.
       await chiedi('/profilo/me', {
         method: 'PUT',
         headers: comeUtente(creatore.token),
-        payload: {
-          nome: 'Marta',
-          cognome: 'Rossi',
-          universita: 'Università di Torino',
-          corso: 'Ingegneria informatica',
-        },
+        payload: { nome: 'Marta', cognome: 'Rossi', corsoId: catalogo.corsoDiPassaggio },
       });
       const dopo = await prisma.aulaStudio.findUnique({ where: { id: aula.id } });
-      expect(dopo!.ateneo).toBe('Università di Padova');
+      expect(dopo!.ateneoId).toBe(catalogo.ateneoId);
     });
 
     it('lo congela anche per un\'aula privata, così potrà essere aperta dopo', async () => {
-      const creatore = await utenteCompleto('Università di Padova');
+      const creatore = await utenteCompleto();
       const aula = await creaAula(creatore.token);
 
       // Il valore si prende alla creazione, che è ciò che dice AS7. Salvarlo
@@ -270,16 +273,17 @@ describe('Aula studio (E3)', () => {
       // in seguito: la regola confronta questo campo con l'università di chi
       // legge, e un campo vuoto non corrisponde a nessuno.
       const riga = await prisma.aulaStudio.findUnique({ where: { id: aula.id } });
-      expect(riga!.ateneo).toBe('Università di Padova');
+      expect(riga!.ateneoId).toBe(catalogo.ateneoId);
       // Finché è privata non produce alcun effetto: si consulta solo quando la
       // visibilità è ATENEO.
       expect(riga!.visibilita).toBe('PRIVATO');
     });
 
     it('un\'aula privata aperta all\'ateneo diventa visibile ai compagni, subito', async () => {
-      const creatore = await utenteCompleto('Università di Padova');
+      const creatore = await utenteCompleto();
       const aula = await creaAula(creatore.token);
-      const compagno = await utenteCompleto('Università di Padova');
+      // Stesso ateneo, corso diverso: la regola guarda l'ateneo.
+      const compagno = await utenteCompleto(catalogo.corsoLettere);
 
       const prima = await sala(compagno.token, aula.id);
       expect(prima.statusCode).toBe(404);
@@ -341,7 +345,7 @@ describe('Aula studio (E3)', () => {
 
     it('un\'aula pubblica ammette qualunque iscritto, come partecipante in sola lettura', async () => {
       const creatore = await utenteCompleto();
-      const chiunque = await utenteCompleto('Università di Padova');
+      const chiunque = await utenteCompleto(catalogo.altroCorso);
       const aula = await creaAula(creatore.token, { visibilita: 'PUBBLICO' });
 
       const ingresso = await ammetti(aula.id, chiunque);
@@ -355,8 +359,8 @@ describe('Aula studio (E3)', () => {
     });
 
     it('un\'aula di ateneo ammette solo chi dichiara lo stesso ateneo, su dato fresco (AS7)', async () => {
-      const creatore = await utenteCompleto('Università di Bologna');
-      const altroAteneo = await utenteCompleto('Università di Padova');
+      const creatore = await utenteCompleto();
+      const altroAteneo = await utenteCompleto(catalogo.altroCorso);
       const aula = await creaAula(creatore.token, { visibilita: 'ATENEO' });
 
       expect((await ammetti(aula.id, altroAteneo)).statusCode).toBe(403);
@@ -365,12 +369,7 @@ describe('Aula studio (E3)', () => {
       await chiedi('/profilo/me', {
         method: 'PUT',
         headers: comeUtente(altroAteneo.token),
-        payload: {
-          nome: 'Marta',
-          cognome: 'Rossi',
-          universita: 'Università di Bologna',
-          corso: 'Ingegneria informatica',
-        },
+        payload: { nome: 'Marta', cognome: 'Rossi', corsoId: catalogo.corsoInformatica },
       });
       expect((await ammetti(aula.id, altroAteneo)).statusCode).toBe(200);
     });
@@ -811,12 +810,7 @@ describe('Aula studio (E3)', () => {
       await chiedi('/profilo/me', {
         method: 'PUT',
         headers: comeUtente(incompleto.token),
-        payload: {
-          nome: 'Luca',
-          cognome: 'Bianchi',
-          universita: 'Università di Bologna',
-          corso: 'Matematica',
-        },
+        payload: { nome: 'Luca', cognome: 'Bianchi', corsoId: catalogo.corsoInformatica },
       });
       const adesso = await chiedi(`/inviti/${invitoId}/accettazione`, {
         method: 'POST',

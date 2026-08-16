@@ -8,7 +8,6 @@ import { Container, SiteShell } from '@/components/layout';
 import { RichiamoMenta } from '@/components/contenuti';
 import { AnteprimaAula } from '@/components/marketing/anteprima-aula';
 import { ButtonLink, Card, Chip, Heading } from '@/components/ui';
-import { cn } from '@/lib/utils';
 import { Link } from '@/i18n/navigazione';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -72,30 +71,16 @@ export default async function PaginaHome({ params }: { params: Promise<{ locale:
                 {t('ctaSecondaria')}
               </ButtonLink>
             </div>
-            <div className="mt-7 flex items-center gap-3.5">
-              {/* Cerchi colorati, non persone: rappresentano una quantità di
-                  studenti, e chiamarli con dei nomi lascerebbe credere che
-                  siano profili veri mostrati sul sito. */}
-              <span aria-hidden className="flex">
-                {['bg-riempimento-1', 'bg-riempimento-2', 'bg-riempimento-3', 'bg-riempimento-4'].map(
-                  (tinta, indice) => (
-                    <span
-                      key={tinta}
-                      className={cn(
-                        'size-8 rounded-full ring-[2.5px] ring-superficie',
-                        tinta,
-                        indice > 0 && '-ml-[11px]',
-                      )}
-                    />
-                  ),
-                )}
-              </span>
-              <p className="text-[13px] font-semibold text-testo-tenue">
-                {t.rich('prova', {
-                  forte: (parti) => <strong className="text-testo-corpo">{parti}</strong>,
-                })}
-              </p>
-            </div>
+            {/* Qui c'erano quattro cerchi colorati e «oltre 28.000 studenti
+                ogni settimana». I cerchi stavano al posto di persone che non
+                ci sono ancora, e il numero era l'unica riga del sito che
+                chiunque poteva smentire aprendo l'app. Al loro posto una cosa
+                vera, che resta vera anche quando gli studenti saranno molti. */}
+            <p className="mt-7 text-[13px] font-semibold text-testo-tenue">
+              {t.rich('prova', {
+                forte: (parti) => <strong className="text-testo-corpo">{parti}</strong>,
+              })}
+            </p>
           </div>
           <AnteprimaAula />
         </Container>
@@ -103,12 +88,19 @@ export default async function PaginaHome({ params }: { params: Promise<{ locale:
 
       <section className="bg-superficie py-14">
         <Container>
-          <div className="flex flex-wrap items-center justify-center gap-10 pb-11 opacity-50">
+          {/* Una fila di nomi di atenei sotto l'eroe si legge come «questi
+              usano il prodotto». Sono invece le pagine che abbiamo scritto noi
+              per ciascun ateneo, e l'etichetta lo dice: senza, il collegamento
+              è onesto e l'impressione no. */}
+          <p className="mb-6 text-center text-[11px] font-extrabold uppercase tracking-[0.08em] text-testo-debole">
+            {t('atenei')}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-10 pb-11 opacity-70">
             {atenei.map((ateneo) => (
               <Link
                 key={ateneo.slug}
                 href={percorsi.ateneo(ateneo.slug)}
-                className="font-display text-[15px] font-extrabold tracking-tight text-testo-tenue"
+                className="font-display text-[15px] font-extrabold tracking-tight text-testo-tenue hover:text-primario-collegamento"
               >
                 {ateneo.nomeBreve}
               </Link>

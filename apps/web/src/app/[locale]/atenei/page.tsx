@@ -37,7 +37,6 @@ export default async function PaginaAtenei({ params }: { params: Promise<{ local
   return (
     <SiteShell>
       <StructuredData
-        lingua={lingua}
         oggetti={[
           briciole(lingua, voci),
           raccolta(

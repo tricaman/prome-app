@@ -1,21 +1,34 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
-import { ATENEI } from '@prome/contenuti';
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
-import { completaMioProfilo, type CompletaProfiloDto } from '@prome/api-client';
+import {
+  completaMioProfilo,
+  useElencaCorsiDiUniversita,
+  useElencaUniversita,
+  type CompletaProfiloDto,
+} from '@prome/api-client';
 import { useApiMutation, useT } from '@/hooks';
-import { Button, Card, Icona, Input, Intestazione, Screen, Text } from '@/components/ui';
+import { Button, Icona, Input, Intestazione, Screen, Text } from '@/components/ui';
+import { ElencoCatalogo } from '@/components/app/elenco-catalogo';
 
 const PASSI_TOTALI = 3;
+
+/** Quante voci mostrare: oltre, l'elenco riempie lo schermo del telefono. */
+const VOCI_VISIBILI = 6;
 
 /**
  * Onboarding del profilo, in tre passi.
  *
- * Una domanda per schermata: il passo dell'ateneo ha bisogno di spazio
- * verticale per i risultati della ricerca, e stiparlo insieme a nome e corso
- * lo renderebbe scomodo proprio dove serve precisione.
+ * Una domanda per schermata: i passi dell'ateneo e del corso hanno bisogno di
+ * spazio verticale per i risultati della ricerca, e stiparli insieme al nome
+ * li renderebbe scomodi proprio dove serve precisione.
+ *
+ * Ateneo e corso sono due passi ma **un dato solo**: al server arriva il
+ * corso, che si porta dietro il proprio ateneo. Il catalogo è chiuso — si
+ * sceglie da un elenco, non si scrive — e il passo del corso non esiste finché
+ * non c'è un ateneo, perché i corsi sono di un ateneo.
  *
  * La barra di avanzamento è continua e non una lista di spunte: comunica
  * progresso senza far sentire l'utente sotto esame.
@@ -26,22 +39,24 @@ export default function SchermataProfilo() {
   const [passo, setPasso] = useState(1);
   const [nome, setNome] = useState('');
   const [cognome, setCognome] = useState('');
-  const [ricerca, setRicerca] = useState('');
+  const [ricercaAteneo, setRicercaAteneo] = useState('');
   const [ateneo, setAteneo] = useState<string | null>(null);
-  const [corso, setCorso] = useState('');
+  const [ricercaCorso, setRicercaCorso] = useState('');
+  const [corso, setCorso] = useState<string | null>(null);
 
-  const risultati = useMemo(() => {
-    const termine = ricerca.trim().toLowerCase();
-    const trovati = termine
-      ? ATENEI.filter((voce) => voce.nome.toLowerCase().includes(termine))
-      : ATENEI;
-    return trovati.slice(0, 4);
-  }, [ricerca]);
+  const atenei = useElencaUniversita({
+    ricerca: ricercaAteneo.trim() || undefined,
+    limit: VOCI_VISIBILI,
+  });
+  const corsi = useElencaCorsiDiUniversita(
+    ateneo ?? '',
+    { ricerca: ricercaCorso.trim() || undefined, limit: VOCI_VISIBILI },
+    // Senza ateneo la domanda non ha senso: non si chiede.
+    { query: { enabled: Boolean(ateneo) } },
+  );
 
   const puoProseguire =
-    (passo === 1 && nome.trim() && cognome.trim()) ||
-    (passo === 2 && ateneo) ||
-    (passo === 3 && corso.trim());
+    (passo === 1 && nome.trim() && cognome.trim()) || (passo === 2 && ateneo) || (passo === 3 && corso);
 
   /**
    * I passi sono tre, la scrittura è una.
@@ -60,12 +75,7 @@ export default function SchermataProfilo() {
       setPasso((corrente) => corrente + 1);
       return;
     }
-    completa.mutate({
-      nome: nome.trim(),
-      cognome: cognome.trim(),
-      universita: ateneo ?? '',
-      corso: corso.trim(),
-    });
+    completa.mutate({ nome: nome.trim(), cognome: cognome.trim(), corsoId: corso ?? '' });
   };
 
   const indietro = () => {
@@ -145,60 +155,26 @@ export default function SchermataProfilo() {
               {t('app.onboarding.titolo')}
             </Text>
             <Text variante="corpoTenue">{t('app.onboarding.sommario')}</Text>
-            <Input
-              value={ricerca}
-              onChangeText={setRicerca}
-              placeholder={t('app.onboarding.cercaUniversita')}
+            <ElencoCatalogo
+              segnaposto={t('app.onboarding.cercaUniversita')}
+              vuoto={t('app.onboarding.nessunRisultato')}
+              voci={(atenei.data?.data ?? []).map((voce) => ({
+                id: voce.id,
+                titolo: voce.nome,
+                dettaglio: voce.citta,
+              }))}
+              sceltaId={ateneo}
+              ricerca={ricercaAteneo}
+              onRicerca={setRicercaAteneo}
+              onScelta={(voce) => {
+                setAteneo(voce.id);
+                // Cambiare ateneo invalida il corso: quel corso è di un altro
+                // ateneo, e tenerlo manderebbe un dato incoerente.
+                setCorso(null);
+                setRicercaCorso('');
+              }}
               autoFocus
             />
-            <Card style={{ padding: 0, overflow: 'hidden' }}>
-              {risultati.length === 0 ? (
-                <View style={{ padding: tema.spaziatura[4] }}>
-                  <Text variante="corpoTenue">{t('app.onboarding.nessunRisultato')}</Text>
-                </View>
-              ) : (
-                risultati.map((voce, indice) => {
-                  const scelto = voce.nome === ateneo;
-                  return (
-                    <Pressable
-                      key={voce.slug}
-                      accessibilityRole="radio"
-                      accessibilityState={{ selected: scelto }}
-                      onPress={() => setAteneo(voce.nome)}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: tema.spaziatura[3],
-                        padding: tema.spaziatura[4],
-                        backgroundColor: scelto ? tema.colori.primarioTenue : 'transparent',
-                        borderBottomWidth: indice < risultati.length - 1 ? 1 : 0,
-                        borderBottomColor: tema.colori.superficieAlt2,
-                      }}
-                    >
-                      <View
-                        style={{
-                          width: 34,
-                          height: 34,
-                          borderRadius: tema.raggio.md,
-                          backgroundColor: tema.colori.primarioTenue,
-                        }}
-                      />
-                      <View style={{ flex: 1, minWidth: 0 }}>
-                        <Text variante="etichetta" numberOfLines={1}>
-                          {voce.nome}
-                        </Text>
-                        <Text variante="didascalia">{voce.citta}</Text>
-                      </View>
-                      {scelto ? (
-                        <Text colore="primario" style={{ fontWeight: '800' }}>
-                          ✓
-                        </Text>
-                      ) : null}
-                    </Pressable>
-                  );
-                })
-              )}
-            </Card>
             <Text variante="didascalia">{t('app.onboarding.nonTrovi')}</Text>
           </>
         ) : null}
@@ -209,13 +185,26 @@ export default function SchermataProfilo() {
               {t('app.onboarding.titolo')}
             </Text>
             <Text variante="corpoTenue">{t('app.onboarding.sommario')}</Text>
-            <Input
-              etichetta="Corso di studi"
-              value={corso}
-              onChangeText={setCorso}
-              placeholder="Ingegneria informatica"
-              obbligatorio
+            <ElencoCatalogo
+              etichetta={t('app.onboarding.corso')}
+              segnaposto={t('app.onboarding.cercaCorso')}
+              vuoto={t('app.onboarding.nessunCorsoTrovato')}
+              voci={(corsi.data?.data ?? []).map((voce) => ({
+                id: voce.id,
+                titolo: voce.nome,
+                // Classe e durata distinguono due corsi omonimi dello stesso
+                // ateneo: senza, la scelta sarebbe a indovinare.
+                dettaglio: `${voce.classe.codice} · ${t('app.onboarding.durataAnni', {
+                  numero: String(voce.durataAnni),
+                })}`,
+              }))}
+              sceltaId={corso}
+              ricerca={ricercaCorso}
+              onRicerca={setRicercaCorso}
+              onScelta={(voce) => setCorso(voce.id)}
+              autoFocus
             />
+            <Text variante="didascalia">{t('app.onboarding.catalogoChiuso')}</Text>
           </>
         ) : null}
       </Screen>

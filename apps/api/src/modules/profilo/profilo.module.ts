@@ -1,11 +1,17 @@
 import { Module } from '@nestjs/common';
 import { AccessoModule } from '../../infrastruttura/accesso/accesso.module';
+import { CatalogoService } from './catalogo/catalogo.service';
 import { PortaIdentitaUtente } from './porta-identita-utente';
 import { ProfiloService } from './profilo.service';
 
 /**
  * Bounded context PROFILO — identità accademica dell'utente
- * (dati anagrafici, università, corso, stato dell'onboarding).
+ * (dati anagrafici, corso di studi con il suo ateneo, stato dell'onboarding).
+ *
+ * Possiede anche il **catalogo accademico** (`CatalogoService`): Università e
+ * Corso universitario sono dati del Profilo secondo il glossario, e tenerli
+ * qui è ciò che permette le foreign key — un contesto a parte le perderebbe,
+ * perché fra contesti non si attraversano gli schemi.
  *
  * Posizione nella Context Map: contesto UPSTREAM condiviso.
  * - PUÒ essere importato da Bacheca, Gruppo e AulaStudio;
@@ -17,7 +23,7 @@ import { ProfiloService } from './profilo.service';
  */
 @Module({
   imports: [AccessoModule],
-  providers: [ProfiloService, PortaIdentitaUtente],
-  exports: [ProfiloService, PortaIdentitaUtente],
+  providers: [ProfiloService, CatalogoService, PortaIdentitaUtente],
+  exports: [ProfiloService, CatalogoService, PortaIdentitaUtente],
 })
 export class ProfiloModule {}

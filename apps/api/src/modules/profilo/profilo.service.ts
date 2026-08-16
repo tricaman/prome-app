@@ -9,7 +9,19 @@ import type {
 import { PrismaService } from '../../database/prisma.service';
 import { AppException } from '../../common/exceptions';
 import { ProfiloErrorCode } from './constants/error-codes';
+import { perIlClientCorso, perIlClientUniversita } from './catalogo/catalogo.service';
 import { emettiProvaOnboarding, type ProvaOnboardingCompletato } from './prova-onboarding';
+
+/**
+ * Il profilo non si legge mai senza il proprio corso: da lì discendono
+ * l'ateneo e quindi tutte le decisioni di visibilità. Una lettura che lo
+ * dimenticasse restituirebbe una persona senza università, cioè una persona
+ * che non vede più niente del proprio ateneo — in silenzio.
+ */
+const CON_CORSO = {
+  impostazioniPrivacy: true,
+  corso: { include: { universita: true, classe: true } },
+} as const;
 
 /**
  * Bounded context PROFILO — l'identità accademica dell'utente.
@@ -53,7 +65,7 @@ export class ProfiloService {
         // sembra morto.
         preferenzeNotifiche: { create: {} },
       },
-      include: { impostazioniPrivacy: true },
+      include: CON_CORSO,
     });
 
     return this.perIlClient(profilo);
@@ -63,7 +75,7 @@ export class ProfiloService {
   async perUtente(utenteId: string): Promise<ProfiloResponse> {
     const profilo = await this.prisma.profilo.findUnique({
       where: { utenteId },
-      include: { impostazioniPrivacy: true },
+      include: CON_CORSO,
     });
 
     if (!profilo) {
@@ -81,13 +93,18 @@ export class ProfiloService {
   /**
    * Completamento dell'onboarding.
    *
-   * I quattro dati arrivano insieme perché insieme definiscono la condizione:
-   * l'onboarding è completo **se e solo se** nome, cognome, università e corso
-   * sono valorizzati. Non esiste un completamento parziale, quindi non esiste
-   * un endpoint che ne aggiorni uno solo.
+   * I dati arrivano insieme perché insieme definiscono la condizione:
+   * l'onboarding è completo **se e solo se** nome, cognome e corso sono
+   * valorizzati. Non esiste un completamento parziale, quindi non esiste un
+   * endpoint che ne aggiorni uno solo.
    *
-   * L'università è **autodichiarata**: non la verifichiamo contro alcun
-   * elenco, e scriverla sbagliata non è un errore del sistema.
+   * L'università non si manda e non si scrive: il corso appartiene già a un
+   * ateneo. Mandarli entrambi vorrebbe dire dover respingere la coppia
+   * incoerente — un errore che così non può esistere.
+   *
+   * Il catalogo è **chiuso**: un corso che non c'è non si sceglie, e il
+   * rifiuto distingue i due casi perché a chi lo riceve dicono cose diverse —
+   * «quel corso non esiste» e «quel corso non si offre più».
    */
   async completaOnboarding(
     utenteId: string,
@@ -97,16 +114,38 @@ export class ProfiloService {
     // manca davvero, e crearlo di nascosto nasconderebbe il difetto.
     await this.perUtente(utenteId);
 
+    const corso = await this.prisma.corso.findUnique({
+      where: { id: dati.corsoId },
+      select: { id: true, attivo: true },
+    });
+    if (!corso) {
+      throw new AppException(
+        ProfiloErrorCode.CORSO_NON_TROVATO,
+        'CORSO_NON_TROVATO',
+        HttpStatus.NOT_FOUND,
+        { corsoId: dati.corsoId },
+      );
+    }
+    // Un corso ritirato non si sceglie più, ma chi l'aveva già scelto se lo
+    // tiene: la verifica è qui, alla scelta, non sulla lettura del profilo.
+    if (!corso.attivo) {
+      throw new AppException(
+        ProfiloErrorCode.CORSO_NON_ATTIVO,
+        'CORSO_NON_ATTIVO',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        { corsoId: dati.corsoId },
+      );
+    }
+
     const profilo = await this.prisma.profilo.update({
       where: { utenteId },
       data: {
         nome: dati.nome.trim(),
         cognome: dati.cognome.trim(),
-        universita: dati.universita.trim(),
-        corso: dati.corso.trim(),
+        corsoId: corso.id,
         onboardingCompletato: true,
       },
-      include: { impostazioniPrivacy: true },
+      include: CON_CORSO,
     });
 
     return this.perIlClient(profilo);
@@ -154,7 +193,7 @@ export class ProfiloService {
           },
         },
       },
-      include: { impostazioniPrivacy: true },
+      include: CON_CORSO,
     });
 
     return this.perIlClient(profilo);
@@ -199,8 +238,11 @@ export class ProfiloService {
       { impostazioniPrivacy: { visibilita: 'PUBBLICO' } },
     ];
     if (lettore.universita) {
+      // L'ateneo si attraversa dal corso, che è l'unico riferimento del
+      // profilo: il confronto è fra identificativi, non fra nomi scritti a
+      // mano in momenti diversi — che è ciò che prima falliva in silenzio.
       condizioni.push({
-        universita: lettore.universita,
+        corso: { universitaId: lettore.universita.id },
         impostazioniPrivacy: { visibilita: 'ATENEO' },
       });
     }
@@ -238,7 +280,7 @@ export class ProfiloService {
       // payload durante la grazia — era già pubblico prima, e se la grazia
       // finisce lo stacca l'anonimizzazione.
       where: { utenteId: { in: utenteIds }, inCancellazioneDal: null },
-      include: { impostazioniPrivacy: true },
+      include: CON_CORSO,
     });
 
     return new Map(profili.map((p) => [p.utenteId, this.perIlClient(p)]));
@@ -399,6 +441,10 @@ export class ProfiloService {
    * «totale» senza esserlo, ed è il difetto peggiore possibile qui.
    */
   async contaResiduiDi(utenteId: string): Promise<number> {
+    // Il catalogo accademico NON si conta e non si tocca: nessuna delle sue
+    // righe porta un utenteId — è l'elenco degli atenei d'Italia, non un dato
+    // di questa persona. Cancellare un corso perché l'ultimo iscritto se ne va
+    // sarebbe la stessa cosa che chiudere l'università.
     const [profili, impostazioni, preferenze, dispositivi] = await Promise.all([
       this.prisma.profilo.count({ where: { utenteId } }),
       this.prisma.impostazioniDiPrivacy.count({ where: { utenteId } }),
@@ -421,7 +467,7 @@ export class ProfiloService {
     nome: string | null;
     cognome: string | null;
     universita: string | null;
-    corso: string | null;
+    corso: { nome: string; codiceCorso: string; classe: string; durataAnni: number } | null;
     onboardingCompletato: boolean;
     impostazioniPrivacy: { contattabilita: string; visibilita: string };
     preferenzeDiNotifica: { commenti: boolean; inviti: boolean };
@@ -431,7 +477,7 @@ export class ProfiloService {
     const profilo = await this.prisma.profilo.findUnique({
       where: { utenteId },
       include: {
-        impostazioniPrivacy: true,
+        ...CON_CORSO,
         preferenzeNotifiche: true,
         dispositivi: true,
         blocchiFatti: true,
@@ -443,8 +489,18 @@ export class ProfiloService {
     return {
       nome: perIlClient.nome,
       cognome: perIlClient.cognome,
-      universita: perIlClient.universita,
-      corso: perIlClient.corso,
+      // Il corso per esteso, mai il suo identificativo: una copia dei propri
+      // dati deve restare leggibile da sola, mesi dopo, senza il catalogo
+      // accanto per tradurre un uuid.
+      universita: perIlClient.universita?.nome ?? null,
+      corso: perIlClient.corso
+        ? {
+            nome: perIlClient.corso.nome,
+            codiceCorso: perIlClient.corso.codice,
+            classe: `${perIlClient.corso.classe.codice} — ${perIlClient.corso.classe.nome}`,
+            durataAnni: perIlClient.corso.durataAnni,
+          }
+        : null,
       onboardingCompletato: perIlClient.onboardingCompletato,
       impostazioniPrivacy: perIlClient.impostazioniPrivacy,
       preferenzeDiNotifica: {
@@ -569,8 +625,14 @@ export class ProfiloService {
     utenteId: string;
     nome: string | null;
     cognome: string | null;
-    universita: string | null;
-    corso: string | null;
+    corso: {
+      id: string;
+      codice: string;
+      nome: string;
+      durataAnni: number;
+      classe: { codice: string; nome: string; livello: string };
+      universita: { id: string; slug: string; nome: string; nomeBreve: string; citta: string };
+    } | null;
     onboardingCompletato: boolean;
     impostazioniPrivacy: { contattabilita: string; visibilita: string } | null;
   }): ProfiloResponse {
@@ -578,8 +640,11 @@ export class ProfiloService {
       utenteId: profilo.utenteId,
       nome: profilo.nome,
       cognome: profilo.cognome,
-      universita: profilo.universita,
-      corso: profilo.corso,
+      // L'università esce dal corso e non da un campo suo: non esiste un
+      // profilo con ateneo e senza corso, e due colonne per la stessa cosa
+      // prima o poi divergono.
+      universita: profilo.corso ? perIlClientUniversita(profilo.corso.universita) : null,
+      corso: profilo.corso ? perIlClientCorso(profilo.corso) : null,
       onboardingCompletato: profilo.onboardingCompletato,
       impostazioniPrivacy: {
         contattabilita: (profilo.impostazioniPrivacy?.contattabilita ??

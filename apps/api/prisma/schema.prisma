@@ -118,8 +118,14 @@ model Profilo {
   utenteId             String   @id
   nome                 String?
   cognome              String?
-  universita           String?
-  corso                String?
+
+  /// Il Corso universitario, scelto dal catalogo: **l'unico riferimento
+  /// accademico del profilo**. L'Università non ha una colonna propria — il
+  /// corso appartiene già a un ateneo, e una seconda colonna sarebbe una
+  /// seconda risposta alla stessa domanda, destinata a divergere. Chi filtra
+  /// per ateneo attraversa la relazione (`corso: { universitaId }`).
+  corsoId              String?
+
   onboardingCompletato Boolean  @default(false)
   creatoIl             DateTime @default(now())
   aggiornatoIl         DateTime @default(now()) @updatedAt
@@ -131,13 +137,111 @@ model Profilo {
   /// cancellazione attraverso ProfiloService.
   inCancellazioneDal DateTime?
 
+  /// `Restrict` e non il `SetNull` di prestito: un corso con iscritti non si
+  /// elimina per sbaglio, e soprattutto la sua eliminazione non deve poter
+  /// lasciare in giro profili «con onboarding completato» e senza corso —
+  /// sarebbero persone che smettono di vedere l'ateneo senza sapere perché.
+  corso               Corso?                  @relation(fields: [corsoId], references: [id], onDelete: Restrict)
   impostazioniPrivacy ImpostazioniDiPrivacy?
   preferenzeNotifiche PreferenzeDiNotifica?
   dispositivi         DispositivoDiNotifica[]
   blocchiFatti        Blocco[]                @relation("bloccante")
   blocchiSubiti       Blocco[]                @relation("bloccato")
 
+  @@index([corsoId])
   @@map("profilo")
+  @@schema("profilo")
+}
+
+// --- Catalogo accademico ---------------------------------------------------
+//
+// Università, Classe di corso e Corso sono **dati del Profilo** (glossario del
+// domain model), quindi vivono nel suo schema e li possiede il suo modulo: un
+// contesto a parte sarebbe una modifica della Context Map, e in cambio
+// perderebbe le foreign key — che qui servono, perché un profilo non deve
+// poter puntare a un corso che non esiste.
+//
+// Il catalogo è **chiuso**: si sceglie da un elenco, non si scrive. Le sue
+// righe NON sono dati personali — nessuna porta un utenteId, la cancellazione
+// dell'account non le tocca e la verifica del residuo non le conta.
+
+/// Un ateneo.
+///
+/// Lo `slug` è lo stesso delle pagine pubbliche (`@prome/contenuti`): il
+/// giorno in cui l'hub di ateneo leggerà dall'API non servirà una mappatura
+/// scritta a mano fra due elenchi che nel frattempo sono divergiti.
+model Universita {
+  id           String   @id @default(uuid())
+  slug         String   @unique
+  nome         String   @unique
+  nomeBreve    String
+  citta        String
+  creatoIl     DateTime @default(now())
+  aggiornatoIl DateTime @default(now()) @updatedAt
+
+  corsi Corso[]
+
+  @@map("universita")
+  @@schema("profilo")
+}
+
+/// La classe ministeriale di un corso: elenco chiuso, condiviso fra atenei.
+///
+/// Sta in tabella propria perché «tutti gli iscritti alla classe L-18, in ogni
+/// ateneo» è una delle domande per cui questo catalogo esiste: con due colonne
+/// sul corso sarebbe un raggruppamento su testo ripetuto ateneo per ateneo, e
+/// basta una maiuscola diversa perché la stessa classe si conti due volte.
+model ClasseDiCorso {
+  /// 'L-18', 'L-18 R', 'LM-77'. È il codice ministeriale: identifica la classe
+  /// nel mondo, non solo qui dentro, e per questo è la chiave.
+  codice  String         @id
+  nome    String
+  livello LivelloDiCorso
+
+  corsi Corso[]
+
+  @@map("classe_di_corso")
+  @@schema("profilo")
+}
+
+/// Il livello del titolo, derivato dalla classe e non dal singolo corso: tutti
+/// i corsi di una classe rilasciano lo stesso titolo.
+enum LivelloDiCorso {
+  TRIENNALE
+  MAGISTRALE
+  CICLO_UNICO
+
+  @@map("livello_di_corso")
+  @@schema("profilo")
+}
+
+/// Un corso di studi di un ateneo.
+model Corso {
+  id           String @id @default(uuid())
+  universitaId String
+  /// Codice assegnato dall'ateneo (es. 6612): unico **dentro l'ateneo**, non
+  /// nel mondo — due atenei possono usare lo stesso numero.
+  codice       String
+  nome         String
+  classeCodice String
+  durataAnni   Int
+
+  /// Un corso disattivato non si può più scegliere, ma i profili che lo citano
+  /// restano validi: si governa il presente, non si riscrive il passato. È il
+  /// motivo per cui la semina non cancella mai una riga.
+  attivo Boolean @default(true)
+
+  creatoIl     DateTime @default(now())
+  aggiornatoIl DateTime @default(now()) @updatedAt
+
+  universita Universita    @relation(fields: [universitaId], references: [id])
+  classe     ClasseDiCorso @relation(fields: [classeCodice], references: [codice])
+  profili    Profilo[]
+
+  @@unique([universitaId, codice])
+  @@index([universitaId, nome])
+  @@index([classeCodice])
+  @@map("corso")
   @@schema("profilo")
 }
 
@@ -439,7 +543,13 @@ model Gruppo {
   /// creazione e poi CONGELATO (G5): un gruppo non cambia pubblico perché chi
   /// l'ha creato ha cambiato ateneo. L'università di chi chiede di entrare si
   /// legge invece sempre fresca dal Profilo.
-  ateneo String?
+  ///
+  /// È l'**identificativo** dell'ateneo, non il suo nome: la regola confronta
+  /// questo campo con l'università di chi legge, e due stringhe scritte in due
+  /// momenti diversi non corrispondono mai in modo affidabile. Identificativo
+  /// nudo, senza foreign key — qui si attraversa un confine di contesto, come
+  /// per `utenteId`.
+  ateneoId String?
 
   /// Chi ha creato il gruppo. Fatto storico: resta vero anche se quella
   /// persona esce, e non concede nulla di per sé — chi amministra è chi è
@@ -599,7 +709,12 @@ model AulaStudio {
   /// creazione e poi CONGELATO (AS7): lo spazio non cambia pubblico perché il
   /// suo creatore ha cambiato ateneo. L'università di chi chiede di entrare si
   /// legge invece sempre fresca dal Profilo.
-  ateneo String?
+  ///
+  /// È l'**identificativo** dell'ateneo, non il suo nome, per la stessa
+  /// ragione del gruppo: la regola lo confronta, e un confronto fra stringhe
+  /// scritte in momenti diversi fallisce in silenzio. Identificativo nudo,
+  /// senza foreign key: fra contesti non si attraversano gli schemi.
+  ateneoId String?
 
   /// Opzionale; se presente, alla creazione deve essere futura (AS8).
   dataOraInizio DateTime?

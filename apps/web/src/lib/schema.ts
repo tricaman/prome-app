@@ -15,6 +15,37 @@ import { urlAssoluto } from './seo';
 export type OggettoSchema = Record<string, unknown>;
 
 const idOrganizzazione = `${config.urlSito}#organizzazione`;
+const idPersona = `${config.urlSito}#persona`;
+
+/**
+ * Chi ha fatto Prome.
+ *
+ * Un motore di ricerca ragiona per entità collegate, non per pagine sciolte:
+ * finché il sito dichiara solo un'organizzazione, «Prome» resta un nome di
+ * dominio. Dichiarare anche la persona, e legarla come fondatore e autore,
+ * è ciò che permette ai due nomi di sostenersi a vicenda — ed è vero, che è
+ * la sola ragione per cui si può scrivere.
+ *
+ * Il riferimento vive nel grafo di **ogni** pagina pubblica, con un `@id`
+ * stabile, perché è la ripetizione dello stesso identificativo a far capire
+ * che si parla sempre della stessa persona.
+ *
+ * Non è una `ProfilePage` e non lo diventerà: quelle descrivono profili di
+ * utenti, che qui non hanno pagine pubbliche. Questa è la firma dell'editore.
+ */
+export const persona = (lingua: Lingua): OggettoSchema => ({
+  '@type': 'Person',
+  '@id': idPersona,
+  name: config.autore.nome,
+  jobTitle: config.autore.ruolo,
+  url: urlAssoluto(lingua, '/chi-siamo'),
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: config.autore.citta,
+    addressCountry: config.autore.paese,
+  },
+  worksFor: { '@id': idOrganizzazione },
+});
 
 /**
  * Il marchio come lo vedono i motori di ricerca.
@@ -38,6 +69,14 @@ export const organizzazione = (descrizione: string): OggettoSchema => ({
     height: 512,
   },
   image: URL_LOGO,
+  // Prome non è una società: dietro c'è una persona, e il piè di pagina di
+  // ogni pagina lo dice a chi legge. Qui lo dice a chi indicizza.
+  founder: { '@id': idPersona },
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: config.autore.citta,
+    addressCountry: config.autore.paese,
+  },
 });
 
 export const sitoWeb = (lingua: Lingua, nome: string, descrizione: string): OggettoSchema => ({
@@ -48,6 +87,7 @@ export const sitoWeb = (lingua: Lingua, nome: string, descrizione: string): Ogge
   description: descrizione,
   inLanguage: lingua,
   publisher: { '@id': idOrganizzazione },
+  creator: { '@id': idPersona },
 });
 
 /** Percorso di navigazione: lo stesso mostrato in pagina dalle briciole. */
@@ -98,10 +138,29 @@ export const articolo = (lingua: Lingua, guida: Guida, percorso: string): Oggett
   headline: guida.titolo,
   description: guida.sommario,
   url: urlAssoluto(lingua, percorso),
+  mainEntityOfPage: { '@type': 'WebPage', '@id': urlAssoluto(lingua, percorso) },
   datePublished: guida.dataIso,
-  author: { '@type': 'Organization', name: guida.autore },
+  dateModified: guida.dataIso,
+  inLanguage: lingua,
+  // Una persona con un nome, non una «redazione»: per chi valuta un contenuto
+  // — e per chi lo legge — un articolo firmato e uno anonimo non valgono
+  // uguale. È lo stesso nome che compare in pagina sotto il titolo.
+  author: { '@id': idPersona },
   publisher: { '@id': idOrganizzazione },
   timeRequired: `PT${guida.minutiLettura}M`,
+});
+
+/**
+ * La pagina «Chi siamo», dichiarata per ciò che è: il posto dove la persona
+ * dietro Prome viene descritta. È il legame che rende il `Person` del grafo
+ * qualcosa di più di un nome — un'entità con una pagina che la spiega.
+ */
+export const paginaChiSiamo = (lingua: Lingua): OggettoSchema => ({
+  '@type': 'AboutPage',
+  url: urlAssoluto(lingua, '/chi-siamo'),
+  inLanguage: lingua,
+  isPartOf: { '@id': `${config.urlSito}#sito` },
+  mainEntity: { '@id': idPersona },
 });
 
 export const organizzazioneEducativa = (

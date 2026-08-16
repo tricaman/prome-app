@@ -22,6 +22,9 @@
     "overrides": {
       "react": "19.2.3",
       "react-dom": "19.2.3"
+    },
+    "patchedDependencies": {
+      "expo-modules-jsi@57.0.4": "patches/expo-modules-jsi@57.0.4.patch"
     }
   }
 }

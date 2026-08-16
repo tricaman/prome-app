@@ -1,4 +1,5 @@
 import { View } from 'react-native';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { COLORE_MARCHIO } from '@prome/design-tokens';
 import { useTema } from '@/theme';
@@ -20,6 +21,11 @@ export default function SchermataBenvenuto() {
   return (
     <Screen style={{ backgroundColor: tema.colori.primarioTenue }}>
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: tema.spaziatura[4] }}>
+        {/* Il marchio intero, lo stesso file dello splash: chi apre l'app vede
+            due volte di seguito lo stesso segno, non un disco e poi un logo.
+            La pastiglia menta sotto non è decorazione — l'ombra su Android
+            segue il contorno della vista, e su un PNG con gli angoli
+            trasparenti sarebbe un quadrato dietro a un cerchio. */}
         <View
           style={[
             {
@@ -31,7 +37,14 @@ export default function SchermataBenvenuto() {
             },
             tema.ombra.lg,
           ]}
-        />
+        >
+          <Image
+            source={require('../../assets/images/splash-icon.png')}
+            style={{ width: '100%', height: '100%' }}
+            contentFit="contain"
+            accessible={false}
+          />
+        </View>
 
         <Text style={{ ...tema.testo.titoloGrande, fontSize: 52, letterSpacing: -1.6 }}>
           prome
@@ -59,9 +72,6 @@ export default function SchermataBenvenuto() {
           larghezzaPiena
           onPress={() => router.push(rotte.accedi())}
         />
-        <Text variante="didascalia" allineamento="center">
-          {t('app.accesso.primoAccesso')}
-        </Text>
       </View>
     </Screen>
   );

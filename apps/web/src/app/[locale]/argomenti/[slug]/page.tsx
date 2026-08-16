@@ -73,7 +73,7 @@ export default async function PaginaArgomento({ params }: { params: Promise<Para
 
   return (
     <SiteShell>
-      <StructuredData lingua={lingua} oggetti={[briciole(lingua, voci)]} />
+      <StructuredData oggetti={[briciole(lingua, voci)]} />
 
       <TestataPagina briciole={voci} titolo={argomento.nome} sommario={argomento.sommario}>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -142,7 +142,7 @@ export default async function PaginaArgomento({ params }: { params: Promise<Para
             testo={argomento.sommario}
             azioni={
               <ButtonLink href={percorsi.home()} dimensione="lg" className="h-12 px-6 text-base">
-                {tSito('registratiGratis')}
+                {tSito('iniziaGratis')}
               </ButtonLink>
             }
           />

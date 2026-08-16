@@ -32,7 +32,7 @@ export const eSolaLettura = (permessi: Permessi): boolean =>
 export interface AulaDaScrivere {
   titolo: string;
   visibilita: VisibilitaAulaStudio;
-  ateneo: string | null;
+  ateneoId: string | null;
   dataOraInizio: Date | null;
   creatoreId: string;
 }
@@ -51,8 +51,13 @@ export function costruisciAula(
     titolo: string;
     visibilita?: VisibilitaAulaStudio;
     dataOraInizio?: Date | null;
-    /** Università del creatore: diventa l'ateneo congelato dell'aula (AS7). */
-    universitaDelCreatore: string | null;
+    /**
+     * Università del creatore: diventa l'ateneo congelato dell'aula (AS7). È
+     * l'identificativo, non il nome — la regola lo confronterà con l'ateneo di
+     * chi chiede di entrare, e due nomi scritti in momenti diversi non
+     * corrispondono in modo affidabile.
+     */
+    universitaIdDelCreatore: string | null;
   },
 ): AulaDaScrivere {
   const titolo = dati.titolo.trim();
@@ -96,7 +101,7 @@ export function costruisciAula(
     //
     // Non cambia alcun comportamento: l'ateneo si consulta soltanto quando la
     // visibilità è ATENEO.
-    ateneo: dati.universitaDelCreatore,
+    ateneoId: dati.universitaIdDelCreatore,
     dataOraInizio,
     creatoreId: prova.utenteId,
   };

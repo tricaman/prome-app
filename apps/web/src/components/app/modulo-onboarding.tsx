@@ -7,19 +7,19 @@ import { useApiMutation, useForm } from '@/hooks';
 import { useRouter } from '@/i18n/navigazione';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { Form, FormInput, FormSubmit } from '@/components/form';
-import { SceltaAteneo } from './scelta-ateneo';
+import { SceltaCorso } from './scelta-corso';
 
 /**
- * Onboarding del profilo: nome, cognome, università, corso.
+ * Onboarding del profilo: nome, cognome e corso di studi.
  *
- * I quattro dati stanno in un modulo solo perché sono un dato solo: il profilo
- * è completo se e solo se ci sono tutti e quattro, quindi spezzarli in passi
- * numerati mostrerebbe un avanzamento che il server non riconosce — per lui
- * esiste una scrittura, non tre.
+ * I dati stanno in un modulo solo perché sono un dato solo: il profilo è
+ * completo se e solo se ci sono tutti, quindi spezzarli in passi numerati
+ * mostrerebbe un avanzamento che il server non riconosce — per lui esiste una
+ * scrittura, non tre.
  *
- * L'università si cerca in un elenco ma **si può anche scrivere**: è un dato
- * autodichiarato, e un ateneo che non è nell'elenco non deve impedire di
- * entrare.
+ * L'università non è un campo a sé: si sceglie per arrivare al corso, e al
+ * server arriva il corso, che se la porta dietro. Il catalogo è **chiuso**,
+ * quindi qui non si scrive niente a mano — si sceglie.
  */
 export function ModuloOnboarding() {
   const t = useTranslations('app.onboarding');
@@ -31,10 +31,9 @@ export function ModuloOnboarding() {
     schema: z.object({
       nome: z.string().min(1, obbligatorio),
       cognome: z.string().min(1, obbligatorio),
-      universita: z.string().min(2, obbligatorio),
-      corso: z.string().min(2, obbligatorio),
+      corsoId: z.string().min(1, obbligatorio),
     }),
-    defaultValues: { nome: '', cognome: '', universita: '', corso: '' },
+    defaultValues: { nome: '', cognome: '', corsoId: '' },
   });
 
   const completa = useApiMutation<unknown, CompletaProfiloDto>({
@@ -50,17 +49,12 @@ export function ModuloOnboarding() {
         <FormInput name="cognome" etichetta={t('cognome')} autoComplete="family-name" obbligatorio />
       </div>
 
-      <SceltaAteneo
-        etichetta={t('universita')}
-        segnaposto={t('cercaUniversita')}
-        nessunRisultato={t('nessunRisultato')}
-        valore={form.watch('universita')}
-        onScelta={(nome) =>
-          form.setValue('universita', nome, { shouldValidate: true, shouldDirty: true })
+      <SceltaCorso
+        onCorso={(corsoId) =>
+          form.setValue('corsoId', corsoId, { shouldValidate: true, shouldDirty: true })
         }
+        errore={form.formState.errors.corsoId?.message}
       />
-
-      <FormInput name="corso" etichetta={t('corso')} segnaposto={t('corsoSegnaposto')} obbligatorio />
 
       <FormSubmit className="h-[50px] px-7 text-[15px] shadow-marchio">{t('completa')}</FormSubmit>
     </Form>

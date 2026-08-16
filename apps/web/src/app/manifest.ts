@@ -1,7 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { COLORE_MARCHIO, temaScuro } from '@prome/design-tokens';
 import { catalogoDi, LINGUA_DI_RIPIEGO } from '@prome/i18n';
-import { config } from '@/lib/config';
 
 export default function manifest(): MetadataRoute.Manifest {
   const messaggi = catalogoDi(LINGUA_DI_RIPIEGO);
@@ -26,6 +25,10 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'maskable',
       },
     ],
-    id: config.urlSito,
+    // L'identità dell'applicazione installata, come percorso e non come URL
+    // assoluto: `id` deve stare sulla stessa origine del documento, e un
+    // indirizzo scritto per intero vale solo sul dominio di produzione — dallo
+    // sviluppo in poi il browser lo scarta e avvisa che lo sta scartando.
+    id: '/',
   };
 }

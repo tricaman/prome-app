@@ -8,6 +8,10 @@ import { PrismaService } from '../src/database/prisma.service';
 import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/canale-email-sviluppo';
 import { TRASPORTO_TEMPO_REALE } from '../src/infrastruttura/tempo-reale/trasporto';
 import { TrasportoAssente } from '../src/infrastruttura/tempo-reale/trasporto-assente';
+import {
+  assicuraCatalogoDiProva,
+  type CatalogoDiProva,
+} from './catalogo';
 
 /**
  * La chat dell'aula studio (E4).
@@ -29,6 +33,7 @@ import { TrasportoAssente } from '../src/infrastruttura/tempo-reale/trasporto-as
 describe('Chat dell\'aula studio (E4)', () => {
   let app: NestFastifyApplication;
   let prisma: PrismaService;
+  let catalogo: CatalogoDiProva;
   let email: CanaleEmailSviluppo;
   let trasporto: TrasportoAssente;
 
@@ -64,12 +69,7 @@ describe('Chat dell\'aula studio (E4)', () => {
     const profilo = await chiedi('/profilo/me', {
       method: 'PUT',
       headers: comeUtente(token),
-      payload: {
-        nome: 'Marta',
-        cognome: 'Rossi',
-        universita: 'Università di Bologna',
-        corso: 'Ingegneria informatica',
-      },
+      payload: { nome: 'Marta', cognome: 'Rossi', corsoId: catalogo.corsoInformatica },
     });
     return { token, utenteId: profilo.json().data.utenteId as string, indirizzo };
   }
@@ -120,6 +120,8 @@ describe('Chat dell\'aula studio (E4)', () => {
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
     prisma = app.get(PrismaService);
+    // Il catalogo è chiuso: senza, nessun onboarding arriva in fondo.
+    catalogo = await assicuraCatalogoDiProva(prisma);
     email = app.get(CanaleEmailSviluppo);
     trasporto = app.get(TRASPORTO_TEMPO_REALE);
   });

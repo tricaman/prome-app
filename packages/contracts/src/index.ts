@@ -156,6 +156,42 @@ export interface CancellazioneAccountResponse {
   scadenza: string;
 }
 
+// --- Catalogo accademico ---------------------------------------------------
+//
+// Università, Classe di corso e Corso sono un **catalogo chiuso**: si sceglie
+// da un elenco, non si scrive. È ciò che rende interrogabile l'identità
+// accademica — «chi studia Economia e commercio a Bologna», «tutti gli
+// iscritti alla classe L-18» — che con due stringhe libere non era esprimibile.
+
+export type LivelloDiCorso = 'TRIENNALE' | 'MAGISTRALE' | 'CICLO_UNICO';
+
+export interface UniversitaResponse {
+  id: string;
+  /** Lo stesso delle pagine pubbliche di ateneo. */
+  slug: string;
+  nome: string;
+  nomeBreve: string;
+  citta: string;
+}
+
+/** La classe ministeriale: identifica il corso oltre il singolo ateneo. */
+export interface ClasseDiCorsoResponse {
+  /** 'L-18', 'L-18 R', 'LMG/01'. */
+  codice: string;
+  nome: string;
+  livello: LivelloDiCorso;
+}
+
+export interface CorsoResponse {
+  id: string;
+  /** Codice dell'ateneo (es. '6612'): unico dentro l'ateneo, non nel mondo. */
+  codice: string;
+  nome: string;
+  durataAnni: number;
+  classe: ClasseDiCorsoResponse;
+  universita: UniversitaResponse;
+}
+
 // --- Profilo --------------------------------------------------------------
 
 /** I tre valori del linguaggio ubiquo. "Pubblico" = tutti gli iscritti a Prome. */
@@ -172,17 +208,17 @@ export interface ProfiloResponse {
   utenteId: string;
   nome: string | null;
   cognome: string | null;
-  universita: string | null;
-  corso: string | null;
+  /**
+   * L'ateneo del corso scelto. Non è un dato a sé: il profilo riferisce **solo**
+   * il corso, e questo campo è la sua università riportata qui per comodità di
+   * lettura — non esiste un profilo con università e senza corso.
+   */
+  universita: UniversitaResponse | null;
+  corso: CorsoResponse | null;
   onboardingCompletato: boolean;
   impostazioniPrivacy: ImpostazioniDiPrivacyResponse;
 }
 
-/**
- * Completamento dell'onboarding: i quattro dati sono richiesti insieme perché
- * l'onboarding è completo se e solo se ci sono tutti e quattro. L'università è
- * autodichiarata e non viene verificata.
- */
 /**
  * Cambio delle regole di privacy.
  *
@@ -198,11 +234,22 @@ export interface AggiornaImpostazioniPrivacyRequest {
   visibilita?: Visibilita;
 }
 
+/**
+ * Completamento dell'onboarding.
+ *
+ * I dati arrivano insieme perché insieme definiscono la condizione: non esiste
+ * un completamento parziale, quindi non esiste un endpoint che ne aggiorni uno
+ * solo. È anche la scrittura con cui si correggono in seguito (P3).
+ *
+ * **Il corso da solo, senza l'università**: il corso appartiene già a un
+ * ateneo, e accettarli entrambi vorrebbe dire dover respingere la coppia
+ * incoerente — un errore che così non può esistere.
+ */
 export interface CompletaProfiloRequest {
   nome: string;
   cognome: string;
-  universita: string;
-  corso: string;
+  /** Identificativo di un corso del catalogo. Il catalogo è chiuso. */
+  corsoId: string;
 }
 
 // --- Bacheca ---------------------------------------------------------------
@@ -668,8 +715,24 @@ export interface EsportazioneDatiResponse {
   profilo: {
     nome: string | null;
     cognome: string | null;
+    /**
+     * Il corso per esteso — nome, codice, classe, durata, ateneo — e non il
+     * suo identificativo: una copia dei propri dati deve restare leggibile da
+     * sola, mesi dopo, senza il catalogo accanto per tradurre un uuid.
+     */
     universita: string | null;
-    corso: string | null;
+    corso: {
+      nome: string;
+      /**
+       * Si chiama `codiceCorso` e non `codice`: una copia dei propri dati non
+       * deve contenere una chiave chiamata «codice», e un test lo verifica
+       * alla lettera — il giorno in cui qualcuno esportasse per sbaglio un
+       * codice d'accesso, quel test è ciò che se ne accorge.
+       */
+      codiceCorso: string;
+      classe: string;
+      durataAnni: number;
+    } | null;
     onboardingCompletato: boolean;
     impostazioniPrivacy: ImpostazioniDiPrivacyResponse;
     preferenzeDiNotifica: { commenti: boolean; inviti: boolean };

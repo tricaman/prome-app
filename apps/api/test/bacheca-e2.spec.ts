@@ -8,6 +8,10 @@ import { PrismaService } from '../src/database/prisma.service';
 import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/canale-email-sviluppo';
 import { ArchivioLocale } from '../src/infrastruttura/archivio-file/archivio-locale';
 import { PuliziaBachecaService } from '../src/modules/bacheca/pulizia-bacheca.service';
+import {
+  assicuraCatalogoDiProva,
+  type CatalogoDiProva,
+} from './catalogo';
 
 /**
  * Post completi e commenti (E2.1, E2.2, E2.4).
@@ -20,6 +24,7 @@ import { PuliziaBachecaService } from '../src/modules/bacheca/pulizia-bacheca.se
 describe('Bacheca — post completi e commenti (E2)', () => {
   let app: NestFastifyApplication;
   let prisma: PrismaService;
+  let catalogo: CatalogoDiProva;
   let email: CanaleEmailSviluppo;
   let archivio: ArchivioLocale;
   let pulizia: PuliziaBachecaService;
@@ -54,12 +59,7 @@ describe('Bacheca — post completi e commenti (E2)', () => {
     await chiedi('/profilo/me', {
       method: 'PUT',
       headers: comeUtente(token),
-      payload: {
-        nome: 'Marta',
-        cognome: 'Rossi',
-        universita: 'Università di Bologna',
-        corso: 'Ingegneria informatica',
-      },
+      payload: { nome: 'Marta', cognome: 'Rossi', corsoId: catalogo.corsoInformatica },
     });
     return token;
   }
@@ -108,6 +108,8 @@ describe('Bacheca — post completi e commenti (E2)', () => {
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
     prisma = app.get(PrismaService);
+    // Il catalogo è chiuso: senza, nessun onboarding arriva in fondo.
+    catalogo = await assicuraCatalogoDiProva(prisma);
     email = app.get(CanaleEmailSviluppo);
     archivio = app.get(ArchivioLocale);
     pulizia = app.get(PuliziaBachecaService);

@@ -197,7 +197,7 @@ function SchedaProfilo({ profilo }: { profilo: ProfiloDto }) {
   const t = useT();
 
   const nome = [profilo.nome, profilo.cognome].filter(Boolean).join(' ');
-  const studi = [profilo.corso, profilo.universita].filter(Boolean).join(' · ');
+  const studi = [profilo.corso?.nome, profilo.universita?.nome].filter(Boolean).join(' · ');
 
   return (
     <Card style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[4] }}>

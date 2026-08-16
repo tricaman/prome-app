@@ -2,9 +2,14 @@ import { Test } from '@nestjs/testing';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { AppModule } from '../src/app.module';
 import { creaValidationPipe } from '../src/common/pipes/validation.pipe';
+import { PrismaService } from '../src/database/prisma.service';
 import { registraCorpiBinari } from '../src/config/fastify';
 import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/canale-email-sviluppo';
 import { MisurazioniSenzaFornitore } from '../src/infrastruttura/misurazioni/misurazioni-senza-fornitore';
+import {
+  assicuraCatalogoDiProva,
+  type CatalogoDiProva,
+} from './catalogo';
 
 /**
  * Strumentazione degli eventi di prodotto (E1.6).
@@ -21,6 +26,7 @@ import { MisurazioniSenzaFornitore } from '../src/infrastruttura/misurazioni/mis
 describe('Misurazioni di utilizzo (E1.6)', () => {
   let app: NestFastifyApplication;
   let email: CanaleEmailSviluppo;
+  let catalogo: CatalogoDiProva;
   let misurazioni: MisurazioniSenzaFornitore;
 
   let contatore = 0;
@@ -51,6 +57,7 @@ describe('Misurazioni di utilizzo (E1.6)', () => {
     await app.getHttpAdapter().getInstance().ready();
     email = app.get(CanaleEmailSviluppo);
     misurazioni = app.get(MisurazioniSenzaFornitore);
+    catalogo = await assicuraCatalogoDiProva(app.get(PrismaService));
   });
 
   afterAll(async () => {
@@ -75,12 +82,7 @@ describe('Misurazioni di utilizzo (E1.6)', () => {
     await chiedi('/profilo/me', {
       method: 'PUT',
       headers: autorizzazione,
-      payload: {
-        nome: 'Marta',
-        cognome: 'Rossi',
-        universita: 'Università di Bologna',
-        corso: 'Ingegneria informatica',
-      },
+      payload: { nome: 'Marta', cognome: 'Rossi', corsoId: catalogo.corsoInformatica },
     });
 
     await chiedi('/bacheca', {
@@ -113,12 +115,7 @@ describe('Misurazioni di utilizzo (E1.6)', () => {
     await chiedi('/profilo/me', {
       method: 'PUT',
       headers: { authorization: `Bearer ${prima.json().data.token}` },
-      payload: {
-        nome: 'Marta',
-        cognome: 'Rossi',
-        universita: 'Università di Bologna',
-        corso: 'Ingegneria informatica',
-      },
+      payload: { nome: 'Marta', cognome: 'Rossi', corsoId: catalogo.corsoInformatica },
     });
     await entra();
 
@@ -157,12 +154,7 @@ describe('Misurazioni di utilizzo (E1.6)', () => {
     await chiedi('/profilo/me', {
       method: 'PUT',
       headers: { authorization: `Bearer ${token}` },
-      payload: {
-        nome: 'Marta',
-        cognome: 'Rossi',
-        universita: 'Università di Bologna',
-        corso: 'Ingegneria informatica',
-      },
+      payload: { nome: 'Marta', cognome: 'Rossi', corsoId: catalogo.corsoInformatica },
     });
     await chiedi('/bacheca', {
       method: 'POST',
@@ -192,12 +184,7 @@ describe('Misurazioni di utilizzo (E1.6)', () => {
     await chiedi('/profilo/me', {
       method: 'PUT',
       headers: autorizzazione,
-      payload: {
-        nome: 'Marta',
-        cognome: 'Rossi',
-        universita: 'Università di Bologna',
-        corso: 'Ingegneria informatica',
-      },
+      payload: { nome: 'Marta', cognome: 'Rossi', corsoId: catalogo.corsoInformatica },
     });
 
     const contenuto = 'contenuto';

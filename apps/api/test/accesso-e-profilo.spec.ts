@@ -6,6 +6,11 @@ import { registraCorpiBinari } from '../src/config/fastify';
 import { PrismaService } from '../src/database/prisma.service';
 import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/canale-email-sviluppo';
 import { TENTATIVI_CONSENTITI } from '../src/infrastruttura/accesso/better-auth';
+import {
+  assicuraCatalogoDiProva,
+  NOME_ATENEO,
+  type CatalogoDiProva,
+} from './catalogo';
 
 /**
  * Il percorso di ingresso, provato per intero contro un database vero.
@@ -22,6 +27,7 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
   let app: NestFastifyApplication;
   let prisma: PrismaService;
   let email: CanaleEmailSviluppo;
+  let catalogo: CatalogoDiProva;
 
   /** Indirizzo diverso a ogni test: nessun test eredita lo stato di un altro. */
   let contatore = 0;
@@ -79,6 +85,9 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
 
     prisma = app.get(PrismaService);
     email = app.get(CanaleEmailSviluppo);
+    // Il catalogo è chiuso: senza, nessun onboarding di questa suite può
+    // arrivare in fondo.
+    catalogo = await assicuraCatalogoDiProva(prisma);
   });
 
   afterAll(async () => {
@@ -449,12 +458,7 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
       const risposta = await chiedi('/profilo/me', {
         method: 'PUT',
         headers: intestazioni,
-        payload: {
-          nome: '  Marta ',
-          cognome: 'Rossi',
-          universita: 'Università di Bologna',
-          corso: 'Ingegneria informatica',
-        },
+        payload: { nome: '  Marta ', cognome: 'Rossi', corsoId: catalogo.corsoInformatica },
       });
 
       expect(risposta.statusCode).toBe(200);
@@ -462,6 +466,60 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
       expect(risposta.json().meta.message).toBe('Profilo completato');
       expect(dati.nome).toBe('Marta');
       expect(dati.onboardingCompletato).toBe(true);
+      // Il corso non è più un'etichetta: porta con sé codice, classe, durata e
+      // l'ateneo da cui discendono tutte le decisioni di visibilità.
+      expect(dati.corso).toMatchObject({
+        id: catalogo.corsoInformatica,
+        nome: 'Ingegneria informatica',
+        codice: 'PROVA-INF',
+        durataAnni: 3,
+        classe: { codice: 'L-8', livello: 'TRIENNALE' },
+      });
+      expect(dati.universita).toMatchObject({ id: catalogo.ateneoId, nome: NOME_ATENEO });
+    });
+
+    it('rifiuta un corso che non è nel catalogo: il catalogo è chiuso', async () => {
+      const sessione = await entra(nuovoIndirizzo());
+
+      const risposta = await chiedi('/profilo/me', {
+        method: 'PUT',
+        headers: { authorization: `Bearer ${sessione.token}` },
+        payload: {
+          nome: 'Marta',
+          cognome: 'Rossi',
+          corsoId: '00000000-0000-4000-8000-000000000000',
+        },
+      });
+
+      expect(risposta.statusCode).toBe(404);
+      expect(risposta.json().errorCode).toBe('PR011');
+    });
+
+    it('rifiuta un corso ritirato, e lo dice in modo diverso da uno inesistente', async () => {
+      // Un corso proprio di questo test: disattivarne uno del catalogo di
+      // prova lo toglierebbe alle suite che girano in parallelo.
+      const ritirato = await prisma.corso.create({
+        data: {
+          universitaId: catalogo.ateneoId,
+          codice: `PROVA-RITIRATO-${Date.now()}`,
+          nome: 'Corso non più offerto',
+          classeCodice: 'L-8',
+          durataAnni: 3,
+          attivo: false,
+        },
+      });
+      const sessione = await entra(nuovoIndirizzo());
+
+      const risposta = await chiedi('/profilo/me', {
+        method: 'PUT',
+        headers: { authorization: `Bearer ${sessione.token}` },
+        payload: { nome: 'Marta', cognome: 'Rossi', corsoId: ritirato.id },
+      });
+
+      expect(risposta.statusCode).toBe(422);
+      expect(risposta.json().errorCode).toBe('PR012');
+
+      await prisma.corso.delete({ where: { id: ritirato.id } });
     });
 
     it('rifiuta un onboarding parziale: i quattro dati sono uno solo', async () => {
@@ -475,7 +533,27 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
 
       expect(risposta.statusCode).toBe(400);
       const campi = risposta.json().details.map((d: { field: string }) => d.field);
-      expect(campi).toEqual(expect.arrayContaining(['universita', 'corso']));
+      expect(campi).toEqual(expect.arrayContaining(['corsoId']));
+    });
+
+    it('rifiuta l\'università mandata a parte: viene dal corso, non da chi chiede', async () => {
+      const sessione = await entra(nuovoIndirizzo());
+
+      const risposta = await chiedi('/profilo/me', {
+        method: 'PUT',
+        headers: { authorization: `Bearer ${sessione.token}` },
+        payload: {
+          nome: 'Marta',
+          cognome: 'Rossi',
+          corsoId: catalogo.corsoInformatica,
+          // Mandarla vorrebbe dire poterla mandare **diversa** da quella del
+          // corso: la coppia incoerente non deve poter esistere.
+          universitaId: catalogo.altroAteneoId,
+        },
+      });
+
+      expect(risposta.statusCode).toBe(400);
+      expect(risposta.json().errorCode).toBe('V001');
     });
 
     it('rifiuta campi non previsti invece di ignorarli', async () => {
@@ -487,8 +565,7 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
         payload: {
           nome: 'Marta',
           cognome: 'Rossi',
-          universita: 'Università di Bologna',
-          corso: 'Ingegneria informatica',
+          corsoId: catalogo.corsoInformatica,
           // Chi prova a scriversi onboarding completato da sé deve sentirsi
           // dire di no, non essere ignorato in silenzio.
           onboardingCompletato: true,
@@ -505,12 +582,7 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
       await chiedi('/profilo/me', {
         method: 'PUT',
         headers: { authorization: `Bearer ${prima.token}` },
-        payload: {
-          nome: 'Marta',
-          cognome: 'Rossi',
-          universita: 'Università di Bologna',
-          corso: 'Ingegneria informatica',
-        },
+        payload: { nome: 'Marta', cognome: 'Rossi', corsoId: catalogo.corsoInformatica },
       });
 
       const dopo = await entra(indirizzo);
@@ -527,18 +599,13 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
    * ammesso. Un errore di battitura, senza questa strada, sarebbe definitivo.
    */
   describe('correggere il profilo (P3)', () => {
-    async function profiloCompleto(universita = 'Università di Bologna') {
+    async function profiloCompleto(corsoId = catalogo.corsoInformatica) {
       const sessione = await entra(nuovoIndirizzo());
       const intestazioni = { authorization: `Bearer ${sessione.token}` };
       const risposta = await chiedi('/profilo/me', {
         method: 'PUT',
         headers: intestazioni,
-        payload: {
-          nome: 'Marta',
-          cognome: 'Rossi',
-          universita,
-          corso: 'Ingegneria informatica',
-        },
+        payload: { nome: 'Marta', cognome: 'Rossi', corsoId },
       });
       return { intestazioni, utenteId: risposta.json().data.utenteId as string };
     }
@@ -549,18 +616,13 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
       const risposta = await chiedi('/profilo/me', {
         method: 'PUT',
         headers: intestazioni,
-        payload: {
-          nome: 'Marta',
-          cognome: 'Rossini',
-          universita: 'Politecnico di Milano',
-          corso: 'Ingegneria gestionale',
-        },
+        payload: { nome: 'Marta', cognome: 'Rossini', corsoId: catalogo.altroCorso },
       });
 
       expect(risposta.statusCode).toBe(200);
       const dati = risposta.json().data;
       expect(dati.cognome).toBe('Rossini');
-      expect(dati.universita).toBe('Politecnico di Milano');
+      expect(dati.universita.id).toBe(catalogo.altroAteneoId);
       // P3 è a senso unico: da completato non si torna indietro, e correggere
       // non è tornare indietro.
       expect(dati.onboardingCompletato).toBe(true);
@@ -572,22 +634,39 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
       const risposta = await chiedi('/profilo/me', {
         method: 'PUT',
         headers: intestazioni,
-        payload: {
-          nome: 'Marta',
-          cognome: 'Rossi',
-          universita: '   ',
-          corso: 'Ingegneria informatica',
-        },
+        payload: { nome: 'Marta', cognome: '   ', corsoId: catalogo.corsoInformatica },
       });
 
       expect(risposta.statusCode).toBe(400);
       const campi = risposta.json().details.map((d: { field: string }) => d.field);
-      expect(campi).toContain('universita');
+      expect(campi).toContain('cognome');
+    });
+
+    it('cambiare corso dentro lo stesso ateneo non cambia ciò che si vede', async () => {
+      // La visibilità «Ateneo» guarda l'ateneo, non il corso: passare da
+      // Informatica a Lettere nello stesso ateneo non deve togliere niente.
+      const autore = await profiloCompleto();
+      await chiedi('/profilo/me/privacy', {
+        method: 'PUT',
+        headers: autore.intestazioni,
+        payload: { visibilita: 'ATENEO' },
+      });
+      await chiedi('/bacheca', {
+        method: 'POST',
+        headers: autore.intestazioni,
+        payload: { testo: 'Appunti di Algebra' },
+      });
+
+      const lettore = await profiloCompleto(catalogo.corsoLettere);
+      const feed = await chiedi('/bacheca', { headers: lettore.intestazioni });
+      expect(feed.json().data.map((p: { testo: string }) => p.testo)).toContain(
+        'Appunti di Algebra',
+      );
     });
 
     it('cambiare ateneo cambia SUBITO ciò che si vede, senza finestra (SE2)', async () => {
       // Un autore del Politecnico che mostra i contenuti al proprio ateneo.
-      const autore = await profiloCompleto('Politecnico di Milano');
+      const autore = await profiloCompleto(catalogo.corsoDiPassaggio);
       await chiedi('/profilo/me/privacy', {
         method: 'PUT',
         headers: autore.intestazioni,
@@ -599,8 +678,8 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
         payload: { testo: 'Appunti di Fisica 2' },
       });
 
-      // Un lettore di Bologna: non lo vede.
-      const lettore = await profiloCompleto('Università di Bologna');
+      // Un lettore di un altro ateneo: non lo vede.
+      const lettore = await profiloCompleto();
       const prima = await chiedi('/bacheca', { headers: lettore.intestazioni });
       expect(prima.json().data.map((p: { testo: string }) => p.testo)).not.toContain(
         'Appunti di Fisica 2',
@@ -611,12 +690,7 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
       await chiedi('/profilo/me', {
         method: 'PUT',
         headers: lettore.intestazioni,
-        payload: {
-          nome: 'Marta',
-          cognome: 'Rossi',
-          universita: 'Politecnico di Milano',
-          corso: 'Ingegneria informatica',
-        },
+        payload: { nome: 'Marta', cognome: 'Rossi', corsoId: catalogo.corsoDiPassaggio },
       });
 
       const dopo = await chiedi('/bacheca', { headers: lettore.intestazioni });
@@ -626,31 +700,26 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
     });
 
     it('ma NON cambia l\'ateneo di un\'aula già creata, né fa uscire da dove si è già dentro', async () => {
-      const { intestazioni, utenteId } = await profiloCompleto('Università di Bologna');
+      const { intestazioni, utenteId } = await profiloCompleto();
       const aula = await chiedi('/aule-studio', {
         method: 'POST',
         headers: intestazioni,
         payload: { titolo: 'Ripasso di Analisi', visibilita: 'ATENEO' },
       });
       const aulaId = aula.json().data.id as string;
-      expect(aula.json().data.ateneo).toBe('Università di Bologna');
+      expect(aula.json().data.ateneo).toBe(NOME_ATENEO);
 
       await chiedi('/profilo/me', {
         method: 'PUT',
         headers: intestazioni,
-        payload: {
-          nome: 'Marta',
-          cognome: 'Rossi',
-          universita: 'Politecnico di Milano',
-          corso: 'Ingegneria informatica',
-        },
+        payload: { nome: 'Marta', cognome: 'Rossi', corsoId: catalogo.corsoDiPassaggio },
       });
 
       // AS7: l'ateneo dello spazio è congelato alla creazione. Uno spazio non
       // cambia pubblico perché chi l'ha aperto si è trasferito.
       const sala = await chiedi(`/aule-studio/${aulaId}/sala`, { headers: intestazioni });
       expect(sala.statusCode).toBe(200);
-      expect(sala.json().data.aula.ateneo).toBe('Università di Bologna');
+      expect(sala.json().data.aula.ateneo).toBe(NOME_ATENEO);
       // E chi era già dentro resta dentro: l'ammissione si interroga
       // all'ingresso, e la sola decadenza che insegue chi è dentro è quella
       // dell'appartenenza al gruppo (SE1).

@@ -9,6 +9,6 @@
 export interface CompletaProfiloDto {
   nome: string;
   cognome: string;
-  universita: string;
-  corso: string;
+  /** Identificativo di un corso del catalogo (GET /catalogo/universita/:id/corsi) */
+  corsoId: string;
 }

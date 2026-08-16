@@ -78,12 +78,12 @@
     "descrizione": "Prome ti aiuta a trovare nuovi compagni di studio e a organizzarti al meglio durante il tuo percorso accademico."
   },
   "home": {
-    "occhiello": "Usata in 42 atenei italiani",
+    "occhiello": "Studio collaborativo per universitari italiani",
     "titolo": "Studiare insieme, senza cercare più nulla",
-    "sommario": "Bacheca del tuo corso, aule studio con audio e materiali condivisi, gruppi che restano nel tempo. Tutto in un posto, gratis per gli studenti.",
+    "sommario": "Bacheca del tuo corso, aule studio con materiali condivisi e chat in tempo reale, gruppi che restano nel tempo. Tutto in un posto, gratis per gli studenti.",
     "ctaPrincipale": "Inizia gratis",
     "ctaSecondaria": "Guarda com'è",
-    "prova": "Oltre <forte>28.000 studenti</forte> studiano su Prome ogni settimana",
+    "prova": "<forte>Gratis</forte> per gli studenti: nessuna pubblicità, nessun dato venduto.",
     "anteprima": {
       "nome": "Chiara Moretti",
       "chiParla": "Chiara sta parlando",
@@ -99,17 +99,17 @@
         "testo": "Domande, appunti e allegati fino a 25 MB. I post restano, organizzati per argomento."
       },
       "aule": {
-        "titolo": "Aule studio con audio",
-        "testo": "Chat, audiochat e materiali condivisi. Programmate o aperte al volo, con permessi per ogni partecipante."
+        "titolo": "Aule studio in tempo reale",
+        "testo": "Chat in tempo reale e materiali condivisi, ordinati per argomento. Programmate o aperte al volo, con i permessi decisi partecipante per partecipante."
       },
       "gruppi": {
         "titolo": "Gruppi che restano",
-        "testo": "Il tuo corso, il tuo team di progetto, l'Erasmus: cartelle fino a 5 livelli e aule studio collocate dentro."
+        "testo": "Il tuo corso, il tuo team di progetto, l’Erasmus: chi ne fa parte entra nelle aule studio del gruppo senza bisogno di un invito ogni volta."
       }
     },
     "chiusura": {
       "titolo": "Tributo al <accento>progresso</accento>",
-      "testo": "Prome è gratis per gli studenti universitari. Registrati con la mail dell'ateneo e trova subito il tuo corso."
+      "testo": "Prome è gratis per gli studenti universitari. Entri con la tua email — arriva un codice, nessuna password — e trovi subito il tuo corso."
     },
     "comeFunziona": {
       "titolo": "Come funziona un'aula studio",
@@ -121,14 +121,15 @@
         },
         "invita": {
           "titolo": "Invita chi vuoi",
-          "testo": "Un link valido sette giorni. Chi entra trova già chat, audio e materiali organizzati per argomento."
+          "testo": "Un invito via email valido sette giorni. Chi entra trova chat e materiali già ordinati per argomento."
         },
         "studiate": {
           "titolo": "Studiate insieme",
-          "testo": "Ognuno con i suoi permessi: parlare, scrivere, caricare. Chi preferisce resta ad ascoltare, e va benissimo così."
+          "testo": "Ognuno con i suoi permessi: chi scrive, chi carica materiali, e chi preferisce soltanto leggere resta in sola lettura."
         }
       }
-    }
+    },
+    "atenei": "Gli atenei che hanno una pagina su Prome"
   },
   "sito": {
     "nav": {
@@ -139,8 +140,6 @@
       "chiSiamo": "Chi siamo"
     },
     "accedi": "Accedi",
-    "registrati": "Registrati",
-    "registratiGratis": "Registrati gratis",
     "iniziaGratis": "Inizia gratis",
     "scaricaApp": "Scarica l'app",
     "vediTutte": "Vedi tutte",
@@ -164,10 +163,11 @@
       "termini": "Termini",
       "cookie": "Cookie",
       "sitemap": "Sitemap",
-      "diritti": "© {anno} Prome · Bologna",
+      "diritti": "© {anno} Prome · Brescia",
       "argomenti": "Argomenti",
       "guide": "Guide allo studio",
-      "chiSiamo": "Chi siamo"
+      "chiSiamo": "Chi siamo",
+      "autore": "Progetto indipendente, ideato e sviluppato da Marius Trica."
     },
     "motto1": "Tributo al",
     "motto2": "progresso"
@@ -179,7 +179,7 @@
       "entra": "Entra ora",
       "apriApp": "Apri nell'app",
       "boxTitolo": "Entra nell'aula studio",
-      "boxTesto": "Gratis, serve solo un account con la mail dell'ateneo.",
+      "boxTesto": "Gratis, serve solo la tua email: arriva un codice e sei dentro.",
       "ateneo": "Ateneo",
       "argomento": "Argomento",
       "iniziata": "Iniziata",
@@ -242,26 +242,28 @@
       }
     },
     "chiSiamo": {
-      "titolo": "Abbiamo costruito quello che ci mancava",
-      "sommario": "Prome nasce a Bologna nel 2024 da tre studenti che si scambiavano appunti su chat sparse, perdendo file, link e sessioni di studio. Oggi è la piattaforma con cui 28.000 studenti italiani si organizzano.",
+      "titolo": "Ho costruito quello che mi mancava",
+      "sommario": "Prome è un progetto indipendente di Marius Trica, da Brescia. Non c’è una società e non c’è un team: una persona sola scrive il codice, legge le segnalazioni e decide cosa entra nel prodotto.",
       "motto": {
         "titolo": "Tributo al progresso",
-        "p1": "Il nostro motto non è uno slogan di marketing: è il criterio con cui decidiamo cosa costruire. Ogni funzione deve far avanzare qualcuno nel suo percorso, non trattenerlo dentro l'app.",
-        "p2": "Per questo non ci sono like, classifiche o notifiche inventate: solo strumenti per studiare insieme e andarsene quando si è finito."
+        "p1": "Non è uno slogan di marketing: è il criterio con cui decido cosa costruire. Ogni funzione deve far avanzare qualcuno nel suo percorso, non trattenerlo dentro l’app.",
+        "p2": "Per questo non ci sono like, classifiche o notifiche inventate: solo strumenti per studiare insieme, e la porta aperta quando si è finito."
       },
       "sostegno": {
-        "titolo": "Come ci manteniamo",
-        "p1": "Prome è gratis per gli studenti e lo resterà. Ci finanziamo con accordi con gli atenei che vogliono strumenti di studio collaborativo per i loro corsi.",
-        "p2": "Non vendiamo dati, non profiliamo per la pubblicità e non addestriamo modelli sui vostri appunti."
+        "titolo": "Come si mantiene",
+        "p1": "Prome è gratis per gli studenti e lo resterà. Oggi non ha ricavi: server, dominio e tempo li metto io, ed è anche il motivo per cui cresce piano e senza promesse.",
+        "p2": "Se un giorno servirà sostenerlo, sarà con accordi con gli atenei che vogliono strumenti di studio per i loro corsi. Mai con la pubblicità, mai vendendo dati, mai addestrando modelli sui vostri appunti."
       },
       "statistiche": {
-        "studenti": "Studenti attivi",
-        "atenei": "Atenei italiani",
-        "aule": "Aule studio nel 2026",
-        "dati": "Dati venduti"
+        "persone": "Persone dietro Prome",
+        "dati": "Dati venduti",
+        "cookie": "Cookie di profilazione",
+        "dove": "Dove stanno i tuoi dati"
       },
-      "team": "Il team",
-      "fotoTeam": "Foto del team"
+      "team": "Chi c’è dietro",
+      "ruolo": "Fondatore e sviluppatore",
+      "bio": "Scrivo il codice, leggo le segnalazioni e decido cosa entra in Prome. Da Brescia, in autonomia, un pezzo per volta.",
+      "scrivimi": "Scrivimi"
     },
     "guide": {
       "titolo": "Guide allo studio",
@@ -276,18 +278,42 @@
     },
     "privacy": {
       "titolo": "Privacy policy",
-      "vigore": "In vigore dal 1 luglio 2026 · versione 3.1",
+      "descrizione": "Quali dati raccoglie Prome, perché, per quanto tempo e come esercitare i tuoi diritti. Un progetto indipendente di Marius Trica, con server in Unione europea.",
+      "vigore": "In vigore dal 15 agosto 2026 · versione 1.0",
       "documenti": "Documenti",
       "inQuestaPagina": "In questa pagina",
       "inBreve": "In breve, senza legalese",
       "contatto": {
         "titolo": "Hai domande sui tuoi dati?",
-        "testo": "Scrivi al nostro responsabile della protezione dei dati: rispondiamo entro 30 giorni come previsto dal GDPR."
+        "testo": "Scrivi direttamente a chi gestisce Prome: rispondiamo entro 30 giorni, come previsto dal GDPR."
       },
       "soloItaliano": "Questo documento è disponibile solo in italiano."
     },
+    "termini": {
+      "titolo": "Termini di servizio",
+      "descrizione": "Le condizioni d’uso di Prome: cos’è il servizio, cosa resta tuo, come ci si comporta e cosa non è garantito.",
+      "vigore": "In vigore dal 15 agosto 2026 · versione 1.0",
+      "documenti": "Documenti",
+      "inQuestaPagina": "In questa pagina",
+      "inBreve": "In breve, senza legalese",
+      "contatto": {
+        "titolo": "Hai domande su queste condizioni?",
+        "testo": "Scrivi a chi gestisce Prome: è una persona sola, e risponde."
+      },
+      "soloItaliano": "Questo documento è disponibile solo in italiano: una traduzione redatta arriverà, una automatica no."
+    },
+    "cookie": {
+      "titolo": "Cookie policy",
+      "descrizione": "Un solo cookie, per ricordare la lingua. Nessuna profilazione, nessuna statistica di terze parti, nessun banner da chiudere.",
+      "vigore": "In vigore dal 15 agosto 2026 · versione 1.0",
+      "documenti": "Documenti",
+      "inQuestaPagina": "In questa pagina",
+      "inBreve": "In breve",
+      "soloItaliano": "Questo documento è disponibile solo in italiano: una traduzione redatta arriverà, una automatica no."
+    },
     "lineeGuida": {
       "titolo": "Linee guida della community",
+      "descrizione": "Le regole della community di Prome: cosa non è ammesso, come segnalare un contenuto e come bloccare una persona.",
       "documenti": "Documenti",
       "inQuestaPagina": "In questa pagina",
       "inBreve": "In breve",
@@ -310,9 +336,8 @@
     "accesso": {
       "titolo": "Entra in Prome",
       "sommario": "Ti arriva un codice via email. Nessuna password da ricordare.",
-      "primoAccesso": "Se è la prima volta, l'account si crea al primo accesso: non serve registrarsi a parte.",
-      "email": "Email universitaria",
-      "inviaCodice": "Inviami il codice",
+      "email": "Email",
+      "inviaCodice": "Continua con email",
       "codiceTitolo": "Controlla la posta",
       "codiceSommario": "Abbiamo mandato un codice a 6 cifre a {email}.",
       "codice": "Codice a 6 cifre",
@@ -321,8 +346,8 @@
       "cambiaEmail": "Cambia l'email",
       "nonArrivato": "Non ti è arrivato?",
       "reinvia": "Invia di nuovo",
-      "provaTitolo": "Tributo al <accento>progresso</accento>",
-      "provaTesto": "Ogni settimana 28.000 studenti aprono un'aula studio, condividono appunti e si danno una mano prima degli appelli.",
+      "provaTitolo": "Un modo nuovo di <accento>studiare insieme</accento>",
+      "provaTesto": "Bacheca del corso, aule studio con materiali condivisi e chat in tempo reale, gruppi che restano nel tempo. Costruita da zero per gli universitari italiani: nessuna password da ricordare, nessuna pubblicità, i tuoi appunti restano tuoi.",
       "riattivato": "Bentornato: la richiesta di cancellazione è stata annullata."
     },
     "onboarding": {
@@ -338,11 +363,16 @@
       "nome": "Nome",
       "cognome": "Cognome",
       "corso": "Corso di studi",
-      "corsoSegnaposto": "Es. Ingegneria informatica",
-      "universitaSceltaAltro": "Scrivi il nome del tuo ateneo",
+      "corsoSegnaposto": "Cerca il tuo corso di studi",
       "completa": "Entra in Prome",
       "indietro": "Indietro",
-      "continua": "Continua"
+      "continua": "Continua",
+      "cercaCorso": "Cerca il tuo corso di studi",
+      "nessunCorsoTrovato": "Nessun corso con questo nome.",
+      "primaLAteneo": "Scegli prima l'università.",
+      "catalogoChiuso": "I corsi sono quelli ufficiali dell'ateneo: se non trovi il tuo, scrivicelo e lo aggiungiamo.",
+      "nonTroviCorso": "Non trovi il tuo corso?",
+      "durataAnni": "{numero} anni"
     },
     "feed": {
       "composer": "Cosa vuoi condividere, {nome}?",

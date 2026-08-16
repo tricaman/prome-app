@@ -2,12 +2,12 @@
 
 import { useState, type ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from 'next-themes';
 import { useLocale } from 'next-intl';
 import { creaQueryClient } from '@prome/app-core';
 import { impostaLinguaApi } from '@/lib/api';
 import { AvvisiProvider } from './avvisi-provider';
 import { InterfacciaProvider } from './interfaccia-provider';
+import { TemaProvider } from './tema';
 
 /**
  * Tutti i contesti dell'applicazione, in un punto solo.
@@ -27,16 +27,18 @@ export function Providers({ children }: { children: ReactNode }) {
   // impostarla qui, in fase di render, la rende disponibile prima dei figli.
   impostaLinguaApi(lingua);
 
-  // Il tema segue l'impostazione di sistema finché qualcuno non sceglie: la
-  // scelta viene salvata da `next-themes` e riletta prima della prima pittura,
-  // così non si vede il lampo chiaro all'apertura di una pagina scura.
+  // Il tema segue l'impostazione di sistema finché qualcuno non sceglie. La
+  // scelta viene riletta e applicata **prima della prima pittura** dallo
+  // script servito nel layout, non da qui: così non si vede il lampo chiaro
+  // all'apertura di una pagina scura, e nell'albero del browser non c'è alcun
+  // tag `<script>` da ridisegnare.
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <TemaProvider>
       <QueryClientProvider client={queryClient}>
         <InterfacciaProvider lingua={lingua}>
           <AvvisiProvider>{children}</AvvisiProvider>
         </InterfacciaProvider>
       </QueryClientProvider>
-    </ThemeProvider>
+    </TemaProvider>
   );
 }

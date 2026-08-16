@@ -43,7 +43,6 @@ export default async function PaginaGuide({ params }: { params: Promise<{ locale
   return (
     <SiteShell>
       <StructuredData
-        lingua={lingua}
         oggetti={[
           briciole(lingua, voci),
           raccolta(
