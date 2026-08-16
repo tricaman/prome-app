@@ -26,6 +26,11 @@ COPY packages/design-tokens/package.json packages/design-tokens/
 COPY packages/app-core/package.json packages/app-core/
 COPY packages/api-client/package.json packages/api-client/
 COPY packages/contenuti/package.json packages/contenuti/
+# Le patch delle dipendenze sono dichiarate nel package.json di radice, quindi
+# `pnpm install` le legge sempre — anche qui, dove la dipendenza corretta è del
+# mobile e non entrerà mai in questa immagine. Senza la cartella, l'install si
+# ferma con ENOENT prima ancora di scaricare qualcosa.
+COPY patches/ patches/
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # --- build -----------------------------------------------------------------
