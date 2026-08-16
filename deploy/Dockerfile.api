@@ -47,7 +47,16 @@ RUN pnpm --filter @prome/api build
 # `--legacy` è richiesto da pnpm 10 quando i pacchetti del workspace non sono
 # "injected": senza, si rifiuta di procedere. È la forma documentata, non un
 # aggiramento.
-RUN pnpm --filter @prome/api --prod deploy --legacy /produzione
+#
+# `allow-unused-patches` perché qui la patch di `expo-modules-jsi` **è**
+# inutilizzata, ed è giusto così: appartiene al mobile, e le dipendenze
+# dell'API non la incontrano mai. Senza, `deploy` si ferma con
+# ERR_PNPM_UNUSED_PATCH. Sta sul comando e non nel package.json di radice di
+# proposito: fuori di qui una patch che non si applica più — dopo un
+# aggiornamento di Expo, per dire — deve continuare a far fallire l'install
+# invece di sparire in un avviso.
+RUN pnpm --filter @prome/api --prod deploy --legacy \
+      --config.allow-unused-patches=true /produzione
 
 # Il client generato da Prisma vive in node_modules/.prisma, e `pnpm deploy`
 # ricrea node_modules da zero: quindi non sopravvive alla copia e va
