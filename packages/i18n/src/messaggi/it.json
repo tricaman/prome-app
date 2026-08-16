@@ -718,7 +718,6 @@
         "titolo": "Modifica profilo",
         "cambiaFoto": "Cambia foto",
         "studi": "Studi",
-        "profiloPubblico": "Profilo pubblico",
         "chiVede": "Chi vede quello che scrivi",
         "chiVedeSub": "Si cambia dalle impostazioni privacy",
         "scegliUniversita": "Scegli l'università",
@@ -775,7 +774,6 @@
     },
     "profilo": {
       "modifica": "Modifica profilo",
-      "condividi": "Condividi profilo",
       "attivita": "La tua attività",
       "impostazioniSupporto": "Impostazioni e supporto",
       "contatori": {
@@ -795,7 +793,6 @@
         "lineeGuida": "Linee guida"
       },
       "versione": "Prome {versione} · {motto}",
-      "vediPubblico": "Vedi profilo pubblico",
       "contenuti": "I tuoi contenuti",
       "nessunGruppo": "Non fai ancora parte di nessun gruppo."
     },

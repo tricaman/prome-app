@@ -4,7 +4,6 @@ import { creaMetadata } from '@/lib/seo';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { AppTopbar } from '@/components/app/app-topbar';
 import { HubProfilo } from '@/components/app/hub-profilo';
-import { ProfiloPubblicoSospeso } from '@/components/app/profilo-pubblico-sospeso';
 import { ButtonLink } from '@/components/ui';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -43,7 +42,6 @@ export default async function PaginaProfilo({ params }: { params: Promise<{ loca
         }
         azioni={
           <div className="flex flex-wrap items-center gap-2">
-            <ProfiloPubblicoSospeso />
             <ButtonLink href={percorsiApp.impostazioni()} variante="contorno" dimensione="sm">
               {t('impostazioni.titolo')}
             </ButtonLink>

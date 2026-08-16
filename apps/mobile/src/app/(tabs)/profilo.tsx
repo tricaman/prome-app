@@ -8,10 +8,8 @@ import { useI18n } from '@/i18n/i18n-provider';
 import {
   SEGNAPOSTO_AIUTO,
   SEGNAPOSTO_AULE_CREATE,
-  SEGNAPOSTO_CONDIVIDI_PROFILO,
   SEGNAPOSTO_MATERIALI_SALVATI,
   SEGNAPOSTO_POST_MIEI,
-  gestoSospeso,
 } from '@/lib/segnaposto';
 import { QueryBoundary } from '@/components/feedback';
 import { VersioneApp } from '@/components/app/versione-app';
@@ -57,10 +55,16 @@ const IGNOTO = '—';
  * raggiungibile da dentro. Solo la privacy è nativa; gli altri due aprono il
  * sito, che è dove vivono e dove cambiano senza che l'app si aggiorni.
  *
- * SEGNAPOSTO: i tuoi post, le aule create, i materiali salvati, la
- * condivisione del profilo e «Aiuto e contatti». Nessuno dei cinque ha un
- * endpoint dietro; l'anno di corso non si scrive affatto, perché inventarlo
- * sarebbe la stessa classe di difetto di «Marta Rossi».
+ * **Non c'è niente da condividere, e non ci sarà.** Il disegno metteva un
+ * bottone di condivisione accanto a «Modifica profilo»: manderebbe a una
+ * pagina pubblica del profilo, che non esiste e non è in ritardo — i dati
+ * delle persone su Prome sono privati, e «Pubblico» significa aperto agli
+ * studenti iscritti, mai al web.
+ *
+ * SEGNAPOSTO: i tuoi post, le aule create, i materiali salvati e «Aiuto e
+ * contatti». Nessuno dei quattro ha un endpoint dietro; l'anno di corso non si
+ * scrive affatto, perché inventarlo sarebbe la stessa classe di difetto di
+ * «Marta Rossi».
  */
 export default function SchedaProfilo() {
   const tema = useTema();
@@ -134,15 +138,6 @@ export default function SchedaProfilo() {
                       <Icona nome="matita" dimensione={17} colore="primarioTesto" />
                     }
                     onPress={() => router.push(rotte.modificaProfilo())}
-                  />
-                  {/* Non esiste un profilo di terzi da aprire: mandare un
-                      collegamento vorrebbe dire mandare a una pagina che non
-                      c'è. Il bottone resta nel disegno, spento. */}
-                  <AzioneTonda
-                    icona="condividi"
-                    etichetta={t('app.profilo.condividi')}
-                    disabilitato
-                    onPress={gestoSospeso(SEGNAPOSTO_CONDIVIDI_PROFILO)}
                   />
                 </View>
               </Card>

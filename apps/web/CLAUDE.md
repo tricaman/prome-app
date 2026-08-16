@@ -97,7 +97,9 @@ Le regole di privacy si mostrano **solo come il server le ha confermate**: `impo
 
 Tre marcatori, sempre insieme: la costante in quel file; `presto={SEGNAPOSTO_…}` su `RigaElenco` (spegne la riga, mostra «Presto», toglie valore e freccia) oppure `gestoSospeso(SEGNAPOSTO_…)` accanto a `isDisabled` per un comando; e una riga `SEGNAPOSTO:` nel docblock del file. Un numero che non c'è si scrive `—`, mai `0`.
 
-**`SEGNAPOSTO_PROFILO_PUBBLICO` è diverso dagli altri**: non è «non ancora fatto», è fuori dal prodotto per la decisione dichiarata più su in questo documento. Il bottone «Vedi profilo pubblico» resta spento perché la domanda che pone è giusta e perché, se sparisse, il prossimo che disegna quella pagina lo rimetterebbe senza sapere che era stato tolto apposta.
+**Un segnaposto è un ritardo, non un ripensamento.** Ciò che è stato deciso di non fare non diventa una riga spenta con la pastiglia «Presto»: quella pastiglia è una promessa, e su qualcosa che non arriverà è la peggiore che si possa fare. Va tolto, e la ragione resta scritta qui.
+
+È il caso del **profilo pubblico**. Il disegno prevedeva `prome.app/u/{nome}`, un bottone «Vedi profilo pubblico» e una pastiglia sulla scheda d'identità: niente di tutto questo esiste, e non è in ritardo. **I dati delle persone su Prome sono privati e non sono mai liberamente accessibili** — vedi la regola non negoziabile più su. Un profilo non ha un indirizzo pubblico, non finisce in un motore di ricerca e non si condivide. Per la stessa ragione la visibilità dei contenuti, quando compare accanto a un nome, porta sempre la sua etichetta: «Privato» da solo si legge come «questo profilo è privato», «Pubblico» come «questo profilo è sul web», e la seconda lettura è falsa.
 
 ### Preferenze di notifica
 

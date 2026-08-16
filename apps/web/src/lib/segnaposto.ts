@@ -40,24 +40,6 @@ export const SEGNAPOSTO_AVATAR = segnaposto(
 );
 export const SEGNAPOSTO_BIO = segnaposto('nessuna biografia nel modello di dominio');
 export const SEGNAPOSTO_ANNO_CORSO = segnaposto("ProfiloDto non porta l'anno di corso");
-export const SEGNAPOSTO_ISCRITTO_DA = segnaposto("ProfiloDto non espone la data d'iscrizione");
-
-/**
- * La pagina pubblica del profilo su prome.app.
- *
- * Non è «non ancora implementata»: è **fuori dal prodotto per decisione
- * dichiarata**. `apps/web/CLAUDE.md` la chiama regola non negoziabile —
- * nessun contenuto degli utenti è visibile a chi non ha un account, profili
- * compresi — e vieta esplicitamente lo schema `ProfilePage`. Servirebbe anche
- * un `GET /profilo/:id` che non esiste e che, quando esisterà, dovrà passare
- * dalle regole di visibilità del contesto Profilo.
- *
- * Il bottone resta nel disegno perché la domanda che pone — «cosa vedono gli
- * altri di me?» — è giusta, e quando ci sarà una risposta andrà lì.
- */
-export const SEGNAPOSTO_PROFILO_PUBBLICO = segnaposto(
-  'nessuna pagina pubblica del profilo, per decisione dichiarata in CLAUDE.md',
-);
 
 // --- Account -----------------------------------------------------------------
 
@@ -72,12 +54,6 @@ export const SEGNAPOSTO_DISPOSITIVI = segnaposto(
 
 export const SEGNAPOSTO_CONTATTABILITA = segnaposto(
   'PUT /profilo/me/privacy la salva, ma nessuna regola la legge',
-);
-export const SEGNAPOSTO_PROMEMORIA = segnaposto(
-  'PreferenzeDiNotificaDto ha due assi soli: commenti e inviti',
-);
-export const SEGNAPOSTO_RIEPILOGO_MATERIALI = segnaposto(
-  'nessun riepilogo periodico, e nessun asse per i materiali',
 );
 
 /**

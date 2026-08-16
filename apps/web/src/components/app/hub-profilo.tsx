@@ -56,7 +56,7 @@ const SFONDO: Record<Tessera['tinta'], string> = {
  * quella dei gruppi, per la stessa ragione: le altre tre non hanno una
  * domanda da fare.
  *
- * SEGNAPOSTO: post, aule create, materiali salvati e il profilo pubblico.
+ * SEGNAPOSTO: post, aule create, materiali salvati.
  */
 export function HubProfilo() {
   const t = useTranslations('app.profilo');
@@ -116,10 +116,15 @@ export function HubProfilo() {
                 {studi ? (
                   <p className="mt-1 text-[14.5px] text-testo-tenue">{studi}</p>
                 ) : null}
+                {/* La pastiglia porta la sua etichetta e non sta nuda accanto
+                    al nome: da sola, «Privato» si leggerebbe come «questo
+                    profilo è privato», e «Pubblico» come «questo profilo è sul
+                    web» — che è falso e resterà falso. Quella scelta riguarda
+                    **quello che scrivi**, e vale dentro Prome. */}
                 <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                  {/* La pastiglia dice la visibilità vera, quella che il server
-                      ha confermato: è l'unica cosa che questa pagina sa dire
-                      su «cosa vedono gli altri». */}
+                  <span className="text-[12px] font-semibold text-testo-debole">
+                    {tImpostazioni('contenuti.titolo')}
+                  </span>
                   <Chip tono="menta" dimensione="sm">
                     {tImpostazioni(`visibilita.${CHIAVI[data.impostazioniPrivacy.visibilita]}`)}
                   </Chip>

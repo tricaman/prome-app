@@ -718,7 +718,6 @@
         "titolo": "Edit profile",
         "cambiaFoto": "Change photo",
         "studi": "Studies",
-        "profiloPubblico": "Public profile",
         "chiVede": "Who sees what you write",
         "chiVedeSub": "Change it in the privacy settings",
         "scegliUniversita": "Choose your university",
@@ -775,7 +774,6 @@
     },
     "profilo": {
       "modifica": "Edit profile",
-      "condividi": "Share profile",
       "attivita": "Your activity",
       "impostazioniSupporto": "Settings and support",
       "contatori": {
@@ -795,7 +793,6 @@
         "lineeGuida": "Guidelines"
       },
       "versione": "Prome {versione} · {motto}",
-      "vediPubblico": "View public profile",
       "contenuti": "Your content",
       "nessunGruppo": "You are not part of any group yet."
     },

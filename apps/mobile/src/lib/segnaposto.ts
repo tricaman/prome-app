@@ -58,9 +58,6 @@ export const SEGNAPOSTO_AVATAR = segnaposto(
   'nessuna foto nel profilo e nessun endpoint per caricarla',
 );
 export const SEGNAPOSTO_ANNO_CORSO = segnaposto("ProfiloDto non porta l'anno di corso");
-export const SEGNAPOSTO_CONDIVIDI_PROFILO = segnaposto(
-  "non esiste GET /profilo/:id: non c'è un profilo di terzi da aprire",
-);
 
 // --- Account -----------------------------------------------------------------
 

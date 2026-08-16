@@ -281,7 +281,10 @@ function Modulo({ profilo, t }: { profilo: ProfiloDto; t: ReturnType<typeof useT
           </View>
         </Card>
 
-        <TitoloSezione>{t('app.impostazioni.modificaProfilo.profiloPubblico')}</TitoloSezione>
+        {/* Non «Profilo pubblico», che era il titolo del disegno: un profilo
+            pubblico non esiste e non esisterà. Qui si va a decidere chi vede
+            quello che scrivi, dentro Prome. */}
+        <TitoloSezione>{t('app.impostazioni.privacy')}</TitoloSezione>
         <Elenco>
           <RigaElenco
             icona="scudo"
