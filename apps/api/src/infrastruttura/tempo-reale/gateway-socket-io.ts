@@ -10,6 +10,7 @@ import { env } from '../../config/env';
 import { PortaIdentitaUtente } from '../../modules/profilo/porta-identita-utente';
 import {
   stanzaDiAula,
+  stanzaDiUtente,
   type GuardianoDellaStanza,
   type TrasportoInTempoReale,
 } from './trasporto';
@@ -61,6 +62,10 @@ export class GatewaySocketIo implements TrasportoInTempoReale, OnGatewayConnecti
     if (!utente) return void client.disconnect(true);
 
     client.data.utenteId = utente.id;
+
+    // La stanza personale, per gli avvisi: l'iscrizione è automatica perché
+    // l'identità appena verificata è l'unica ammissione che serve.
+    await client.join(stanzaDiUtente(utente.id));
   }
 
   /**

@@ -56,6 +56,11 @@
     "vuoto": {
       "titolo": "Ancora nulla qui",
       "descrizione": "Quando ci sarà qualcosa da vedere, lo troverai in questa pagina."
+    },
+    "risorsaNonTrovata": {
+      "titolo": "Contenuto non disponibile",
+      "descrizione": "Potrebbe essere stato eliminato, o non essere più visibile per te.",
+      "azione": "Torna alla bacheca"
     }
   },
   "validazione": {
@@ -333,7 +338,31 @@
     },
     "nuovoPost": "Nuovo post",
     "cerca": "Cerca post, materiali, aule studio…",
-    "notifiche": "Notifiche",
+    "notifiche": {
+      "titolo": "Notifiche",
+      "apri": "Apri le notifiche",
+      "nonLette": "{numero} da leggere",
+      "nonLetta": "Non letta",
+      "segnaTutte": "Segna tutte come lette",
+      "tipo": {
+        "COMMENTO": {
+          "titolo": "Nuovo commento",
+          "corpo": "Qualcuno ha commentato un tuo post"
+        },
+        "INVITO_AULA": {
+          "titolo": "Invito in aula studio",
+          "corpo": "Sei stato invitato in un'aula studio"
+        },
+        "INVITO_GRUPPO": {
+          "titolo": "Invito in un gruppo",
+          "corpo": "Sei stato invitato in un gruppo"
+        }
+      },
+      "vuoto": {
+        "titolo": "Nessuna notifica",
+        "descrizione": "Quando qualcuno commenta un tuo post o ti invita in uno spazio, lo troverai qui."
+      }
+    },
     "accesso": {
       "titolo": "Entra in Prome",
       "sommario": "Ti arriva un codice via email. Nessuna password da ricordare.",
@@ -658,14 +687,14 @@
       },
       "notifiche": {
         "titolo": "Quando ti avvisiamo",
-        "stato": "Gli avvisi non vengono ancora recapitati: non c’è un fornitore di notifiche. Quello che scegli qui vale da subito e decide cosa riceverai quando arriveranno.",
+        "stato": "Le notifiche ti aspettano sempre qui nell'app, sulla campanella. Questi interruttori decidono cosa ti interrompe anche fuori — l'email oggi, le notifiche sul telefono quando ci sarà chi le recapita.",
         "commenti": {
           "titolo": "Commenti ai tuoi post",
-          "testo": "Quando qualcuno commenta un contenuto che hai scritto. Mai per i tuoi commenti."
+          "testo": "Quando qualcuno commenta un contenuto che hai scritto. Mai per i tuoi commenti. Ti mandiamo anche un'email."
         },
         "inviti": {
           "titolo": "Inviti",
-          "testo": "Quando qualcuno ti invita in un’aula studio o in un gruppo."
+          "testo": "Quando qualcuno ti invita in un'aula studio o in un gruppo. L'email dell'invito arriva comunque: serve ad accettarlo."
         },
         "cosaTiAvvisa": "Cosa ti avvisa",
         "silenzia": "Silenzia",

@@ -29,6 +29,10 @@ export const ProfiloErrorCode = {
   // diverse — «quel corso non esiste» e «quel corso non si offre più».
   CORSO_NON_TROVATO: 'PR011',
   CORSO_NON_ATTIVO: 'PR012',
+
+  /** Copre insieme «non esiste» e «non è tua»: distinguerli direbbe a chi
+   *  indovina gli id che quella notifica esiste per qualcun altro. */
+  NOTIFICA_NOT_FOUND: 'PR013',
 } as const;
 
 export type ProfiloErrorCode = (typeof ProfiloErrorCode)[keyof typeof ProfiloErrorCode];

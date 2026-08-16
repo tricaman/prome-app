@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { AvatarUtente } from '@/components/app/avatar-utente';
+import { CampanellaNotifiche } from '@/components/app/campanella-notifiche';
 import { ThemeToggle } from '@/components/layout';
 import { cn } from '@/lib/utils';
 
@@ -14,12 +15,16 @@ export interface AppTopbarProps {
 /**
  * Barra superiore dell'app: dove ci si trova, e le azioni della schermata.
  *
- * Non ha la campana delle notifiche né il campo di ricerca che aveva prima.
- * La campana era un bottone senza gesto con un pallino sempre acceso — diceva
- * «c'è qualcosa di nuovo» a ogni pagina, per sempre, e non c'era nulla da
- * aprire; il campo di ricerca era un riquadro di testo, non un campo, e
- * nessuna ricerca esiste ancora sui contenuti. Erano in cima a ogni schermata
- * dell'app, che è il posto peggiore in cui tenere due cose finte.
+ * **La campana è tornata, e stavolta è vera.** Quella tolta a luglio era un
+ * bottone senza gesto con un pallino sempre acceso — diceva «c'è qualcosa di
+ * nuovo» a ogni pagina, per sempre, e non c'era nulla da aprire. Questa conta
+ * le notifiche non lette dal server e porta al loro elenco: se il numero non
+ * c'è, non c'è. Il campo di ricerca invece resta fuori: nessuna ricerca
+ * esiste ancora sui contenuti, e un riquadro finto in cima a ogni schermata
+ * era il posto peggiore dove tenerlo.
+ *
+ * Sta qui e non nelle `azioni` delle pagine: dieci pagine la renderebbero in
+ * dieci punti, e quella dimenticata sarebbe una schermata senza campanella.
  */
 export function AppTopbar({ titolo, azioni, className }: AppTopbarProps) {
   return (
@@ -33,6 +38,7 @@ export function AppTopbar({ titolo, azioni, className }: AppTopbarProps) {
 
       <div className="ml-auto flex flex-none items-center gap-3">
         {azioni}
+        <CampanellaNotifiche />
         <ThemeToggle className="size-[42px] rounded-[14px] border border-bordo bg-superficie" />
         <AvatarUtente />
       </div>

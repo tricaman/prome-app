@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Linking, Pressable, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { pesoLeggibile } from '@prome/app-core';
+import { pesoLeggibile, statusErrore } from '@prome/app-core';
 import {
   commentaPost,
   eliminaCommento,
@@ -18,7 +18,7 @@ import { useTema } from '@/theme';
 import { useApiMutation, useT } from '@/hooks';
 import { TarghettaAllegato } from '@/components/contenuti';
 import { SegnalaEBlocca } from '@/components/app/segnala-e-blocca';
-import { QueryBoundary } from '@/components/feedback';
+import { ErrorState, QueryBoundary, RisorsaNonTrovata } from '@/components/feedback';
 import { Avatar, Button, Card, Icona, Input, Intestazione, Screen, Text } from '@/components/ui';
 
 /**
@@ -39,7 +39,15 @@ export default function SchermataPost() {
     <>
       <Intestazione conIndietro />
       <Screen scorrevole>
-        <QueryBoundary query={post}>
+        <QueryBoundary query={post}
+          errore={(errore, riprova) =>
+            statusErrore(errore) === 404 ? (
+              <RisorsaNonTrovata />
+            ) : (
+              <ErrorState errore={errore} onRiprova={riprova} />
+            )
+          }
+        >
           {({ data }) => {
             const autore =
               [data.autore.nome, data.autore.cognome].filter(Boolean).join(' ') ||

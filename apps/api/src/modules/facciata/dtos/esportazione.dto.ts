@@ -94,6 +94,13 @@ class DispositivoEsportatoDto {
   @ApiProperty() registratoIl!: string;
 }
 
+/** Senza il risorsaId: l'identificativo di un contenuto altrui, illeggibile da solo. */
+class NotificaEsportataDto {
+  @ApiProperty() tipo!: string;
+  @ApiProperty() letta!: boolean;
+  @ApiProperty() ricevutaIl!: string;
+}
+
 class BloccoEsportatoDto {
   @ApiProperty() utenteId!: string;
   @ApiProperty() bloccatoIl!: string;
@@ -136,6 +143,9 @@ class ProfiloEsportatoDto {
 
   @ApiProperty({ type: [DispositivoEsportatoDto] })
   dispositiviRegistrati!: DispositivoEsportatoDto[];
+
+  @ApiProperty({ type: [NotificaEsportataDto] })
+  notifiche!: NotificaEsportataDto[];
 
   @ApiProperty({ type: [BloccoEsportatoDto], description: 'Chi hai bloccato. Chi ha bloccato te non è un tuo dato.' })
   bloccati!: BloccoEsportatoDto[];

@@ -49,8 +49,26 @@ export interface SegnalazioneDaRecapitare {
   estratto: string;
 }
 
+/**
+ * L'email che accompagna la notifica di un commento: la campanella dentro
+ * l'app, questa fuori. Porta SOLO il collegamento al post — niente testo del
+ * commento, niente nome di chi ha scritto: un'email attraversa un fornitore e
+ * finisce in caselle inoltrate, condivise, violate — è il posto meno protetto
+ * in cui un dato personale possa finire. Chi apre il collegamento legge tutto
+ * dentro l'app, dove la visibilità vale ancora.
+ */
+export interface NotificaDiCommentoDaRecapitare {
+  /** Il post commentato, dentro l'app: URL_APP_WEB + percorso. */
+  collegamento: string;
+}
+
 export interface CanaleEmail {
   inviaCodiceAccesso(destinatario: string, codice: string, lingua: string): Promise<void>;
+  inviaNotificaCommento(
+    destinatario: string,
+    notifica: NotificaDiCommentoDaRecapitare,
+    lingua: string,
+  ): Promise<void>;
   inviaInvitoAulaStudio(
     destinatario: string,
     invito: InvitoDaRecapitare,

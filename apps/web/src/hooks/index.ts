@@ -7,3 +7,4 @@
  */
 export { useApiMutation, useForm, type OpzioniApiMutation, type FormProme } from '@prome/app-core';
 export { useMediaQuery, useSchermoPiccolo } from './use-media-query';
+export { useNotificheLive } from './use-notifiche';

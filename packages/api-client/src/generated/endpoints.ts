@@ -38,6 +38,7 @@ import type {
   CompletaProfiloDto,
   ConcediPermesso200,
   CondividiMaterialeAula201,
+  ContaNotificheNonLette200,
   CreaArgomento201,
   CreaArgomentoDto,
   CreaAulaStudio201,
@@ -61,6 +62,8 @@ import type {
   ElencaCorsiDiUniversitaParams,
   ElencaMieiGruppi200,
   ElencaMieiGruppiParams,
+  ElencaNotifiche200,
+  ElencaNotificheParams,
   ElencaPost200,
   ElencaPostParams,
   ElencaUniversita200,
@@ -112,6 +115,8 @@ import type {
   SbloccaUtente200,
   ScaricaMieiDati200,
   ScriviInAula201,
+  SegnaNotificaLetta200,
+  SegnaTutteLeNotificheLette200,
   SegnalaContenuto201,
   StatoDelServizio200,
   VerificaCodiceAccesso200,
@@ -3249,6 +3254,317 @@ export const useAccettaInvito = <TError = ErrorResponseDto,
       > => {
 
       const mutationOptions = getAccettaInvitoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Le mie notifiche, dalla più recente
+ */
+export const elencaNotifiche = (
+    params?: ElencaNotificheParams,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ElencaNotifiche200>(
+      {url: `/notifiche`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getElencaNotificheQueryKey = (params?: ElencaNotificheParams,) => {
+    return [
+    `/notifiche`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getElencaNotificheQueryOptions = <TData = Awaited<ReturnType<typeof elencaNotifiche>>, TError = ErrorResponseDto>(params?: ElencaNotificheParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaNotifiche>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getElencaNotificheQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof elencaNotifiche>>> = ({ signal }) => elencaNotifiche(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof elencaNotifiche>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ElencaNotificheQueryResult = NonNullable<Awaited<ReturnType<typeof elencaNotifiche>>>
+export type ElencaNotificheQueryError = ErrorResponseDto
+
+
+export function useElencaNotifiche<TData = Awaited<ReturnType<typeof elencaNotifiche>>, TError = ErrorResponseDto>(
+ params: undefined |  ElencaNotificheParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaNotifiche>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaNotifiche>>,
+          TError,
+          Awaited<ReturnType<typeof elencaNotifiche>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaNotifiche<TData = Awaited<ReturnType<typeof elencaNotifiche>>, TError = ErrorResponseDto>(
+ params?: ElencaNotificheParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaNotifiche>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaNotifiche>>,
+          TError,
+          Awaited<ReturnType<typeof elencaNotifiche>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaNotifiche<TData = Awaited<ReturnType<typeof elencaNotifiche>>, TError = ErrorResponseDto>(
+ params?: ElencaNotificheParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaNotifiche>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Le mie notifiche, dalla più recente
+ */
+
+export function useElencaNotifiche<TData = Awaited<ReturnType<typeof elencaNotifiche>>, TError = ErrorResponseDto>(
+ params?: ElencaNotificheParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaNotifiche>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getElencaNotificheQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Quante notifiche non ho ancora letto
+ */
+export const contaNotificheNonLette = (
+    
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ContaNotificheNonLette200>(
+      {url: `/notifiche/conteggio`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getContaNotificheNonLetteQueryKey = () => {
+    return [
+    `/notifiche/conteggio`
+    ] as const;
+    }
+
+    
+export const getContaNotificheNonLetteQueryOptions = <TData = Awaited<ReturnType<typeof contaNotificheNonLette>>, TError = ErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof contaNotificheNonLette>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getContaNotificheNonLetteQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof contaNotificheNonLette>>> = ({ signal }) => contaNotificheNonLette(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof contaNotificheNonLette>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ContaNotificheNonLetteQueryResult = NonNullable<Awaited<ReturnType<typeof contaNotificheNonLette>>>
+export type ContaNotificheNonLetteQueryError = ErrorResponseDto
+
+
+export function useContaNotificheNonLette<TData = Awaited<ReturnType<typeof contaNotificheNonLette>>, TError = ErrorResponseDto>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof contaNotificheNonLette>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof contaNotificheNonLette>>,
+          TError,
+          Awaited<ReturnType<typeof contaNotificheNonLette>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useContaNotificheNonLette<TData = Awaited<ReturnType<typeof contaNotificheNonLette>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof contaNotificheNonLette>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof contaNotificheNonLette>>,
+          TError,
+          Awaited<ReturnType<typeof contaNotificheNonLette>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useContaNotificheNonLette<TData = Awaited<ReturnType<typeof contaNotificheNonLette>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof contaNotificheNonLette>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Quante notifiche non ho ancora letto
+ */
+
+export function useContaNotificheNonLette<TData = Awaited<ReturnType<typeof contaNotificheNonLette>>, TError = ErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof contaNotificheNonLette>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getContaNotificheNonLetteQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Segna tutto come letto
+ */
+export const segnaTutteLeNotificheLette = (
+    
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<SegnaTutteLeNotificheLette200>(
+      {url: `/notifiche/lette`, method: 'PUT'
+    },
+      options);
+    }
+  
+
+
+export const getSegnaTutteLeNotificheLetteMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof segnaTutteLeNotificheLette>>, TError,void, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof segnaTutteLeNotificheLette>>, TError,void, TContext> => {
+
+const mutationKey = ['segnaTutteLeNotificheLette'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof segnaTutteLeNotificheLette>>, void> = () => {
+          
+
+          return  segnaTutteLeNotificheLette(requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SegnaTutteLeNotificheLetteMutationResult = NonNullable<Awaited<ReturnType<typeof segnaTutteLeNotificheLette>>>
+    
+    export type SegnaTutteLeNotificheLetteMutationError = ErrorResponseDto
+
+    /**
+ * @summary Segna tutto come letto
+ */
+export const useSegnaTutteLeNotificheLette = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof segnaTutteLeNotificheLette>>, TError,void, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof segnaTutteLeNotificheLette>>,
+        TError,
+        void,
+        TContext
+      > => {
+
+      const mutationOptions = getSegnaTutteLeNotificheLetteMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Segna una notifica come letta
+ */
+export const segnaNotificaLetta = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<SegnaNotificaLetta200>(
+      {url: `/notifiche/${id}/letta`, method: 'PUT'
+    },
+      options);
+    }
+  
+
+
+export const getSegnaNotificaLettaMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof segnaNotificaLetta>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof segnaNotificaLetta>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['segnaNotificaLetta'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof segnaNotificaLetta>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  segnaNotificaLetta(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SegnaNotificaLettaMutationResult = NonNullable<Awaited<ReturnType<typeof segnaNotificaLetta>>>
+    
+    export type SegnaNotificaLettaMutationError = ErrorResponseDto
+
+    /**
+ * @summary Segna una notifica come letta
+ */
+export const useSegnaNotificaLetta = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof segnaNotificaLetta>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof segnaNotificaLetta>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getSegnaNotificaLettaMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

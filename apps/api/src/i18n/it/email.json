@@ -11,6 +11,14 @@
     "istruzioni": "Inseriscilo in Prome entro {minuti} minuti. Dopo scade e ne va chiesto uno nuovo.",
     "ignora": "Se non hai chiesto tu di entrare, ignora questo messaggio: senza il codice nessuno può accedere."
   },
+  "notificaCommento": {
+    "oggetto": "Qualcuno ha commentato un tuo post su Prome",
+    "anteprima": "Apri il post per leggere il commento e rispondere.",
+    "titolo": "Nuovo commento a un tuo post",
+    "istruzioni": "Qualcuno ha commentato un contenuto che hai pubblicato. Apri il post per leggere il commento e rispondere.",
+    "azione": "Apri il post",
+    "gestione": "Puoi spegnere queste email da Impostazioni → Quando ti avvisiamo, dentro Prome."
+  },
   "invitoAula": {
     "oggetto": "{invitante} ti invita in aula studio su Prome",
     "anteprima": "Apri l’invito per entrare in «{titoloAula}».",

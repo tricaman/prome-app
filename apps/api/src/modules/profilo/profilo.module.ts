@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AccessoModule } from '../../infrastruttura/accesso/accesso.module';
 import { CatalogoService } from './catalogo/catalogo.service';
+import { NotificheInAppService } from './notifiche-in-app.service';
 import { PortaIdentitaUtente } from './porta-identita-utente';
 import { ProfiloService } from './profilo.service';
 
@@ -23,7 +24,7 @@ import { ProfiloService } from './profilo.service';
  */
 @Module({
   imports: [AccessoModule],
-  providers: [ProfiloService, CatalogoService, PortaIdentitaUtente],
-  exports: [ProfiloService, CatalogoService, PortaIdentitaUtente],
+  providers: [ProfiloService, CatalogoService, NotificheInAppService, PortaIdentitaUtente],
+  exports: [ProfiloService, CatalogoService, NotificheInAppService, PortaIdentitaUtente],
 })
 export class ProfiloModule {}

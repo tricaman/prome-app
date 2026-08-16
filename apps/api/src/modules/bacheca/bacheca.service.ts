@@ -66,12 +66,17 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
    */
   async elabora(tipo: string, payload: unknown): Promise<void> {
     if (tipo !== COMMENTO_SCRITTO) return;
-    const { postId, destinatarioId, autoreId } = payload as PayloadCommentoScritto;
+    const { commentoId, postId, destinatarioId, autoreId } = payload as PayloadCommentoScritto;
 
     await this.avvisi.avvisa(
       destinatarioId,
-      'commento',
       {
+        tipo: 'COMMENTO',
+        risorsaTipo: 'POST',
+        risorsaId: postId,
+        // Il commento, non il post: due commenti sono due notifiche, e la
+        // stessa consegna ripetuta dall'outbox resta una.
+        chiaveDeduplicazione: commentoId,
         percorso: `/app/post/${postId}`,
         titolo: 'notifiche.commento.titolo',
         corpo: 'notifiche.commento.corpo',

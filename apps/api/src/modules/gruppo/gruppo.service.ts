@@ -322,8 +322,11 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
 
     await this.avvisi.avvisaIndirizzo(
       invito.destinatario,
-      'invito',
       {
+        tipo: 'INVITO_GRUPPO',
+        risorsaTipo: 'INVITO_GRUPPO',
+        risorsaId: invito.id,
+        chiaveDeduplicazione: invito.id,
         percorso: `/app/inviti-gruppo/${invito.id}`,
         titolo: 'notifiche.invito.titolo',
         corpo: 'notifiche.invito.corpo',

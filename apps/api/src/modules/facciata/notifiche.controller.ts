@@ -1,27 +1,93 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { PreferenzeDiNotificaResponse } from '@prome/contracts';
-import { ApiWrappedResponse, ResponseMessage } from '../../common/decorators';
+import type {
+  ConteggioNotificheResponse,
+  NotificaResponse,
+  PaginatedResult,
+  PreferenzeDiNotificaResponse,
+} from '@prome/contracts';
+import { ApiPaginatedResponse, ApiWrappedResponse, ResponseMessage } from '../../common/decorators';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 import { ProfiloService } from '../profilo/profilo.service';
+import { NotificheInAppService } from '../profilo/notifiche-in-app.service';
 import type { UtenteDiDominio } from '../profilo/porta-identita-utente';
 import {
   AggiornaPreferenzeDto,
+  ConteggioNotificheDto,
+  NotificaDto,
   PreferenzeDiNotificaDto,
   RegistraDispositivoDto,
 } from './dtos/notifiche.dto';
 import { Utente } from './guardia-accesso';
 
 /**
- * Gli apparecchi su cui si vuole essere raggiunti, e cosa si vuole sapere.
+ * La casella delle notifiche, gli apparecchi su cui si vuole essere raggiunti
+ * e cosa si vuole sapere.
  *
  * Sta sotto Profilo perché è Profilo a possedere «l'Utente come persona
- * identificabile e **contattabile**»: gli apparecchi e le preferenze sono la
- * forma tecnica di quella contattabilità, non un contesto a sé.
+ * identificabile e **contattabile**»: la casella, gli apparecchi e le
+ * preferenze sono la forma tecnica di quella contattabilità, non un contesto
+ * a sé.
  */
 @ApiTags('notifiche')
 @Controller('notifiche')
 export class NotificheController {
-  constructor(private readonly profilo: ProfiloService) {}
+  constructor(
+    private readonly profilo: ProfiloService,
+    private readonly notifiche: NotificheInAppService,
+  ) {}
+
+  @Get()
+  @ApiOperation({ operationId: 'elencaNotifiche', summary: 'Le mie notifiche, dalla più recente' })
+  @ApiPaginatedResponse({ type: NotificaDto })
+  elenca(
+    @Utente() utente: UtenteDiDominio,
+    @Query() query: PaginationDto,
+  ): Promise<PaginatedResult<NotificaResponse>> {
+    return this.notifiche.elenca(utente.id, query);
+  }
+
+  @Get('conteggio')
+  @ApiOperation({
+    operationId: 'contaNotificheNonLette',
+    summary: 'Quante notifiche non ho ancora letto',
+  })
+  @ApiWrappedResponse({ type: ConteggioNotificheDto })
+  conteggio(@Utente() utente: UtenteDiDominio): Promise<ConteggioNotificheResponse> {
+    return this.notifiche.contaNonLette(utente.id);
+  }
+
+  // Dichiarata PRIMA di `:id/letta`: le rotte si valutano in ordine, e
+  // «lette» finirebbe catturato come un id.
+  @Put('lette')
+  @ApiOperation({ operationId: 'segnaTutteLeNotificheLette', summary: 'Segna tutto come letto' })
+  @ApiWrappedResponse({ type: ConteggioNotificheDto })
+  @ResponseMessage('successes.NOTIFICHE_LETTE')
+  segnaTutte(@Utente() utente: UtenteDiDominio): Promise<ConteggioNotificheResponse> {
+    return this.notifiche.segnaTutteLette(utente.id);
+  }
+
+  @Put(':id/letta')
+  @ApiOperation({ operationId: 'segnaNotificaLetta', summary: 'Segna una notifica come letta' })
+  @ApiWrappedResponse({ type: NotificaDto })
+  @ResponseMessage('successes.NOTIFICA_LETTA')
+  segnaLetta(
+    @Utente() utente: UtenteDiDominio,
+    @Param('id') id: string,
+  ): Promise<NotificaResponse> {
+    return this.notifiche.segnaLetta(utente.id, id);
+  }
 
   @Post('dispositivi')
   @ApiOperation({

@@ -6,7 +6,8 @@ import { useApriSalaAulaStudio, useLeggiMioProfilo, type SalaDto } from '@prome/
 import { percorsiApp } from '@/lib/percorsi-app';
 import { Link } from '@/i18n/navigazione';
 import { Avatar, Chip, Icona } from '@/components/ui';
-import { QueryBoundary } from '@/components/feedback';
+import { statusErrore } from '@prome/app-core';
+import { ErrorState, QueryBoundary, RisorsaNonTrovata } from '@/components/feedback';
 import { cn } from '@/lib/utils';
 import { ChatAula } from './chat-aula';
 import { MaterialiAula } from './materiali-aula';
@@ -37,7 +38,15 @@ export function SalaAula({ aulaId }: { aulaId: string }) {
   const io = useLeggiMioProfilo();
 
   return (
-    <QueryBoundary query={sala}>
+    <QueryBoundary query={sala}
+      errore={(errore, riprova) =>
+        statusErrore(errore) === 404 ? (
+          <RisorsaNonTrovata />
+        ) : (
+          <ErrorState errore={errore} onRiprova={riprova} />
+        )
+      }
+    >
       {({ data }) => (
         <>
           <Intestazione

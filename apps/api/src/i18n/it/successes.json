@@ -48,5 +48,7 @@
   "PREFERENZE_AGGIORNATE": "Preferenze aggiornate",
   "UTENTE_BLOCCATO": "Utente bloccato: non vedrete più i contenuti l’uno dell’altro",
   "UTENTE_SBLOCCATO": "Utente sbloccato",
-  "SEGNALAZIONE_RICEVUTA": "Grazie della segnalazione: la guardiamo entro 24 ore"
+  "SEGNALAZIONE_RICEVUTA": "Grazie della segnalazione: la guardiamo entro 24 ore",
+  "NOTIFICA_LETTA": "Notifica letta",
+  "NOTIFICHE_LETTE": "Tutte le notifiche sono state lette"
 }

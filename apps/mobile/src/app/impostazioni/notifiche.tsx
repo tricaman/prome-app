@@ -30,13 +30,12 @@ const ASSI = ['commenti', 'inviti'] as const;
  * Tolta dall'indice e messa per conto suo: due interruttori e una fascia
  * oraria non appartengono alla stessa schermata di privacy e account.
  *
- * **La scheda in cima non dice che le notifiche sono attive, perché non lo
- * sono.** Sul telefono manca il modulo nativo che registri il dispositivo e a
- * monte manca il fornitore che recapiti: una riga verde con la spunta sarebbe
- * falsa due volte. Dice invece cosa succede davvero — la scelta si salva, il
- * server la rispetta, la consegna non c'è ancora — che è la stessa cosa che il
- * web dichiara con le stesse parole. Una scheda che dichiara il proprio stato
- * non è una promessa falsa; una che lo nasconde sì.
+ * **La scheda in cima dice cosa questi interruttori governano davvero.** Da
+ * quando esiste la casella, le notifiche arrivano SEMPRE sulla campanella: le
+ * preferenze decidono cosa interrompe anche fuori dall'app — l'email oggi, il
+ * push quando ci sarà un fornitore che recapita (sul telefono manca anche il
+ * modulo nativo che registri il token: E12.3). Una scheda che dichiara il
+ * proprio stato non è una promessa falsa; una che lo nasconde sì.
  *
  * I due assi sono indipendenti e si mandano **uno per volta**: il gesto manda
  * solo quello toccato, quindi l'altro non può essere azzerato da una risposta

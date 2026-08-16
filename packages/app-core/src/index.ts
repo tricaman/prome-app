@@ -16,6 +16,7 @@ export {
   rispostaErrore,
   messaggioErrore,
   codiceErrore,
+  statusErrore,
   riferimentoErrore,
   dettagliValidazione,
 } from './errori';

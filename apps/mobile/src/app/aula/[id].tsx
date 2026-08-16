@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Linking, Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { caricaConAvanzamento, pesoLeggibile } from '@prome/app-core';
+import { caricaConAvanzamento, pesoLeggibile, statusErrore } from '@prome/app-core';
 import { LUNGHEZZA_MASSIMA_MESSAGGIO } from '@prome/contracts';
 import {
   concediPermesso,
@@ -27,7 +27,7 @@ import { rotte } from '@/content';
 import { scegliDocumento, scegliFoto, type FileScelto } from '@/lib/scelta-file';
 import { useTema } from '@/theme';
 import { useApiMutation, useChatAula, useT } from '@/hooks';
-import { QueryBoundary } from '@/components/feedback';
+import { ErrorState, QueryBoundary, RisorsaNonTrovata } from '@/components/feedback';
 import {
   Avatar,
   Button,
@@ -67,7 +67,15 @@ export default function SchermataAula() {
     <View style={{ flex: 1, backgroundColor: tema.colori.sfondo }}>
       <Intestazione conIndietro />
 
-      <QueryBoundary query={sala}>
+      <QueryBoundary query={sala}
+          errore={(errore, riprova) =>
+            statusErrore(errore) === 404 ? (
+              <RisorsaNonTrovata />
+            ) : (
+              <ErrorState errore={errore} onRiprova={riprova} />
+            )
+          }
+        >
         {({ data }) => (
           <>
             <View style={{ paddingHorizontal: tema.spaziatura[5], gap: tema.spaziatura[3] }}>

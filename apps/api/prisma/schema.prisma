@@ -145,6 +145,7 @@ model Profilo {
   impostazioniPrivacy ImpostazioniDiPrivacy?
   preferenzeNotifiche PreferenzeDiNotifica?
   dispositivi         DispositivoDiNotifica[]
+  notifiche           Notifica[]
   blocchiFatti        Blocco[]                @relation("bloccante")
   blocchiSubiti       Blocco[]                @relation("bloccato")
 
@@ -353,6 +354,65 @@ enum PiattaformaDiNotifica {
   WEB
 
   @@map("piattaforma_di_notifica")
+  @@schema("profilo")
+}
+
+/// La notifica in-app: la riga che la campanella conta e l'elenco mostra.
+///
+/// Nasce SEMPRE (salvo autore uguale al destinatario e coppie bloccate): le
+/// preferenze qui sopra governano i canali che interrompono — l'email, domani
+/// il push — mai questa riga. Chi apre la campanella vede tutto, chi spegne un
+/// asse chiede solo di non essere interrotto.
+///
+/// Non porta dati personali: né l'autore, né testi risolti — il client traduce
+/// dal `tipo`, e la risorsa si apre dentro l'app, dove le regole di visibilità
+/// valgono ancora. È la stessa scelta del payload push.
+model Notifica {
+  id             String @id @default(uuid())
+  destinatarioId String
+
+  /// Cosa è successo: decide il testo che il client mostra.
+  tipo TipoDiNotifica
+
+  /// Dove porta il tocco: ogni client costruisce il proprio percorso da qui.
+  /// Due campi distinti dal tipo, perché domani un tipo nuovo può puntare a
+  /// una risorsa che esiste già.
+  risorsaTipo RisorsaDiNotifica
+  risorsaId   String
+
+  /// Una per fatto: il commentoId per il commento, l'invitoId per gli inviti.
+  /// L'unicità con il destinatario È la deduplica dell'outbox at-least-once:
+  /// lo stesso fatto consegnato due volte trova la riga e si ferma lì.
+  chiaveDeduplicazione String
+
+  lettaIl      DateTime?
+  creatoIl     DateTime  @default(now())
+  aggiornatoIl DateTime  @default(now()) @updatedAt
+
+  profilo Profilo @relation(fields: [destinatarioId], references: [utenteId], onDelete: Cascade)
+
+  @@unique([destinatarioId, chiaveDeduplicazione])
+  @@index([destinatarioId, creatoIl])
+  @@index([destinatarioId, lettaIl])
+  @@map("notifica")
+  @@schema("profilo")
+}
+
+enum TipoDiNotifica {
+  COMMENTO
+  INVITO_AULA
+  INVITO_GRUPPO
+
+  @@map("tipo_di_notifica")
+  @@schema("profilo")
+}
+
+enum RisorsaDiNotifica {
+  POST
+  INVITO_AULA
+  INVITO_GRUPPO
+
+  @@map("risorsa_di_notifica")
   @@schema("profilo")
 }
 

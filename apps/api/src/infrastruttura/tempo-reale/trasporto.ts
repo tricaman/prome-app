@@ -51,6 +51,14 @@ export const TRASPORTO_TEMPO_REALE = Symbol('TrasportoInTempoReale');
 export const stanzaDiAula = (aulaStudioId: string): string => `aula-studio:${aulaStudioId}`;
 
 /**
+ * La stanza personale di un utente: dove arrivano i suoi avvisi in tempo
+ * reale. Nessun guardiano — l'identità verificata alla connessione È
+ * l'ammissione alla propria stanza, e nessuno può chiedere di entrare in
+ * quella di un altro perché non esiste un messaggio per farlo.
+ */
+export const stanzaDiUtente = (utenteId: string): string => `utente:${utenteId}`;
+
+/**
  * Chi può entrare in una stanza.
  *
  * Il trasporto non decide le ammissioni, ma non può nemmeno lasciare che

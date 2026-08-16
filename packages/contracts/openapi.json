@@ -2768,6 +2768,248 @@
         ]
       }
     },
+    "/notifiche": {
+      "get": {
+        "operationId": "elencaNotifiche",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Campo di ordinamento (dipende dalla risorsa)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "asc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/NotificaDto"
+                      }
+                    },
+                    "meta": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ResponseMetaDto"
+                        },
+                        {
+                          "properties": {
+                            "pagination": {
+                              "$ref": "#/components/schemas/PaginationMetaDto"
+                            }
+                          },
+                          "required": [
+                            "pagination"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Le mie notifiche, dalla più recente",
+        "tags": [
+          "notifiche"
+        ]
+      }
+    },
+    "/notifiche/conteggio": {
+      "get": {
+        "operationId": "contaNotificheNonLette",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ConteggioNotificheDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Quante notifiche non ho ancora letto",
+        "tags": [
+          "notifiche"
+        ]
+      }
+    },
+    "/notifiche/lette": {
+      "put": {
+        "operationId": "segnaTutteLeNotificheLette",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ConteggioNotificheDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Segna tutto come letto",
+        "tags": [
+          "notifiche"
+        ]
+      }
+    },
+    "/notifiche/{id}/letta": {
+      "put": {
+        "operationId": "segnaNotificaLetta",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/NotificaDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Segna una notifica come letta",
+        "tags": [
+          "notifiche"
+        ]
+      }
+    },
     "/notifiche/dispositivi": {
       "post": {
         "operationId": "registraDispositivo",
@@ -4967,6 +5209,58 @@
           "chiave"
         ]
       },
+      "NotificaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "COMMENTO",
+              "INVITO_AULA",
+              "INVITO_GRUPPO"
+            ]
+          },
+          "risorsaTipo": {
+            "type": "string",
+            "enum": [
+              "POST",
+              "INVITO_AULA",
+              "INVITO_GRUPPO"
+            ]
+          },
+          "risorsaId": {
+            "type": "string"
+          },
+          "letta": {
+            "type": "boolean"
+          },
+          "creatoIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tipo",
+          "risorsaTipo",
+          "risorsaId",
+          "letta",
+          "creatoIl"
+        ]
+      },
+      "ConteggioNotificheDto": {
+        "type": "object",
+        "properties": {
+          "nonLette": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "nonLette"
+        ]
+      },
       "RegistraDispositivoDto": {
         "type": "object",
         "properties": {
@@ -5289,7 +5583,7 @@
             "type": "string",
             "example": "Economia e commercio"
           },
-          "codice": {
+          "codiceCorso": {
             "type": "string",
             "example": "6612"
           },
@@ -5304,7 +5598,7 @@
         },
         "required": [
           "nome",
-          "codice",
+          "codiceCorso",
           "classe",
           "durataAnni"
         ]
@@ -5337,6 +5631,25 @@
         "required": [
           "piattaforma",
           "registratoIl"
+        ]
+      },
+      "NotificaEsportataDto": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string"
+          },
+          "letta": {
+            "type": "boolean"
+          },
+          "ricevutaIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "tipo",
+          "letta",
+          "ricevutaIl"
         ]
       },
       "BloccoEsportatoDto": {
@@ -5393,6 +5706,12 @@
               "$ref": "#/components/schemas/DispositivoEsportatoDto"
             }
           },
+          "notifiche": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificaEsportataDto"
+            }
+          },
           "bloccati": {
             "description": "Chi hai bloccato. Chi ha bloccato te non è un tuo dato.",
             "type": "array",
@@ -5410,6 +5729,7 @@
           "impostazioniPrivacy",
           "preferenzeDiNotifica",
           "dispositiviRegistrati",
+          "notifiche",
           "bloccati"
         ]
       },

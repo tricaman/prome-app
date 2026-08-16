@@ -3,6 +3,7 @@ import type {
   CanaleEmail,
   InvitoAlGruppoDaRecapitare,
   InvitoDaRecapitare,
+  NotificaDiCommentoDaRecapitare,
   SegnalazioneDaRecapitare,
 } from './canale-email';
 
@@ -27,6 +28,9 @@ export class CanaleEmailSviluppo implements CanaleEmail {
   /** Ultimo invito per destinatario, con lo stesso scopo. */
   private readonly ultimiInviti = new Map<string, InvitoDaRecapitare>();
 
+  /** Ultima notifica di commento per destinatario: la guardano i test. */
+  private readonly ultimeNotificheCommento = new Map<string, NotificaDiCommentoDaRecapitare>();
+
   private readonly ultimiInvitiAlGruppo = new Map<string, InvitoAlGruppoDaRecapitare>();
 
   /**
@@ -39,6 +43,18 @@ export class CanaleEmailSviluppo implements CanaleEmail {
     this.ultimiCodici.set(destinatario.toLowerCase(), codice);
     this.logger.warn(
       `[SVILUPPO] Codice di accesso per ${destinatario} (lingua ${lingua}): ${codice} — nessuna email inviata.`,
+    );
+    return Promise.resolve();
+  }
+
+  inviaNotificaCommento(
+    destinatario: string,
+    notifica: NotificaDiCommentoDaRecapitare,
+    lingua: string,
+  ): Promise<void> {
+    this.ultimeNotificheCommento.set(destinatario.toLowerCase(), notifica);
+    this.logger.warn(
+      `[SVILUPPO] Notifica di commento per ${destinatario} (lingua ${lingua}): ${notifica.collegamento} — nessuna email inviata.`,
     );
     return Promise.resolve();
   }
@@ -99,5 +115,10 @@ export class CanaleEmailSviluppo implements CanaleEmail {
   /** Solo per i test: l'ultimo invito a un gruppo mandato a quell'indirizzo. */
   ultimoInvitoAlGruppoPer(destinatario: string): InvitoAlGruppoDaRecapitare | undefined {
     return this.ultimiInvitiAlGruppo.get(destinatario.toLowerCase());
+  }
+
+  /** Solo per i test: l'ultima notifica di commento mandata a quell'indirizzo. */
+  ultimaNotificaCommentoPer(destinatario: string): NotificaDiCommentoDaRecapitare | undefined {
+    return this.ultimeNotificheCommento.get(destinatario.toLowerCase());
   }
 }

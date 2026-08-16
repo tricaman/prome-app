@@ -8,7 +8,7 @@
 
 export interface CorsoEsportatoDto {
   nome: string;
-  codice: string;
+  codiceCorso: string;
   classe: string;
   durataAnni: number;
 }

@@ -12,7 +12,8 @@ import { useApiMutation } from '@/hooks';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { useRouter } from '@/i18n/navigazione';
 import { Button, Card } from '@/components/ui';
-import { QueryBoundary } from '@/components/feedback';
+import { statusErrore } from '@prome/app-core';
+import { ErrorState, QueryBoundary, RisorsaNonTrovata } from '@/components/feedback';
 
 /**
  * Chi arriva dall'email di invito a un'aula studio.
@@ -60,7 +61,15 @@ export function AccettaInvitoAula({ invitoId }: { invitoId: string }) {
   }, [partecipanteCreato, aulaId, router]);
 
   return (
-    <QueryBoundary query={invito} dimensione="piena">
+    <QueryBoundary query={invito} dimensione="piena"
+      errore={(errore, riprova) =>
+        statusErrore(errore) === 404 ? (
+          <RisorsaNonTrovata />
+        ) : (
+          <ErrorState errore={errore} onRiprova={riprova} />
+        )
+      }
+    >
       {({ data }) => {
         // La scadenza la dichiara il server: l'ora del browser è modificabile,
         // e sarebbe una seconda copia della stessa regola.

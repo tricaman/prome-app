@@ -101,9 +101,17 @@ Tre marcatori, sempre insieme: la costante in quel file; `presto={SEGNAPOSTO_…
 
 È il caso del **profilo pubblico**. Il disegno prevedeva `prome.app/u/{nome}`, un bottone «Vedi profilo pubblico» e una pastiglia sulla scheda d'identità: niente di tutto questo esiste, e non è in ritardo. **I dati delle persone su Prome sono privati e non sono mai liberamente accessibili** — vedi la regola non negoziabile più su. Un profilo non ha un indirizzo pubblico, non finisce in un motore di ricerca e non si condivide. Per la stessa ragione la visibilità dei contenuti, quando compare accanto a un nome, porta sempre la sua etichetta: «Privato» da solo si legge come «questo profilo è privato», «Pubblico» come «questo profilo è sul web», e la seconda lettura è falsa.
 
+### Notifiche: campanella, elenco, 404
+
+La campanella sta **dentro `AppTopbar`**, non nelle `azioni` delle pagine: dieci pagine la renderebbero in dieci punti, e quella dimenticata sarebbe una schermata senza campanella. Porta il numero vero di non lette (`useNotificheLive`: query con rilettura a 60 s + socket sulla stanza personale che invalida — il socket non porta dati, porta un campanello) e naviga a `/app/notifiche`, che è una pagina e non un popover: ha un indirizzo, e la stessa forma esiste sul telefono.
+
+Il click su una riga **naviga subito e segna letta senza aspettare** (best-effort, niente `useApiMutation`: un toast a ogni click è rumore). I testi si traducono dal `tipo` sul client: la riga non porta nomi né frasi. La destinazione si costruisce da `risorsaTipo`+`risorsaId` con `percorsiApp.*`.
+
+**«Risorsa non trovata»**: le destinazioni (post, gruppo, sala, inviti) passano al `QueryBoundary` un ramo `errore` che su `statusErrore(e) === 404` mostra `RisorsaNonTrovata` — senza Riprova, perché riprovare un 404 produce lo stesso 404. Il 404 si riconosce dallo **status**, mai elencando codici di dominio.
+
 ### Preferenze di notifica
 
-`impostazioni-notifiche.tsx` **dichiara il proprio stato invece di tacerlo**: le preferenze si salvano davvero e il server le rispetta, ma nessun avviso viene ancora recapitato perché non c'è un fornitore, e la scheda lo dice in prima riga. È l'opposto degli interruttori tolti a luglio, che si dicevano attivi senza salvare niente — la differenza non è la presenza di un'infrastruttura, è che qui la parte mancante è scritta a schermo.
+`impostazioni-notifiche.tsx` **dichiara il proprio stato invece di tacerlo**: le preferenze si salvano davvero e il server le rilegge all'istante dell'invio, ma governano **i canali che interrompono** — l'email del commento oggi, il push quando ci sarà un fornitore — mai la campanella, dove le notifiche arrivano sempre. Spegnere un asse significa «non disturbarmi», non «nascondimi l'informazione», e la scheda lo dice in prima riga. È l'opposto degli interruttori tolti a luglio, che si dicevano attivi senza salvare niente.
 
 Come per la privacy: nessuno stato locale, si manda **solo l'asse toccato**, e se la scrittura fallisce l'interruttore torna dov'era.
 

@@ -23,7 +23,8 @@ import {
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
 import { useApiMutation, useT } from '@/hooks';
-import { QueryBoundary } from '@/components/feedback';
+import { statusErrore } from '@prome/app-core';
+import { ErrorState, QueryBoundary, RisorsaNonTrovata } from '@/components/feedback';
 import { Avatar, Button, Card, Chip, Icona, Input, Intestazione, Screen, Text } from '@/components/ui';
 import { etichettaVisibilita } from '@/lib/visibilita';
 import { SceltaVisibilitaGruppo } from '@/components/app/scelta-visibilita-gruppo';
@@ -45,7 +46,15 @@ export default function SchermataGruppo() {
   return (
     <View style={{ flex: 1 }}>
       <Intestazione conIndietro />
-      <QueryBoundary query={gruppo}>
+      <QueryBoundary query={gruppo}
+          errore={(errore, riprova) =>
+            statusErrore(errore) === 404 ? (
+              <RisorsaNonTrovata />
+            ) : (
+              <ErrorState errore={errore} onRiprova={riprova} />
+            )
+          }
+        >
         {({ data }) => <Contenuto gruppoId={id} dettaglio={data} />}
       </QueryBoundary>
     </View>

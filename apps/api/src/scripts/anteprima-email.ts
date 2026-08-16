@@ -68,6 +68,13 @@ async function genera(): Promise<void> {
     nomeCorrente = `codice-accesso.${lingua}`;
     await canale.inviaCodiceAccesso('anteprima@prome.app', '481902', lingua);
 
+    nomeCorrente = `notifica-commento.${lingua}`;
+    await canale.inviaNotificaCommento(
+      'anteprima@prome.app',
+      { collegamento: 'https://prome.app/app/post/anteprima' },
+      lingua,
+    );
+
     nomeCorrente = `invito-aula-studio.${lingua}`;
     await canale.inviaInvitoAulaStudio(
       'anteprima@prome.app',

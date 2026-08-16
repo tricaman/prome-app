@@ -9,6 +9,7 @@ import type { ProfiloEsportatoDtoCorso } from './profiloEsportatoDtoCorso';
 import type { ImpostazioniDiPrivacyDto } from './impostazioniDiPrivacyDto';
 import type { PreferenzeEsportateDto } from './preferenzeEsportateDto';
 import type { DispositivoEsportatoDto } from './dispositivoEsportatoDto';
+import type { NotificaEsportataDto } from './notificaEsportataDto';
 import type { BloccoEsportatoDto } from './bloccoEsportatoDto';
 
 export interface ProfiloEsportatoDto {
@@ -24,6 +25,7 @@ export interface ProfiloEsportatoDto {
   impostazioniPrivacy: ImpostazioniDiPrivacyDto;
   preferenzeDiNotifica: PreferenzeEsportateDto;
   dispositiviRegistrati: DispositivoEsportatoDto[];
+  notifiche: NotificaEsportataDto[];
   /** Chi hai bloccato. Chi ha bloccato te non è un tuo dato. */
   bloccati: BloccoEsportatoDto[];
 }

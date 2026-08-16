@@ -9,6 +9,7 @@ import { RecapitoFattiService } from '../modules/aula-studio/recapito-fatti.serv
 import { RecapitoFattiDelGruppoService } from '../modules/gruppo/recapito-fatti.service';
 import { RecapitoFattiDellaBachecaService } from '../modules/bacheca/recapito-fatti.service';
 import { PuliziaBachecaService } from '../modules/bacheca/pulizia-bacheca.service';
+import { NotificheInAppService } from '../modules/profilo/notifiche-in-app.service';
 import { CancellazioneService } from '../modules/cancellazione/cancellazione.service';
 
 /** Ogni quanto girano le pulizie. */
@@ -49,6 +50,7 @@ export class WorkerService implements OnApplicationBootstrap, OnApplicationShutd
     private readonly recapitoFattiDelGruppo: RecapitoFattiDelGruppoService,
     private readonly recapitoFattiDellaBacheca: RecapitoFattiDellaBachecaService,
     private readonly cancellazione: CancellazioneService,
+    private readonly notificheInApp: NotificheInAppService,
   ) {}
 
   onApplicationBootstrap(): void {
@@ -122,6 +124,17 @@ export class WorkerService implements OnApplicationBootstrap, OnApplicationShutd
     } catch (errore) {
       this.logger.error(
         'Il giro della cancellazione account è fallito: si riprova al prossimo giro',
+        errore instanceof Error ? errore.stack : undefined,
+      );
+    }
+
+    try {
+      // Le notifiche lette da più di trenta giorni: la campanella è un
+      // segnale, non un archivio. Le non lette restano.
+      await this.notificheInApp.eseguiGiro();
+    } catch (errore) {
+      this.logger.error(
+        'La pulizia delle notifiche è fallita: si riprova al prossimo giro',
         errore instanceof Error ? errore.stack : undefined,
       );
     }

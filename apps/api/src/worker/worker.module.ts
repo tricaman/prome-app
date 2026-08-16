@@ -4,6 +4,7 @@ import { registrazioneI18n } from '../config/i18n';
 import { PrismaModule } from '../database/prisma.module';
 import { MisurazioniModule } from '../infrastruttura/misurazioni/misurazioni.module';
 import { AulaStudioModule } from '../modules/aula-studio/aula-studio.module';
+import { ProfiloModule } from '../modules/profilo/profilo.module';
 import { BachecaModule } from '../modules/bacheca/bacheca.module';
 import { CancellazioneModule } from '../modules/cancellazione/cancellazione.module';
 import { GruppoModule } from '../modules/gruppo/gruppo.module';
@@ -38,6 +39,7 @@ import { WorkerService } from './worker.service';
     // @Global vale solo se il modulo è importato dalla radice di QUESTO
     // contesto: senza, la catena non potrebbe contare i completamenti.
     MisurazioniModule,
+    ProfiloModule,
     BachecaModule,
     AulaStudioModule,
     CancellazioneModule,

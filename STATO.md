@@ -141,6 +141,18 @@ Sul web le preferenze hanno di nuovo un pannello, e questa volta salva davvero. 
 
 Dispositivi e preferenze sono **detentori censiti** dal primo giorno: cadono con il profilo, la verifica del residuo li conta, e l'esportazione li include — senza il token, che non è un dato della persona ma il modo di raggiungere il suo apparecchio.
 
+### La casella delle notifiche, la campanella e l'email del commento ✅ (16 agosto 2026, sera)
+
+**Le notifiche ora si vedono.** Prima esistevano solo in uscita — un avviso spedito verso un fornitore che non c'è — e chi apriva l'app non trovava traccia di niente. Ora ogni avviso scrive una riga (`profilo.notifica`: tipo, risorsa, letta, con deduplica per fatto), e la riga alimenta la campanella col **numero vero** di non lette: nella topbar del web (dov'era stata tolta la campana finta col pallino sempre acceso — è tornata con qualcosa dietro) e nell'intestazione della bacheca sul telefono (`AzioneTonda` ha imparato il `conteggio`). Il tocco su una notifica la segna letta e naviga alla risorsa: il post nell'app; l'invito sulla sua pagina web, la stessa dell'email — sul telefono le schermate native di accettazione non esistono ancora.
+
+**La semantica delle preferenze è cambiata, ed è scritta a schermo.** La riga nasce SEMPRE (salvo sé stessi e coppie bloccate): spegnere un asse significa «non interrompermi», non «nascondimi l'informazione». Le preferenze governano i canali che interrompono — l'**email del commento**, nata oggi (solo il collegamento al post, zero dati personali, come il push; gli inviti tengono la loro email, che serve ad accettare) — e il push di domani. Il testo delle impostazioni non dice più «gli avvisi non vengono ancora recapitati»: in-app arrivano, ed è il push a mancare ancora (E12.3, la posizione sul fornitore non cambia).
+
+**Il badge si tiene vivo in due modi**, e la degradazione è dichiarata: un evento socket sulla stanza personale (`utente:{id}`, iscrizione automatica alla connessione, nel dato il solo uuid della riga) più una rilettura ogni 60 secondi. In produzione l'evento del commento parte dal **worker**, che non ha il server WS: lì arriva la rilettura, non il socket — chiuderla vorrà un adapter Redis, non è un difetto da inseguire oggi.
+
+**Il 404 ha una faccia.** Toccare la notifica di un post eliminato — o un segnalibro vecchio — mostra «Contenuto non disponibile» senza bottone Riprova (riprovare un 404 produce lo stesso 404), su tutte le destinazioni di entrambi i client. Si riconosce dallo **status** (`statusErrore`, nuovo in app-core), mai elencando codici di dominio.
+
+La casella è un **detentore**: contata dal residuo, esportata (tipo, letta, quando — mai il `risorsaId`, che punta a contenuti altrui), eliminata in cascata col profilo. Le lette si puliscono dopo 30 giorni dal giro lento del worker; le non lette restano. Endpoint: elenco paginato, conteggio, segna letta (idempotente, 404 `PR013` su altrui e inesistenti — indistinguibili di proposito), segna tutte. **15 test nuovi** in `test/notifiche-inbox.spec.ts`; i 16 di E8 e l'intera suite (316) restano verdi.
+
 ### E13.1 ed E13.2 — l'app è pronta per essere costruita ✅ (tutto ciò che non passa dai tuoi account)
 
 La catena di distribuzione esiste: `eas.json` con tre profili (dev client, prova interna con APK

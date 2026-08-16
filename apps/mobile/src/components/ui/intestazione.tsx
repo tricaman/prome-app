@@ -96,12 +96,19 @@ export function AzioneTonda({
   icona,
   etichetta,
   conPallino = false,
+  conteggio,
   disabilitato = false,
   onPress,
 }: {
   icona: Parameters<typeof Icona>[0]['nome'];
   etichetta: string;
   conPallino?: boolean;
+  /**
+   * Il numero nella bolla: quante cose aspettano dietro il bottone. Zero non
+   * disegna nulla — un badge a zero è un pallino che grida per niente. Sopra
+   * il 9 dice «9+»: a quel punto il numero esatto non cambia la decisione.
+   */
+  conteggio?: number;
   disabilitato?: boolean;
   onPress?: () => void;
 }) {
@@ -128,7 +135,35 @@ export function AzioneTonda({
       ]}
     >
       <Icona nome={icona} dimensione={21} colore="testo" />
-      {conPallino ? (
+      {conteggio !== undefined && conteggio > 0 ? (
+        <View
+          style={{
+            position: 'absolute',
+            top: -3,
+            right: -3,
+            minWidth: 18,
+            height: 18,
+            paddingHorizontal: 4,
+            borderRadius: tema.raggio.full,
+            backgroundColor: tema.colori.avviso,
+            borderWidth: 2,
+            borderColor: tema.colori.superficie,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 9.5,
+              lineHeight: 12,
+              fontWeight: tema.tipografia.peso.extra,
+              color: tema.colori.avvisoTesto,
+            }}
+          >
+            {conteggio > 9 ? '9+' : conteggio}
+          </Text>
+        </View>
+      ) : conPallino ? (
         <View
           style={{
             position: 'absolute',

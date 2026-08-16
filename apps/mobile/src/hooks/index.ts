@@ -9,3 +9,4 @@ export { useApiMutation, useForm, type OpzioniApiMutation, type FormProme } from
 export { useI18n, useT } from '@/i18n/i18n-provider';
 export { useTema } from '@/theme';
 export { useChatAula, type StatoConnessione } from './use-chat-aula';
+export { useNotificheLive } from './use-notifiche';

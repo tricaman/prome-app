@@ -584,8 +584,11 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     // quelli si leggono aprendo l'invito, dove le regole valgono ancora.
     await this.avvisi.avvisaIndirizzo(
       invito.destinatario,
-      'invito',
       {
+        tipo: 'INVITO_AULA',
+        risorsaTipo: 'INVITO_AULA',
+        risorsaId: invito.id,
+        chiaveDeduplicazione: invito.id,
         percorso: `/app/inviti/${invito.id}`,
         titolo: 'notifiche.invito.titolo',
         corpo: 'notifiche.invito.corpo',

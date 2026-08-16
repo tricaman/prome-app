@@ -71,6 +71,11 @@ export class EsportazioneController {
               piattaforma: dispositivo.piattaforma,
               registratoIl: dispositivo.registratoIl.toISOString(),
             })),
+            notifiche: profilo.notifiche.map((notifica) => ({
+              tipo: notifica.tipo,
+              letta: notifica.letta,
+              ricevutaIl: notifica.ricevutaIl.toISOString(),
+            })),
             bloccati: profilo.bloccati.map((blocco) => ({
               utenteId: blocco.utenteId,
               bloccatoIl: blocco.bloccatoIl.toISOString(),
@@ -85,6 +90,7 @@ export class EsportazioneController {
             impostazioniPrivacy: { contattabilita: 'PRIVATO', visibilita: 'PRIVATO' },
             preferenzeDiNotifica: { commenti: true, inviti: true },
             dispositiviRegistrati: [],
+            notifiche: [],
             bloccati: [],
           },
       bacheca,

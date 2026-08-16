@@ -6,6 +6,7 @@ import { DURATA_CODICE_SECONDI } from '../accesso/better-auth';
 import type {
   CanaleEmail,
   InvitoAlGruppoDaRecapitare,
+  NotificaDiCommentoDaRecapitare,
   SegnalazioneDaRecapitare,
   InvitoDaRecapitare,
 } from './canale-email';
@@ -75,6 +76,29 @@ export class CanaleEmailSmtp implements CanaleEmail {
     // Nel log finisce che è partita, mai il codice: chi legge i log non deve
     // poter entrare negli account altrui.
     this.logger.log(`Codice di accesso inviato (lingua ${lingua})`);
+  }
+
+  async inviaNotificaCommento(
+    destinatario: string,
+    notifica: NotificaDiCommentoDaRecapitare,
+    lingua: string,
+  ): Promise<void> {
+    const t = (chiave: string) => this.traduci(`email.notificaCommento.${chiave}`, lingua);
+
+    await this.recapita(destinatario, lingua, {
+      oggetto: t('oggetto'),
+      anteprima: t('anteprima'),
+      blocchi: [
+        titolo(t('titolo')),
+        paragrafo(t('istruzioni')),
+        azione(t('azione'), notifica.collegamento),
+        separatore(),
+        nota(t('gestione')),
+      ],
+    });
+
+    // Chi ha commentato cosa non entra nei log, come non entra nell'email.
+    this.logger.log(`Notifica di commento inviata (lingua ${lingua})`);
   }
 
   async inviaInvitoAulaStudio(

@@ -445,13 +445,14 @@ export class ProfiloService {
     // righe porta un utenteId — è l'elenco degli atenei d'Italia, non un dato
     // di questa persona. Cancellare un corso perché l'ultimo iscritto se ne va
     // sarebbe la stessa cosa che chiudere l'università.
-    const [profili, impostazioni, preferenze, dispositivi] = await Promise.all([
+    const [profili, impostazioni, preferenze, dispositivi, notifiche] = await Promise.all([
       this.prisma.profilo.count({ where: { utenteId } }),
       this.prisma.impostazioniDiPrivacy.count({ where: { utenteId } }),
       this.prisma.preferenzeDiNotifica.count({ where: { utenteId } }),
       this.prisma.dispositivoDiNotifica.count({ where: { utenteId } }),
+      this.prisma.notifica.count({ where: { destinatarioId: utenteId } }),
     ]);
-    return profili + impostazioni + preferenze + dispositivi;
+    return profili + impostazioni + preferenze + dispositivi + notifiche;
   }
 
   /**
@@ -472,6 +473,7 @@ export class ProfiloService {
     impostazioniPrivacy: { contattabilita: string; visibilita: string };
     preferenzeDiNotifica: { commenti: boolean; inviti: boolean };
     dispositiviRegistrati: Array<{ piattaforma: string; registratoIl: Date }>;
+    notifiche: Array<{ tipo: string; letta: boolean; ricevutaIl: Date }>;
     bloccati: Array<{ utenteId: string; bloccatoIl: Date }>;
   } | null> {
     const profilo = await this.prisma.profilo.findUnique({
@@ -480,6 +482,7 @@ export class ProfiloService {
         ...CON_CORSO,
         preferenzeNotifiche: true,
         dispositivi: true,
+        notifiche: { orderBy: { creatoIl: 'desc' } },
         blocchiFatti: true,
       },
     });
@@ -516,6 +519,15 @@ export class ProfiloService {
         piattaforma: dispositivo.piattaforma,
         registratoIl: dispositivo.creatoIl,
       })),
+      // Della notifica esce cosa era e quando: **non il `risorsaId`**, che è
+      // l'identificativo di un contenuto altrui — da solo illeggibile, e in
+      // una copia scaricata sarebbe solo un uuid che punta a casa d'altri.
+      // Stessa logica del corso per esteso, al contrario.
+      notifiche: profilo.notifiche.map((notifica) => ({
+        tipo: notifica.tipo,
+        letta: notifica.lettaIl !== null,
+        ricevutaIl: notifica.creatoIl,
+      })),
       // Chi HO bloccato: l'identificativo senza il nome, che è un dato suo.
       // Chi ha bloccato ME non è un mio dato — è una scelta altrui — e non
       // compare in alcuna esportazione. La cancellazione invece conta e porta
@@ -540,17 +552,29 @@ export class ProfiloService {
    * — e chi chiama non manda niente. Non è un errore.
    */
   async dispositiviDaAvvisare(utenteId: string, tipo: 'commento' | 'invito'): Promise<string[]> {
-    const preferenze = await this.prisma.preferenzeDiNotifica.findUnique({ where: { utenteId } });
-    // Assenti significa «mai scelto»: valgono i valori di partenza, che sono
-    // accesi. Non esiste lo stato «non impostato».
-    const acceso = tipo === 'commento' ? (preferenze?.commenti ?? true) : (preferenze?.inviti ?? true);
-    if (!acceso) return [];
+    if (!(await this.preferenzaAccesa(utenteId, tipo))) return [];
 
     const dispositivi = await this.prisma.dispositivoDiNotifica.findMany({
       where: { utenteId },
       select: { token: true },
     });
     return dispositivi.map((d) => d.token);
+  }
+
+  /**
+   * La persona vuole ancora essere interrotta per questo tipo di avviso?
+   *
+   * Letta **adesso**, mai da una copia: chi ha appena spento i commenti non
+   * deve riceverne uno per un commento arrivato un istante prima. Governa i
+   * canali che interrompono — push, email — mai la riga nella campanella, che
+   * nasce comunque: spegnere un asse significa «non disturbarmi», non
+   * «nascondimi l'informazione».
+   */
+  async preferenzaAccesa(utenteId: string, tipo: 'commento' | 'invito'): Promise<boolean> {
+    const preferenze = await this.prisma.preferenzeDiNotifica.findUnique({ where: { utenteId } });
+    // Assenti significa «mai scelto»: valgono i valori di partenza, che sono
+    // accesi. Non esiste lo stato «non impostato».
+    return tipo === 'commento' ? (preferenze?.commenti ?? true) : (preferenze?.inviti ?? true);
   }
 
   async preferenzeDiNotifica(utenteId: string): Promise<{ commenti: boolean; inviti: boolean }> {

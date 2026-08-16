@@ -11,6 +11,14 @@
     "istruzioni": "Enter it in Prome within {minuti} minutes. After that it expires and you need a new one.",
     "ignora": "If you didn't ask to sign in, ignore this message: without the code nobody can get in."
   },
+  "notificaCommento": {
+    "oggetto": "Someone commented on your post on Prome",
+    "anteprima": "Open the post to read the comment and reply.",
+    "titolo": "New comment on your post",
+    "istruzioni": "Someone commented on something you published. Open the post to read the comment and reply.",
+    "azione": "Open the post",
+    "gestione": "You can turn these emails off in Settings → Notifications, inside Prome."
+  },
   "invitoAula": {
     "oggetto": "{invitante} invites you to a study room on Prome",
     "anteprima": "Open the invitation to join “{titoloAula}”.",

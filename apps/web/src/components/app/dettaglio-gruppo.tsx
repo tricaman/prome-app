@@ -27,7 +27,8 @@ import { percorsiApp } from '@/lib/percorsi-app';
 import { Link, useRouter } from '@/i18n/navigazione';
 import { Form, FormInput } from '@/components/form';
 import { Avatar, Button, Card, Chip, Icona, Input } from '@/components/ui';
-import { QueryBoundary } from '@/components/feedback';
+import { statusErrore } from '@prome/app-core';
+import { ErrorState, QueryBoundary, RisorsaNonTrovata } from '@/components/feedback';
 import { cn } from '@/lib/utils';
 import { etichettaVisibilita } from './elenco-gruppi';
 import { SceltaVisibilitaGruppo } from './scelta-visibilita-gruppo';
@@ -48,7 +49,15 @@ export function DettaglioGruppo({ gruppoId }: { gruppoId: string }) {
   const gruppo = useLeggiGruppo(gruppoId);
 
   return (
-    <QueryBoundary query={gruppo} dimensione="piena">
+    <QueryBoundary query={gruppo} dimensione="piena"
+      errore={(errore, riprova) =>
+        statusErrore(errore) === 404 ? (
+          <RisorsaNonTrovata />
+        ) : (
+          <ErrorState errore={errore} onRiprova={riprova} />
+        )
+      }
+    >
       {({ data }) => <Contenuto gruppoId={gruppoId} dettaglio={data} />}
     </QueryBoundary>
   );

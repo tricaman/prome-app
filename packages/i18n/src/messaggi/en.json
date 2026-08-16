@@ -56,6 +56,11 @@
     "vuoto": {
       "titolo": "Nothing here yet",
       "descrizione": "When there's something to see, you'll find it on this page."
+    },
+    "risorsaNonTrovata": {
+      "titolo": "Content unavailable",
+      "descrizione": "It may have been deleted, or may no longer be visible to you.",
+      "azione": "Back to the board"
     }
   },
   "validazione": {
@@ -333,7 +338,31 @@
     },
     "nuovoPost": "New post",
     "cerca": "Search posts, materials, study rooms…",
-    "notifiche": "Notifications",
+    "notifiche": {
+      "titolo": "Notifications",
+      "apri": "Open notifications",
+      "nonLette": "{numero} unread",
+      "nonLetta": "Unread",
+      "segnaTutte": "Mark all as read",
+      "tipo": {
+        "COMMENTO": {
+          "titolo": "New comment",
+          "corpo": "Someone commented on your post"
+        },
+        "INVITO_AULA": {
+          "titolo": "Study room invitation",
+          "corpo": "You've been invited to a study room"
+        },
+        "INVITO_GRUPPO": {
+          "titolo": "Group invitation",
+          "corpo": "You've been invited to a group"
+        }
+      },
+      "vuoto": {
+        "titolo": "No notifications",
+        "descrizione": "When someone comments on your post or invites you somewhere, you'll find it here."
+      }
+    },
     "accesso": {
       "titolo": "Enter Prome",
       "sommario": "We email you a code. No password to remember.",
@@ -658,14 +687,14 @@
       },
       "notifiche": {
         "titolo": "When we notify you",
-        "stato": "Notices are not delivered yet: there is no notification provider. What you choose here applies immediately and decides what you will receive once they arrive.",
+        "stato": "Notifications always wait for you here in the app, on the bell. These switches decide what interrupts you outside as well — email today, phone notifications once there is someone to deliver them.",
         "commenti": {
           "titolo": "Comments on your posts",
-          "testo": "When someone comments on something you wrote. Never for your own comments."
+          "testo": "When someone comments on something you wrote. Never for your own comments. We also send you an email."
         },
         "inviti": {
           "titolo": "Invitations",
-          "testo": "When someone invites you to a study room or a group."
+          "testo": "When someone invites you to a study room or a group. The invitation email arrives regardless: it's how you accept."
         },
         "cosaTiAvvisa": "What alerts you",
         "silenzia": "Mute",

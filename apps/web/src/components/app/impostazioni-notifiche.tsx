@@ -21,10 +21,11 @@ const ASSI = ['commenti', 'inviti'] as const;
  * **Non sono gli interruttori tolti a luglio.** Quelli non salvavano niente e
  * si dicevano attivi; questi salvano davvero, e il server li rilegge
  * nell'istante dell'invio — chi spegne i commenti non riceve l'avviso di un
- * commento arrivato un attimo prima. Ciò che manca è dall'altra parte, ed è
- * scritto sulla scheda invece che taciuto: **nessun avviso viene ancora
- * recapitato**, perché non c'è un fornitore. Una scheda che dichiara il
- * proprio stato non è una promessa falsa; una che lo nasconde sì.
+ * commento arrivato un attimo prima. Da quando esiste la casella, governano i
+ * canali che interrompono — l'email del commento oggi, il push quando ci sarà
+ * un fornitore — **mai la campanella**, dove le notifiche arrivano sempre:
+ * spegnere un asse significa «non disturbarmi», non «nascondimi
+ * l'informazione». La scheda lo dice in prima riga.
  *
  * I due assi sono **indipendenti** come quelli della privacy, e si cambiano
  * uno per volta: il gesto manda solo l'asse toccato, quindi l'altro non può

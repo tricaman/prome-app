@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { pesoLeggibile } from '@prome/app-core';
+import { pesoLeggibile, statusErrore } from '@prome/app-core';
 import {
   eliminaPost,
   getElencaPostQueryKey,
@@ -17,7 +17,7 @@ import { useApiMutation } from '@/hooks';
 import { useRouter } from '@/i18n/navigazione';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { Button } from '@/components/ui';
-import { QueryBoundary } from '@/components/feedback';
+import { ErrorState, QueryBoundary, RisorsaNonTrovata } from '@/components/feedback';
 import { TarghettaAllegato } from '@/components/contenuti';
 import { Avatar, Card, Heading, Icona } from '@/components/ui';
 import { Commenti } from './commenti';
@@ -37,7 +37,15 @@ export function DettaglioPost({ postId }: { postId: string }) {
   const post = useLeggiPost(postId);
 
   return (
-    <QueryBoundary query={post}>
+    <QueryBoundary query={post}
+      errore={(errore, riprova) =>
+        statusErrore(errore) === 404 ? (
+          <RisorsaNonTrovata />
+        ) : (
+          <ErrorState errore={errore} onRiprova={riprova} />
+        )
+      }
+    >
       {({ data }) => {
         const autore =
           [data.autore.nome, data.autore.cognome].filter(Boolean).join(' ') ||

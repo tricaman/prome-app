@@ -132,7 +132,7 @@ export default function SchermataImpostazioni() {
             etichetta={t('app.impostazioni.notifiche.titolo')}
             sottotitolo={t('app.impostazioni.voci.notificheSub')}
             valore={riassuntoAvvisi}
-            onPress={() => router.push(rotte.notifiche())}
+            onPress={() => router.push(rotte.impostazioniNotifiche())}
           />
           <RigaElenco
             icona="luna"

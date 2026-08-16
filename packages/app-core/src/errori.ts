@@ -28,6 +28,17 @@ export function codiceErrore(errore: unknown): string | undefined {
   return rispostaErrore(errore)?.errorCode;
 }
 
+/**
+ * Status HTTP della risposta, se la chiamata è arrivata a destinazione.
+ *
+ * Serve dove la classe dell'errore conta più del punto di lancio: «non
+ * trovato» è un 404 qualunque sia il contesto, e riconoscerlo dallo status è
+ * più robusto che elencare i codici di dominio di ogni modulo.
+ */
+export function statusErrore(errore: unknown): number | undefined {
+  return eErroreApi(errore) ? errore.status : undefined;
+}
+
 /** Identificativo per correlare la segnalazione dell'utente con i log. */
 export function riferimentoErrore(errore: unknown): string | undefined {
   return rispostaErrore(errore)?.errorId;

@@ -682,6 +682,37 @@ export interface AggiornaPreferenzeDiNotificaRequest {
   inviti?: boolean;
 }
 
+/**
+ * La notifica in-app: la riga che la campanella conta e l'elenco mostra.
+ *
+ * Nasce sempre (salvo autore uguale al destinatario e coppie bloccate): le
+ * preferenze qui sopra governano i canali che interrompono — email, domani il
+ * push — mai questa riga. Non porta testi né nomi: il client traduce dal
+ * `tipo`, e la risorsa si apre dentro l'app, dove la visibilità vale ancora.
+ */
+export type TipoDiNotifica = 'COMMENTO' | 'INVITO_AULA' | 'INVITO_GRUPPO';
+
+/**
+ * Dove porta il tocco. Distinto dal tipo perché domani un tipo nuovo può
+ * puntare a una risorsa che esiste già; ogni client costruisce da qui il
+ * proprio percorso.
+ */
+export type RisorsaDiNotifica = 'POST' | 'INVITO_AULA' | 'INVITO_GRUPPO';
+
+export interface NotificaResponse {
+  id: string;
+  tipo: TipoDiNotifica;
+  risorsaTipo: RisorsaDiNotifica;
+  risorsaId: string;
+  letta: boolean;
+  creatoIl: string;
+}
+
+/** Il numero sulla campanella: leggero apposta, il badge lo chiede spesso. */
+export interface ConteggioNotificheResponse {
+  nonLette: number;
+}
+
 // --- Esportazione dei propri dati -------------------------------------------
 //
 // La privacy policy promette «una copia completa in formato leggibile». Questa
@@ -738,6 +769,8 @@ export interface EsportazioneDatiResponse {
     preferenzeDiNotifica: { commenti: boolean; inviti: boolean };
     /** Senza il token: è il modo di raggiungere l'apparecchio, non un dato suo. */
     dispositiviRegistrati: { piattaforma: string; registratoIl: string }[];
+    /** Senza il risorsaId: l'identificativo di un contenuto altrui, illeggibile da solo. */
+    notifiche: { tipo: string; letta: boolean; ricevutaIl: string }[];
     /** Chi HO bloccato, senza nomi. Chi ha bloccato me non è un mio dato. */
     bloccati: { utenteId: string; bloccatoIl: string }[];
   };

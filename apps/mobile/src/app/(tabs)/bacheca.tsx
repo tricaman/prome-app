@@ -6,9 +6,9 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
-import { useT } from '@/hooks';
+import { useNotificheLive, useT } from '@/hooks';
 import { FeedBacheca } from '@/components/contenuti';
-import { Avatar, Icona, Text } from '@/components/ui';
+import { Avatar, AzioneTonda, Icona, Text } from '@/components/ui';
 
 /**
  * Bacheca.
@@ -27,6 +27,7 @@ export default function SchedaBacheca() {
 
   const profilo = useLeggiMioProfilo();
   const nome = [profilo.data?.data.nome, profilo.data?.data.cognome].filter(Boolean).join(' ');
+  const { nonLette } = useNotificheLive();
 
   /**
    * Il trascinamento rilegge davvero la bacheca.
@@ -58,6 +59,12 @@ export default function SchedaBacheca() {
             {nome ? <Text variante="didascalia">Ciao {nome.split(' ')[0]} 👋</Text> : null}
             <Text variante="titolo">{t('app.nav.bacheca')}</Text>
           </View>
+          <AzioneTonda
+            icona="campana"
+            etichetta={t('app.notifiche.apri')}
+            conteggio={nonLette}
+            onPress={() => router.push(rotte.notifiche())}
+          />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('app.nav.profilo')}
