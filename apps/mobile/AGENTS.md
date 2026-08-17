@@ -145,6 +145,34 @@ per questo il tasto indietro ha un ripiego (`router.canGoBack()`), altrimenti sa
 non fa niente. Restano protette dalla guardia — non sono in `SENZA_SESSIONE` — perché per accettare
 serve un account.
 
+## Chi decide se un collegamento apre l'app
+
+**Non noi, e non con l'`User-Agent`.** Il sito non riconosce il dispositivo per poi rimandare a
+`prome://…`: quel riconoscimento sa dire «questo è un iPhone», mai «questo iPhone ha Prome
+installata» — che è l'unica domanda che conta — e sbagliando produce l'errore del browser proprio a
+chi stiamo invitando. La decisione la prende il **sistema operativo**, con i link universali (iOS) e
+gli app link (Android): l'indirizzo resta uno solo, `https://prome.app/app/inviti/<id>`, quello che
+l'email manda da sempre. Se l'app c'è si apre l'app, se non c'è si apre la pagina — che è una pagina
+vera, non un ripiego.
+
+Tre pezzi, e vanno cambiati insieme:
+
+1. `app.json` — `ios.associatedDomains` e `android.intentFilters` (con `autoVerify`) dichiarano
+   quali indirizzi l'app rivendica. **Solo gli inviti**: rivendicare tutta `/app/` aprirebbe l'app
+   su «Pagina non trovata» ogni volta che manca la schermata corrispondente.
+2. `src/app/+native-intent.tsx` — traduce l'indirizzo del sito (`/it/app/inviti/<id>`) nella rotta
+   dell'app (`/inviti/<id>`). Senza, un link universale aprirebbe l'app su un 404, che è peggio di
+   non averla aperta. Non può lanciare: un errore lì cade all'avvio.
+3. `apps/web/src/lib/link-app.ts` — i due file `.well-known` serviti dal sito. **L'elenco dei
+   percorsi è lo stesso del punto 2**: se uno cresce senza l'altro, o si apre una schermata che non
+   esiste, o si lascia al browser un indirizzo che l'app sapeva gestire.
+
+**Chi arriva da un collegamento spesso non è dentro** — si invita anche chi non ha ancora un account
+(IA2). La guardia ricorda dove stava andando (`lib/destinazione-in-attesa.ts`, in memoria e non
+sull'archivio cifrato: deve sopravvivere a due schermate, non a un riavvio) e ce lo riporta dopo il
+codice o dopo l'onboarding. Si riscuote **una volta sola**, e solo verso i percorsi dell'elenco
+chiuso: è la stessa regola del parametro `da` sul web.
+
 ## Contenuti e rotte
 
 - I dati e le ricerche vengono da `@prome/contenuti`, lo stesso pacchetto che usa il sito: mai copiare dati fra le due app.

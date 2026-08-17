@@ -1,9 +1,7 @@
 import type { ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
-import { percorsiApp } from '@/lib/percorsi-app';
 import { AppTopbar } from '@/components/app/app-topbar';
 import { NavImpostazioni } from '@/components/app/nav-impostazioni';
-import { ButtonLink } from '@/components/ui';
 
 /**
  * La cornice delle impostazioni: indice a sinistra, sezione a destra.
@@ -18,6 +16,11 @@ import { ButtonLink } from '@/components/ui';
  * perché così ogni sezione nuova nasce dentro la cornice: il muro di sessione
  * è più su ancora, sul gruppo `(sessione)`, quindi una rotta qui nasce
  * protetta senza che nessuno debba ricordarsene.
+ *
+ * Il bottone «Torna al profilo» non c'è più: era una destinazione dentro la
+ * barra di una schermata, e ora sia «Profilo» sia «Impostazioni» stanno nella
+ * colonna, una sopra l'altra. Restava a dire due volte la stessa cosa, la
+ * seconda nel posto sbagliato.
  */
 export default async function LayoutImpostazioni({ children }: { children: ReactNode }) {
   const t = await getTranslations('app.impostazioni');
@@ -29,11 +32,6 @@ export default async function LayoutImpostazioni({ children }: { children: React
           <span className="font-display text-xl font-extrabold tracking-[-0.02em]">
             {t('titolo')}
           </span>
-        }
-        azioni={
-          <ButtonLink href={percorsiApp.profilo()} variante="contorno" dimensione="sm">
-            {t('tornaAlProfilo')}
-          </ButtonLink>
         }
       />
 

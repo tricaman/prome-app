@@ -324,5 +324,19 @@ reale, e da **tenere vivo** — un account di prova scaduto è un rifiuto al sec
 - **Audio d'aula** (S-audio → E5): serve il permesso microfono con la sua motivazione scritta
   (`NSMicrophoneUsageDescription`) e la voce corrispondente nei due moduli. Oggi il permesso **non
   è dichiarato**, ed è giusto così: un permesso chiesto e non usato è un rilievo in revisione.
-- **Link universali** (E12.4): `apple-app-site-association` e `assetlinks.json` serviti da
-  `prome.app`, che vogliono il Team ID e l'impronta della chiave di firma — cioè gli account.
+- **Link universali** (E12.4): il codice c'è **tutto** dal 17 agosto 2026 — il sito serve
+  `apple-app-site-association` e `assetlinks.json` (`apps/web/src/app/.well-known/`), l'app dichiara
+  `associatedDomains` e gli `intentFilters`, e `+native-intent.tsx` traduce l'indirizzo del sito
+  nella schermata giusta. Mancano **due valori e una build**, ed è la parte che passa dai tuoi
+  account:
+
+  1. `APPLE_TEAM_ID` — App Store Connect → Membership, dieci caratteri.
+  2. `ANDROID_SHA256_FIRMA` — `eas credentials` → Android → Keystore. Quando l'app sarà su Play,
+     **aggiungere anche l'impronta di ri-firma di Play**, separata da virgola: sono chiavi diverse,
+     e chi installa dallo store verificherebbe contro quella sbagliata.
+
+  Le due variabili vanno in `deploy/.env` sulla macchina; il sito le rilegge a un riavvio, senza
+  ricostruire. Poi serve **una build nuova dell'app**: `associatedDomains` è una capacità del
+  binario, e quella installata oggi non la porta. Verifica: `curl -i` sui due indirizzi (200,
+  `application/json`, nessuna redirezione) e un collegamento aperto **dall'email** su un telefono
+  vero — non dalla barra degli indirizzi di Safari, dove i link universali non scattano di proposito.

@@ -125,7 +125,7 @@ La scheda «Gruppi» è tornata sul telefono, e questa volta mostra i gruppi di 
 
 Nessuna regola è stata ricopiata nel telefono, com'è giusto per una superficie: G2 la fa rispettare il server e il messaggio arriva già tradotto. L'unica cosa che il client fa è **non offrire** ciò che sarebbe rifiutato — i gesti di moderazione a chi non modera, e la visibilità di ateneo a un gruppo nato senza ateneo.
 
-L'atterraggio dell'invito **dentro** l'app è arrivato il 17 agosto (sezione più sotto): la notifica apre una schermata nativa, con le due risposte. Resta fuori solo il collegamento **dell'email**, che punta a un indirizzo web: aprirlo nell'app è E12.4 (link universali e app sugli store).
+L'atterraggio dell'invito **dentro** l'app è arrivato il 17 agosto (sezioni più sotto): la notifica apre una schermata nativa con le due risposte, e il collegamento dell'email apre l'app da sé — E12.4, a cui mancano solo due valori dei tuoi account e una build.
 
 Per strada è stato tolto un plurale ICU (`{numero, plural, …}`) che avevo introdotto sui membri: il `traduci` condiviso fa **solo interpolazione**, quindi sul telefono sarebbe uscita la stringa grezza. Ora sono due chiavi, come già faceva la sala per i partecipanti.
 
@@ -289,7 +289,21 @@ Estratti sul web i due pezzi che mancavano: `Elenco`/`RigaElenco` e `SceltaRadio
 
 Un rifiuto è terminale come un'accettazione: dopo, né l'una né l'altro (422, `AS010`/`GR009`). Da uno spazio in cui si è già entrati si esce; non si disdice un invito già speso. Sette casi nuovi in `aula-studio.spec.ts` e `gruppo.spec.ts`, suite intera a **351 verdi**.
 
-Resta fuori il collegamento **dell'email**, che continua a puntare al sito: aprirlo nell'app richiede i link universali, cioè un file servito da `prome.app` con l'identificativo di squadra Apple e l'app pubblicata — è E12.4 per intero. Con lo schema `prome://` che l'app dichiara già, `prome://inviti/<id>` porta invece alla schermata giusta senza altro lavoro.
+### Anche il collegamento dell'email apre l'app — E12.4, meno due valori ✅ (17 agosto 2026, sera)
+
+**L'email continua a mandare lo stesso indirizzo**, `https://prome.app/app/inviti/<id>`, e non cambierà: la domanda non era *dove* punta il collegamento, ma **chi decide** se aprirlo nell'app. La strada scartata è il riconoscimento del dispositivo sul nostro server: l'`User-Agent` sa dire «questo è un iPhone», mai «questo iPhone ha Prome installata» — che è l'unica cosa che conta — e l'unico modo di agire su quella supposizione è rimandare a `prome://…`, che su un telefono senza l'app produce l'errore del browser **proprio a chi stiamo invitando**, cioè quasi sempre a chi un account non ce l'ha ancora (IA2). Un interstiziale «apri nell'app / continua sul web» sarebbe la stessa supposizione, con in più una schermata da attraversare.
+
+Decide il **sistema operativo**, che la risposta la sa: link universali su iOS, app link su Android. Un indirizzo solo, nessun interstiziale, e il ripiego non è un ripiego — è la pagina web, che funziona. Tre pezzi, scritti perché restino uno solo:
+
+- **il sito serve i due file** `/.well-known/apple-app-site-association` e `/.well-known/assetlinks.json` (`apps/web/src/lib/link-app.ts`), costruiti dall'ambiente. **Senza i valori rispondono 404**, ed è deliberato: un `apple-app-site-association` con un Team ID sbagliato non è un file a metà, è un file che Apple mette in cache e rispetta — i collegamenti smetterebbero di funzionare senza che niente lo segnali. Il riconoscimento della lingua non li tocca, perché il `matcher` del proxy esclude gli indirizzi con un punto e `.well-known` ne ha uno;
+- **l'app li rivendica** (`associatedDomains`, `intentFilters` con `autoVerify`) — **solo gli inviti**: rivendicare tutta `/app/` la farebbe aprire su «Pagina non trovata» ovunque manchi la schermata corrispondente;
+- **`+native-intent.tsx` traduce** `/it/app/inviti/<id>` in `/inviti/<id>`. Le rotte dell'app sono un altro albero, senza area privata e senza lingua nell'indirizzo: senza traduzione il link universale aprirebbe l'app su un 404, che è peggio di non averla aperta. Dieci casi provati a mano compilando il file vero, compresi quelli storti — un indirizzo dell'area privata che non sappiamo tradurre va a casa, non su un errore.
+
+**E chi non è dentro non perde più l'invito.** Prima la guardia mandava al benvenuto e dimenticava: si entrava, ci si ritrovava in bacheca, e bisognava tornare nell'email — se il messaggio c'era ancora. Ora la destinazione si ricorda (`lib/destinazione-in-attesa.ts`) e la si riprende dopo il codice **o dopo l'onboarding**, che è il caso normale di chi è stato invitato senza avere un account. Sta in memoria e non nell'archivio cifrato di proposito: deve sopravvivere a due schermate, non a un riavvio — un'intenzione conservata sul disco tornerebbe a galla giorni dopo, su un invito ormai scaduto.
+
+Mancano **due valori e una build**, e sono la parte che passa dagli account: `APPLE_TEAM_ID` (App Store Connect) e `ANDROID_SHA256_FIRMA` (`eas credentials`, e quando l'app sarà su Play anche l'impronta di ri-firma, separata da virgola: sono chiavi diverse). Vanno in `deploy/.env`; il sito li rilegge **a un riavvio**, senza ricostruire. Poi serve una build nuova dell'app, perché `associatedDomains` è una capacità del binario. Fino ad allora tutto si comporta esattamente come prima — 404 sui due file, collegamento che apre il browser — ed è la ragione per cui questa parte si poteva scrivere per intero senza toccare gli account. La verifica finale è dal vivo: `curl -i` sui due indirizzi (200, `application/json`, nessuna redirezione) e un invito aperto **dall'email** su un telefono vero, non dalla barra degli indirizzi, dove i link universali non scattano di proposito.
+
+Con lo schema privato, che l'app dichiara già, `prome://inviti/<id>` porta alla schermata giusta da subito.
 
 ---
 

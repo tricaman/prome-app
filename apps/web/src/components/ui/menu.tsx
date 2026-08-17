@@ -19,7 +19,7 @@ export interface MenuProps {
   intestazione?: ReactNode;
   /** Da che lato si allinea al proprio innesco. */
   allineamento?: 'inizio' | 'fine';
-  /** Stile dell'innesco: il bottone che lo avvolge non ne ha uno proprio. */
+  /** Stile dell'innesco: quello della libreria non ne ha uno di prodotto. */
   classNameInnesco?: string;
   children: ReactNode;
 }
@@ -34,6 +34,12 @@ const ALLINEAMENTO = { inizio: 'bottom start', fine: 'bottom end' } as const;
  * collegamenti veri — si aprono in una scheda nuova, si copia l'indirizzo — e
  * passano dal router dell'applicazione (`InterfacciaProvider`), quindi
  * conservano il prefisso di lingua.
+ *
+ * Della libreria si tiene quasi tutto: fondo, ombra, animazione d'ingresso,
+ * chiusura con Esc, ritorno del fuoco all'innesco, frecce da tastiera. Qui si
+ * correggono solo i due punti in cui il suo disegno non è il nostro — il raggio
+ * e il colore del passaggio del mouse, che di serie **scurisce** su fondo già
+ * scuro invece di schiarire.
  */
 export function Menu({
   innesco,
@@ -48,25 +54,25 @@ export function Menu({
       <Dropdown.Trigger
         aria-label={etichetta}
         className={cn(
-          'cursor-pointer rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primario',
+          'cursor-pointer rounded-full outline-none transition-colors',
+          'focus-visible:ring-2 focus-visible:ring-primario focus-visible:ring-offset-2 focus-visible:ring-offset-superficie',
           classNameInnesco,
         )}
       >
         {innesco}
       </Dropdown.Trigger>
+
       <Dropdown.Popover
         placement={ALLINEAMENTO[allineamento]}
-        className="min-w-[232px] rounded-2xl border border-bordo bg-sovrapposizione p-1.5 shadow-lg"
+        className="min-w-[232px] rounded-2xl border border-bordo"
       >
         {intestazione ? (
           <>
-            <div className="px-2.5 pb-3 pt-2">{intestazione}</div>
-            <div className="mx-1 mb-1.5 h-px bg-bordo" />
+            <div className="px-3.5 pb-3 pt-3.5">{intestazione}</div>
+            <div className="h-px bg-bordo" />
           </>
         ) : null}
-        <Dropdown.Menu aria-label={etichetta} className="flex flex-col gap-0.5 outline-none">
-          {children}
-        </Dropdown.Menu>
+        <Dropdown.Menu aria-label={etichetta}>{children}</Dropdown.Menu>
       </Dropdown.Popover>
     </Dropdown>
   );
@@ -100,10 +106,9 @@ export function VoceMenu({
       isDisabled={disattivata}
       textValue={etichetta}
       className={cn(
-        'flex h-[38px] cursor-pointer items-center gap-2.5 rounded-[10px] px-2.5 text-[13px] font-semibold outline-none transition-colors',
+        'min-h-[38px] cursor-pointer gap-2.5 rounded-[10px] px-2.5 text-[13px] font-semibold',
         distruttiva ? 'text-errore' : 'text-testo-corpo',
-        'data-[hovered]:bg-superficie-alt-2 data-[focused]:bg-superficie-alt-2',
-        'data-[disabled]:cursor-not-allowed data-[disabled]:opacity-60',
+        'data-[hovered=true]:bg-superficie-alt-2',
       )}
     >
       {icona ? <Icona nome={icona} dimensione={17} /> : null}

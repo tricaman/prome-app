@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { Stack, router, useSegments } from 'expo-router';
+import { Stack, router, usePathname, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSessione } from '@prome/app-core';
 import { rotte } from '@/content';
+import { ricordaDestinazione } from '@/lib/destinazione-in-attesa';
 import { Providers } from '@/providers/providers';
 import { useTema } from '@/theme';
 
@@ -50,6 +51,9 @@ function Navigazione() {
   const tema = useTema();
   const { autenticato, caricata } = useSessione();
   const segmenti = useSegments();
+  // Il percorso **risolto**, con dentro l'identificativo: `useSegments` torna
+  // lo schema della rotta (`[id]`), che non basta a tornarci.
+  const percorso = usePathname();
   const queryClient = useQueryClient();
   /** Se la sessione c'era: serve a riconoscere l'istante in cui cade. */
   const eraDentro = useRef(false);
@@ -72,11 +76,17 @@ function Navigazione() {
     const primo = segmenti[0];
     const pubblica = primo === undefined || SENZA_SESSIONE.has(primo);
 
-    if (!autenticato && !pubblica) router.replace(rotte.benvenuto());
+    if (!autenticato && !pubblica) {
+      // Si arriva qui in un modo solo: un collegamento che ha aperto l'app su
+      // una schermata protetta. Il percorso si ricorda **prima** di navigare,
+      // perché un istante dopo non esiste più.
+      ricordaDestinazione(percorso);
+      router.replace(rotte.benvenuto());
+    }
     // Chi è già dentro non deve rivedere il benvenuto: chiedere un codice con
     // una sessione viva ne fa partire uno vero, per niente.
     else if (autenticato && rimandaIndietroChiEDentro(primo)) router.replace(rotte.bacheca());
-  }, [caricata, autenticato, segmenti, queryClient]);
+  }, [caricata, autenticato, segmenti, percorso, queryClient]);
 
   // Finché non si sa, non si disegna nulla: la schermata di partenza è quella
   // di chi non è entrato, e mostrarla a chi è entrato sarebbe un lampo di app

@@ -135,6 +135,15 @@ services:
     restart: unless-stopped
     depends_on:
       - api
+    environment:
+      # I due valori che accendono i link universali: il Team ID di Apple e
+      # l'impronta (o le impronte, separate da virgola) della chiave con cui
+      # l'app Android è firmata. Sono **d'ambiente e non di build** apposta —
+      # con `?` mancante il sito risponde 404 sui due file `.well-known`, che
+      # è lo stato di prima, e accenderli è un riavvio invece di una
+      # ricostruzione dell'immagine.
+      APPLE_TEAM_ID: ${APPLE_TEAM_ID:-}
+      ANDROID_SHA256_FIRMA: ${ANDROID_SHA256_FIRMA:-}
     logging: *log
 
   caddy:

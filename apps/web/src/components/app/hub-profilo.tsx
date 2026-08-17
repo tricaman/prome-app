@@ -10,7 +10,7 @@ import {
 } from '@prome/api-client';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { Link } from '@/i18n/navigazione';
-import { Avatar, Card, Chip, Icona, type NomeIcona } from '@/components/ui';
+import { Avatar, ButtonLink, Card, Chip, Icona, type NomeIcona } from '@/components/ui';
 import { QueryBoundary } from '@/components/feedback';
 import { cn } from '@/lib/utils';
 
@@ -115,7 +115,7 @@ export function HubProfilo() {
           const studi = [data.universita?.nome, data.corso?.nome].filter(Boolean).join(' · ');
 
           return (
-            <Card padding="md" className="mb-6 flex flex-wrap items-center gap-5">
+            <Card padding="md" className="mb-6 flex flex-wrap items-start gap-5">
               <Avatar nome={nome || '?'} dimensione={84} className="text-3xl" />
               <div className="min-w-0 flex-1">
                 <p className="font-display text-[28px] font-extrabold leading-tight tracking-[-0.02em] text-testo">
@@ -128,16 +128,42 @@ export function HubProfilo() {
                     al nome: da sola, «Privato» si leggerebbe come «questo
                     profilo è privato», e «Pubblico» come «questo profilo è sul
                     web» — che è falso e resterà falso. Quella scelta riguarda
-                    **quello che scrivi**, e vale dentro Prome. */}
-                <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                    **quello che scrivi**, e vale dentro Prome.
+
+                    Ed è un collegamento: è l'unica impostazione che questa
+                    schermata dichiara, e dichiararla senza dire dove si cambia
+                    obbliga a cercarla nell'indice. */}
+                <Link
+                  href={percorsiApp.impostazioniPrivacy()}
+                  className="group mt-2.5 inline-flex flex-wrap items-center gap-2 rounded-full"
+                >
                   <span className="text-[12px] font-semibold text-testo-debole">
                     {tImpostazioni('contenuti.titolo')}
                   </span>
-                  <Chip tono="menta" dimensione="sm">
+                  <Chip
+                    tono="menta"
+                    dimensione="sm"
+                    className="gap-1 transition-colors group-hover:bg-tinta-menta-bordo"
+                  >
                     {tImpostazioni(`visibilita.${CHIAVI[data.impostazioniPrivacy.visibilita]}`)}
+                    <Icona nome="avanti" dimensione={12} />
                   </Chip>
-                </div>
+                </Link>
               </div>
+
+              {/* L'azione sta sull'oggetto su cui agisce: era in cima allo
+                  schermo, unico bottone pieno della pagina, per un gesto che
+                  si fa una volta all'anno. In contorno, perché non deve pesare
+                  quanto «Nuovo post». */}
+              <ButtonLink
+                href={percorsiApp.modificaProfilo()}
+                variante="contorno"
+                dimensione="sm"
+                className="flex-none gap-1.5"
+              >
+                <Icona nome="matita" dimensione={15} />
+                {t('modifica')}
+              </ButtonLink>
             </Card>
           );
         }}

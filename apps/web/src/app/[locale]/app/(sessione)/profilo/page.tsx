@@ -4,7 +4,6 @@ import { creaMetadata } from '@/lib/seo';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { AppTopbar } from '@/components/app/app-topbar';
 import { HubProfilo } from '@/components/app/hub-profilo';
-import { ButtonLink } from '@/components/ui';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const lingua = await linguaDeiMetadati(params);
@@ -25,8 +24,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
  * prodotto, solo dove cambiare come funziona l'app. Sono due cose diverse, e
  * sul web possono avere due indirizzi diversi.
  *
- * Le impostazioni si raggiungono da qui: sono la seconda azione della barra,
- * dopo «Modifica profilo», che è quella che si fa più spesso.
+ * **La barra non porta più azioni.** Ci stavano «Impostazioni» — una
+ * destinazione globale raggiungibile da questa sola schermata, che è il modo
+ * più elegante di nascondere una cosa — e «Modifica profilo», unico bottone
+ * pieno dello schermo per un gesto che si fa una volta all'anno, a mille pixel
+ * dalla scheda che modifica. Le impostazioni ora stanno nella colonna e nel
+ * menu account; modificare il profilo si fa sulla scheda, in `HubProfilo`.
  */
 export default async function PaginaProfilo({ params }: { params: Promise<{ locale: string }> }) {
   await linguaDellaRotta(params);
@@ -39,16 +42,6 @@ export default async function PaginaProfilo({ params }: { params: Promise<{ loca
           <span className="font-display text-xl font-extrabold tracking-[-0.02em]">
             {t('nav.profilo')}
           </span>
-        }
-        azioni={
-          <div className="flex flex-wrap items-center gap-2">
-            <ButtonLink href={percorsiApp.impostazioni()} variante="contorno" dimensione="sm">
-              {t('impostazioni.titolo')}
-            </ButtonLink>
-            <ButtonLink href={percorsiApp.modificaProfilo()} dimensione="sm">
-              {t('profilo.modifica')}
-            </ButtonLink>
-          </div>
         }
       />
 

@@ -1,13 +1,20 @@
 import type { ReactNode } from 'react';
-import { AvatarUtente } from '@/components/app/avatar-utente';
 import { CampanellaNotifiche } from '@/components/app/campanella-notifiche';
+import { MenuAccount } from '@/components/app/menu-account';
 import { ThemeToggle } from '@/components/layout';
 import { cn } from '@/lib/utils';
 
 export interface AppTopbarProps {
   /** Titolo della schermata: dice dove ci si trova. */
   titolo?: ReactNode;
-  /** Azioni a destra, prima del tema. */
+  /**
+   * Azioni **della schermata**, prima dei comandi dell'applicazione.
+   *
+   * Solo verbi, e solo su ciò che si sta guardando. Una destinazione qui —
+   * «Impostazioni» stava proprio qui, sul profilo — è un collegamento che
+   * esiste su una schermata sola: non è navigazione, è un nascondiglio. Le
+   * destinazioni stanno nella colonna, o nel menu account.
+   */
   azioni?: ReactNode;
   className?: string;
 }
@@ -25,6 +32,10 @@ export interface AppTopbarProps {
  *
  * Sta qui e non nelle `azioni` delle pagine: dieci pagine la renderebbero in
  * dieci punti, e quella dimenticata sarebbe una schermata senza campanella.
+ *
+ * **L'avatar è diventato un menu.** Era un ritratto e basta: l'angolo che tutti
+ * premono cercando l'account, e l'unico controllo dello schermo che non faceva
+ * niente. Vale la stessa ragione della campanella — sta qui, non nelle pagine.
  */
 export function AppTopbar({ titolo, azioni, className }: AppTopbarProps) {
   return (
@@ -36,11 +47,17 @@ export function AppTopbar({ titolo, azioni, className }: AppTopbarProps) {
     >
       <div className="flex min-w-0 flex-1 items-center gap-3">{titolo}</div>
 
-      <div className="ml-auto flex flex-none items-center gap-3">
-        {azioni}
+      {/* Lo spazio non è uniforme, e non è un vezzo: campanella e tema stanno
+          stretti perché sono la stessa cosa — comandi dell'applicazione — e
+          l'account si stacca, perché è un'altra. Con tutti e tre a 12px non
+          si leggeva nessun gruppo, solo cinque oggetti in fila. */}
+      <div className="ml-auto flex flex-none items-center gap-2">
+        {azioni ? <div className="mr-1 flex items-center gap-2">{azioni}</div> : null}
         <CampanellaNotifiche />
         <ThemeToggle className="size-[42px] rounded-[14px] border border-bordo bg-superficie" />
-        <AvatarUtente />
+        <div className="ml-1.5">
+          <MenuAccount />
+        </div>
       </div>
     </header>
   );

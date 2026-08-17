@@ -48,6 +48,8 @@ openssl rand -base64 32   # POSTGRES_PASSWORD
 
 L'API **si ferma all'avvio** se ne manca uno, invece di partire e sbagliare dopo. In particolare rifiuta di partire con `CANALE_EMAIL=sviluppo` in produzione (quel canale scrive i codici OTP nei log) e senza `EMAIL_SUPPORTO`, la casella che riceve le segnalazioni: le linee guida promettono una risposta entro 24 ore, e senza nessuno dietro è una promessa falsa dal primo giorno.
 
+**Due variabili accendono i link universali** (`APPLE_TEAM_ID`, `ANDROID_SHA256_FIRMA`), e stanno sul contenitore `web`: finché sono vuote il sito risponde 404 su `/.well-known/apple-app-site-association` e `/.well-known/assetlinks.json`, e i collegamenti degli inviti restano al browser — cioè lo stato di prima, non un guasto. Sono d'ambiente e **non argomenti di build**: si accendono con un riavvio, non ricostruendo l'immagine. Dopo averle messe, i due indirizzi vanno interrogati davvero (`curl -i https://prome.app/.well-known/apple-app-site-association`): devono rispondere 200, `application/json` e **senza redirezioni**, che è la condizione che Apple verifica.
+
 **Una variabile nuova nell'API va aggiunta anche qui**, in tre punti: `.env` sulla macchina, `.env.esempio` e il blocco `environment` del compose — di `api` **e** di `worker`, che condividono l'immagine e quindi la stessa validazione. Il compose passa solo ciò che dichiara: una variabile presente in `.env` ma non elencata lì non arriva al contenitore. Le obbligatorie si scrivono nella forma `${NOME:?...}`, così il rilascio si ferma al primo comando invece di avviare qualcosa che esce subito e viene rimesso in piedi all'infinito.
 
 ## Backup

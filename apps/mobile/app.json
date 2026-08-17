@@ -13,11 +13,25 @@
       "supportsTablet": false,
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "associatedDomains": ["applinks:prome.app"]
     },
     "android": {
       "package": "app.prome",
       "permissions": [],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "category": ["BROWSABLE", "DEFAULT"],
+          "data": [
+            { "scheme": "https", "host": "prome.app", "pathPrefix": "/app/inviti" },
+            { "scheme": "https", "host": "prome.app", "pathPrefix": "/app/inviti-gruppo" },
+            { "scheme": "https", "host": "prome.app", "pathPattern": "/.*/app/inviti/.*" },
+            { "scheme": "https", "host": "prome.app", "pathPattern": "/.*/app/inviti-gruppo/.*" }
+          ]
+        }
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#32E0C4",
         "backgroundImage": "./assets/images/android-icon-background.png",

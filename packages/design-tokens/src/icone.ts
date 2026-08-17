@@ -18,6 +18,9 @@ export const TRACCIATI = {
   piu: 'M12 5v14M5 12h14',
   indietro: 'M20 12H5m6-7-7 7 7 7',
   avanti: 'm9 6 6 6-6 6',
+  // Non è `avanti` ruotata: una freccia ruotata via CSS prende terminali e
+  // spessore storti sui mezzi pixel. Qui il verso lo dice il tracciato.
+  giu: 'm6 9 6 6 6-6',
   chiudi: 'M6 6l12 12M18 6 6 18',
   commento:
     'M20.5 11.5c0 4.4-3.8 7.5-8.5 7.5-1 0-2-.15-2.9-.4L4.5 20.5l1.3-3.6A7.4 7.4 0 013.5 11.5C3.5 7.1 7.3 4 12 4s8.5 3.1 8.5 7.5Z',

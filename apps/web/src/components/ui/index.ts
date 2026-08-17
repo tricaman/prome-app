@@ -19,4 +19,5 @@ export { Switch, type SwitchProps } from './switch';
 export { Segmented, type SegmentedProps, type OpzioneSegmento } from './segmented';
 export { Icona, TRACCIATI, type IconaProps, type NomeIcona } from './icona';
 export { Elenco, RigaElenco, type RigaElencoProps } from './elenco';
+export { Menu, VoceMenu, type MenuProps, type VoceMenuProps } from './menu';
 export { SceltaRadio, type SceltaRadioProps, type OpzioneRadio } from './scelta-radio';

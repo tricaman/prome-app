@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { rotte } from '@/content';
+import { riscuotiDestinazione } from '@/lib/destinazione-in-attesa';
 import { useTema } from '@/theme';
 import { apriSessione, avvisatore } from '@prome/app-core';
 import {
@@ -51,8 +52,12 @@ export default function SchermataCodice() {
     onSuccess: async ({ data }) => {
       await apriSessione(data.token);
       // Chi non ha ancora compilato il profilo non entra nella bacheca: da
-      // qui sappiamo già quale delle due strade prendere.
-      router.replace(data.onboardingCompletato ? rotte.bacheca() : rotte.profilo());
+      // qui sappiamo già quale delle due strade prendere. Chi invece stava
+      // andando da qualche parte — un invito aperto da un collegamento — ci
+      // torna, e la destinazione **non si riscuote** se il profilo manca
+      // ancora: la riprende `completa-profilo`, che è l'ultimo passo.
+      const attesa = data.onboardingCompletato ? riscuotiDestinazione() : null;
+      router.replace(attesa ?? (data.onboardingCompletato ? rotte.bacheca() : rotte.profilo()));
       // Rientrare entro la grazia di 14 giorni annulla la cancellazione: va
       // detto, o l'utente non saprà mai che l'account è salvo.
       const riattivato = data.cancellazioneAnnullata === true;

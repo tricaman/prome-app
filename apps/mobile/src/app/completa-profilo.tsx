@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { rotte } from '@/content';
+import { riscuotiDestinazione } from '@/lib/destinazione-in-attesa';
 import { useTema } from '@/theme';
 import {
   completaMioProfilo,
@@ -67,7 +68,11 @@ export default function SchermataProfilo() {
    */
   const completa = useApiMutation<unknown, CompletaProfiloDto>({
     mutationFn: (dati: CompletaProfiloDto) => completaMioProfilo(dati),
-    onSuccess: () => router.replace(rotte.bacheca()),
+    // Chi è arrivato da un invito ci torna adesso: è il caso che IA2 chiama
+    // normale — si invita anche chi non ha ancora un account, e quel qualcuno
+    // arriva qui prima di poter accettare. Mandarlo in bacheca gli farebbe
+    // cercare da capo il messaggio da cui era partito.
+    onSuccess: () => router.replace(riscuotiDestinazione() ?? rotte.bacheca()),
   });
 
   const avanti = () => {
