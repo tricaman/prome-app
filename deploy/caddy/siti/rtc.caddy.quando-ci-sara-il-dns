@@ -1,0 +1,24 @@
+# Segnalazione di LiveKit (spike WP-14).
+#
+# Questo file NON viene caricato: gli manca l'estensione .caddy di proposito.
+# Va rinominato in `rtc.caddy` **solo quando rtc.prome.app risolve già alla
+# macchina**. Acceso prima, Caddy chiede subito il certificato, la validazione
+# fallisce e i tentativi falliti contano per i limiti di Let's Encrypt — è la
+# stessa lezione di web.caddy.
+#
+# **Qui passa solo la segnalazione.** Il WebSocket con cui i client si accordano
+# su chi parla con chi: poche decine di byte. L'audio non passa da Caddy — va in
+# UDP diretto sulla 7882 dell'host — e non deve passarci: un reverse proxy in
+# mezzo al media aggiungerebbe latenza proprio dove si sente.
+
+rtc.prome.app {
+	# Nessuna compressione: il traffico è già un WebSocket di messaggi brevi, e
+	# comprimerlo costa CPU senza restituire niente.
+	reverse_proxy livekit:7880
+
+	header {
+		X-Content-Type-Options nosniff
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+}

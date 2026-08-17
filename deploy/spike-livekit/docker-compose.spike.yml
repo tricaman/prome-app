@@ -1,0 +1,49 @@
+# LiveKit per lo spike WP-14 — deliberatamente separato dalla produzione.
+#
+# Non sta in `docker-compose.prod.yml` perché lo spike non ha ancora risposto:
+# finché la risposta non c'è, l'audio non è parte del sistema. Se l'esito è
+# negativo questa cartella si cancella e non resta niente da smontare.
+#
+# Si unisce però alla rete della produzione, perché la segnalazione la deve
+# raggiungere il Caddy che è già lì: due Caddy litigherebbero per le porte
+# 80 e 443.
+#
+#   cd /home/deploy/prome/deploy/spike-livekit
+#   sudo docker compose -f docker-compose.spike.yml up -d
+
+name: prome-spike-livekit
+
+services:
+  livekit:
+    image: livekit/livekit-server:v1.13.5
+    # Nome fisso: è così che Caddy lo trova, con `reverse_proxy livekit:7880`.
+    container_name: livekit
+    restart: unless-stopped
+    command: --config /etc/livekit.yaml
+    environment:
+      # Formato "chiave: segreto". Generate sulla macchina, mai nel repository.
+      LIVEKIT_KEYS: ${LIVEKIT_KEYS}
+    ports:
+      # Solo il media è pubblicato. La segnalazione (7880) resta interna e
+      # passa da Caddy in TLS.
+      - '7881:7881'
+      - '7882:7882/udp'
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+    # Nota sui buffer UDP: LiveKit chiede 5 MB e i predefiniti sono 208 KB.
+    # Si alzano **sull'host** (`/etc/sysctl.d/99-livekit.conf`), non qui:
+    # `net.core.rmem_max` non è per-rete, quindi runc rifiuta di impostarlo
+    # sul contenitore e il contenitore non parte proprio. Provato.
+    networks:
+      - produzione
+    logging:
+      driver: json-file
+      options:
+        max-size: '20m'
+        max-file: '3'
+
+networks:
+  # La rete che docker compose ha già creato per il progetto `prome`.
+  produzione:
+    external: true
+    name: prome_default

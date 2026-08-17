@@ -1,0 +1,39 @@
+# Configurazione di LiveKit per lo spike WP-14.
+#
+# Le chiavi NON stanno qui: arrivano da LIVEKIT_KEYS nell'ambiente, che vive
+# in `.env` sulla macchina come tutti gli altri segreti.
+
+# Segnalazione. Non è pubblicata sull'host: la raggiunge Caddy dalla rete
+# interna e la espone in TLS su rtc.prome.app. Una porta in meno aperta.
+port: 7880
+
+rtc:
+  # Ripiego in TCP per chi non può uscire in UDP. Questa sì deve essere
+  # raggiungibile dall'esterno.
+  tcp_port: 7881
+
+  # **Una sola porta UDP con multiplexing**, non un intervallo.
+  #
+  # LiveKit di suo userebbe 50000-60000. In Docker quella forma è una trappola:
+  # ogni porta pubblicata crea un processo `docker-proxy`, quindi diecimila
+  # processi su una macchina a due core. Con il mux tutto il media passa da qui.
+  udp_port: 7882
+
+  # Il contenitore vede un indirizzo privato; i candidati ICE devono portare
+  # quello pubblico, altrimenti nessuno riesce a collegarsi da fuori.
+  #
+  # Lo diciamo noi invece di farglielo scoprire. Con `use_external_ip: true`
+  # LiveKit lo chiede a un server STUN — all'avvio ha interrogato
+  # `global.stun.twilio.com`, che è fuori UE: nessun media ci passa, ma V3
+  # chiede di sapere dove va il traffico e una dipendenza esterna all'avvio
+  # è una cosa in più che può mancare proprio quando serve. L'indirizzo qui
+  # è statico e lo conosciamo.
+  use_external_ip: false
+  node_ip: 46.224.215.1
+
+# Nessuna registrazione: A3 dice solo transito, e non si abilita per sbaglio
+# ciò che il vincolo esclude.
+
+logging:
+  level: info
+  json: true
