@@ -83,13 +83,23 @@ Due aree, due cornici: il sito pubblico usa `SiteShell`, l'app usa `AppShell` (c
 
 Le regole di privacy si mostrano **solo come il server le ha confermate**: `impostazioni-privacy.tsx` legge il profilo e scrive con `useApiMutation`, senza alcuno stato locale. Niente aggiornamento ottimistico qui, mai — un valore a schermo che non è stato salvato è la bugia peggiore che questa schermata possa dire, perché chi legge «Pubblico» crede di essere visibile e nessuno lo smentirà. I valori sono quelli del contratto (`PRIVATO|ATENEO|PUBBLICO`); le etichette e le descrizioni stanno in i18n e devono descrivere **ciò che il server applica davvero**, non il modello di dominio nella sua interezza.
 
-**Un asse solo si può cambiare**, la visibilità dei contenuti. La contattabilità è un valore vero e salvato, ma **nessuna regola la legge ancora** (vedi `apps/api/CLAUDE.md`): la sua scheda esiste (`impostazioni-contattabilita.tsx`), è spenta, e dichiara in chiaro che la scelta non è ancora applicata. La differenza che conta non è essere a schermo o no — è che **non si salva**: chi la impostasse su «Privato» crederebbe di essersi protetto, e nessuno lo smentirebbe. Quando qualcosa la applicherà, la scheda si accende e basta.
+**Entrambi gli assi si cambiano**, uno alla volta. La contattabilità è rimasta spenta e dichiarata finché nessuna regola la leggeva — un interruttore che non protegge da niente è peggio di uno che manca — e si è accesa quando è nato il gesto in cui può decidere **senza raccontare niente**: invitare una persona che si sta già guardando nella sala di un'aula aperta (`POST /aule-studio/:id/inviti/utente`). Sull'invito **per indirizzo** la regola resta inapplicata di proposito: un rifiuto lì direbbe a chiunque se una certa email ha un account su Prome. La scheda dice per esteso **dove vale**, perché una regola di privacy che non dichiara il proprio perimetro si legge più larga di quello che è.
+
+Il pulsante «Invita» nella tabella dei permessi è spento con la ragione quando `contattabile` è falso: **lo stato lo dichiara il server**, ed è lo stesso valore che l'API applicherebbe — scoprire un divieto da un errore, dopo aver premuto, somiglia a un guasto e non a una scelta di qualcun altro.
 
 ### Il profilo e le impostazioni sono due destinazioni
 
 `/app/profilo` è una pagina di **contenuto** — chi sei, cosa hai prodotto — e `/app/impostazioni` una pagina di **controllo**. Fino al 16 agosto 2026 la voce «Profilo» della colonna di navigazione portava alle impostazioni, e una pagina di profilo non esisteva. `/app/profilo/modifica` è una terza destinazione: cinque campi e una ricerca con suggerimenti stanno stretti in un modale, ed è la stessa scelta fatta sul telefono.
 
 **Ogni sezione delle impostazioni è una rotta** (`/app/impostazioni/{privacy,notifiche,aspetto,dati,elimina}`), non un'ancora dentro una pagina sola: su un browser l'indirizzo si salva fra i preferiti, si manda a qualcuno, e il tasto indietro fa quello che ci si aspetta. L'indice sta in `impostazioni/layout.tsx` e porta a destra il valore corrente di ogni voce — è ciò che rende un indice migliore di una lista di controlli, perché quasi sempre chi apre le impostazioni vuole verificare, non cambiare. `/app/impostazioni` resta valido e rimanda alla privacy: era nella navigazione e nei preferiti, e romperlo per una riorganizzazione interna sarebbe un guasto per chi non c'entra.
+
+### I propri contenuti: tre pagine, nessun endpoint nuovo
+
+Le tessere del profilo portano tutte da qualche parte, e i quattro numeri vengono dalla paginazione (`limit: 1`: serve il totale, non l'elenco):
+
+- **`/app/profilo/post`** è la bacheca con `?soloMiei=true` — un parametro, non una collezione nuova: `/bacheca/miei` avrebbe avuto la stessa forma, la stessa paginazione e gli stessi difetti da correggere due volte. Ci compaiono anche i post che le proprie impostazioni nascondono agli altri: la visibilità dice chi vede le cose **altrui**.
+- **`/app/profilo/aule`** riusa `GET /aule-studio`, che risponde già «le aule di cui faccio parte». Si chiama «le tue aule» e non «create da te» perché chi ha aperto un'aula non è scritto da nessuna parte, e l'unico indizio — essere moderatore — vale anche per chi è stato promosso dopo.
+- **`/app/profilo/materiali`** è la raccolta personale (`GET /materiali-salvati`), con l'aula di provenienza su ogni riga: un elenco di nomi di file senza provenienza non dice niente.
 
 ### Segnaposto: quello che il disegno prevede e il prodotto non ha
 

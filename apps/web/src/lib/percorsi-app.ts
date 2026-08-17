@@ -18,6 +18,9 @@ export const percorsiApp = {
   invitoGruppo: (id: string) => `/app/inviti-gruppo/${id}`,
   profilo: () => '/app/profilo',
   modificaProfilo: () => '/app/profilo/modifica',
+  mieiPost: () => '/app/profilo/post',
+  mieAule: () => '/app/profilo/aule',
+  materialiSalvati: () => '/app/profilo/materiali',
   notifiche: () => '/app/notifiche',
   /**
    * Le impostazioni non sono una pagina sola: ogni sezione ha il proprio

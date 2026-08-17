@@ -70,7 +70,10 @@ function SchedaGruppo({ gruppo }: { gruppo: GruppoDto }) {
               justifyContent: 'center',
             }}
           >
-            <Text variante="sottotitolo" style={{ color: tema.colori.primarioTesto }}>
+            {/* Stessa correzione della barra: il quadrello è menta **tenue**,
+                non menta pieno, e il testo che gli va sopra è l'accento. Con
+                `primarioTesto` la lettera era scura su fondo scuro. */}
+            <Text variante="sottotitolo" colore="accento">
               {gruppo.nome.slice(0, 1).toUpperCase()}
             </Text>
           </View>

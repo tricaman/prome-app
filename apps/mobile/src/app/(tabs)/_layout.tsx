@@ -31,7 +31,14 @@ export default function LayoutSchede() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: tema.colori.primarioTesto,
+        // **Accento, non `primarioTesto`.** Quello è il colore del testo scritto
+        // SOPRA il menta pieno — scuro, perché il menta è chiaro — e sulla
+        // barra delle schede, che menta non è, sul fondo scuro spariva: la
+        // scheda attiva restava senza nome. L'accento è il menta del marchio
+        // adattato allo sfondo della pagina (scurito sul chiaro, pieno sullo
+        // scuro), quindi etichetta e icona hanno lo stesso colore in entrambi
+        // i temi — che è ciò che fa leggere l'una accanto all'altra.
+        tabBarActiveTintColor: tema.colori.primarioAccento,
         tabBarInactiveTintColor: tema.colori.testoTenue,
         tabBarStyle: {
           backgroundColor: tema.colori.superficie,
@@ -57,7 +64,7 @@ export default function LayoutSchede() {
             fontWeight: '800',
           },
           tabBarIcon: ({ focused }) => (
-            <Icona nome="bacheca" dimensione={24} colore={focused ? 'primario' : 'tenue'} />
+            <Icona nome="bacheca" dimensione={24} colore={focused ? 'accento' : 'tenue'} />
           ),
         }}
       />
@@ -66,7 +73,7 @@ export default function LayoutSchede() {
         options={{
           title: t('app.nav.aule'),
           tabBarIcon: ({ focused }) => (
-            <Icona nome="aule" dimensione={24} colore={focused ? 'primario' : 'tenue'} />
+            <Icona nome="aule" dimensione={24} colore={focused ? 'accento' : 'tenue'} />
           ),
         }}
       />
@@ -75,7 +82,7 @@ export default function LayoutSchede() {
         options={{
           title: t('app.nav.gruppi'),
           tabBarIcon: ({ focused }) => (
-            <Icona nome="gruppi" dimensione={24} colore={focused ? 'primario' : 'tenue'} />
+            <Icona nome="gruppi" dimensione={24} colore={focused ? 'accento' : 'tenue'} />
           ),
         }}
       />
@@ -84,7 +91,7 @@ export default function LayoutSchede() {
         options={{
           title: t('app.nav.profilo'),
           tabBarIcon: ({ focused }) => (
-            <Icona nome="profilo" dimensione={24} colore={focused ? 'primario' : 'tenue'} />
+            <Icona nome="profilo" dimensione={24} colore={focused ? 'accento' : 'tenue'} />
           ),
         }}
       />

@@ -44,19 +44,8 @@ export const gestoSospeso =
     if (__DEV__) console.warn(`[segnaposto] comando sospeso invocato — manca: ${debito.manca}`);
   };
 
-// --- Contatori e attività ----------------------------------------------------
-
-export const SEGNAPOSTO_POST_MIEI = segnaposto('GET /post non filtra per autore');
-export const SEGNAPOSTO_AULE_CREATE = segnaposto('GET /aule-studio non filtra per creatore');
-export const SEGNAPOSTO_MATERIALI_SALVATI = segnaposto(
-  'nessun concetto di «materiale salvato» nel dominio',
-);
-
 // --- Profilo -----------------------------------------------------------------
 
-export const SEGNAPOSTO_AVATAR = segnaposto(
-  'nessuna foto nel profilo e nessun endpoint per caricarla',
-);
 export const SEGNAPOSTO_ANNO_CORSO = segnaposto("ProfiloDto non porta l'anno di corso");
 
 // --- Account -----------------------------------------------------------------
@@ -67,15 +56,9 @@ export const SEGNAPOSTO_EMAIL = segnaposto(
 export const SEGNAPOSTO_DISPOSITIVI = segnaposto(
   'i dispositivi si registrano e si dimenticano, ma non esiste un GET che li elenchi',
 );
-export const SEGNAPOSTO_TEMA = segnaposto(
-  'sul telefono il tema segue useColorScheme(): non è una scelta, è un riflesso del sistema',
-);
 
 // --- Privacy e avvisi --------------------------------------------------------
 
-export const SEGNAPOSTO_CONTATTABILITA = segnaposto(
-  'PUT /profilo/me/privacy la salva, ma nessuna regola la legge',
-);
 export const SEGNAPOSTO_PROMEMORIA = segnaposto(
   'PreferenzeDiNotificaDto ha due assi soli: commenti e inviti',
 );
@@ -86,4 +69,3 @@ export const SEGNAPOSTO_PERMESSO_PUSH = segnaposto(
 
 // --- Supporto ----------------------------------------------------------------
 
-export const SEGNAPOSTO_AIUTO = segnaposto('nessuna schermata di aiuto e nessun canale di contatto');

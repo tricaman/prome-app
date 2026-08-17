@@ -791,10 +791,10 @@
       "contattabilita": {
         "titolo": "Who can contact you",
         "testo": "Who can message you privately and invite you to study rooms and groups.",
-        "nonApplicata": "This choice isn't applied yet: invitations travel by email address, which may not have an account. We keep it visible because the day it counts, it will count for what you chose.",
         "privato": "Only people already in your groups or study rooms",
         "ateneo": "Only people studying at your university",
-        "pubblico": "Any student signed up to Prome"
+        "pubblico": "Any student signed up to Prome",
+        "ambito": "It applies to people who see you in an open room without sharing any space with you: those already in your groups or rooms can invite you anyway."
       },
       "leggiPrivacy": {
         "titolo": "Read the privacy policy",

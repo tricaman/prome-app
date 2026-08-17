@@ -125,10 +125,7 @@ export default function SchermataCreaAula() {
                   opacity: impossibile ? 0.5 : 1,
                 }}
               >
-                <Text
-                  variante="etichetta"
-                  style={{ color: scelta ? tema.colori.primarioTesto : tema.colori.testo }}
-                >
+                <Text variante="etichetta" colore={scelta ? 'accento' : 'testo'}>
                   {t(`app.aule.modale.visibilita.${opzione.chiave}Titolo`)}
                 </Text>
                 <Text variante="didascalia">

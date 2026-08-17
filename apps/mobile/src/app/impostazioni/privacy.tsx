@@ -1,4 +1,3 @@
-import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -12,11 +11,9 @@ import {
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
 import { useApiMutation, useT } from '@/hooks';
-import { SEGNAPOSTO_CONTATTABILITA, gestoSospeso } from '@/lib/segnaposto';
 import { QueryBoundary } from '@/components/feedback';
 import {
   Card,
-  Chip,
   Elenco,
   Intestazione,
   RigaElenco,
@@ -54,10 +51,11 @@ const CHIAVI = { PRIVATO: 'privato', ATENEO: 'ateneo', PUBBLICO: 'pubblico' } as
  * detta una volta, mostrando «Ateneo» a chiunque mentre il valore vero era
  * «Privato».
  *
- * SEGNAPOSTO: chi può contattarti — l'API accetta e salva l'asse, ma nessuna
- * regola lo legge (`SEGNAPOSTO_CONTATTABILITA`). Le card ci sono e sono
- * spente, con lo stato scritto sopra: salvarlo farebbe credere protetta una
- * persona che non lo è.
+ * **I due assi sono indipendenti** e si cambiano uno alla volta, come li
+ * modella il dominio. «Chi può contattarti» era spento e dichiarato tale
+ * finché nessuna regola lo leggeva; ora decide chi può invitarti quando ti
+ * vede in una sala aperta senza condividere con te nessuno spazio — l'unico
+ * gesto in cui il rifiuto non racconta a nessuno se sei iscritto a Prome.
  */
 export default function SchermataPrivacy() {
   const tema = useTema();
@@ -65,6 +63,12 @@ export default function SchermataPrivacy() {
   const queryClient = useQueryClient();
   const profilo = useLeggiMioProfilo();
   const blocchi = useElencaBlocchi({ limit: 1 });
+
+  const salvaContatto = useApiMutation({
+    mutationFn: (contattabilita: AggiornaPrivacyDtoVisibilita) =>
+      aggiornaMiaPrivacy({ contattabilita }),
+    invalida: [getLeggiMioProfiloQueryKey() as never],
+  });
 
   const salva = useApiMutation({
     mutationFn: (visibilita: AggiornaPrivacyDtoVisibilita) => aggiornaMiaPrivacy({ visibilita }),
@@ -105,31 +109,33 @@ export default function SchermataPrivacy() {
           )}
         </QueryBoundary>
 
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: tema.spaziatura[2],
-            marginTop: tema.spaziatura[2],
-          }}
-        >
-          <TitoloSezione>{t('app.impostazioni.contattabilita.titolo')}</TitoloSezione>
-          <Chip tono="ambra">{t('comune.presto')}</Chip>
-        </View>
-        <Card style={{ gap: tema.spaziatura[3] }}>
-          <Text variante="didascalia">{t('app.impostazioni.contattabilita.testo')}</Text>
-          <Text variante="didascalia" style={{ color: tema.tinte.ambra.testo }}>
-            {t('app.impostazioni.contattabilita.nonApplicata')}
-          </Text>
-          <SceltaRadio
-            opzioni={opzioni('contattabilita')}
-            valore="PRIVATO"
-            etichetta={t('app.impostazioni.contattabilita.titolo')}
-            disabilitato
-            conPallino
-            onScegli={gestoSospeso(SEGNAPOSTO_CONTATTABILITA)}
-          />
-        </Card>
+        {/* **Adesso vale qualcosa, quindi adesso si sceglie.** Era spenta con
+            la pastiglia «Presto» perché nessuna regola la leggeva, e un
+            interruttore che non protegge da niente è peggio di uno che manca.
+            Da oggi decide chi può invitarti quando ti vede in una sala aperta
+            senza condividere con te nessuno spazio — l'unico gesto in cui il
+            rifiuto non racconta a nessuno se sei iscritto a Prome. */}
+        <TitoloSezione>{t('app.impostazioni.contattabilita.titolo')}</TitoloSezione>
+        <QueryBoundary query={profilo}>
+          {({ data }) => (
+            <Card style={{ gap: tema.spaziatura[3] }}>
+              <Text variante="didascalia">{t('app.impostazioni.contattabilita.testo')}</Text>
+              {/* Dove vale davvero: una regola di privacy che non dice il
+                  proprio perimetro si legge più larga di quello che è. */}
+              <Text variante="didascalia" colore="debole">
+                {t('app.impostazioni.contattabilita.ambito')}
+              </Text>
+              <SceltaRadio
+                opzioni={opzioni('contattabilita')}
+                valore={data.impostazioniPrivacy.contattabilita}
+                etichetta={t('app.impostazioni.contattabilita.titolo')}
+                inCorso={salvaContatto.isPending}
+                conPallino
+                onScegli={(contattabilita) => salvaContatto.mutate(contattabilita)}
+              />
+            </Card>
+          )}
+        </QueryBoundary>
 
         <TitoloSezione>{t('app.impostazioni.persone')}</TitoloSezione>
         <Elenco>

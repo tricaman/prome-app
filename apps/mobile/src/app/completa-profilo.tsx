@@ -237,8 +237,8 @@ function NotaPrivacy() {
         padding: tema.spaziatura[4],
       }}
     >
-      <Icona nome="lucchetto" colore="primario" />
-      <Text variante="didascalia" style={{ flex: 1, color: tema.colori.primarioTesto }}>
+      <Icona nome="lucchetto" colore="accento" />
+      <Text variante="didascalia" colore="accento" style={{ flex: 1 }}>
         {t('app.onboarding.privacy')}
       </Text>
     </View>

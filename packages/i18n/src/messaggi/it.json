@@ -791,10 +791,10 @@
       "contattabilita": {
         "titolo": "Chi può contattarti",
         "testo": "Chi può scriverti in privato e invitarti in aule studio e gruppi.",
-        "nonApplicata": "Questa scelta non è ancora applicata: gli inviti viaggiano per indirizzo email, che può non avere un account. La lasciamo in vista perché il giorno in cui varrà, varrà per quello che hai scelto.",
         "privato": "Solo chi è già nei tuoi gruppi o nelle tue aule studio",
         "ateneo": "Solo chi studia nel tuo ateneo",
-        "pubblico": "Qualunque studente iscritto a Prome"
+        "pubblico": "Qualunque studente iscritto a Prome",
+        "ambito": "Vale per chi ti vede in un'aula aperta senza condividere con te nessuno spazio: chi è già nei tuoi gruppi o nelle tue aule può invitarti comunque."
       },
       "leggiPrivacy": {
         "titolo": "Leggi la privacy policy",

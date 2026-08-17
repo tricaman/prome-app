@@ -12,15 +12,11 @@ import {
 import { useApiMutation, useForm } from '@/hooks';
 import { useRouter } from '@/i18n/navigazione';
 import { percorsiApp } from '@/lib/percorsi-app';
-import {
-  SEGNAPOSTO_ANNO_CORSO,
-  SEGNAPOSTO_AVATAR,
-  SEGNAPOSTO_BIO,
-  gestoSospeso,
-} from '@/lib/segnaposto';
+import { SEGNAPOSTO_ANNO_CORSO, SEGNAPOSTO_BIO, gestoSospeso } from '@/lib/segnaposto';
 import { Form, FormInput } from '@/components/form';
-import { Avatar, Button, Card, Chip, Icona, Input, SectionLabel, Textarea } from '@/components/ui';
+import { Button, Card, Icona, Input, SectionLabel, Textarea } from '@/components/ui';
 import { QueryBoundary } from '@/components/feedback';
+import { FotoProfilo } from './foto-profilo';
 import { SceltaCorso } from './scelta-corso';
 
 /**
@@ -116,33 +112,9 @@ function Modulo({ profilo }: { profilo: ProfiloDto }) {
         </Button>
       </div>
 
-      {/* Al posto della foto ci sono le iniziali su un colore ricavato dal
-          nome: non è un ripiego provvisorio, è quello che il prodotto usa
-          ovunque. Il bottone resta spento perché non esiste un endpoint a cui
-          mandare i byte. */}
-      <Card padding="md" className="mb-6 flex flex-wrap items-center gap-4">
-        <Avatar nome={nome || '?'} dimensione={64} className="text-xl" />
-        <div className="min-w-0 flex-1">
-          <p className="text-[14.5px] font-extrabold text-testo">{tModifica('foto')}</p>
-          <p className="mt-0.5 text-[12.5px] leading-relaxed text-testo-tenue">
-            {tModifica('fotoTesto')}
-          </p>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <Button
-            variante="contorno"
-            size="sm"
-            isDisabled
-            onPress={gestoSospeso(SEGNAPOSTO_AVATAR)}
-            iconaSinistra={<Icona nome="fotocamera" dimensione={16} />}
-          >
-            {tModifica('carica')}
-          </Button>
-          <Chip tono="ambra" dimensione="sm">
-            {tComune('presto')}
-          </Chip>
-        </div>
-      </Card>
+      {/* Senza foto restano le iniziali su un colore ricavato dal nome: non è
+          un ripiego provvisorio, è il ritratto di chi la foto non la mette. */}
+      <FotoProfilo nome={nome} foto={profilo.foto} />
 
       <Card padding="md" className="mb-6">
         <SectionLabel>{tModifica('datiPersonali')}</SectionLabel>

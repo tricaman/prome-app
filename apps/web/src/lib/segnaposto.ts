@@ -25,19 +25,8 @@ export interface Segnaposto {
 
 const segnaposto = (manca: string): Segnaposto => ({ manca });
 
-// --- Contatori e contenuti propri --------------------------------------------
-
-export const SEGNAPOSTO_POST_MIEI = segnaposto('ElencaPostParams non ha un filtro per autore');
-export const SEGNAPOSTO_AULE_CREATE = segnaposto('gli elenchi non filtrano per creatore');
-export const SEGNAPOSTO_MATERIALI_SALVATI = segnaposto(
-  'nessun concetto di «materiale salvato» nel dominio',
-);
-
 // --- Profilo -----------------------------------------------------------------
 
-export const SEGNAPOSTO_AVATAR = segnaposto(
-  'ProfiloDto non ha una foto e non esiste un endpoint per caricarla',
-);
 export const SEGNAPOSTO_BIO = segnaposto('nessuna biografia nel modello di dominio');
 export const SEGNAPOSTO_ANNO_CORSO = segnaposto("ProfiloDto non porta l'anno di corso");
 
@@ -51,10 +40,6 @@ export const SEGNAPOSTO_DISPOSITIVI = segnaposto(
 );
 
 // --- Avvisi ------------------------------------------------------------------
-
-export const SEGNAPOSTO_CONTATTABILITA = segnaposto(
-  'PUT /profilo/me/privacy la salva, ma nessuna regola la legge',
-);
 
 /**
  * Il gesto di un comando sospeso: nessuno.

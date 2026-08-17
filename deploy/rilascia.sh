@@ -61,8 +61,23 @@ echo "→ avvio"
 echo "→ ricarico la configurazione di Caddy"
 "${COMPOSE[@]}" exec -T caddy caddy reload --config /etc/caddy/Caddyfile </dev/null
 
-# Le immagini vecchie si accumulano: 38 GB si riempiono in fretta.
-sudo docker image prune -f --filter "until=168h" >/dev/null
+# Le immagini vecchie si accumulano: 38 GB si riempiono in fretta, e infatti
+# si erano riempiti — 87% di disco, 70 immagini, 11 GB di cache di build.
+#
+# La riga di prima diceva `prune -f` senza `-a`, che rimuove **solo le immagini
+# senza tag**: le nostre sono tutte etichettate con lo sha del commit, quindi
+# non erano mai penzolanti e non veniva cancellato niente. Un comando che gira
+# a ogni rilascio, esce con zero e non fa nulla.
+#
+# Con `-a` si rimuove ciò che nessun contenitore sta usando. Non si perde la
+# possibilità di tornare indietro: le immagini vivono su ghcr, e `rilascia.sh`
+# le ritira per sha quando serve.
+sudo docker image prune -af --filter "until=48h" >/dev/null
+
+# La cache di build non la tocca `image prune`, ed era il pezzo più grosso.
+# Sulla macchina non si costruisce — le immagini arrivano dalla CI — quindi
+# qui non c'è niente da riusare: quello che c'è è residuo.
+sudo docker builder prune -af >/dev/null
 
 # Il controllo che mancava. `up -d` può non sostituire niente — un compose che
 # risolve a un'immagine diversa da quella appena tirata giù, una variabile che

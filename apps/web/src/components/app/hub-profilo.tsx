@@ -1,15 +1,15 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useElencaMieiGruppi, useLeggiMioProfilo } from '@prome/api-client';
+import {
+  useElencaAuleStudio,
+  useElencaMaterialiSalvati,
+  useElencaMieiGruppi,
+  useElencaPost,
+  useLeggiMioProfilo,
+} from '@prome/api-client';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { Link } from '@/i18n/navigazione';
-import {
-  SEGNAPOSTO_AULE_CREATE,
-  SEGNAPOSTO_MATERIALI_SALVATI,
-  SEGNAPOSTO_POST_MIEI,
-  type Segnaposto,
-} from '@/lib/segnaposto';
 import { Avatar, Card, Chip, Icona, type NomeIcona } from '@/components/ui';
 import { QueryBoundary } from '@/components/feedback';
 import { cn } from '@/lib/utils';
@@ -25,7 +25,8 @@ interface Tessera {
   icona: NomeIcona;
   tinta: 'menta' | 'ambra' | 'blu' | 'neutra';
   valore?: number;
-  presto?: Segnaposto;
+  /** Dove porta: una tessera che non porta da nessuna parte è un numero e basta. */
+  href: string;
 }
 
 const SFONDO: Record<Tessera['tinta'], string> = {
@@ -44,29 +45,32 @@ const SFONDO: Record<Tessera['tinta'], string> = {
  * ieri la voce «Profilo» della colonna di navigazione portava alle
  * impostazioni, che è come chiamare «casa» il quadro elettrico.
  *
- * **Le quattro tessere sono la forma del disegno, non i suoi numeri.** L'unico
- * conteggio vero è quello dei gruppi, perché «i miei gruppi» è una domanda che
- * il server sa già rispondere; post, aule e materiali mostrano un trattino,
- * perché per contarli servirebbe un filtro per autore che gli elenchi non
- * hanno. Non si contano nemmeno passando dall'esportazione dei dati: quello è
- * l'adempimento GDPR, e usarlo per decorare tre riquadri sarebbe un abuso di
- * un endpoint che esiste per un'altra ragione.
+ * **I quattro numeri sono veri**, e vengono dalla paginazione delle quattro
+ * letture che il server sa già fare: i miei gruppi, le mie aule, i miei post
+ * (la bacheca con `soloMiei=true`) e la raccolta dei materiali salvati. Si
+ * chiede **una riga sola** per ciascuno: serve il totale, non l'elenco. Il
+ * trattino resta per il tempo in cui il numero non è ancora arrivato, perché
+ * un numero che non c'è non è zero.
  *
- * Sotto le tessere il disegno prevede le schede dei propri contenuti. C'è solo
- * quella dei gruppi, per la stessa ragione: le altre tre non hanno una
- * domanda da fare.
- *
- * SEGNAPOSTO: post, aule create, materiali salvati.
+ * Ogni tessera porta alla propria pagina: erano quattro riquadri di cui tre
+ * spenti con la pastiglia «presto», cioè la forma del disegno senza niente
+ * dietro.
  */
 export function HubProfilo() {
   const t = useTranslations('app.profilo');
   const tImpostazioni = useTranslations('app.impostazioni');
   const tNav = useTranslations('app.nav');
-  const tComune = useTranslations('comune');
   const profilo = useLeggiMioProfilo();
   const gruppi = useElencaMieiGruppi({ limit: 12 });
+  // Una riga sola: di queste tre serve il totale, non il contenuto.
+  const mieiPost = useElencaPost({ limit: 1, soloMiei: true });
+  const mieAule = useElencaAuleStudio({ limit: 1 });
+  const salvati = useElencaMaterialiSalvati({ limit: 1 });
 
   const totaleGruppi = gruppi.data?.meta.pagination.total;
+  const totalePost = mieiPost.data?.meta.pagination.total;
+  const totaleAule = mieAule.data?.meta.pagination.total;
+  const totaleSalvati = salvati.data?.meta.pagination.total;
 
   const tessere: readonly Tessera[] = [
     {
@@ -74,21 +78,24 @@ export function HubProfilo() {
       etichetta: t('tuoiPost'),
       icona: 'bacheca',
       tinta: 'menta',
-      presto: SEGNAPOSTO_POST_MIEI,
+      valore: totalePost,
+      href: percorsiApp.mieiPost(),
     },
     {
       chiave: 'aule',
-      etichetta: t('auleCreate'),
+      etichetta: t('tueAule'),
       icona: 'aule',
       tinta: 'ambra',
-      presto: SEGNAPOSTO_AULE_CREATE,
+      valore: totaleAule,
+      href: percorsiApp.mieAule(),
     },
     {
       chiave: 'materiali',
       etichetta: tNav('materiali'),
       icona: 'cartella',
       tinta: 'blu',
-      presto: SEGNAPOSTO_MATERIALI_SALVATI,
+      valore: totaleSalvati,
+      href: percorsiApp.materialiSalvati(),
     },
     {
       chiave: 'gruppi',
@@ -96,6 +103,7 @@ export function HubProfilo() {
       icona: 'gruppi',
       tinta: 'neutra',
       valore: totaleGruppi,
+      href: percorsiApp.gruppi(),
     },
   ];
 
@@ -139,8 +147,10 @@ export function HubProfilo() {
         {tessere.map((tessera) => (
           <Card
             key={tessera.chiave}
+            come={Link}
+            href={tessera.href}
             padding="md"
-            className={cn('rounded-2xl', tessera.presto && 'opacity-60')}
+            className="rounded-2xl transition-colors hover:border-tinta-menta-bordo"
           >
             <span
               aria-hidden
@@ -152,14 +162,9 @@ export function HubProfilo() {
               <Icona nome={tessera.icona} dimensione={19} />
             </span>
             <p className="font-display text-[26px] font-extrabold leading-none text-testo">
-              {tessera.presto || tessera.valore === undefined ? IGNOTO : tessera.valore}
+              {tessera.valore === undefined ? IGNOTO : tessera.valore}
             </p>
             <p className="mt-1.5 text-[12.5px] font-bold text-testo-tenue">{tessera.etichetta}</p>
-            {tessera.presto ? (
-              <Chip tono="ambra" dimensione="sm" className="mt-2">
-                {tComune('presto')}
-              </Chip>
-            ) : null}
           </Card>
         ))}
       </div>
