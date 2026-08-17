@@ -53,6 +53,22 @@ Fuori:
 - **Il media non passa da Caddy.** Caddy termina TLS per la sola segnalazione WebSocket; i pacchetti audio vanno in UDP direttamente sull'host.
 - **TURN per ultimo.** Prima si prova che tre persone su reti normali si sentano (C1); solo dopo si affronta l'attraversamento delle reti restrittive (C2), che è dove sta il conflitto sulla porta 443 già occupata da Caddy.
 
+## Diario
+
+**16 agosto — messa in opera, ~1 ora.** LiveKit v1.13.5 gira sulla macchina, avvio pulito, e Caddy raggiunge la segnalazione sulla rete interna (`200 OK` su `livekit:7880`). Quattro cose scoperte facendola, tutte già riportate nella configurazione:
+
+1. **Porta UDP singola con mux**, mai l'intervallo: in Docker ogni porta pubblicata è un processo `docker-proxy`.
+2. **Buffer UDP a 5 MB sull'host**, non fra i `sysctls` del contenitore — `net.core.rmem_max` non è per-rete e runc si rifiuta di avviare il contenitore. Provato: il contenitore non parte proprio.
+3. **IP pubblico dichiarato a mano.** Con la scoperta automatica LiveKit interroga uno STUN esterno all'avvio, e ha chiamato Twilio (fuori UE). Nessun media ci passa, ma è una dipendenza esterna all'avvio in meno e un dubbio su V3 in meno.
+4. **Due firewall, non uno.** `ufw` sull'host ammette 22/80/443 e l'ho esteso a 7881 e 7882 — ma la porta restava chiusa. Con `tcpdump` sulla macchina, durante tre tentativi da fuori: **zero pacchetti**. Quindi c'è un **firewall Hetzner a monte** che finora non si era visto, perché ammette esattamente le porte che il sistema già usava.
+
+**Bloccato in attesa di due azioni sul pannello** (non risolvibili da qui):
+
+- Hetzner → Firewalls: ammettere `7881/tcp` e `7882/udp`;
+- Cloudflare → DNS: record `A` per `rtc.prome.app` verso `46.224.215.1`, **nuvoletta grigia**.
+
+Senza il DNS non c'è TLS, e senza TLS il browser non concede il microfono: la prova a tre non è eseguibile.
+
 ## Esito
 
 _Da compilare alla scadenza del timebox._
