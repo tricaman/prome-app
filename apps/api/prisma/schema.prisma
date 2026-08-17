@@ -718,10 +718,13 @@ model InvitoAlGruppo {
   @@schema("gruppo")
 }
 
-/// IG2 in forma di tipo: gli stati conclusivi sono terminali.
+/// IG2 in forma di tipo: gli stati conclusivi sono terminali. Sono tre, e
+/// `RIFIUTATO` è una risposta di chi è stato invitato — non una scadenza
+/// anticipata, che invece accade a chi non risponde affatto.
 enum StatoInvitoAlGruppo {
   IN_ATTESA
   ACCETTATO
+  RIFIUTATO
   SCADUTO
 
   @@map("stato_invito_al_gruppo")
@@ -977,10 +980,13 @@ model Invito {
 }
 
 /// IA1: dallo stato iniziale si transita una volta sola, e gli stati
-/// conclusivi sono terminali. Una seconda accettazione non ha effetto.
+/// conclusivi sono terminali. Una seconda accettazione non ha effetto, e
+/// nemmeno un rifiuto dopo un'accettazione: si esce da un'aula, non si
+/// disdice un invito già speso.
 enum StatoInvito {
   IN_ATTESA
   ACCETTATO
+  RIFIUTATO
   SCADUTO
 
   @@map("stato_invito")

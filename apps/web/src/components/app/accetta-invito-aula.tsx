@@ -6,6 +6,7 @@ import {
   accettaInvito,
   getElencaAuleStudioQueryKey,
   getLeggiInvitoQueryKey,
+  rifiutaInvito,
   useLeggiInvito,
 } from '@prome/api-client';
 import { useApiMutation } from '@/hooks';
@@ -30,6 +31,11 @@ import { ErrorState, QueryBoundary, RisorsaNonTrovata } from '@/components/feedb
  * finestra si dichiara — «ti stiamo facendo entrare» — invece di nasconderla
  * dietro un caricamento muto, e nella sala si entra quando il server conferma
  * che il partecipante c'è.
+ *
+ * **Le risposte sono due.** Il rifiuto risponde 200 e chiude l'invito: non c'è
+ * niente da attendere, e non parte alcun avviso verso chi ha invitato — sapere
+ * di essere stati rifiutati vorrebbe dire, per chi ha scritto a un indirizzo a
+ * caso, sapere che dietro quell'indirizzo c'è qualcuno.
  */
 export function AccettaInvitoAula({ invitoId }: { invitoId: string }) {
   const t = useTranslations('app.invito');
@@ -54,6 +60,13 @@ export function AccettaInvitoAula({ invitoId }: { invitoId: string }) {
     ],
   });
 
+  // Il rifiuto non tocca l'elenco delle aule: non ne fa entrare né uscire da
+  // nessuna. Si rilegge il solo invito, che è l'unica cosa cambiata.
+  const rifiuta = useApiMutation({
+    mutationFn: () => rifiutaInvito(invitoId),
+    invalida: [getLeggiInvitoQueryKey(invitoId) as never],
+  });
+
   const aulaId = invito.data?.data.aulaStudioId;
   const partecipanteCreato = invito.data?.data.partecipanteCreato ?? false;
   useEffect(() => {
@@ -74,6 +87,7 @@ export function AccettaInvitoAula({ invitoId }: { invitoId: string }) {
         // La scadenza la dichiara il server: l'ora del browser è modificabile,
         // e sarebbe una seconda copia della stessa regola.
         const scaduto = data.stato === 'SCADUTO';
+        const rifiutato = data.stato === 'RIFIUTATO';
         const inAttesa = data.stato === 'ACCETTATO' && !data.partecipanteCreato;
 
         return (
@@ -86,16 +100,33 @@ export function AccettaInvitoAula({ invitoId }: { invitoId: string }) {
 
               {scaduto ? (
                 <p className="mt-4 text-[13.5px] text-testo-tenue">{t('scaduto')}</p>
+              ) : rifiutato ? (
+                <p className="mt-4 text-[13.5px] text-testo-tenue">{t('rifiutato')}</p>
               ) : inAttesa ? (
                 <p className="mt-4 text-[13.5px] text-testo-tenue">{t('inCorso')}</p>
               ) : (
-                <Button
-                  className="mt-5 h-11 rounded-xl px-6"
-                  inCaricamento={accetta.isPending}
-                  onPress={() => accetta.mutate(undefined)}
-                >
-                  {t('entra')}
-                </Button>
+                // Le due risposte stanno **una accanto all'altra**: un invito
+                // senza un modo di dire di no si chiude solo abbandonando la
+                // pagina, e chi lo fa resta a chiedersi se abbia accettato.
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                  <Button
+                    className="h-11 rounded-xl px-6"
+                    inCaricamento={accetta.isPending}
+                    isDisabled={rifiuta.isPending}
+                    onPress={() => accetta.mutate(undefined)}
+                  >
+                    {t('entra')}
+                  </Button>
+                  <Button
+                    variante="contorno"
+                    className="h-11 rounded-xl px-6"
+                    inCaricamento={rifiuta.isPending}
+                    isDisabled={accetta.isPending}
+                    onPress={() => rifiuta.mutate(undefined)}
+                  >
+                    {t('rifiuta')}
+                  </Button>
+                </div>
               )}
             </Card>
           </div>

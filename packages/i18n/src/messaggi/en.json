@@ -333,8 +333,13 @@
       "gruppi": "Groups",
       "materiali": "Saved materials",
       "profilo": "Profile",
+      "impostazioni": "Settings",
       "tuoiGruppi": "Your groups",
       "esci": "Sign out"
+    },
+    "account": {
+      "apri": "Your account",
+      "menu": "Profile, settings and sign out"
     },
     "nuovoPost": "New post",
     "cerca": "Search posts, materials, study rooms…",
@@ -484,7 +489,9 @@
     "invito": {
       "titolo": "You have been invited to a study room",
       "entra": "Join the room",
+      "rifiuta": "Decline",
       "inCorso": "We are letting you in…",
+      "rifiutato": "You declined this invitation. Whoever invited you is not notified.",
       "scaduto": "This invitation has expired. Ask whoever invited you to send a new one."
     },
     "sala": {
@@ -626,7 +633,9 @@
       },
       "invitoTitolo": "You have been invited to a group",
       "invitoEntra": "Join the group",
+      "invitoRifiuta": "Decline",
       "invitoInCorso": "We are adding you to the group…",
+      "invitoRifiutato": "You declined this invitation. Whoever invited you is not notified.",
       "invitoScaduto": "This invitation has expired.",
       "apriAula": "Open",
       "entraAula": "Join",

@@ -763,6 +763,70 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     return this.invitoPerIlClient(aggiornato, aula.titolo, false);
   }
 
+  /**
+   * Il secondo stato conclusivo di IA1: si risponde di no.
+   *
+   * **Nessuna prova di onboarding, e non è una dimenticanza.** IA2 la esige
+   * per *accettare*, perché è l'accettazione a produrre un partecipante: per
+   * rifiutare non nasce niente, e chiederla vorrebbe dire obbligare a
+   * completare il profilo chi vuole solo togliersi di torno un invito.
+   *
+   * **Nessun fatto pubblicato**: a valle non c'è nessuno da avvisare — non
+   * nasce un partecipante, e chi ha invitato non riceve una notifica di
+   * rifiuto (sarebbe il terzo tipo di avviso, cioè una decisione di prodotto,
+   * e per giunta racconterebbe che dietro quell'indirizzo c'è qualcuno).
+   * Per questo il controller risponde 200 e non 202: qui non c'è nulla di
+   * preso in carico, la risposta è completa quando è scritta.
+   */
+  async rifiuta(utenteId: string, invitoId: string): Promise<InvitoResponse> {
+    const invito = await this.prisma.invito.findUnique({ where: { id: invitoId } });
+    if (!invito) {
+      throw new AppException(
+        AulaStudioErrorCode.INVITO_NOT_FOUND,
+        'INVITO_NOT_FOUND',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // Vale la stessa regola dell'accettazione: l'invito è rivolto a un
+    // indirizzo, e solo quello risponde. Chi ha invitato non può rifiutare al
+    // posto dell'invitato — per ritirare un invito servirebbe un altro gesto.
+    const mioIndirizzo = await this.identita.indirizzoDi(utenteId);
+    if (mioIndirizzo && mioIndirizzo !== invito.destinatario) {
+      throw new AppException(
+        AulaStudioErrorCode.INVITO_DI_UN_ALTRO,
+        'INVITO_DI_UN_ALTRO',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    // IA1: dallo stato iniziale si transita una volta sola. Rifiutare ciò che
+    // si è già accettato non è un rifiuto: è uscire dall'aula, e ha il suo
+    // gesto.
+    if (invito.stato !== 'IN_ATTESA') {
+      throw new AppException(
+        AulaStudioErrorCode.INVITO_GIA_CHIUSO,
+        'INVITO_GIA_CHIUSO',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    if (invito.scadeIl.getTime() <= Date.now()) {
+      throw new AppException(
+        AulaStudioErrorCode.INVITO_SCADUTO,
+        'INVITO_SCADUTO',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    const aggiornato = await this.prisma.invito.update({
+      where: { id: invitoId },
+      data: { stato: 'RIFIUTATO', chiusoIl: new Date() },
+    });
+
+    const aula = await this.aulaEsistente(invito.aulaStudioId);
+    return this.invitoPerIlClient(aggiornato, aula.titolo, false);
+  }
+
   async leggiInvito(utenteId: string, invitoId: string): Promise<InvitoResponse> {
     const invito = await this.prisma.invito.findUnique({ where: { id: invitoId } });
     if (!invito) {

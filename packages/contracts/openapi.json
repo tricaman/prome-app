@@ -2986,6 +2986,58 @@
         ]
       }
     },
+    "/inviti/{id}/rifiuto": {
+      "post": {
+        "operationId": "rifiutaInvito",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/InvitoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Rifiuta l'invito: l'invito si chiude e non nasce nulla",
+        "tags": [
+          "inviti"
+        ]
+      }
+    },
     "/materiali-salvati": {
       "get": {
         "operationId": "elencaMaterialiSalvati",
@@ -4410,6 +4462,58 @@
         ]
       }
     },
+    "/inviti-gruppo/{id}/rifiuto": {
+      "post": {
+        "operationId": "rifiutaInvitoDiGruppo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/InvitoAlGruppoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Rifiuta l'invito",
+        "tags": [
+          "gruppi"
+        ]
+      }
+    },
     "/account/cancellazione": {
       "post": {
         "operationId": "richiediCancellazioneAccount",
@@ -5550,6 +5654,7 @@
             "enum": [
               "IN_ATTESA",
               "ACCETTATO",
+              "RIFIUTATO",
               "SCADUTO"
             ]
           },
@@ -6108,6 +6213,7 @@
             "enum": [
               "IN_ATTESA",
               "ACCETTATO",
+              "RIFIUTATO",
               "SCADUTO"
             ]
           },

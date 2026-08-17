@@ -52,4 +52,28 @@ export class InvitiController {
   ): Promise<InvitoResponse> {
     return this.aule.accetta(utente.id, id);
   }
+
+  /**
+   * **200, non 202.**
+   *
+   * È la differenza con l'accettazione, ed è tutta nel dominio: accettare
+   * prende in carico la nascita di un partecipante che non c'è ancora,
+   * rifiutare non lascia niente in sospeso. L'invito è chiuso quando la
+   * risposta arriva, e non c'è un secondo `GET` da fare per sapere com'è
+   * finita.
+   */
+  @Post(':id/rifiuto')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    operationId: 'rifiutaInvito',
+    summary: 'Rifiuta l\'invito: l\'invito si chiude e non nasce nulla',
+  })
+  @ApiWrappedResponse({ type: InvitoDto })
+  @ResponseMessage('successes.INVITO_RIFIUTATO')
+  async rifiuta(
+    @Utente() utente: UtenteDiDominio,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<InvitoResponse> {
+    return this.aule.rifiuta(utente.id, id);
+  }
 }

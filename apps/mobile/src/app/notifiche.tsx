@@ -1,4 +1,4 @@
-import { Linking, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -10,9 +10,8 @@ import {
   useElencaNotifiche,
   type NotificaDto,
 } from '@prome/api-client';
-import { paginaDelSito, rotte } from '@/content';
+import { rotte } from '@/content';
 import { useTema } from '@/theme';
-import { useI18n } from '@/i18n/i18n-provider';
 import { useT } from '@/hooks';
 import { QueryBoundary, EmptyState } from '@/components/feedback';
 import {
@@ -39,15 +38,15 @@ const ICONE: Record<NotificaDto['tipo'], NomeIcona> = {
  *
  * **Il tocco naviga subito e segna letta senza aspettare**: la lettura è un
  * effetto del gesto, non il gesto, e un errore nel segnarla non trattiene
- * nessuno. Un post si apre nell'app; **un invito si apre nel browser**, sulla
- * stessa pagina a cui punta la sua email — le schermate native di
- * accettazione non esistono ancora, e due strade per lo stesso invito
- * sarebbero due implementazioni della stessa decisione.
+ * nessuno. **Ogni destinazione è una schermata dell'app**, inviti compresi:
+ * fino a oggi l'invito apriva il browser sulla pagina dell'email, che
+ * significava chiedere un secondo accesso sul web per rispondere a qualcosa
+ * che qui è un tocco — e dietro c'è un solo invito, letto e chiuso dagli
+ * stessi endpoint.
  */
 export default function SchermataNotifiche() {
   const tema = useTema();
   const t = useT();
-  const { lingua } = useI18n();
   const queryClient = useQueryClient();
   const notifiche = useElencaNotifiche({ limit: 50 });
   // Il conteggio e basta: la campanella della bacheca tiene già vivo il
@@ -61,16 +60,20 @@ export default function SchermataNotifiche() {
     void queryClient.invalidateQueries({ queryKey: getElencaNotificheQueryKey() });
   };
 
-  const apri = (notifica: NotificaDto) => {
-    if (notifica.risorsaTipo === 'POST') {
-      router.push(rotte.post(notifica.risorsaId));
-    } else {
-      const percorso =
-        notifica.risorsaTipo === 'INVITO_AULA'
-          ? `/app/inviti/${notifica.risorsaId}`
-          : `/app/inviti-gruppo/${notifica.risorsaId}`;
-      void Linking.openURL(paginaDelSito(percorso, lingua));
+  /** Dove porta il tocco: la destinazione si costruisce qui, mai sul server. */
+  const destinazioneDi = (notifica: NotificaDto) => {
+    switch (notifica.risorsaTipo) {
+      case 'POST':
+        return rotte.post(notifica.risorsaId);
+      case 'INVITO_AULA':
+        return rotte.invito(notifica.risorsaId);
+      case 'INVITO_GRUPPO':
+        return rotte.invitoGruppo(notifica.risorsaId);
     }
+  };
+
+  const apri = (notifica: NotificaDto) => {
+    router.push(destinazioneDi(notifica));
     if (!notifica.letta) {
       // Best-effort: se fallisce, la riga resta non letta e il conteggio dice
       // il vero. Riprovare o avvisare non aiuterebbe chi sta già navigando.

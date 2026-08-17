@@ -13,5 +13,6 @@ export type InvitoAlGruppoDtoStato = typeof InvitoAlGruppoDtoStato[keyof typeof 
 export const InvitoAlGruppoDtoStato = {
   IN_ATTESA: 'IN_ATTESA',
   ACCETTATO: 'ACCETTATO',
+  RIFIUTATO: 'RIFIUTATO',
   SCADUTO: 'SCADUTO',
 } as const;

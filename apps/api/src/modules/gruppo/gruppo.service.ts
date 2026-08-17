@@ -386,6 +386,45 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
     return this.invitoPerIlClient(aggiornato, gruppo.nome, false);
   }
 
+  /**
+   * L'altro stato conclusivo di IG2: si risponde di no.
+   *
+   * Come per l'aula, **senza prova di onboarding** — il rifiuto non produce
+   * alcun membro, e pretendere un profilo completo per dire di no vorrebbe
+   * dire trattenere dentro Prome chi voleva soltanto uscirne — e **senza
+   * fatto pubblicato**: a valle non c'è nessun consumatore. Per questo il
+   * controller risponde 200 e non 202: niente è preso in carico.
+   */
+  async rifiuta(utenteId: string, invitoId: string): Promise<InvitoAlGruppoResponse> {
+    const invito = await this.invitoEsistente(invitoId);
+    await this.esigiDestinatario(utenteId, invito);
+
+    // IG2: dallo stato iniziale si transita una volta sola. Da un gruppo in cui
+    // si è già entrati si esce, non si disdice l'invito.
+    if (invito.stato !== 'IN_ATTESA') {
+      throw new AppException(
+        GruppoErrorCode.INVITO_GIA_CHIUSO,
+        'GRUPPO_INVITO_GIA_CHIUSO',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    if (invito.scadeIl.getTime() <= Date.now()) {
+      throw new AppException(
+        GruppoErrorCode.INVITO_SCADUTO,
+        'GRUPPO_INVITO_SCADUTO',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    const aggiornato = await this.prisma.invitoAlGruppo.update({
+      where: { id: invitoId },
+      data: { stato: 'RIFIUTATO', chiusoIl: new Date() },
+    });
+
+    const gruppo = await this.gruppoEsistente(invito.gruppoId);
+    return this.invitoPerIlClient(aggiornato, gruppo.nome, false);
+  }
+
   async leggiInvito(utenteId: string, invitoId: string): Promise<InvitoAlGruppoResponse> {
     const invito = await this.invitoEsistente(invitoId);
     const mioIndirizzo = await this.identita.indirizzoDi(utenteId);

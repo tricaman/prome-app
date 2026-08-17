@@ -6,6 +6,7 @@ import {
   accettaInvitoDiGruppo,
   getElencaMieiGruppiQueryKey,
   getLeggiInvitoDiGruppoQueryKey,
+  rifiutaInvitoDiGruppo,
   useLeggiInvitoDiGruppo,
 } from '@prome/api-client';
 import { useApiMutation } from '@/hooks';
@@ -45,6 +46,12 @@ export function AccettaInvitoGruppo({ invitoId }: { invitoId: string }) {
     ],
   });
 
+  // L'elenco dei gruppi non cambia rifiutando: si rilegge il solo invito.
+  const rifiuta = useApiMutation({
+    mutationFn: () => rifiutaInvitoDiGruppo(invitoId),
+    invalida: [getLeggiInvitoDiGruppoQueryKey(invitoId) as never],
+  });
+
   // Quando il membro c'è davvero si entra nel gruppo. In un effetto e non
   // durante il disegno: navigare mentre si rende è un effetto collaterale, e
   // qui produrrebbe un salto anche mentre React sta solo riprovando a disegnare.
@@ -69,6 +76,7 @@ export function AccettaInvitoGruppo({ invitoId }: { invitoId: string }) {
         // vorrebbe dire tenere due copie della stessa regola, e quella del
         // browser è anche quella sbagliata — l'ora locale è modificabile.
         const scaduto = data.stato === 'SCADUTO';
+        const rifiutato = data.stato === 'RIFIUTATO';
         const inAttesa = data.stato === 'ACCETTATO' && !data.membroCreato;
 
         return (
@@ -81,16 +89,30 @@ export function AccettaInvitoGruppo({ invitoId }: { invitoId: string }) {
 
               {scaduto ? (
                 <p className="mt-4 text-[13.5px] text-testo-tenue">{t('invitoScaduto')}</p>
+              ) : rifiutato ? (
+                <p className="mt-4 text-[13.5px] text-testo-tenue">{t('invitoRifiutato')}</p>
               ) : inAttesa ? (
                 <p className="mt-4 text-[13.5px] text-testo-tenue">{t('invitoInCorso')}</p>
               ) : (
-                <Button
-                  className="mt-5 h-11 rounded-xl px-6"
-                  inCaricamento={accetta.isPending}
-                  onPress={() => accetta.mutate(undefined)}
-                >
-                  {t('invitoEntra')}
-                </Button>
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                  <Button
+                    className="h-11 rounded-xl px-6"
+                    inCaricamento={accetta.isPending}
+                    isDisabled={rifiuta.isPending}
+                    onPress={() => accetta.mutate(undefined)}
+                  >
+                    {t('invitoEntra')}
+                  </Button>
+                  <Button
+                    variante="contorno"
+                    className="h-11 rounded-xl px-6"
+                    inCaricamento={rifiuta.isPending}
+                    isDisabled={accetta.isPending}
+                    onPress={() => rifiuta.mutate(undefined)}
+                  >
+                    {t('invitoRifiuta')}
+                  </Button>
+                </div>
               )}
             </Card>
           </div>

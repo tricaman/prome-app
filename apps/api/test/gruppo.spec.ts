@@ -493,6 +493,77 @@ describe('Gruppo (E7)', () => {
       expect(risposta.json().errorCode).toBe('GR010');
     });
 
+    it('rifiutare chiude l\'invito, non aggiunge nessuno e non pubblica alcun fatto', async () => {
+      const capo = await utenteCompleto();
+      const gruppo = await creaGruppo(capo.token);
+      const invitato = await utenteCompleto();
+      const invito = await chiedi(`/gruppi/${gruppo.id}/inviti`, {
+        method: 'POST',
+        headers: comeUtente(capo.token),
+        payload: { destinatario: invitato.indirizzo },
+      });
+      const invitoId = invito.json().data.id as string;
+
+      const rifiuto = await chiedi(`/inviti-gruppo/${invitoId}/rifiuto`, {
+        method: 'POST',
+        headers: comeUtente(invitato.token),
+      });
+
+      expect(rifiuto.statusCode).toBe(200);
+      expect(rifiuto.json().data.stato).toBe('RIFIUTATO');
+      expect(
+        await prisma.fattoInUscitaDelGruppo.count({ where: { aggregatoId: invitoId } }),
+      ).toBe(0);
+      await recapito.eseguiGiro();
+      expect(
+        await prisma.membro.count({ where: { gruppoId: gruppo.id, utenteId: invitato.utenteId } }),
+      ).toBe(0);
+    });
+
+    it('un invito rifiutato è chiuso per sempre (IG2)', async () => {
+      const capo = await utenteCompleto();
+      const gruppo = await creaGruppo(capo.token);
+      const invitato = await utenteCompleto();
+      const invito = await chiedi(`/gruppi/${gruppo.id}/inviti`, {
+        method: 'POST',
+        headers: comeUtente(capo.token),
+        payload: { destinatario: invitato.indirizzo },
+      });
+      const invitoId = invito.json().data.id as string;
+      await chiedi(`/inviti-gruppo/${invitoId}/rifiuto`, {
+        method: 'POST',
+        headers: comeUtente(invitato.token),
+      });
+
+      const ripensamento = await chiedi(`/inviti-gruppo/${invitoId}/accettazione`, {
+        method: 'POST',
+        headers: comeUtente(invitato.token),
+      });
+
+      expect(ripensamento.statusCode).toBe(422);
+      expect(ripensamento.json().errorCode).toBe('GR009');
+    });
+
+    it('l\'invito di un altro non si rifiuta', async () => {
+      const capo = await utenteCompleto();
+      const gruppo = await creaGruppo(capo.token);
+      const destinatario = await utenteCompleto();
+      const estraneo = await utenteCompleto();
+      const invito = await chiedi(`/gruppi/${gruppo.id}/inviti`, {
+        method: 'POST',
+        headers: comeUtente(capo.token),
+        payload: { destinatario: destinatario.indirizzo },
+      });
+
+      const risposta = await chiedi(`/inviti-gruppo/${invito.json().data.id}/rifiuto`, {
+        method: 'POST',
+        headers: comeUtente(estraneo.token),
+      });
+
+      expect(risposta.statusCode).toBe(403);
+      expect(risposta.json().errorCode).toBe('GR010');
+    });
+
     it('solo un moderatore invita', async () => {
       const capo = await utenteCompleto();
       const gruppo = await creaGruppo(capo.token);

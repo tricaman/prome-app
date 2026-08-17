@@ -125,7 +125,7 @@ La scheda «Gruppi» è tornata sul telefono, e questa volta mostra i gruppi di 
 
 Nessuna regola è stata ricopiata nel telefono, com'è giusto per una superficie: G2 la fa rispettare il server e il messaggio arriva già tradotto. L'unica cosa che il client fa è **non offrire** ciò che sarebbe rifiutato — i gesti di moderazione a chi non modera, e la visibilità di ateneo a un gruppo nato senza ateneo.
 
-Resta fuori l'atterraggio dell'invito **dentro** l'app: l'email punta a un indirizzo web, e aprirlo nell'app è E12.4 (link universali e app sugli store). Chi riceve l'invito lo accetta dal browser, e da quel momento il gruppo compare nella scheda.
+L'atterraggio dell'invito **dentro** l'app è arrivato il 17 agosto (sezione più sotto): la notifica apre una schermata nativa, con le due risposte. Resta fuori solo il collegamento **dell'email**, che punta a un indirizzo web: aprirlo nell'app è E12.4 (link universali e app sugli store).
 
 Per strada è stato tolto un plurale ICU (`{numero, plural, …}`) che avevo introdotto sui membri: il `traduci` condiviso fa **solo interpolazione**, quindi sul telefono sarebbe uscita la stringa grezza. Ora sono due chiavi, come già faceva la sala per i partecipanti.
 
@@ -143,7 +143,7 @@ Dispositivi e preferenze sono **detentori censiti** dal primo giorno: cadono con
 
 ### La casella delle notifiche, la campanella e l'email del commento ✅ (16 agosto 2026, sera)
 
-**Le notifiche ora si vedono.** Prima esistevano solo in uscita — un avviso spedito verso un fornitore che non c'è — e chi apriva l'app non trovava traccia di niente. Ora ogni avviso scrive una riga (`profilo.notifica`: tipo, risorsa, letta, con deduplica per fatto), e la riga alimenta la campanella col **numero vero** di non lette: nella topbar del web (dov'era stata tolta la campana finta col pallino sempre acceso — è tornata con qualcosa dietro) e nell'intestazione della bacheca sul telefono (`AzioneTonda` ha imparato il `conteggio`). Il tocco su una notifica la segna letta e naviga alla risorsa: il post nell'app; l'invito sulla sua pagina web, la stessa dell'email — sul telefono le schermate native di accettazione non esistono ancora.
+**Le notifiche ora si vedono.** Prima esistevano solo in uscita — un avviso spedito verso un fornitore che non c'è — e chi apriva l'app non trovava traccia di niente. Ora ogni avviso scrive una riga (`profilo.notifica`: tipo, risorsa, letta, con deduplica per fatto), e la riga alimenta la campanella col **numero vero** di non lette: nella topbar del web (dov'era stata tolta la campana finta col pallino sempre acceso — è tornata con qualcosa dietro) e nell'intestazione della bacheca sul telefono (`AzioneTonda` ha imparato il `conteggio`). Il tocco su una notifica la segna letta e naviga alla risorsa: il post nell'app; l'invito, fino al 17 agosto, sulla sua pagina web — le schermate native di accettazione sono arrivate il giorno dopo, con il rifiuto (sezione più sotto).
 
 **La semantica delle preferenze è cambiata, ed è scritta a schermo.** La riga nasce SEMPRE (salvo sé stessi e coppie bloccate): spegnere un asse significa «non interrompermi», non «nascondimi l'informazione». Le preferenze governano i canali che interrompono — l'**email del commento**, nata oggi (solo il collegamento al post, zero dati personali, come il push; gli inviti tengono la loro email, che serve ad accettare) — e il push di domani. Il testo delle impostazioni non dice più «gli avvisi non vengono ancora recapitati»: in-app arrivano, ed è il push a mancare ancora (E12.3, la posizione sul fornitore non cambia).
 
@@ -277,6 +277,20 @@ Corretti in silenzio altri quattro punti: «Richiedi l'archivio, fino a 48 ore, 
 
 Estratti sul web i due pezzi che mancavano: `Elenco`/`RigaElenco` e `SceltaRadio`, quest'ultimo copiato a mano in **quattro** punti. `Card` ora inoltra le proprie props all'elemento scelto con `come`, senza il quale una scheda resa come collegamento non poteva ricevere il proprio `href`.
 
+### L'invito si apre nell'app, e si può rifiutare ✅ (17 agosto 2026)
+
+**Il tocco su un invito, sul telefono, apriva il browser.** Non era una scorciatoia mal riuscita: le schermate native di accettazione non esistevano, e la notifica portava sulla stessa pagina web dell'email. Chi era già dentro l'app si trovava davanti a un accesso da rifare in un browser per rispondere a un invito che, dietro, è lo stesso invito e gli stessi endpoint — `GET /inviti/:id` e la sua accettazione — che l'app avrebbe potuto chiamare da sé. Ora ci sono due schermate, `inviti/[id]` e `inviti-gruppo/[id]`, gemelle di quelle del sito: titolo dello spazio, le risposte, e la sala (o il gruppo) che si apre da sé quando il partecipante compare. La finestra di IA3/IG3 si dichiara qui come là — «ti stiamo facendo entrare» — e il 404 di un invito revocato mostra «Contenuto non disponibile» invece di un errore.
+
+**Rifiutare non esisteva, su nessuna delle due superfici.** L'unica risposta possibile era «Entra», e l'unico modo di dire di no era chiudere la pagina: l'invito restava in attesa per sette giorni, e chi l'aveva ricevuto non aveva modo di sapere se avesse risposto. Ora `StatoInvito` ha il suo secondo stato conclusivo — **IA1 e IG2 li enunciano al plurale da sempre**, ne era stato implementato uno solo — e `POST /inviti/:id/rifiuto` (`/inviti-gruppo/:id/rifiuto` per il gruppo) lo chiude. Tre decisioni che vale la pena non rimettere in discussione:
+
+- **200, non 202.** L'accettazione risponde 202 perché prende in carico la nascita di un partecipante che ancora non c'è; il rifiuto non lascia niente in sospeso, e la risposta è completa quando è scritta.
+- **Nessuna prova di onboarding.** IA2 la esige per *accettare*, perché è l'accettazione a produrre un partecipante: pretenderla anche qui vorrebbe dire obbligare a compilare un profilo per dire di no.
+- **Nessun avviso a chi ha invitato, e nessun fatto pubblicato.** Sarebbe il terzo tipo di avviso — l'elenco è chiuso per decisione — e per giunta direbbe a chi ha scritto a un indirizzo qualunque che dietro quell'indirizzo c'è qualcuno, che è la stessa fuga che tiene la contattabilità inapplicata sugli inviti per indirizzo.
+
+Un rifiuto è terminale come un'accettazione: dopo, né l'una né l'altro (422, `AS010`/`GR009`). Da uno spazio in cui si è già entrati si esce; non si disdice un invito già speso. Sette casi nuovi in `aula-studio.spec.ts` e `gruppo.spec.ts`, suite intera a **351 verdi**.
+
+Resta fuori il collegamento **dell'email**, che continua a puntare al sito: aprirlo nell'app richiede i link universali, cioè un file servito da `prome.app` con l'identificativo di squadra Apple e l'app pubblicata — è E12.4 per intero. Con lo schema `prome://` che l'app dichiara già, `prome://inviti/<id>` porta invece alla schermata giusta senza altro lavoro.
+
 ---
 
 ## Cosa non c'è ancora
@@ -346,7 +360,7 @@ Vale la pena conoscerli, perché sono tutti della stessa famiglia: cose che in s
 
 0. ~~Prima di sottomettere agli store servono segnalazione e blocco~~ — **fatto (15 agosto 2026, sera)**: vedi la sezione «Segnalazione e blocco». Resta tuo: mettere un indirizzo vero in `EMAIL_SUPPORTO` al prossimo rilascio (l'avvio in produzione si ferma senza), e ricordare che la casella va letta — le linee guida promettono 24 ore.
 
-1. **Un difetto trovato oggi, e corretto: la pagina di atterraggio dell'invito a un'aula non esisteva.** L'email di invito la nomina dal giorno in cui gli inviti sono in esercizio — punta a `/app/inviti/<id>` — e chi apriva quel collegamento trovava «Pagina non trovata». Il server faceva la sua parte da sempre: mancava soltanto la schermata. **Nessun test dell'API poteva vederlo**, perché non era l'API a essere rotta, ed è esattamente ciò che il giro dal vivo del punto 2 avrebbe scoperto al primo tentativo.
+1. **Un difetto trovato oggi, e corretto: la pagina di atterraggio dell'invito a un'aula non esisteva.** L'email di invito la nomina dal giorno in cui gli inviti sono in esercizio — punta a `/app/inviti/<id>` — e chi apriva quel collegamento trovava «Pagina non trovata». Il server faceva la sua parte da sempre: mancava soltanto la schermata. **Nessun test dell'API poteva vederlo**, perché non era l'API a essere rotta, ed è esattamente ciò che il giro dal vivo del punto 2 avrebbe scoperto al primo tentativo. La stessa mancanza c'era **sul telefono**, dove però non si vedeva come un 404: la notifica apriva il browser, e sembrava una scelta. Chiusa il 17 agosto insieme al rifiuto, che non esisteva su nessuna delle due superfici.
 
 2. **M4 non è chiusa finché non è provata dal vivo.** Il codice c'è (E3+E4), ma l'accettazione dell'epica chiede atti che nessun test sostituisce: il giro completo **con due persone reali e invito via email vero**, da un dispositivo diverso da quello di sviluppo; le misure di soglia da registrare (apertura della sala, ingresso dopo l'accettazione, comparsa del messaggio agli altri); la degradazione osservata **spegnendo davvero** archivio, canale email e trasporto; e — poiché lo schema è cambiato — il **ripristino del database riprovato**.
 3. **Il giro dei gruppi va provato a due account** (E7), e comprende la misura che l'epica chiede di registrare: A crea un gruppo e vi colloca un'aula, B accetta l'invito arrivato per email vera ed **entra senza invito all'aula**, poi A rimuove B mentre B è dentro la sala — B deve essere allontanato **entro pochi secondi** e non rientrare. Va verificato dal vivo anche AS6: B moderatore del gruppo entra nell'aula collocata **in sola lettura**.

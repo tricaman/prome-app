@@ -16,7 +16,7 @@ import {
 import { PaginationDto } from '../../../common/dto';
 
 const VISIBILITA = ['PRIVATO', 'ATENEO', 'PUBBLICO'] as const;
-const STATI = ['IN_ATTESA', 'ACCETTATO', 'SCADUTO'] as const;
+const STATI = ['IN_ATTESA', 'ACCETTATO', 'RIFIUTATO', 'SCADUTO'] as const;
 
 /** Spazi ai bordi tolti prima della validazione: "  " non è un nome valido. */
 const ripulisci = ({ value }: { value: unknown }): unknown =>

@@ -232,6 +232,8 @@ export * from './richiestaCodiceDto';
 export * from './richiestaCodiceRispostaDto';
 export * from './richiestaDiSupportoDto';
 export * from './richiestaDiSupportoDtoCategoria';
+export * from './rifiutaInvito200';
+export * from './rifiutaInvitoDiGruppo200';
 export * from './rimuoviFotoProfilo200';
 export * from './rimuoviMembro200';
 export * from './rimuoviMembro200Data';

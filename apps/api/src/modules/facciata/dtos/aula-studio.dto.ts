@@ -307,7 +307,7 @@ export class InvitoDto implements InvitoResponse {
   @ApiProperty() aulaStudioId!: string;
   @ApiProperty() titoloAula!: string;
   @ApiProperty() destinatario!: string;
-  @ApiProperty({ enum: ['IN_ATTESA', 'ACCETTATO', 'SCADUTO'] }) stato!: StatoInvito;
+  @ApiProperty({ enum: ['IN_ATTESA', 'ACCETTATO', 'RIFIUTATO', 'SCADUTO'] }) stato!: StatoInvito;
   @ApiProperty() scadeIl!: string;
   @ApiProperty() emessoIl!: string;
   @ApiProperty({ description: 'Falso subito dopo l\'accettazione: compare entro pochi secondi' })

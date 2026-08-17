@@ -128,6 +128,23 @@ La guardia sta in `app/_layout.tsx`, sopra lo `Stack`, e l'elenco `SENZA_SESSION
 
 Un'aula studio o un gruppo può essere Privato, Ateneo o Pubblico, e **"Pubblico" significa aperto a tutti gli studenti iscritti a Prome**, non al web. I contenuti si vedono solo da dentro l'app: non esistono pagine pubbliche di aule, post, materiali, profili o gruppi. Quando si scrive una descrizione di visibilità — nella creazione di un'aula o nelle impostazioni privacy — non deve mai promettere indicizzazione o visibilità agli anonimi.
 
+## Gli inviti si aprono qui, non nel browser
+
+`inviti/[id]` e `inviti-gruppo/[id]` sono le gemelle native delle pagine del sito, e la notifica ci
+naviga con `rotte.invito`/`rotte.invitoGruppo`. **Nessuna destinazione di una notifica esce
+dall'app**: dietro c'è un solo invito e gli stessi endpoint, e mandare fuori chi è già dentro
+significa chiedergli un secondo accesso su un browser per un gesto che qui è un tocco.
+
+Le risposte sono **due, entrambe reali**: si entra (202, poi la sala si apre da sé quando il
+partecipante compare — la finestra di IA3 si dichiara, non si nasconde) oppure si rifiuta (200,
+l'invito si chiude). Un «rifiuta» che si limitasse a chiudere la schermata sarebbe un gesto finto,
+e l'invito resterebbe in attesa per sette giorni senza che chi l'ha ricevuto lo sappia.
+
+Sono le prime schermate che possono essere **il punto di ingresso dell'app** (`prome://inviti/<id>`):
+per questo il tasto indietro ha un ripiego (`router.canGoBack()`), altrimenti sarebbe un cerchio che
+non fa niente. Restano protette dalla guardia — non sono in `SENZA_SESSIONE` — perché per accettare
+serve un account.
+
 ## Contenuti e rotte
 
 - I dati e le ricerche vengono da `@prome/contenuti`, lo stesso pacchetto che usa il sito: mai copiare dati fra le due app.

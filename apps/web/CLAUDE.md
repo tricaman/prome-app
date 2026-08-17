@@ -117,6 +117,8 @@ La campanella sta **dentro `AppTopbar`**, non nelle `azioni` delle pagine: dieci
 
 Il click su una riga **naviga subito e segna letta senza aspettare** (best-effort, niente `useApiMutation`: un toast a ogni click è rumore). I testi si traducono dal `tipo` sul client: la riga non porta nomi né frasi. La destinazione si costruisce da `risorsaTipo`+`risorsaId` con `percorsiApp.*`.
 
+**Un invito ha due risposte, e stanno una accanto all'altra** (`accetta-invito-aula.tsx`, `accetta-invito-gruppo.tsx`): «Entra» (202, poi si entra quando il server conferma che il partecipante c'è — la finestra di IA3 si dichiara, non si nasconde dietro un caricamento muto) e «Rifiuta» (200, l'invito si chiude e la scheda lo dice). Le stesse due schermate esistono native sul telefono: la pagina web non è più l'unica strada, ma è **la stessa decisione**, e va cambiata di là insieme.
+
 **«Risorsa non trovata»**: le destinazioni (post, gruppo, sala, inviti) passano al `QueryBoundary` un ramo `errore` che su `statusErrore(e) === 404` mostra `RisorsaNonTrovata` — senza Riprova, perché riprovare un 404 produce lo stesso 404. Il 404 si riconosce dallo **status**, mai elencando codici di dominio.
 
 ### Preferenze di notifica

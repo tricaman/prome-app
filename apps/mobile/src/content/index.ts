@@ -36,6 +36,11 @@ export const rotte = {
   post: (id: string): Href => ({ pathname: '/post/[id]', params: { id } }),
   aula: (id: string): Href => ({ pathname: '/aula/[id]', params: { id } }),
   gruppo: (id: string): Href => ({ pathname: '/gruppo/[id]', params: { id } }),
+  // Gli stessi due percorsi del sito (`/app/inviti/…`, `/app/inviti-gruppo/…`)
+  // meno il prefisso dell'area privata, che sul telefono non esiste: l'invito
+  // è la stessa risorsa, letta e accettata dagli stessi endpoint.
+  invito: (id: string): Href => ({ pathname: '/inviti/[id]', params: { id } }),
+  invitoGruppo: (id: string): Href => ({ pathname: '/inviti-gruppo/[id]', params: { id } }),
   impostazioni: (): Href => '/impostazioni',
   modificaProfilo: (): Href => '/impostazioni/modifica-profilo',
   privacy: (): Href => '/impostazioni/privacy',

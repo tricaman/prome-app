@@ -197,4 +197,17 @@ export class InvitiAlGruppoController {
   ): Promise<InvitoAlGruppoResponse> {
     return this.gruppi.accetta(utente.id, id);
   }
+
+  /** 200 e non 202: rifiutando non resta niente in sospeso da aspettare. */
+  @Post(':id/rifiuto')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ operationId: 'rifiutaInvitoDiGruppo', summary: 'Rifiuta l\'invito' })
+  @ApiWrappedResponse({ type: InvitoAlGruppoDto })
+  @ResponseMessage('successes.GRUPPO_INVITO_RIFIUTATO')
+  rifiuta(
+    @Utente() utente: UtenteDiDominio,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<InvitoAlGruppoResponse> {
+    return this.gruppi.rifiuta(utente.id, id);
+  }
 }

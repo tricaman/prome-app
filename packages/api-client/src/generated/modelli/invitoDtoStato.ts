@@ -13,5 +13,6 @@ export type InvitoDtoStato = typeof InvitoDtoStato[keyof typeof InvitoDtoStato];
 export const InvitoDtoStato = {
   IN_ATTESA: 'IN_ATTESA',
   ACCETTATO: 'ACCETTATO',
+  RIFIUTATO: 'RIFIUTATO',
   SCADUTO: 'SCADUTO',
 } as const;

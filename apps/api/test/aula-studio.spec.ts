@@ -819,6 +819,111 @@ describe('Aula studio (E3)', () => {
       expect(adesso.statusCode).toBe(202);
     });
 
+    it('rifiutare chiude l\'invito e non fa nascere niente', async () => {
+      const moderatore = await utenteCompleto();
+      const aula = await creaAula(moderatore.token);
+      const invitato = await utenteCompleto();
+      const invito = await chiedi(`/aule-studio/${aula.id}/inviti`, {
+        method: 'POST',
+        headers: comeUtente(moderatore.token),
+        payload: { destinatario: invitato.indirizzo },
+      });
+      const invitoId = invito.json().data.id as string;
+
+      const rifiuto = await chiedi(`/inviti/${invitoId}/rifiuto`, {
+        method: 'POST',
+        headers: comeUtente(invitato.token),
+      });
+
+      // 200 e non 202: rifiutando non resta niente in sospeso da aspettare.
+      expect(rifiuto.statusCode).toBe(200);
+      expect(rifiuto.json().data.stato).toBe('RIFIUTATO');
+      // Nessun fatto pubblicato: a valle non c'è alcun consumatore. Il giro
+      // della corsia rapida non deve avere niente da consegnare.
+      expect(await prisma.fattoInUscita.count({ where: { aggregatoId: invitoId } })).toBe(0);
+      await recapito.eseguiGiro();
+      expect(
+        await prisma.partecipante.count({
+          where: { aulaStudioId: aula.id, utenteId: invitato.utenteId },
+        }),
+      ).toBe(0);
+    });
+
+    it('un invito rifiutato non si accetta più (IA1: gli stati conclusivi sono terminali)', async () => {
+      const moderatore = await utenteCompleto();
+      const aula = await creaAula(moderatore.token);
+      const invitato = await utenteCompleto();
+      const invito = await chiedi(`/aule-studio/${aula.id}/inviti`, {
+        method: 'POST',
+        headers: comeUtente(moderatore.token),
+        payload: { destinatario: invitato.indirizzo },
+      });
+      const invitoId = invito.json().data.id as string;
+      await chiedi(`/inviti/${invitoId}/rifiuto`, {
+        method: 'POST',
+        headers: comeUtente(invitato.token),
+      });
+
+      const ripensamento = await chiedi(`/inviti/${invitoId}/accettazione`, {
+        method: 'POST',
+        headers: comeUtente(invitato.token),
+      });
+      const secondoRifiuto = await chiedi(`/inviti/${invitoId}/rifiuto`, {
+        method: 'POST',
+        headers: comeUtente(invitato.token),
+      });
+
+      expect(ripensamento.statusCode).toBe(422);
+      expect(ripensamento.json().errorCode).toBe('AS010');
+      expect(secondoRifiuto.statusCode).toBe(422);
+      expect(secondoRifiuto.json().errorCode).toBe('AS010');
+    });
+
+    it('l\'invito di un altro non si rifiuta', async () => {
+      const moderatore = await utenteCompleto();
+      const aula = await creaAula(moderatore.token);
+      const invitato = await utenteCompleto();
+      const estraneo = await utenteCompleto();
+      const invito = await chiedi(`/aule-studio/${aula.id}/inviti`, {
+        method: 'POST',
+        headers: comeUtente(moderatore.token),
+        payload: { destinatario: invitato.indirizzo },
+      });
+      const invitoId = invito.json().data.id as string;
+
+      const tentativo = await chiedi(`/inviti/${invitoId}/rifiuto`, {
+        method: 'POST',
+        headers: comeUtente(estraneo.token),
+      });
+
+      expect(tentativo.statusCode).toBe(403);
+      expect(tentativo.json().errorCode).toBe('AS011');
+      expect((await prisma.invito.findUnique({ where: { id: invitoId } }))!.stato).toBe('IN_ATTESA');
+    });
+
+    it('chi non ha completato l\'onboarding può comunque rifiutare: IA2 vale per accettare', async () => {
+      const moderatore = await utenteCompleto();
+      const aula = await creaAula(moderatore.token);
+      const incompleto = await utenteSenzaOnboarding();
+      const invito = await chiedi(`/aule-studio/${aula.id}/inviti`, {
+        method: 'POST',
+        headers: comeUtente(moderatore.token),
+        payload: { destinatario: incompleto.indirizzo },
+      });
+      const invitoId = invito.json().data.id as string;
+
+      const rifiuto = await chiedi(`/inviti/${invitoId}/rifiuto`, {
+        method: 'POST',
+        headers: comeUtente(incompleto.token),
+      });
+
+      // La prova di onboarding la esige l'accettazione, perché è lei a
+      // produrre un partecipante. Pretenderla anche qui vorrebbe dire
+      // obbligare a compilare un profilo per dire di no.
+      expect(rifiuto.statusCode).toBe(200);
+      expect((await prisma.invito.findUnique({ where: { id: invitoId } }))!.stato).toBe('RIFIUTATO');
+    });
+
     it('gli inviti scaduti si chiudono al giro dell\'unità lavoratrice, per interrogazione dello stato', async () => {
       const moderatore = await utenteCompleto();
       const aula = await creaAula(moderatore.token);

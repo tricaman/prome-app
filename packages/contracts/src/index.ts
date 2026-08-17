@@ -655,7 +655,13 @@ export interface CreaAllegatoDiAulaStudioRequest {
 
 // --- Inviti all'aula studio -------------------------------------------------
 
-export type StatoInvito = 'IN_ATTESA' | 'ACCETTATO' | 'SCADUTO';
+/**
+ * IA1 enuncia gli stati conclusivi al plurale, e `RIFIUTATO` è il secondo modo
+ * in cui un invito si chiude per scelta di chi l'ha ricevuto. Non è una
+ * scadenza anticipata: la scadenza è un fatto temporale che accade a chi non
+ * ha risposto, questo è una risposta.
+ */
+export type StatoInvito = 'IN_ATTESA' | 'ACCETTATO' | 'RIFIUTATO' | 'SCADUTO';
 
 export interface InvitoResponse {
   id: string;
@@ -758,7 +764,8 @@ export interface ModificaGruppoRequest {
 
 // --- Inviti al gruppo -------------------------------------------------------
 
-export type StatoInvitoAlGruppo = 'IN_ATTESA' | 'ACCETTATO' | 'SCADUTO';
+/** Come `StatoInvito`: rifiutare è una risposta, scadere è ciò che accade a chi non risponde. */
+export type StatoInvitoAlGruppo = 'IN_ATTESA' | 'ACCETTATO' | 'RIFIUTATO' | 'SCADUTO';
 
 export interface InvitoAlGruppoResponse {
   id: string;

@@ -121,6 +121,8 @@ import type {
   RichiediCodiceAccesso200,
   RichiestaCodiceDto,
   RichiestaDiSupportoDto,
+  RifiutaInvito200,
+  RifiutaInvitoDiGruppo200,
   RimuoviFotoProfilo200,
   RimuoviMembro200,
   RimuoviPartecipante200,
@@ -3529,6 +3531,69 @@ export const useAccettaInvito = <TError = ErrorResponseDto,
     }
     
 /**
+ * @summary Rifiuta l'invito: l'invito si chiude e non nasce nulla
+ */
+export const rifiutaInvito = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<RifiutaInvito200>(
+      {url: `/inviti/${id}/rifiuto`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getRifiutaInvitoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rifiutaInvito>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof rifiutaInvito>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['rifiutaInvito'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rifiutaInvito>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  rifiutaInvito(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RifiutaInvitoMutationResult = NonNullable<Awaited<ReturnType<typeof rifiutaInvito>>>
+    
+    export type RifiutaInvitoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Rifiuta l'invito: l'invito si chiude e non nasce nulla
+ */
+export const useRifiutaInvito = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rifiutaInvito>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof rifiutaInvito>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getRifiutaInvitoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
  * @summary I materiali che ho messo da parte, dal più recente
  */
 export const elencaMaterialiSalvati = (
@@ -5258,6 +5323,69 @@ export const useAccettaInvitoDiGruppo = <TError = ErrorResponseDto,
       > => {
 
       const mutationOptions = getAccettaInvitoDiGruppoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Rifiuta l'invito
+ */
+export const rifiutaInvitoDiGruppo = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<RifiutaInvitoDiGruppo200>(
+      {url: `/inviti-gruppo/${id}/rifiuto`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getRifiutaInvitoDiGruppoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rifiutaInvitoDiGruppo>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof rifiutaInvitoDiGruppo>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['rifiutaInvitoDiGruppo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rifiutaInvitoDiGruppo>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  rifiutaInvitoDiGruppo(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RifiutaInvitoDiGruppoMutationResult = NonNullable<Awaited<ReturnType<typeof rifiutaInvitoDiGruppo>>>
+    
+    export type RifiutaInvitoDiGruppoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Rifiuta l'invito
+ */
+export const useRifiutaInvitoDiGruppo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rifiutaInvitoDiGruppo>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof rifiutaInvitoDiGruppo>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getRifiutaInvitoDiGruppoMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

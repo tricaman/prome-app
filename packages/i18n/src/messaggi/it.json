@@ -333,8 +333,13 @@
       "gruppi": "Gruppi",
       "materiali": "Materiali salvati",
       "profilo": "Profilo",
+      "impostazioni": "Impostazioni",
       "tuoiGruppi": "I tuoi gruppi",
       "esci": "Esci"
+    },
+    "account": {
+      "apri": "Il tuo account",
+      "menu": "Profilo, impostazioni e uscita"
     },
     "nuovoPost": "Nuovo post",
     "cerca": "Cerca post, materiali, aule studio…",
@@ -484,7 +489,9 @@
     "invito": {
       "titolo": "Sei stato invitato in un'aula studio",
       "entra": "Entra nell'aula",
+      "rifiuta": "Rifiuta",
       "inCorso": "Ti stiamo facendo entrare…",
+      "rifiutato": "Hai rifiutato questo invito. Chi ti ha invitato non riceve alcun avviso.",
       "scaduto": "Questo invito è scaduto. Chiedi a chi ti ha invitato di mandartene uno nuovo."
     },
     "sala": {
@@ -626,7 +633,9 @@
       },
       "invitoTitolo": "Sei stato invitato in un gruppo",
       "invitoEntra": "Entra nel gruppo",
+      "invitoRifiuta": "Rifiuta",
       "invitoInCorso": "Ti stiamo aggiungendo al gruppo…",
+      "invitoRifiutato": "Hai rifiutato questo invito. Chi ti ha invitato non riceve alcun avviso.",
       "invitoScaduto": "Questo invito è scaduto.",
       "apriAula": "Apri",
       "entraAula": "Entra",
