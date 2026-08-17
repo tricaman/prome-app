@@ -62,12 +62,33 @@ Fuori:
 3. **IP pubblico dichiarato a mano.** Con la scoperta automatica LiveKit interroga uno STUN esterno all'avvio, e ha chiamato Twilio (fuori UE). Nessun media ci passa, ma è una dipendenza esterna all'avvio in meno e un dubbio su V3 in meno.
 4. **Due firewall, non uno.** `ufw` sull'host ammette 22/80/443 e l'ho esteso a 7881 e 7882 — ma la porta restava chiusa. Con `tcpdump` sulla macchina, durante tre tentativi da fuori: **zero pacchetti**. Quindi c'è un **firewall Hetzner a monte** che finora non si era visto, perché ammette esattamente le porte che il sistema già usava.
 
-**Bloccato in attesa di due azioni sul pannello** (non risolvibili da qui):
+**16 agosto — sbloccato.** DNS e firewall Hetzner sistemati dal committente. `rtc.prome.app` ha un certificato Let's Encrypt valido, `/rtc/validate` risponde `401` senza token — cioè raggiungibile e autenticante — e la `7881/tcp` arriva da fuori.
 
-- Hetzner → Firewalls: ammettere `7881/tcp` e `7882/udp`;
-- Cloudflare → DNS: record `A` per `rtc.prome.app` verso `46.224.215.1`, **nuvoletta grigia**.
+### Il media passa davvero
 
-Senza il DNS non c'è TLS, e senza TLS il browser non concede il microfono: la prova a tre non è eseguibile.
+Provato con `livekit-cli load-test` **dalla rete di casa**, quindi con traversata NAT vera, non da dentro la macchina.
+
+| prova | tracce | banda | perdita | CPU LiveKit |
+|---|---|---|---|---|
+| 3 pubblicano, 3 ascoltano | 9/9 | 165 kbps totali | **0%** | — |
+| 8 pubblicano, 8 ascoltano | 48/64 | 937 kbps totali | **0%** | 30-42% di **un** core |
+
+Memoria: 50 MB. Carico di sistema durante la prova a otto: **0.09**. La macchina non se ne accorge, e il collo di bottiglia non sarà la CPU.
+
+### Il 48/64 non è un difetto, ed è la scoperta che conta
+
+Ogni ascoltatore riceve costantemente **6 tracce su 8**, identico a 35 e a 75 secondi. Con **un solo ascoltatore** il numero resta 6: quindi non è un limite del client di prova, **è il server che inoltra solo un sottoinsieme delle tracce audio** — il comportamento di LiveKit che manda i parlanti più attivi invece di tutti.
+
+Per un'aula di studio è esattamente ciò che si vuole: la banda di chi ascolta non cresce con il numero di presenti, e più di cinque o sei persone non parlano davvero insieme.
+
+**Ha però una conseguenza sul client, da tenere presente in E5.2**: non si può assumere una traccia per ogni partecipante. L'elenco di chi sta parlando va costruito sugli eventi di parlante attivo di LiveKit, mai contando le tracce ricevute. Il che combacia con AS8, che vieta comunque al dominio di tenere quell'elenco.
+
+### Cosa manca ai criteri
+
+- **C1/C2** — serve una pagina di prova e tre persone vere su tre reti, di cui una restrittiva. Il trasporto è provato, il permesso microfono del browser no.
+- **C3** — mobile, non ancora toccato.
+- **C4** — oggi è vero per assenza: nulla dell'aula chiama LiveKit. Diventa un criterio con un senso solo dopo E5.1, e va provato allora.
+- **C7** — l'aggiornamento di versione è un cambio di tag nel compose dello spike; da riprovare quando esiste una versione nuova.
 
 ## Esito
 
