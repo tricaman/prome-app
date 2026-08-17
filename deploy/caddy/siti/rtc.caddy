@@ -12,9 +12,19 @@
 # mezzo al media aggiungerebbe latenza proprio dove si sente.
 
 rtc.prome.app {
+	# La pagina di prova dello spike. `handle_path` toglie il prefisso, quindi
+	# il server statico vede `/` e `/livekit-client.umd.js`. Sparirà con lo
+	# spike, insieme al suo contenitore.
+	handle_path /prova* {
+		reverse_proxy prova-audio:80
+	}
+
+	# Tutto il resto è la segnalazione di LiveKit.
 	# Nessuna compressione: il traffico è già un WebSocket di messaggi brevi, e
 	# comprimerlo costa CPU senza restituire niente.
-	reverse_proxy livekit:7880
+	handle {
+		reverse_proxy livekit:7880
+	}
 
 	header {
 		X-Content-Type-Options nosniff

@@ -42,6 +42,27 @@ services:
         max-size: '20m'
         max-file: '3'
 
+  # La pagina di prova, servita come file statici.
+  #
+  # Sta qui e non dietro il Caddy di produzione perché montarle una cartella
+  # vorrebbe dire modificare `docker-compose.prod.yml`, e finché lo spike non
+  # ha risposto la produzione non si tocca. L'immagine è la stessa di Caddy,
+  # già presente sulla macchina: nessuno scaricamento in più.
+  prova:
+    image: caddy:2-alpine
+    container_name: prova-audio
+    restart: unless-stopped
+    command: caddy file-server --root /srv --listen :80
+    volumes:
+      - ./prova:/srv:ro
+    networks:
+      - produzione
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '2'
+
 networks:
   # La rete che docker compose ha già creato per il progetto `prome`.
   produzione:

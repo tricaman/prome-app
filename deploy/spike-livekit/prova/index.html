@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Prova audio — spike WP-14</title>
+    <!--
+      Pagina di prova dello spike, non un pezzo di prodotto.
+
+      Serve a chiudere i criteri C1, C2 e C3: tre persone da tre reti diverse
+      che si sentono, una da rete restrittiva, e il telefono. Non conosce
+      Prome: nessun permesso, nessun token dalla nostra API, nessuna aula. Il
+      token arriva dall'indirizzo. Quando lo spike ha risposto, questa cartella
+      si cancella.
+
+      L'SDK è servito da qui e non da una CDN: la pagina sta sul nostro
+      dominio, e un `script` di terzi lì dentro è una cosa che poi si dimentica.
+    -->
+    <style>
+      :root {
+        color-scheme: light dark;
+        --fondo: #f7f9fb;
+        --scheda: #ffffff;
+        --testo: #14181f;
+        --tenue: #647697;
+        --bordo: #dfe5ec;
+        --menta: #12a594;
+        --rosso: #d3453c;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --fondo: #0f1319;
+          --scheda: #1d242e;
+          --testo: #f5f8fa;
+          --tenue: #8095b0;
+          --bordo: #2e3a48;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 24px 16px 48px;
+        background: var(--fondo);
+        color: var(--testo);
+        font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      main { max-width: 34rem; margin: 0 auto; }
+      h1 { font-size: 1.25rem; margin: 0 0 4px; }
+      .occhiello { color: var(--tenue); font-size: 0.875rem; margin: 0 0 24px; }
+      .scheda {
+        background: var(--scheda);
+        border: 1px solid var(--bordo);
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 16px;
+      }
+      button {
+        font: inherit;
+        font-weight: 600;
+        border: 0;
+        border-radius: 10px;
+        padding: 14px 20px;
+        width: 100%;
+        cursor: pointer;
+        background: var(--menta);
+        color: #04312b;
+      }
+      button[disabled] { opacity: 0.45; cursor: not-allowed; }
+      button.secondario { background: transparent; color: var(--testo); border: 1px solid var(--bordo); }
+      .stato { font-size: 0.9375rem; color: var(--tenue); margin-top: 12px; }
+      .errore {
+        background: #fdecea;
+        color: #7a201a;
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-top: 12px;
+        font-size: 0.9375rem;
+      }
+      @media (prefers-color-scheme: dark) {
+        .errore { background: #3a1a17; color: #ffb4ac; }
+      }
+      ul { list-style: none; margin: 0; padding: 0; }
+      li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--bordo);
+      }
+      li:last-child { border-bottom: 0; }
+      .pallino {
+        width: 10px; height: 10px; border-radius: 50%;
+        background: var(--bordo); flex: none;
+      }
+      .parla { background: var(--menta); box-shadow: 0 0 0 4px rgba(18,165,148,0.22); }
+      .muto { color: var(--tenue); font-size: 0.8125rem; margin-left: auto; }
+      .nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      code { font-size: 0.8125rem; color: var(--tenue); word-break: break-all; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Prova audio</h1>
+      <p class="occhiello">
+        Spike WP-14 — serve a verificare che tre persone su reti diverse si
+        sentano. Non è Prome: nessun dato viene salvato, niente è registrato.
+      </p>
+
+      <div class="scheda">
+        <button id="entra">Attiva il microfono ed entra</button>
+        <p class="stato" id="stato">Pronto.</p>
+        <div id="errore" hidden class="errore"></div>
+      </div>
+
+      <div class="scheda" id="sala" hidden>
+        <ul id="elenco"></ul>
+        <p style="margin: 16px 0 0">
+          <button id="muta" class="secondario">Muta il microfono</button>
+        </p>
+        <p class="stato" id="qualita"></p>
+      </div>
+    </main>
+
+    <script src="livekit-client.umd.js"></script>
+    <script>
+      const { Room, RoomEvent, ConnectionQuality, createLocalAudioTrack } = LivekitClient;
+
+      const $ = (id) => document.getElementById(id);
+      const stato = (testo) => ($('stato').textContent = testo);
+
+      function mostraErrore(titolo, cosaFare) {
+        const box = $('errore');
+        box.hidden = false;
+        box.innerHTML = `<strong>${titolo}</strong><br />${cosaFare}`;
+      }
+
+      // Il token arriva dall'indirizzo. Nel prodotto lo rilascerà l'API dopo
+      // aver verificato il Permesso di Parlare: qui non c'è nulla da
+      // verificare, perché non c'è ancora nessuna aula.
+      const parametri = new URLSearchParams(location.search || location.hash.replace(/^#/, '?'));
+      const token = parametri.get('token');
+      const URL_LIVEKIT = 'wss://' + location.host;
+
+      if (!token) {
+        $('entra').disabled = true;
+        mostraErrore(
+          'Manca il token nell’indirizzo.',
+          'Apri il collegamento completo che ti è stato mandato, quello che finisce con <code>?token=…</code>.',
+        );
+      }
+
+      const sala = new Room({ adaptiveStream: true, dynacast: true });
+      const elenco = new Map();
+
+      /**
+       * Chi c'è e chi sta parlando.
+       *
+       * L'elenco dei parlanti viene dagli eventi del server, MAI dal contare
+       * le tracce ricevute: la prova a otto partecipanti ha mostrato che il
+       * server ne inoltra solo un sottoinsieme — i più attivi — quindi
+       * contare le tracce darebbe una stanza con persone che spariscono.
+       */
+      function ridisegna() {
+        const ul = $('elenco');
+        ul.innerHTML = '';
+        for (const [identita, dati] of elenco) {
+          const li = document.createElement('li');
+          li.innerHTML =
+            `<span class="pallino${dati.parla ? ' parla' : ''}"></span>` +
+            `<span class="nome">${identita}${dati.io ? ' (tu)' : ''}</span>` +
+            (dati.muto ? '<span class="muto">muto</span>' : '');
+          ul.appendChild(li);
+        }
+      }
+
+      function aggiorna(partecipante, io = false) {
+        elenco.set(partecipante.identity, {
+          io,
+          muto: !partecipante.isMicrophoneEnabled,
+          parla: partecipante.isSpeaking,
+        });
+        ridisegna();
+      }
+
+      sala
+        .on(RoomEvent.ParticipantConnected, (p) => aggiorna(p))
+        .on(RoomEvent.ParticipantDisconnected, (p) => {
+          elenco.delete(p.identity);
+          ridisegna();
+        })
+        .on(RoomEvent.TrackSubscribed, (track) => {
+          if (track.kind === 'audio') track.attach();
+        })
+        .on(RoomEvent.ActiveSpeakersChanged, (parlanti) => {
+          const attivi = new Set(parlanti.map((p) => p.identity));
+          for (const [identita, dati] of elenco) dati.parla = attivi.has(identita);
+          ridisegna();
+        })
+        .on(RoomEvent.TrackMuted, (_, p) => aggiorna(p, p === sala.localParticipant))
+        .on(RoomEvent.TrackUnmuted, (_, p) => aggiorna(p, p === sala.localParticipant))
+        .on(RoomEvent.ConnectionQualityChanged, (qualita, p) => {
+          if (p !== sala.localParticipant) return;
+          const parole = {
+            [ConnectionQuality.Excellent]: 'ottima',
+            [ConnectionQuality.Good]: 'buona',
+            [ConnectionQuality.Poor]: 'scarsa',
+          };
+          $('qualita').textContent = 'Qualità della tua connessione: ' + (parole[qualita] || 'sconosciuta');
+        })
+        .on(RoomEvent.Disconnected, () => {
+          stato('Disconnesso.');
+          $('sala').hidden = true;
+          $('entra').disabled = false;
+        });
+
+      $('entra').addEventListener('click', async () => {
+        $('entra').disabled = true;
+        $('errore').hidden = true;
+
+        // Il microfono si chiede PRIMA di collegarsi, e da solo: così il
+        // rifiuto del permesso e il fallimento di rete restano due errori
+        // distinti, con due messaggi distinti. È la stessa distinzione che
+        // E5.3 dovrà fare nel prodotto.
+        let traccia;
+        try {
+          stato('Sto chiedendo il permesso per il microfono…');
+          traccia = await createLocalAudioTrack();
+        } catch (errore) {
+          $('entra').disabled = false;
+          stato('Pronto.');
+          mostraErrore(
+            'Il microfono non è disponibile.',
+            'Il browser ha negato il permesso, oppure un’altra applicazione sta usando il microfono. ' +
+              'Consenti l’accesso dall’icona nella barra degli indirizzi e riprova.',
+          );
+          return;
+        }
+
+        try {
+          stato('Mi sto collegando…');
+          await sala.connect(URL_LIVEKIT, token);
+          await sala.localParticipant.publishTrack(traccia);
+
+          aggiorna(sala.localParticipant, true);
+          for (const p of sala.remoteParticipants.values()) aggiorna(p);
+
+          $('sala').hidden = false;
+          stato('Sei dentro. Stanza: ' + sala.name);
+        } catch (errore) {
+          traccia.stop();
+          $('entra').disabled = false;
+          stato('Pronto.');
+          const scaduto = /token|jwt|expired|unauthorized/i.test(String(errore?.message));
+          mostraErrore(
+            scaduto ? 'Il collegamento non è più valido.' : 'Non riesco a collegarmi.',
+            scaduto
+              ? 'Il token è scaduto o non è corretto: chiedi un collegamento nuovo.'
+              : 'La rete che stai usando potrebbe bloccare le chiamate audio. ' +
+                  'Prova a passare alla rete del telefono e riprova. Dettaglio: <code>' +
+                  String(errore?.message || errore) +
+                  '</code>',
+          );
+        }
+      });
+
+      $('muta').addEventListener('click', async () => {
+        const acceso = sala.localParticipant.isMicrophoneEnabled;
+        await sala.localParticipant.setMicrophoneEnabled(!acceso);
+        $('muta').textContent = acceso ? 'Riattiva il microfono' : 'Muta il microfono';
+        aggiorna(sala.localParticipant, true);
+      });
+    </script>
+  </body>
+</html>
