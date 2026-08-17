@@ -20,6 +20,7 @@ import {
   LUNGHEZZA_MASSIMA_MESSAGGIO,
   LUNGHEZZA_MASSIMA_TITOLO_AULA,
   type AllegatoDiAulaStudioResponse,
+  type MaterialeSalvatoResponse,
   type ArgomentoResponse,
   type AulaStudioResponse,
   type CreaAllegatoDiAulaStudioRequest,
@@ -180,6 +181,13 @@ export class AutoreDiAulaDto {
   @ApiProperty({ nullable: true, type: String }) nome!: string | null;
   @ApiProperty({ nullable: true, type: String }) cognome!: string | null;
   @ApiProperty({ nullable: true, type: String }) universita!: string | null;
+  @ApiPropertyOptional({
+    nullable: true,
+    type: String,
+    description: 'Foto del profilo, o null: allora restano le iniziali',
+  })
+  foto?: string | null;
+
   @ApiPropertyOptional({ description: 'Account non più esistente: «Utente rimosso»' })
   rimosso?: boolean;
 }
@@ -190,11 +198,41 @@ export class PermessiDto implements PermessiResponse {
   @ApiProperty() @IsBoolean() caricare!: boolean;
 }
 
+/**
+ * Chi si invita, nominato per identificativo.
+ *
+ * L'indirizzo **non compare**, né in ingresso né in uscita: chi invita sta
+ * guardando una persona in una sala, non un'email, e il server risolve il
+ * recapito senza raccontarlo a nessuno.
+ */
+export class InvitaUtenteDto {
+  // **Non è un UUID**: l'identificativo dell'utente arriva dal fornitore di
+  // identità e ha la sua forma. Validarlo come UUID rifiutava ogni invito con
+  // un errore di validazione, che è il modo più silenzioso di rompere una
+  // funzione — il codice dice «campo malformato» e il campo era giusto.
+  @ApiProperty()
+  @IsString()
+  @Length(1, 100)
+  utenteId!: string;
+}
+
 export class PartecipanteDto implements PartecipanteResponse {
   @ApiProperty() utenteId!: string;
   @ApiProperty({ nullable: true, type: String }) nome!: string | null;
   @ApiProperty({ nullable: true, type: String }) cognome!: string | null;
   @ApiProperty({ nullable: true, type: String }) universita!: string | null;
+  @ApiPropertyOptional({
+    nullable: true,
+    type: String,
+    description: 'Foto del profilo, o null: allora restano le iniziali',
+  })
+  foto?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Se chi legge può invitarla altrove: lo decidono le sue impostazioni',
+  })
+  contattabile?: boolean;
+
   @ApiPropertyOptional({ description: 'Account non più esistente: «Utente rimosso»' })
   rimosso?: boolean;
   @ApiProperty() moderatore!: boolean;
@@ -233,6 +271,18 @@ export class MaterialeDto implements AllegatoDiAulaStudioResponse {
   @ApiProperty({ nullable: true, type: String }) argomentoId!: string | null;
   @ApiProperty() caricatoDa!: string;
   @ApiProperty() creatoIl!: string;
+
+  @ApiPropertyOptional({ description: 'Vero se chi legge lo ha messo da parte' })
+  salvato?: boolean;
+}
+
+/** Un materiale della propria raccolta, con l'aula da cui viene. */
+export class MaterialeSalvatoDto implements MaterialeSalvatoResponse {
+  @ApiProperty({ type: MaterialeDto }) materiale!: MaterialeDto;
+  @ApiProperty() aulaStudioId!: string;
+  @ApiProperty({ description: 'Un elenco di nomi di file senza provenienza non dice niente' })
+  titoloAula!: string;
+  @ApiProperty() salvatoIl!: string;
 }
 
 export class SalaDto implements SalaResponse {

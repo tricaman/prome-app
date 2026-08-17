@@ -5,27 +5,27 @@ import { elencaPost, getElencaPostQueryKey, type PostDto } from '@prome/api-clie
 import type { PostDiBacheca } from '@prome/contenuti';
 import { useT } from '@/hooks';
 import { useTema } from '@/theme';
-import { QueryBoundary } from '@/components/feedback';
 import { Button } from '@/components/ui';
 import { PostCard } from './post-card';
 
 const PER_PAGINA = 20;
 
+export type QueryFeedBacheca = ReturnType<typeof useFeedBacheca>;
+export type PaginaFeed = Awaited<ReturnType<typeof elencaPost>>;
+
 /**
- * La bacheca, dai dati veri.
+ * La lettura della bacheca.
  *
- * Ordine cronologico e nessun ranking: lo decide il server, e il client non
- * riordina. Attesa, errore e stato vuoto li gestisce il confine di query — qui
- * resta solo il caso «ci sono i post».
+ * Sta fuori dal componente perché la scheda deve poterla passare alla propria
+ * cornice: è la cornice a disegnare attesa, errore e vuoto e a rileggerla
+ * quando si tira giù, e non può farlo per una query che non conosce.
  *
  * **Le pagine si accumulano**, come sul web. Prima ne caricava una sola: il
  * ventunesimo post non esisteva per chi usava il telefono, e non c'era modo di
  * accorgersene — il feed finiva, e sembrava che non ci fosse altro.
  */
-export function FeedBacheca() {
-  const t = useT();
-
-  const post = useInfiniteQuery({
+export function useFeedBacheca() {
+  return useInfiniteQuery({
     queryKey: getElencaPostQueryKey({ limit: PER_PAGINA }),
     queryFn: ({ pageParam }) => elencaPost({ page: pageParam, limit: PER_PAGINA }),
     initialPageParam: 1,
@@ -37,30 +37,51 @@ export function FeedBacheca() {
       return pagina.page + 1;
     },
   });
+}
+
+/**
+ * La bacheca, dai dati veri.
+ *
+ * Ordine cronologico e nessun ranking: lo decide il server, e il client non
+ * riordina. Qui resta solo il caso «ci sono i post»: gli altri tre esiti li ha
+ * già risolti il confine di query della cornice, che è anche il motivo per cui
+ * le pagine arrivano da fuori invece di essere lette da `feed.data`.
+ *
+ * **Il numero dei commenti arriva con il post** (`commenti`): contarli qui
+ * vorrebbe dire una lettura per ogni scheda dello scorrimento.
+ */
+export function FeedBacheca({
+  feed,
+  pagine,
+  onCommenti,
+}: {
+  feed: QueryFeedBacheca;
+  pagine: PaginaFeed[];
+  /** Apre i commenti di un post sul posto, senza lasciare la bacheca. */
+  onCommenti?: (postId: string) => void;
+}) {
+  const t = useT();
 
   return (
-    <QueryBoundary
-      query={post}
-      eVuoto={(risposta) => risposta.pages.every((pagina) => pagina.data.length === 0)}
-    >
-      {(risposta) => (
-        <>
-          {risposta.pages.flatMap((pagina) =>
-            pagina.data.map((riga) => (
-              <PostCard key={riga.id} post={perLaScheda(riga, t('comune.utenteRimosso'))} />
-            )),
-          )}
-
-          {post.hasNextPage ? (
-            <AltriPost
-              inCorso={post.isFetchingNextPage}
-              etichetta={t('app.feed.caricaAltri')}
-              onPress={() => void post.fetchNextPage()}
-            />
-          ) : null}
-        </>
+    <>
+      {pagine.flatMap((pagina) =>
+        pagina.data.map((riga) => (
+          <PostCard
+            key={riga.id}
+            post={perLaScheda(riga, t('comune.utenteRimosso'))}
+            onCommenti={onCommenti ? () => onCommenti(riga.id) : undefined}
+          />
+        )),
       )}
-    </QueryBoundary>
+
+      {feed.hasNextPage ? (
+        <AltriPost
+          inCorso={feed.isFetchingNextPage}
+          etichetta={t('app.feed.caricaAltri')}
+          onPress={() => void feed.fetchNextPage()}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -114,9 +135,11 @@ function perLaScheda(post: PostDto, utenteRimosso: string): PostDiBacheca {
     autore: autore || utenteRimosso,
     contesto: [post.autore.universita, quando(post.creatoIl)].filter(Boolean).join(' · '),
     corpo: post.testo,
+    foto: post.autore.foto,
     allegato: primoAllegato
       ? { nome: primoAllegato.nome, dettaglio: pesoLeggibile(primoAllegato.dimensione) }
       : undefined,
+    commenti: post.commenti,
   };
 }
 

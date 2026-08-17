@@ -17,4 +17,6 @@ export interface MaterialeDto {
   argomentoId: string | null;
   caricatoDa: string;
   creatoIl: string;
+  /** Vero se chi legge lo ha messo da parte */
+  salvato?: boolean;
 }

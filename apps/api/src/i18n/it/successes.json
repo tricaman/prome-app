@@ -50,5 +50,10 @@
   "UTENTE_SBLOCCATO": "Utente sbloccato",
   "SEGNALAZIONE_RICEVUTA": "Grazie della segnalazione: la guardiamo entro 24 ore",
   "NOTIFICA_LETTA": "Notifica letta",
-  "NOTIFICHE_LETTE": "Tutte le notifiche sono state lette"
+  "NOTIFICHE_LETTE": "Tutte le notifiche sono state lette",
+  "RICHIESTA_SUPPORTO_INVIATA": "Richiesta inviata al supporto",
+  "FOTO_AGGIORNATA": "Foto aggiornata",
+  "FOTO_RIMOSSA": "Foto rimossa",
+  "MATERIALE_SALVATO": "Materiale salvato",
+  "MATERIALE_DIMENTICATO": "Materiale tolto dalla raccolta"
 }

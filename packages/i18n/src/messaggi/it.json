@@ -417,7 +417,9 @@
       "vuoto": "Qui compariranno i post del tuo corso. Comincia tu.",
       "tipoNonAmmesso": "Puoi allegare PDF, immagini e file di testo",
       "caricamentoFallito": "Caricamento non riuscito",
-      "caricaAltri": "Carica altri post"
+      "caricaAltri": "Carica altri post",
+      "unCommento": "1 commento",
+      "nCommenti": "{numero} commenti"
     },
     "post": {
       "indietro": "Torna indietro",
@@ -438,7 +440,12 @@
       "elimina": "Elimina",
       "salva": "Salva",
       "annulla": "Annulla",
-      "titoloCommenti": "Commenti"
+      "titoloCommenti": "Commenti",
+      "unCommento": "1 commento",
+      "opzioni": "Opzioni del post",
+      "confermaEliminazione": "Conferma eliminazione",
+      "testo": "Testo del post",
+      "eliminaAvviso": "Sparisce per tutti, con i suoi commenti. Non si annulla."
     },
     "aule": {
       "titolo": "Aule studio",
@@ -569,7 +576,21 @@
       "retrocedi": "Non moderatore",
       "rimuovi": "Rimuovi",
       "indirizzo": "Indirizzo email",
-      "invitaAiuto": "L'invito vale sette giorni e funziona anche con chi non è ancora iscritto a Prome."
+      "invitaAiuto": "L'invito vale sette giorni e funziona anche con chi non è ancora iscritto a Prome.",
+      "inviaMessaggio": "Invia",
+      "ieri": "Ieri",
+      "linea": {
+        "connessione": "Connessione in corso…",
+        "assente": "Fuori tempo reale · i messaggi restano salvati"
+      },
+      "aggiungi": "Aggiungi",
+      "aggiungiAiuto": "Un file dall’archivio o dal rullino, oppure un argomento in cui raccoglierli.",
+      "titoloArgomento": "Titolo dell’argomento",
+      "creaArgomento": "Crea l’argomento",
+      "invitaAltrove": "Invita in una tua aula",
+      "invitaAltroveSub": "Scegli l’aula in cui vuoi invitarla",
+      "nonContattabile": "Non accetta inviti da chi non è già nei suoi spazi",
+      "nessunaAulaDaModerare": "Puoi invitare solo nelle aule che moderi: al momento nessuna."
     },
     "gruppo": {
       "titolo": "Gruppi",
@@ -763,7 +784,9 @@
         "bio": "Bio",
         "bioTesto": "Una riga su di te, sotto al nome.",
         "anno": "Anno di corso",
-        "emailAltrove": "L'indirizzo con cui accedi non si cambia da qui, e non compare nel profilo: la sessione porta solo un identificativo, e mostrarlo vorrebbe dire farlo uscire dall'accesso."
+        "emailAltrove": "L'indirizzo con cui accedi non si cambia da qui, e non compare nel profilo: la sessione porta solo un identificativo, e mostrarlo vorrebbe dire farlo uscire dall'accesso.",
+        "scegliFoto": "Scegli un’altra foto",
+        "togliFoto": "Togli la foto"
       },
       "contattabilita": {
         "titolo": "Chi può contattarti",
@@ -784,7 +807,12 @@
         "aspetto": "Il tema vale su questo browser e si applica subito.",
         "dati": "Una copia completa di post, commenti, materiali e dati del profilo.",
         "elimina": "Prima di procedere, leggi cosa succede ai tuoi contenuti."
-      }
+      },
+      "temaChiaro": "Chiaro",
+      "temaScuro": "Scuro",
+      "temaSistemaSub": "Come il telefono: chiaro di giorno, scuro di sera se lo hai impostato così.",
+      "temaChiaroSub": "Sempre chiaro, qualunque cosa faccia il telefono.",
+      "temaScuroSub": "Sempre scuro, qualunque cosa faccia il telefono."
     },
     "segnala": {
       "segnala": "Segnala",
@@ -823,11 +851,50 @@
       },
       "versione": "Prome {versione} · {motto}",
       "contenuti": "I tuoi contenuti",
-      "nessunGruppo": "Non fai ancora parte di nessun gruppo."
+      "nessunGruppo": "Non fai ancora parte di nessun gruppo.",
+      "tueAule": "Le tue aule studio",
+      "nessunPost": "Non hai ancora scritto niente. Il primo post comincia da qui.",
+      "nessunaAula": "Non fai ancora parte di nessuna aula studio."
     },
     "privacy": {
       "titolo": "Privacy policy",
       "condividi": "Condividi il documento"
+    },
+    "aiuto": {
+      "titolo": "Aiuto e contatti",
+      "sommario": "Raccontaci cosa succede. Rispondiamo alla casella con cui sei entrato.",
+      "categoria": "Di cosa si tratta",
+      "categorie": {
+        "BUG": "Qualcosa non funziona",
+        "ACCOUNT": "Problemi con l’account",
+        "CONTENUTO": "Un contenuto o una persona",
+        "SUGGERIMENTO": "Un suggerimento",
+        "DOMANDA": "Una domanda",
+        "ALTRO": "Altro"
+      },
+      "categorieSub": {
+        "BUG": "Un difetto, qualcosa che si comporta in modo strano",
+        "ACCOUNT": "Accesso, profilo, i tuoi dati",
+        "CONTENUTO": "Per segnalare un post o un commento usa «Segnala» sul contenuto: arriva più in fretta",
+        "SUGGERIMENTO": "Cosa dovrebbe fare Prome e ancora non fa",
+        "DOMANDA": "Come si fa a…",
+        "ALTRO": "Quello che non sta nelle altre voci"
+      },
+      "messaggio": "Il messaggio",
+      "messaggioAiuto": "Se è un difetto: cosa stavi facendo, cosa ti aspettavi e cosa è successo.",
+      "contatto": "Indirizzo per la risposta (facoltativo)",
+      "contattoAiuto": "Lascialo solo se preferisci essere ricontattato altrove.",
+      "contesto": "Alleghiamo anche: {contesto}",
+      "contestoPerche": "Servono a riprodurre un difetto senza doverti richiedere nulla.",
+      "invia": "Invia al supporto",
+      "inviata": "Richiesta inviata. Ti rispondiamo appena possibile."
+    },
+    "materialiSalvati": {
+      "titolo": "Materiali salvati",
+      "vuoto": "Non hai ancora messo da parte niente. Il segnalibro sui materiali di un’aula li raccoglie qui.",
+      "salva": "Metti da parte",
+      "salvato": "Tolgi dalla raccolta",
+      "da": "da {aula}"
     }
   }
 }

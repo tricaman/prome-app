@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useTema } from '@/theme';
-import { useT } from '@/hooks';
+import { useNotificheLive, useT } from '@/hooks';
 import { Icona } from '@/components/ui';
 
 /**
@@ -13,10 +13,19 @@ import { Icona } from '@/components/ui';
  * La scheda dei gruppi era stata **tolta** perché mostrava tre gruppi
  * inventati di una persona che non esiste, mentre sul web i gruppi diventavano
  * veri. È tornata con E12.1, e adesso mostra i gruppi di chi guarda.
+ *
+ * **Il numero delle notifiche sta qui**, sulla bacheca, e non solo sulla
+ * campanella dentro la bacheca: da un'altra scheda la campanella non si vede,
+ * e una notifica che si annuncia solo dove sei già arrivato non annuncia
+ * niente. È lo stesso conteggio, letto dalla stessa query.
+ *
+ * Il socket lo tiene questo livello e non la scheda: qui è acceso finché lo è
+ * una scheda qualsiasi, e ce n'è **uno solo**.
  */
 export default function LayoutSchede() {
   const tema = useTema();
   const t = useT();
+  const { nonLette } = useNotificheLive();
 
   return (
     <Tabs
@@ -38,6 +47,15 @@ export default function LayoutSchede() {
         name="bacheca"
         options={{
           title: t('app.nav.bacheca'),
+          // Zero non disegna nulla, e sopra il 9 dice «9+»: le stesse due
+          // regole della campanella, perché è lo stesso numero.
+          tabBarBadge: nonLette > 0 ? (nonLette > 9 ? '9+' : nonLette) : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: tema.colori.avviso,
+            color: tema.colori.avvisoTesto,
+            fontSize: 10,
+            fontWeight: '800',
+          },
           tabBarIcon: ({ focused }) => (
             <Icona nome="bacheca" dimensione={24} colore={focused ? 'primario' : 'tenue'} />
           ),

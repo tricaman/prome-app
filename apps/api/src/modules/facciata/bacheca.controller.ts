@@ -29,6 +29,7 @@ import {
   CreaPostDto,
   ModificaPostDto,
   PostDto,
+  QueryPostDto,
   PreautorizzaAllegatoDto,
   PreautorizzaAllegatoRispostaDto,
 } from './dtos/bacheca.dto';
@@ -103,9 +104,13 @@ export class BachecaController {
   @ResponseMessage('successes.POST_ELENCATI')
   elenca(
     @Utente() utente: UtenteDiDominio,
-    @Query() query: PaginationDto,
+    @Query() query: QueryPostDto,
   ): Promise<PaginatedResult<PostResponse>> {
-    return this.bacheca.elenca(utente.id, { page: query.page, limit: query.limit });
+    return this.bacheca.elenca(
+      utente.id,
+      { page: query.page, limit: query.limit },
+      { soloMiei: query.soloMiei ?? false },
+    );
   }
 
   @Get(':id')

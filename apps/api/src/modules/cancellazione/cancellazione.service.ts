@@ -307,13 +307,15 @@ export class CancellazioneService {
       );
     }
 
-    // Aula studio: il partecipante esce onorando AS2, gli inviti spariscono, e
-    // il materiale resta con il solo caricatore anonimizzato — è la sola
-    // eccezione alla cancellazione, dichiarata nell'informativa.
+    // Aula studio: il partecipante esce onorando AS2, la sua raccolta di
+    // materiali salvati e i suoi inviti spariscono, e il materiale **caricato**
+    // resta con il solo caricatore anonimizzato — è la sola eccezione alla
+    // cancellazione, dichiarata nell'informativa.
     let auleComplete = false;
     try {
       const indirizzo = await this.accesso.indirizzoDi(utenteId);
       await this.aule.rimuoviPartecipazioniDi(utenteId);
+      await this.aule.eliminaMaterialiSalvatiDi(utenteId);
       await this.aule.eliminaInvitiDi(utenteId, indirizzo);
       await this.aule.anonimizzaMaterialiDi(utenteId);
       await this.aule.anonimizzaMessaggiDi(utenteId);

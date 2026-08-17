@@ -14,6 +14,11 @@ export interface AutoreDiAulaDto {
   cognome: string | null;
   /** @nullable */
   universita: string | null;
+  /**
+   * Foto del profilo, o null: allora restano le iniziali
+   * @nullable
+   */
+  foto?: string | null;
   /** Account non più esistente: «Utente rimosso» */
   rimosso?: boolean;
 }

@@ -4,10 +4,12 @@ import { useTranslations } from 'next-intl';
 import {
   concediPermesso,
   getApriSalaAulaStudioQueryKey,
+  invitaUtenteInAulaStudio,
   promuoviAModeratore,
   retrocediDaModeratore,
   revocaPermesso,
   rimuoviPartecipante,
+  useElencaAuleStudio,
   type PartecipanteDto,
 } from '@prome/api-client';
 import { useApiMutation } from '@/hooks';
@@ -40,6 +42,23 @@ export function TabellaPermessi({ aulaId, partecipanti, sonoModeratore }: Tabell
   const t = useTranslations('app.sala');
   const tComune = useTranslations('comune');
   const chiaveSala = getApriSalaAulaStudioQueryKey(aulaId);
+
+  /**
+   * In quale aula si invita: **la prima che si modera**.
+   *
+   * Sul telefono si sceglie da un foglio; qui, dove la tabella è già larga,
+   * un secondo menu per riga sarebbe rumore — e chi modera una sola aula, che
+   * è il caso normale, non ha niente da scegliere. Con nessuna aula moderata
+   * il pulsante resta spento: non c'è dove portare nessuno.
+   */
+  const mieAule = useElencaAuleStudio({ limit: 50 });
+  const aulaDoveInvitare = (mieAule.data?.data ?? []).find((a) => a.sonoModeratore)?.id;
+
+  const invita = useApiMutation({
+    mutationFn: ({ aulaId: dove, utenteId }: { aulaId: string; utenteId: string }) =>
+      invitaUtenteInAulaStudio(dove, { utenteId }),
+    invalida: [],
+  });
 
   const cambia = useApiMutation({
     mutationFn: ({
@@ -100,7 +119,7 @@ export function TabellaPermessi({ aulaId, partecipanti, sonoModeratore }: Tabell
               )}
             >
               <span className="flex min-w-0 flex-1 items-center gap-3">
-                <Avatar nome={nome} dimensione={36} />
+                <Avatar nome={nome} foto={partecipante.foto} dimensione={36} />
                 <span className="min-w-0">
                   <span className="flex items-center gap-2">
                     <span className="truncate text-sm font-extrabold text-testo">{nome}</span>
@@ -135,6 +154,39 @@ export function TabellaPermessi({ aulaId, partecipanti, sonoModeratore }: Tabell
                   />
                 </span>
               ))}
+
+              {/* L'invito nasce dalla persona che si sta guardando, e **lo
+                  stato lo dichiara il server** (`contattabile`): il pulsante è
+                  spento prima del gesto, con la ragione nel titolo. Scoprire
+                  un divieto di privacy da un errore, dopo aver premuto,
+                  somiglia a un guasto e non a una scelta di qualcun altro. */}
+              {partecipante.contattabile !== undefined && !partecipante.rimosso ? (
+                <span
+                  className="flex justify-end"
+                  // La ragione sta sul contenitore e non sul bottone: un
+                  // elemento spento non riceve il passaggio del mouse, e il
+                  // suo titolo non lo leggerebbe nessuno.
+                  title={partecipante.contattabile ? t('invitaAltrove') : t('nonContattabile')}
+                >
+                  <Button
+                    variante="contorno"
+                    className="h-9 rounded-xl px-3 text-[12px]"
+                    isDisabled={!partecipante.contattabile || !aulaDoveInvitare}
+                    aria-label={
+                      partecipante.contattabile ? t('invitaAltrove') : t('nonContattabile')
+                    }
+                    onPress={() =>
+                      aulaDoveInvitare &&
+                      invita.mutate({
+                        aulaId: aulaDoveInvitare,
+                        utenteId: partecipante.utenteId,
+                      })
+                    }
+                  >
+                    {t('invita')}
+                  </Button>
+                </span>
+              ) : null}
 
               {sonoModeratore ? (
                 <span className="flex w-[160px] justify-end gap-2">

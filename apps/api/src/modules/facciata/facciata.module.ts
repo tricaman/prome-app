@@ -18,8 +18,10 @@ import { CancellazioneController } from './cancellazione.controller';
 import { EsportazioneController } from './esportazione.controller';
 import { GruppoController, InvitiAlGruppoController } from './gruppo.controller';
 import { InvitiController } from './inviti.controller';
+import { MaterialiSalvatiController } from './materiali-salvati.controller';
 import { NotificheController } from './notifiche.controller';
 import { SegnalazioniController } from './segnalazioni.controller';
+import { SupportoController } from './supporto.controller';
 import { GuardiaAccesso } from './guardia-accesso';
 import { HealthController } from './health.controller';
 import { ProfiloController } from './profilo.controller';
@@ -55,8 +57,10 @@ import { ProfiloController } from './profilo.controller';
     BachecaController,
     AulaStudioController,
     InvitiController,
+    MaterialiSalvatiController,
     NotificheController,
     SegnalazioniController,
+    SupportoController,
     GruppoController,
     InvitiAlGruppoController,
     ArchivioController,

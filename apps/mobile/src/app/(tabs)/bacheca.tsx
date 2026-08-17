@@ -1,122 +1,70 @@
 import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { getElencaPostQueryKey, useLeggiMioProfilo } from '@prome/api-client';
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { useLeggiMioProfilo } from '@prome/api-client';
 import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { rotte } from '@/content';
-import { useTema } from '@/theme';
-import { useNotificheLive, useT } from '@/hooks';
-import { FeedBacheca } from '@/components/contenuti';
-import { Avatar, AzioneTonda, Icona, Text } from '@/components/ui';
+import { useNonLette, useT } from '@/hooks';
+import { FeedBacheca, useFeedBacheca } from '@/components/contenuti';
+import { SchermataTab } from '@/components/app/schermata-tab';
+import { FoglioCommenti } from '@/components/app/foglio-commenti';
+import { AzioneTonda, PulsanteFluttuante } from '@/components/ui';
 
 /**
  * Bacheca.
  *
- * Il pulsante per scrivere è fluttuante e sempre raggiungibile con il pollice:
- * su un telefono l'azione principale non può stare in cima allo scorrimento.
+ * Cornice, margini e trascinamento per aggiornare vengono da `SchermataTab`,
+ * come nelle altre tre schede: prima questa era l'unica a disegnarsi la propria
+ * intestazione e il proprio scorrimento, ed era il motivo per cui i suoi
+ * margini non somigliavano a quelli di nessun'altra.
  *
- * Il trascinamento per aggiornare è il gesto che tutti provano per primo su un
- * elenco di contenuti; qui c'è, e non serve un pulsante che faccia lo stesso.
+ * Il profilo si rilegge insieme al feed: il saluto in cima è suo, e un
+ * aggiornamento che lasciasse indietro il nome sarebbe un pezzo di schermo
+ * fermo a prima.
  */
 export default function SchedaBacheca() {
-  const tema = useTema();
   const t = useT();
-  const bordi = useSafeAreaInsets();
-  const [inAggiornamento, setInAggiornamento] = useState(false);
 
   const profilo = useLeggiMioProfilo();
   const nome = [profilo.data?.data.nome, profilo.data?.data.cognome].filter(Boolean).join(' ');
-  const { nonLette } = useNotificheLive();
-
-  /**
-   * Il trascinamento rilegge davvero la bacheca.
-   *
-   * L'indicatore resta acceso finché la richiesta non è finita: spegnerlo
-   * prima direbbe che i dati sono nuovi mentre stanno ancora arrivando.
-   */
-  const clienteQuery = useQueryClient();
-  const aggiorna = async () => {
-    setInAggiornamento(true);
-    await clienteQuery.invalidateQueries({ queryKey: getElencaPostQueryKey() });
-    setInAggiornamento(false);
-  };
+  // Solo il numero: il socket lo tiene la barra delle schede, che lo mostra
+  // anche da un'altra scheda.
+  const { nonLette } = useNonLette();
+  const feed = useFeedBacheca();
+  /** Di quale post si stanno leggendo i commenti: nessuno, finché non si tocca. */
+  const [commentiDi, setCommentiDi] = useState<string | undefined>(undefined);
 
   return (
-    <View style={{ flex: 1, backgroundColor: tema.colori.sfondo }}>
-      <View
-        style={{
-          paddingTop: bordi.top + tema.spaziatura[2],
-          paddingHorizontal: tema.spaziatura[5],
-          paddingBottom: tema.spaziatura[3],
-          gap: tema.spaziatura[3],
-        }}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[3] }}>
-          <View style={{ flex: 1 }}>
-            {/* Il saluto compare solo quando il nome c'è davvero: durante il
-                caricamento resta il titolo, mai un nome di ripiego. */}
-            {nome ? <Text variante="didascalia">Ciao {nome.split(' ')[0]} 👋</Text> : null}
-            <Text variante="titolo">{t('app.nav.bacheca')}</Text>
-          </View>
-          <AzioneTonda
-            icona="campana"
-            etichetta={t('app.notifiche.apri')}
-            conteggio={nonLette}
-            onPress={() => router.push(rotte.notifiche())}
-          />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('app.nav.profilo')}
-            onPress={() => router.push(rotte.mioProfilo())}
-          >
-            <Avatar nome={nome || '?'} dimensione={42} soloColore />
-          </Pressable>
-        </View>
-      </View>
-
-      <ScrollView
-        contentContainerStyle={{
-          paddingHorizontal: tema.spaziatura[4],
-          paddingBottom: tema.spaziatura[20],
-          gap: tema.spaziatura[3],
-        }}
-        refreshControl={
-          <RefreshControl
-            refreshing={inAggiornamento}
-            onRefresh={() => void aggiorna()}
-            tintColor={tema.colori.primario}
-          />
-        }
-      >
-        <FeedBacheca />
-      </ScrollView>
-
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('app.nuovoPost')}
-        onPress={() => router.push(rotte.componi())}
-        style={[
-          {
-            position: 'absolute',
-            right: tema.spaziatura[5],
-            bottom: tema.spaziatura[6],
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: tema.spaziatura[2],
-            height: 56,
-            paddingHorizontal: tema.spaziatura[5],
-            borderRadius: tema.raggio.full,
-            backgroundColor: tema.colori.primario,
-          },
-          tema.ombra.lg,
-        ]}
-      >
-        <Icona nome="piu" dimensione={22} colore="primarioTesto" />
-        <Text variante="etichetta" style={{ color: tema.colori.primarioTesto }}>
-          {t('app.feed.pubblica')}
-        </Text>
-      </Pressable>
-    </View>
+    <SchermataTab
+      titolo={t('app.nav.bacheca')}
+      // Il saluto compare solo quando il nome c'è davvero: durante il
+      // caricamento resta il titolo, mai un nome di ripiego.
+      sopraTitolo={nome ? `Ciao ${nome.split(' ')[0]} 👋` : undefined}
+      azioni={
+        <AzioneTonda
+          icona="campana"
+          etichetta={t('app.notifiche.apri')}
+          conteggio={nonLette}
+          onPress={() => router.push(rotte.notifiche())}
+        />
+      }
+      query={feed}
+      ancheQuery={[profilo]}
+      eVuoto={(risposta) => risposta.pages.every((pagina) => pagina.data.length === 0)}
+      azione={
+        <PulsanteFluttuante
+          etichetta={t('app.feed.pubblica')}
+          onPress={() => router.push(rotte.componi())}
+        />
+      }
+    >
+      {(risposta) => (
+        <>
+          <FeedBacheca feed={feed} pagine={risposta.pages} onCommenti={setCommentiDi} />
+          {/* Il foglio è un `Modal`: sta nell'albero qui, ma si disegna sopra
+              tutto — comprese la barra delle schede e la chiamata
+              fluttuante. */}
+          <FoglioCommenti postId={commentiDi} onChiudi={() => setCommentiDi(undefined)} />
+        </>
+      )}
+    </SchermataTab>
   );
 }

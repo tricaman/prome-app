@@ -67,7 +67,7 @@ export default function SchermataNotifiche() {
     <>
       <Intestazione conIndietro titolo={t('app.impostazioni.notifiche.titolo')} />
 
-      <Screen scorrevole>
+      <Screen scorrevole conAreaSicura={false}>
         <Card
           style={{
             backgroundColor: tema.tinte.ambra.velo,

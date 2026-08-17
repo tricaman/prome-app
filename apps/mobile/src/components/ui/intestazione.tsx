@@ -9,8 +9,12 @@ import { Text } from './text';
 
 export interface IntestazioneProps {
   titolo?: string;
-  /** Riga di contesto sotto al titolo. */
-  sottotitolo?: string;
+  /**
+   * Riga di contesto **sopra** al titolo: il saluto della bacheca, una
+   * sezione di provenienza. Sta sopra perché il titolo resti l'ultima cosa
+   * letta prima del contenuto.
+   */
+  sopraTitolo?: string;
   /** Mostra il tasto indietro: da usare su ogni schermata impilata. */
   conIndietro?: boolean;
   /**
@@ -25,6 +29,19 @@ export interface IntestazioneProps {
   azioni?: ReactNode;
   /** Con `false` non aggiunge il margine per la barra di stato. */
   conAreaSicura?: boolean;
+  /**
+   * Con `true` il titolo sta alla stessa altezza comunque vada: lo spazio
+   * della riga di contesto è riservato anche quando non c'è, e le azioni si
+   * centrano nella riga invece di allungarla.
+   *
+   * Serve dove le intestazioni si confrontano fra loro — le quattro schede.
+   * Senza, il titolo stava a tre altezze diverse a seconda di cosa gli
+   * cresceva intorno: sedici punti più in basso dove c'era il saluto, dieci
+   * dove c'era un'icona, in cima dove non c'era né l'uno né l'altra. Il
+   * confronto non è teorico, è il salto che si vede passando da una scheda
+   * all'altra.
+   */
+  altezzaCostante?: boolean;
 }
 
 /**
@@ -36,15 +53,21 @@ export interface IntestazioneProps {
  */
 export function Intestazione({
   titolo,
-  sottotitolo,
+  sopraTitolo,
   conIndietro = false,
   onIndietro,
   azioni,
   conAreaSicura = true,
+  altezzaCostante = false,
 }: IntestazioneProps) {
   const tema = useTema();
   const bordi = useSafeAreaInsets();
   const t = useT();
+
+  // La riga di contesto occupa una riga di didascalia, il titolo una riga di
+  // titolo: sono le due misure che tengono ferma l'altezza.
+  const altezzaSopraTitolo = tema.testo.didascalia.lineHeight ?? 0;
+  const altezzaTitolo = tema.testo.titolo.lineHeight ?? 0;
 
   return (
     <View
@@ -75,13 +98,37 @@ export function Intestazione({
       ) : null}
 
       {titolo || azioni ? (
-        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: tema.spaziatura[3] }}>
+        <View
+          style={[
+            { flexDirection: 'row', alignItems: 'flex-end', gap: tema.spaziatura[3] },
+            altezzaCostante && { minHeight: altezzaSopraTitolo + altezzaTitolo },
+          ]}
+        >
           <View style={{ flex: 1, minWidth: 0 }}>
-            {sottotitolo ? <Text variante="didascalia">{sottotitolo}</Text> : null}
+            {/* Lo spazio della riga di contesto si riserva anche vuoto: è ciò
+                che tiene il titolo dov'era nella scheda precedente. */}
+            {altezzaCostante || sopraTitolo ? (
+              <View style={{ height: altezzaSopraTitolo, justifyContent: 'flex-end' }}>
+                {sopraTitolo ? (
+                  <Text variante="didascalia" numberOfLines={1}>
+                    {sopraTitolo}
+                  </Text>
+                ) : null}
+              </View>
+            ) : null}
             {titolo ? <Text variante="titolo">{titolo}</Text> : null}
           </View>
           {azioni ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[2] }}>
+            // Centrate nella riga, non appoggiate in fondo: appoggiandosi
+            // allungavano la riga e portavano giù il titolo con sé.
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                alignSelf: altezzaCostante ? 'center' : 'flex-end',
+                gap: tema.spaziatura[2],
+              }}
+            >
               {azioni}
             </View>
           ) : null}

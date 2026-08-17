@@ -1,8 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
+  IsBoolean,
   IsIn,
   IsInt,
   IsOptional,
@@ -27,6 +28,7 @@ import {
   type TipoAllegato,
 } from '@prome/contracts';
 import { MASSIMO_ALLEGATI_PER_POST } from '../../bacheca/bacheca.service';
+import { PaginationDto } from '../../../common/dto';
 
 const TIPI: TipoAllegato[] = ['PDF', 'IMMAGINE', 'TESTO'];
 
@@ -82,6 +84,13 @@ export class AutoreDto implements AutoreResponse {
   @ApiProperty({ nullable: true, type: String }) cognome!: string | null;
   @ApiProperty({ nullable: true, type: String }) universita!: string | null;
 
+  @ApiPropertyOptional({
+    nullable: true,
+    type: String,
+    description: 'Foto del profilo, o null: allora restano le iniziali',
+  })
+  foto?: string | null;
+
   @ApiProperty({
     required: false,
     description: 'Vero quando l\'account dell\'autore non esiste più: il client mostra «Utente rimosso»',
@@ -98,6 +107,29 @@ export class PostDto implements PostResponse {
 
   @ApiProperty({ description: 'Se chi legge ne è l\'autore: lo decide il server' })
   puoModificare!: boolean;
+
+  @ApiProperty({ description: 'Quanti commenti ha il post' })
+  commenti!: number;
+}
+
+/**
+ * I filtri della bacheca.
+ *
+ * **Un parametro, non un endpoint**: «i miei post» è la stessa risorsa con una
+ * condizione in meno da risolvere, e `/bacheca/miei` sarebbe una seconda
+ * collezione con la stessa forma, la stessa paginazione e gli stessi difetti
+ * da correggere due volte.
+ *
+ * Non esiste invece un filtro per autore qualunque: aprirebbe una funzione che
+ * il prodotto non ha — sfogliare i contenuti di una persona — e lo farebbe di
+ * straforo, con un parametro.
+ */
+export class QueryPostDto extends PaginationDto {
+  @ApiPropertyOptional({ description: 'Solo i post di chi legge' })
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  soloMiei?: boolean;
 }
 
 export class CreaPostDto implements CreaPostRequest {

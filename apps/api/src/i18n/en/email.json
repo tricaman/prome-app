@@ -47,5 +47,16 @@
     "soggetto": "Content identifier",
     "segnalante": "Reporter identifier",
     "estratto": "Excerpt of the reported content (first 300 characters):"
+  },
+  "supporto": {
+    "oggetto": "Help request on Prome",
+    "anteprima": "Someone wrote to support.",
+    "titolo": "Help request",
+    "istruzioni": "Someone wrote from the app. Reply to the mailbox they signed in with, or to the address below if they left one.",
+    "categoria": "Category",
+    "mittente": "Sender identifier",
+    "contatto": "Address for the reply",
+    "contesto": "App and device",
+    "messaggio": "The message:"
   }
 }

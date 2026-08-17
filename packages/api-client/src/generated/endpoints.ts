@@ -33,11 +33,14 @@ import type {
   AggiornaPrivacyDto,
   ApriSalaAulaStudio200,
   BloccaUtente200,
+  ChiediAiuto201,
   CommentaPost201,
   CompletaMioProfilo200,
   CompletaProfiloDto,
   ConcediPermesso200,
   CondividiMaterialeAula201,
+  ConfermaFotoProfilo200,
+  ConfermaFotoProfiloDto,
   ContaNotificheNonLette200,
   CreaArgomento201,
   CreaArgomentoDto,
@@ -52,6 +55,7 @@ import type {
   CreaPostDto,
   CreaSegnalazioneDto,
   DimenticaDispositivo200,
+  DimenticaMateriale200,
   ElencaAuleStudio200,
   ElencaAuleStudioParams,
   ElencaBlocchi200,
@@ -60,6 +64,8 @@ import type {
   ElencaCommentiParams,
   ElencaCorsiDiUniversita200,
   ElencaCorsiDiUniversitaParams,
+  ElencaMaterialiSalvati200,
+  ElencaMaterialiSalvatiParams,
   ElencaMieiGruppi200,
   ElencaMieiGruppiParams,
   ElencaNotifiche200,
@@ -81,6 +87,8 @@ import type {
   InviaMessaggioDto,
   InvitaInAulaStudio201,
   InvitaNelGruppo201,
+  InvitaUtenteDto,
+  InvitaUtenteInAulaStudio201,
   LeggiGruppo200,
   LeggiInvito200,
   LeggiInvitoDiGruppo200,
@@ -97,6 +105,8 @@ import type {
   ModificaPostDto,
   PreautorizzaAllegato200,
   PreautorizzaAllegatoDto,
+  PreautorizzaFotoProfilo200,
+  PreautorizzaFotoProfiloDto,
   PreautorizzaMaterialeAula201,
   PreautorizzaMaterialeDto,
   PromuoviAModeratore200,
@@ -110,8 +120,11 @@ import type {
   RichiediCancellazioneAccount200,
   RichiediCodiceAccesso200,
   RichiestaCodiceDto,
+  RichiestaDiSupportoDto,
+  RimuoviFotoProfilo200,
   RimuoviMembro200,
   RimuoviPartecipante200,
+  SalvaMateriale200,
   SbloccaUtente200,
   ScaricaMieiDati200,
   ScriviInAula201,
@@ -630,6 +643,197 @@ export const useCompletaMioProfilo = <TError = ErrorResponseDto,
       > => {
 
       const mutationOptions = getCompletaMioProfiloMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Autorizza il caricamento della foto del profilo
+ */
+export const preautorizzaFotoProfilo = (
+    preautorizzaFotoProfiloDto: PreautorizzaFotoProfiloDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<PreautorizzaFotoProfilo200>(
+      {url: `/profilo/me/foto/pre-autorizzazione`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: preautorizzaFotoProfiloDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getPreautorizzaFotoProfiloMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preautorizzaFotoProfilo>>, TError,{data: PreautorizzaFotoProfiloDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof preautorizzaFotoProfilo>>, TError,{data: PreautorizzaFotoProfiloDto}, TContext> => {
+
+const mutationKey = ['preautorizzaFotoProfilo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof preautorizzaFotoProfilo>>, {data: PreautorizzaFotoProfiloDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  preautorizzaFotoProfilo(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PreautorizzaFotoProfiloMutationResult = NonNullable<Awaited<ReturnType<typeof preautorizzaFotoProfilo>>>
+    export type PreautorizzaFotoProfiloMutationBody = PreautorizzaFotoProfiloDto
+    export type PreautorizzaFotoProfiloMutationError = ErrorResponseDto
+
+    /**
+ * @summary Autorizza il caricamento della foto del profilo
+ */
+export const usePreautorizzaFotoProfilo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preautorizzaFotoProfilo>>, TError,{data: PreautorizzaFotoProfiloDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof preautorizzaFotoProfilo>>,
+        TError,
+        {data: PreautorizzaFotoProfiloDto},
+        TContext
+      > => {
+
+      const mutationOptions = getPreautorizzaFotoProfiloMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Adotta la foto caricata e la mette sul profilo
+ */
+export const confermaFotoProfilo = (
+    confermaFotoProfiloDto: ConfermaFotoProfiloDto,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<ConfermaFotoProfilo200>(
+      {url: `/profilo/me/foto`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: confermaFotoProfiloDto
+    },
+      options);
+    }
+  
+
+
+export const getConfermaFotoProfiloMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confermaFotoProfilo>>, TError,{data: ConfermaFotoProfiloDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof confermaFotoProfilo>>, TError,{data: ConfermaFotoProfiloDto}, TContext> => {
+
+const mutationKey = ['confermaFotoProfilo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confermaFotoProfilo>>, {data: ConfermaFotoProfiloDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  confermaFotoProfilo(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfermaFotoProfiloMutationResult = NonNullable<Awaited<ReturnType<typeof confermaFotoProfilo>>>
+    export type ConfermaFotoProfiloMutationBody = ConfermaFotoProfiloDto
+    export type ConfermaFotoProfiloMutationError = ErrorResponseDto
+
+    /**
+ * @summary Adotta la foto caricata e la mette sul profilo
+ */
+export const useConfermaFotoProfilo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confermaFotoProfilo>>, TError,{data: ConfermaFotoProfiloDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof confermaFotoProfilo>>,
+        TError,
+        {data: ConfermaFotoProfiloDto},
+        TContext
+      > => {
+
+      const mutationOptions = getConfermaFotoProfiloMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Toglie la foto: restano le iniziali
+ */
+export const rimuoviFotoProfilo = (
+    
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<RimuoviFotoProfilo200>(
+      {url: `/profilo/me/foto`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getRimuoviFotoProfiloMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rimuoviFotoProfilo>>, TError,void, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof rimuoviFotoProfilo>>, TError,void, TContext> => {
+
+const mutationKey = ['rimuoviFotoProfilo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rimuoviFotoProfilo>>, void> = () => {
+          
+
+          return  rimuoviFotoProfilo(requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RimuoviFotoProfiloMutationResult = NonNullable<Awaited<ReturnType<typeof rimuoviFotoProfilo>>>
+    
+    export type RimuoviFotoProfiloMutationError = ErrorResponseDto
+
+    /**
+ * @summary Toglie la foto: restano le iniziali
+ */
+export const useRimuoviFotoProfilo = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rimuoviFotoProfilo>>, TError,void, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof rimuoviFotoProfilo>>,
+        TError,
+        void,
+        TContext
+      > => {
+
+      const mutationOptions = getRimuoviFotoProfiloMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
@@ -2612,6 +2816,72 @@ export const useInvitaInAulaStudio = <TError = ErrorResponseDto,
     }
     
 /**
+ * @summary Invita una persona che vedi, rispettando le sue impostazioni di contatto
+ */
+export const invitaUtenteInAulaStudio = (
+    id: string,
+    invitaUtenteDto: InvitaUtenteDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<InvitaUtenteInAulaStudio201>(
+      {url: `/aule-studio/${id}/inviti/utente`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: invitaUtenteDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getInvitaUtenteInAulaStudioMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof invitaUtenteInAulaStudio>>, TError,{id: string;data: InvitaUtenteDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof invitaUtenteInAulaStudio>>, TError,{id: string;data: InvitaUtenteDto}, TContext> => {
+
+const mutationKey = ['invitaUtenteInAulaStudio'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof invitaUtenteInAulaStudio>>, {id: string;data: InvitaUtenteDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  invitaUtenteInAulaStudio(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type InvitaUtenteInAulaStudioMutationResult = NonNullable<Awaited<ReturnType<typeof invitaUtenteInAulaStudio>>>
+    export type InvitaUtenteInAulaStudioMutationBody = InvitaUtenteDto
+    export type InvitaUtenteInAulaStudioMutationError = ErrorResponseDto
+
+    /**
+ * @summary Invita una persona che vedi, rispettando le sue impostazioni di contatto
+ */
+export const useInvitaUtenteInAulaStudio = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof invitaUtenteInAulaStudio>>, TError,{id: string;data: InvitaUtenteDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof invitaUtenteInAulaStudio>>,
+        TError,
+        {id: string;data: InvitaUtenteDto},
+        TContext
+      > => {
+
+      const mutationOptions = getInvitaUtenteInAulaStudioMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
  * @summary Scrive un messaggio nella chat
  */
 export const scriviInAula = (
@@ -3254,6 +3524,224 @@ export const useAccettaInvito = <TError = ErrorResponseDto,
       > => {
 
       const mutationOptions = getAccettaInvitoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary I materiali che ho messo da parte, dal più recente
+ */
+export const elencaMaterialiSalvati = (
+    params?: ElencaMaterialiSalvatiParams,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ElencaMaterialiSalvati200>(
+      {url: `/materiali-salvati`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getElencaMaterialiSalvatiQueryKey = (params?: ElencaMaterialiSalvatiParams,) => {
+    return [
+    `/materiali-salvati`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getElencaMaterialiSalvatiQueryOptions = <TData = Awaited<ReturnType<typeof elencaMaterialiSalvati>>, TError = ErrorResponseDto>(params?: ElencaMaterialiSalvatiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaMaterialiSalvati>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getElencaMaterialiSalvatiQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof elencaMaterialiSalvati>>> = ({ signal }) => elencaMaterialiSalvati(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof elencaMaterialiSalvati>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ElencaMaterialiSalvatiQueryResult = NonNullable<Awaited<ReturnType<typeof elencaMaterialiSalvati>>>
+export type ElencaMaterialiSalvatiQueryError = ErrorResponseDto
+
+
+export function useElencaMaterialiSalvati<TData = Awaited<ReturnType<typeof elencaMaterialiSalvati>>, TError = ErrorResponseDto>(
+ params: undefined |  ElencaMaterialiSalvatiParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaMaterialiSalvati>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaMaterialiSalvati>>,
+          TError,
+          Awaited<ReturnType<typeof elencaMaterialiSalvati>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaMaterialiSalvati<TData = Awaited<ReturnType<typeof elencaMaterialiSalvati>>, TError = ErrorResponseDto>(
+ params?: ElencaMaterialiSalvatiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaMaterialiSalvati>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaMaterialiSalvati>>,
+          TError,
+          Awaited<ReturnType<typeof elencaMaterialiSalvati>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaMaterialiSalvati<TData = Awaited<ReturnType<typeof elencaMaterialiSalvati>>, TError = ErrorResponseDto>(
+ params?: ElencaMaterialiSalvatiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaMaterialiSalvati>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary I materiali che ho messo da parte, dal più recente
+ */
+
+export function useElencaMaterialiSalvati<TData = Awaited<ReturnType<typeof elencaMaterialiSalvati>>, TError = ErrorResponseDto>(
+ params?: ElencaMaterialiSalvatiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaMaterialiSalvati>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getElencaMaterialiSalvatiQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Mette da parte un materiale di un’aula di cui faccio parte
+ */
+export const salvaMateriale = (
+    materialeId: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<SalvaMateriale200>(
+      {url: `/materiali-salvati/${materialeId}`, method: 'PUT'
+    },
+      options);
+    }
+  
+
+
+export const getSalvaMaterialeMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof salvaMateriale>>, TError,{materialeId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof salvaMateriale>>, TError,{materialeId: string}, TContext> => {
+
+const mutationKey = ['salvaMateriale'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof salvaMateriale>>, {materialeId: string}> = (props) => {
+          const {materialeId} = props ?? {};
+
+          return  salvaMateriale(materialeId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SalvaMaterialeMutationResult = NonNullable<Awaited<ReturnType<typeof salvaMateriale>>>
+    
+    export type SalvaMaterialeMutationError = ErrorResponseDto
+
+    /**
+ * @summary Mette da parte un materiale di un’aula di cui faccio parte
+ */
+export const useSalvaMateriale = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof salvaMateriale>>, TError,{materialeId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof salvaMateriale>>,
+        TError,
+        {materialeId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getSalvaMaterialeMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Toglie dalla raccolta
+ */
+export const dimenticaMateriale = (
+    materialeId: string,
+ options?: SecondParameter<typeof istanzaApi>,) => {
+      
+      
+      return istanzaApi<DimenticaMateriale200>(
+      {url: `/materiali-salvati/${materialeId}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getDimenticaMaterialeMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof dimenticaMateriale>>, TError,{materialeId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof dimenticaMateriale>>, TError,{materialeId: string}, TContext> => {
+
+const mutationKey = ['dimenticaMateriale'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof dimenticaMateriale>>, {materialeId: string}> = (props) => {
+          const {materialeId} = props ?? {};
+
+          return  dimenticaMateriale(materialeId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DimenticaMaterialeMutationResult = NonNullable<Awaited<ReturnType<typeof dimenticaMateriale>>>
+    
+    export type DimenticaMaterialeMutationError = ErrorResponseDto
+
+    /**
+ * @summary Toglie dalla raccolta
+ */
+export const useDimenticaMateriale = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof dimenticaMateriale>>, TError,{materialeId: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof dimenticaMateriale>>,
+        TError,
+        {materialeId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getDimenticaMaterialeMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
@@ -3914,6 +4402,71 @@ export const useSegnalaContenuto = <TError = ErrorResponseDto,
       > => {
 
       const mutationOptions = getSegnalaContenutoMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Manda una richiesta di aiuto al supporto
+ */
+export const chiediAiuto = (
+    richiestaDiSupportoDto: RichiestaDiSupportoDto,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ChiediAiuto201>(
+      {url: `/supporto`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: richiestaDiSupportoDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getChiediAiutoMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof chiediAiuto>>, TError,{data: RichiestaDiSupportoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof chiediAiuto>>, TError,{data: RichiestaDiSupportoDto}, TContext> => {
+
+const mutationKey = ['chiediAiuto'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof chiediAiuto>>, {data: RichiestaDiSupportoDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  chiediAiuto(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ChiediAiutoMutationResult = NonNullable<Awaited<ReturnType<typeof chiediAiuto>>>
+    export type ChiediAiutoMutationBody = RichiestaDiSupportoDto
+    export type ChiediAiutoMutationError = ErrorResponseDto
+
+    /**
+ * @summary Manda una richiesta di aiuto al supporto
+ */
+export const useChiediAiuto = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof chiediAiuto>>, TError,{data: RichiestaDiSupportoDto}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof chiediAiuto>>,
+        TError,
+        {data: RichiestaDiSupportoDto},
+        TContext
+      > => {
+
+      const mutationOptions = getChiediAiutoMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

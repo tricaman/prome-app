@@ -24,4 +24,9 @@ export interface ProfiloDto {
   corso: ProfiloDtoCorso;
   onboardingCompletato: boolean;
   impostazioniPrivacy: ImpostazioniDiPrivacyDto;
+  /**
+   * Indirizzo della foto del profilo, o null: allora restano le iniziali
+   * @nullable
+   */
+  foto: string | null;
 }

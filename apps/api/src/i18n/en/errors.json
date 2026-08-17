@@ -68,5 +68,9 @@
   "GRUPPO_CONFLITTO_DI_VERSIONE": "Someone just changed the members: try again",
   "AULA_COLLOCAZIONE_NEGATA": "You can place a room only in a group you belong to",
   "BLOCCO_NON_VALIDO": "You cannot block yourself",
-  "NOTIFICA_NOT_FOUND": "Notification not found"
+  "NOTIFICA_NOT_FOUND": "Notification not found",
+  "FOTO_NON_VALIDA": "The profile photo must be an image of at most 5 MB.",
+  "FOTO_CHIAVE_SCONOSCIUTA": "This photo was not authorised: start the upload again.",
+  "FOTO_NON_CARICATA": "The photo never arrived: try uploading it again.",
+  "AULA_NON_CONTATTABILE": "This person does not accept invitations from people outside their spaces."
 }

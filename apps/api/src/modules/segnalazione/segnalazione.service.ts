@@ -1,6 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type {
+  CategoriaDiSupporto,
   MotivoDiSegnalazione,
+  RichiestaDiSupportoRequest,
   SegnalazioneResponse,
   TipoDiSoggettoSegnalato,
 } from '@prome/contracts';
@@ -97,6 +99,43 @@ export class SegnalazioneService {
         `Segnalazione registrata ma non inoltrata al supporto: ${(errore as Error).message}`,
       );
     }
+  }
+
+  /**
+   * Inoltra al supporto una richiesta di aiuto.
+   *
+   * **Non si scrive niente**, e qui è l'opposto della segnalazione: là la riga
+   * è la fonte di verità e l'email è il campanello, qui l'email È il ticket.
+   * Una tabella di richieste sarebbe un detentore di dati personali in più —
+   * con dentro testo scritto da una persona — da cancellare con l'account,
+   * contare nella verifica del residuo (SE3) ed esportare, in cambio di una
+   * coda che il supporto ha già nella propria casella.
+   *
+   * Per la stessa ragione **non c'è un elenco delle proprie richieste**: non
+   * esiste un posto da cui leggerle.
+   *
+   * L'errore, se l'email non parte, **arriva a chi scrive**: qui non c'è una
+   * riga che resta, quindi tacere vorrebbe dire far credere di aver chiesto
+   * aiuto a chi non l'ha chiesto a nessuno.
+   */
+  async inoltraRichiesta(utenteId: string, richiesta: RichiestaDiSupportoRequest): Promise<void> {
+    if (!env.EMAIL_SUPPORTO) {
+      // Fuori produzione può mancare (in produzione l'avvio si ferma).
+      this.logger.warn('EMAIL_SUPPORTO assente: richiesta di supporto non inoltrata.');
+      return;
+    }
+
+    await this.email.inviaRichiestaDiSupporto(
+      env.EMAIL_SUPPORTO,
+      {
+        categoria: richiesta.categoria satisfies CategoriaDiSupporto,
+        testo: richiesta.testo,
+        utenteId,
+        contatto: richiesta.contatto,
+        contesto: richiesta.contesto,
+      },
+      'it',
+    );
   }
 
   // --- Cancellazione dell'account (V5) --------------------------------------

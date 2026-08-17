@@ -47,5 +47,16 @@
     "soggetto": "Identificativo del contenuto",
     "segnalante": "Identificativo di chi segnala",
     "estratto": "Estratto del contenuto segnalato (primi 300 caratteri):"
+  },
+  "supporto": {
+    "oggetto": "Richiesta di aiuto su Prome",
+    "anteprima": "Una persona ha scritto al supporto.",
+    "titolo": "Richiesta di aiuto",
+    "istruzioni": "Una persona ha scritto dall'app. Rispondile alla casella con cui è entrata, o all'indirizzo indicato qui sotto se ne ha lasciato uno.",
+    "categoria": "Categoria",
+    "mittente": "Identificativo di chi scrive",
+    "contatto": "Indirizzo per la risposta",
+    "contesto": "App e apparecchio",
+    "messaggio": "Il messaggio:"
   }
 }

@@ -50,5 +50,10 @@
   "UTENTE_SBLOCCATO": "User unblocked",
   "SEGNALAZIONE_RICEVUTA": "Thanks for the report: we will review it within 24 hours",
   "NOTIFICA_LETTA": "Notification read",
-  "NOTIFICHE_LETTE": "All notifications marked as read"
+  "NOTIFICHE_LETTE": "All notifications marked as read",
+  "RICHIESTA_SUPPORTO_INVIATA": "Request sent to support",
+  "FOTO_AGGIORNATA": "Photo updated",
+  "FOTO_RIMOSSA": "Photo removed",
+  "MATERIALE_SALVATO": "Material saved",
+  "MATERIALE_DIMENTICATO": "Material removed from your collection"
 }

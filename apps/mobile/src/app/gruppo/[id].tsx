@@ -76,7 +76,7 @@ function Contenuto({
   const unicoModeratore = membri.filter((m) => m.moderatore).length === 1;
 
   return (
-    <Screen scorrevole>
+    <Screen scorrevole conAreaSicura={false}>
       <Card style={{ gap: tema.spaziatura[2] }}>
         <Text variante="titolo">{gruppo.nome}</Text>
         <Text variante="didascalia">

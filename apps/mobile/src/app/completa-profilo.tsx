@@ -137,7 +137,7 @@ export default function SchermataProfilo() {
         </Text>
       </View>
 
-      <Screen scorrevole>
+      <Screen scorrevole conAreaSicura={false}>
         {passo === 1 ? (
           <>
             <Text variante="titoloGrande" style={{ fontSize: 30 }}>

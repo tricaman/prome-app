@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AccessoModule } from '../../infrastruttura/accesso/accesso.module';
+import { ArchivioFileModule } from '../../infrastruttura/archivio-file/archivio-file.module';
 import { CatalogoService } from './catalogo/catalogo.service';
 import { NotificheInAppService } from './notifiche-in-app.service';
 import { PortaIdentitaUtente } from './porta-identita-utente';
@@ -21,9 +22,13 @@ import { ProfiloService } from './profilo.service';
  * Importa `AccessoModule`, che non è un contesto ma la configurazione di un
  * servizio generico: è la dipendenza `Accesso → Profilo` della Context Map, e
  * l'unica cosa che la attraversa è PortaIdentitàUtente, posseduta da qui.
+ *
+ * Importa anche `ArchivioFileModule` — infrastruttura, non un contesto — da
+ * quando il profilo ha una foto: il file lo tiene l'archivio, e Profilo è chi
+ * sa che quel file muore con la persona.
  */
 @Module({
-  imports: [AccessoModule],
+  imports: [AccessoModule, ArchivioFileModule],
   providers: [ProfiloService, CatalogoService, NotificheInAppService, PortaIdentitaUtente],
   exports: [ProfiloService, CatalogoService, NotificheInAppService, PortaIdentitaUtente],
 })

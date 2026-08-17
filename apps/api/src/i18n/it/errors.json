@@ -68,5 +68,9 @@
   "GRUPPO_CONFLITTO_DI_VERSIONE": "Qualcun altro ha appena cambiato i membri: riprova",
   "AULA_COLLOCAZIONE_NEGATA": "Puoi collocare un’aula solo in un gruppo di cui fai parte",
   "BLOCCO_NON_VALIDO": "Non puoi bloccare te stesso",
-  "NOTIFICA_NOT_FOUND": "Notifica non trovata"
+  "NOTIFICA_NOT_FOUND": "Notifica non trovata",
+  "FOTO_NON_VALIDA": "La foto del profilo dev’essere un’immagine di al massimo 5 MB.",
+  "FOTO_CHIAVE_SCONOSCIUTA": "Questa foto non è stata autorizzata: ricomincia il caricamento.",
+  "FOTO_NON_CARICATA": "La foto non è arrivata: riprova a caricarla.",
+  "AULA_NON_CONTATTABILE": "Questa persona non accetta inviti da chi non è già nei suoi spazi."
 }

@@ -36,7 +36,7 @@ export default function SchermataAccedi() {
   return (
     <>
       <Intestazione conIndietro />
-      <Screen scorrevole>
+      <Screen scorrevole conAreaSicura={false}>
         <View style={{ gap: tema.spaziatura[2] }}>
           <Text variante="titoloGrande" style={{ fontSize: 32 }}>
             {t('app.accesso.titolo')}

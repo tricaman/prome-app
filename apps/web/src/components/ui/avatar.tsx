@@ -26,6 +26,11 @@ export interface AvatarProps {
   /** Nome della persona: dà il colore e le iniziali, e resta il testo alternativo. */
   nome: string;
   dimensione?: number;
+  /**
+   * La foto, se quella persona ne ha una. Senza, restano le iniziali — che non
+   * sono un ripiego provvisorio: sono il ritratto di chi la foto non la mette.
+   */
+  foto?: string | null;
   /** Nasconde le iniziali: per i gruppi decorativi di avatar. */
   soloColore?: boolean;
   className?: string;
@@ -37,7 +42,13 @@ export interface AvatarProps {
  * Finché non ci sono immagini reali mostra le iniziali su una tinta derivata
  * dal nome: riconoscibile e stabile, senza il grigio anonimo di un segnaposto.
  */
-export function Avatar({ nome, dimensione = 38, soloColore = false, className }: AvatarProps) {
+export function Avatar({
+  nome,
+  dimensione = 38,
+  foto,
+  soloColore = false,
+  className,
+}: AvatarProps) {
   const iniziali = nome
     .split(/\s+/)
     .slice(0, 2)
@@ -61,11 +72,23 @@ export function Avatar({ nome, dimensione = 38, soloColore = false, className }:
     <span
       style={{ width: dimensione, height: dimensione, fontSize: dimensione * 0.36 }}
       className={cn(
-        'inline-grid flex-none place-items-center rounded-full font-extrabold text-riempimento-testo select-none',
+        'relative inline-grid flex-none place-items-center overflow-hidden rounded-full font-extrabold text-riempimento-testo select-none',
         tintaDi(nome),
         className,
       )}
     >
+      {/* Le iniziali restano **sotto** la foto, non al suo posto: mentre
+          l'immagine arriva si vede già chi è, e non un buco grigio. */}
+      {foto ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={foto}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 size-full object-cover"
+          loading="lazy"
+        />
+      ) : null}
       <span aria-hidden>{iniziali}</span>
       <span className="sr-only">{nome}</span>
     </span>

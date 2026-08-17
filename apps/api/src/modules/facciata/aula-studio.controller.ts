@@ -36,6 +36,7 @@ import {
   CreaArgomentoDto,
   CreaAulaStudioDto,
   CreaInvitoDto,
+  InvitaUtenteDto,
   CreaMaterialeDto,
   InviaMessaggioDto,
   InvitoDto,
@@ -243,6 +244,30 @@ export class AulaStudioController {
     @Body() corpo: CreaInvitoDto,
   ): Promise<InvitoResponse> {
     return this.aule.invita(utente.id, id, corpo.destinatario);
+  }
+
+  /**
+   * Invita **una persona che si sta guardando**, non un indirizzo.
+   *
+   * Due endpoint e non uno perché rispondono a due gesti diversi: uno nomina
+   * un'email — e può raggiungere chi su Prome non c'è ancora — l'altro nomina
+   * qualcuno che si ha davanti nella sala. Solo il secondo può applicare la
+   * contattabilità del destinatario senza dire a nessuno se una certa email ha
+   * un account.
+   */
+  @Post(':id/inviti/utente')
+  @ApiOperation({
+    operationId: 'invitaUtenteInAulaStudio',
+    summary: 'Invita una persona che vedi, rispettando le sue impostazioni di contatto',
+  })
+  @ApiWrappedResponse({ type: InvitoDto, status: HttpStatus.CREATED })
+  @ResponseMessage('successes.INVITO_EMESSO')
+  async invitaUtente(
+    @Utente() utente: UtenteDiDominio,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() corpo: InvitaUtenteDto,
+  ): Promise<InvitoResponse> {
+    return this.aule.invitaUtente(utente.id, id, corpo.utenteId);
   }
 
   // --- Chat -----------------------------------------------------------------

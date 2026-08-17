@@ -103,7 +103,7 @@ export default function SchermataNotifiche() {
         }
       />
 
-      <Screen scorrevole>
+      <Screen scorrevole conAreaSicura={false}>
         <QueryBoundary
           query={notifiche}
           eVuoto={(risposta) => risposta.data.length === 0}

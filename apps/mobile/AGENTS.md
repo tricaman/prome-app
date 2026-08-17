@@ -134,6 +134,19 @@ Un'aula studio o un gruppo può essere Privato, Ateneo o Pubblico, e **"Pubblico
 - Le rotte si costruiscono con `rotte.*` da `@/content`, mai stringhe scritte a mano.
 - Le icone sono in `@prome/design-tokens`: aggiungerne una significa aggiungere un tracciato là, così il segno resta identico sul web.
 
+## La foto del profilo
+
+**Un solo `Avatar`**, con la dimensione in ingresso e la `foto` quando c'è: non esistono varianti (la
+versione «solo colore» è stata tolta — un disco muto si legge come un'immagine che non ha finito di
+caricare). Senza foto restano le iniziali, che **non sono un ripiego provvisorio**: sono il ritratto
+di chi la foto non la mette.
+
+Il caricamento sta in `useFotoProfilo()` e sono i soliti tre tempi (`POST
+/profilo/me/foto/pre-autorizzazione` → byte all'archivio → `PUT /profilo/me/foto`). Si cambia
+**toccando l'avatar**, non con un bottone accanto; con una foto già messa il tocco apre le due
+scelte. La foto si carica subito e non aspetta «Salva»: sparire perché si è usciti senza salvare
+sarebbe l'unica cosa della schermata a comportarsi così.
+
 ## Caricare un file
 
 Tre tempi, come sul web: si dichiarano nome, tipo e dimensione a `preautorizzaAllegato`, si mandano i byte **direttamente all'archivio** con `caricaConAvanzamento` (`@prome/app-core`, la stessa funzione del web), poi si pubblica citando le chiavi. I byte non passano dagli endpoint di dominio.
@@ -185,6 +198,15 @@ Non c'è un evento di invio come sul web: l'invio parte da `FormSubmit`, che val
 - Il tema segue l'impostazione di sistema del dispositivo. Ogni schermata va provata anche in tema scuro.
 - Testo sempre con il componente `Text` e la sua `variante`, mai `Text` di react-native.
 - Ogni schermata è avvolta da `Screen`, che gestisce sfondo e aree sicure (notch, barra gesti).
+- **Le quattro schede si scrivono solo dentro `SchermataTab`** (`components/app/schermata-tab.tsx`):
+  titolo, margini, scorrimento, trascinamento per aggiornare e spazio per il pulsante fluttuante
+  stanno lì una volta sola. Una scheda che si disegna la propria cornice torna a prendere il
+  margine del notch due volte — l'intestazione una e `Screen` un'altra — ed è esattamente il modo
+  in cui le quattro schede si erano scostate l'una dall'altra.
+- `Screen` prende le aree sicure **una volta sola**: dentro una cornice che le ha già prese (una
+  `Intestazione` sopra, la barra delle schede sotto) va passato `conAreaSicura={false}`.
+- L'azione principale di una scheda è un `PulsanteFluttuante`, passato a `SchermataTab` come
+  `azione`: è la cornice a riservargli lo spazio in fondo all'elenco.
 - Area toccabile minima 48 punti: `Button` la rispetta già.
 
 ## Internazionalizzazione

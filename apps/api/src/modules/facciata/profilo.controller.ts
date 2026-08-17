@@ -1,12 +1,25 @@
-import { Body, Controller, Delete, Get, Inject, Param, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { BloccatoResponse, PaginatedResult, ProfiloResponse } from '@prome/contracts';
+import type {
+  BloccatoResponse,
+  PaginatedResult,
+  PreautorizzaAllegatoResponse,
+  ProfiloResponse,
+} from '@prome/contracts';
 import { ApiPaginatedResponse, ApiWrappedResponse, ResponseMessage } from '../../common/decorators';
 import { ProfiloService } from '../profilo/profilo.service';
 import { MISURAZIONI, type MisurazioniDiUtilizzo } from '../../infrastruttura/misurazioni/misurazioni';
 import type { UtenteDiDominio } from '../profilo/porta-identita-utente';
 import { PaginationDto } from '../../common/dto';
-import { AggiornaPrivacyDto, BloccatoDto, CompletaProfiloDto, ProfiloDto } from './dtos/profilo.dto';
+import { PreautorizzaAllegatoRispostaDto } from './dtos/bacheca.dto';
+import {
+  AggiornaPrivacyDto,
+  BloccatoDto,
+  CompletaProfiloDto,
+  ConfermaFotoProfiloDto,
+  PreautorizzaFotoProfiloDto,
+  ProfiloDto,
+} from './dtos/profilo.dto';
 import { Utente } from './guardia-accesso';
 
 /**
@@ -30,6 +43,52 @@ export class ProfiloController {
   @ResponseMessage('successes.PROFILO_LETTO')
   leggi(@Utente() utente: UtenteDiDominio): Promise<ProfiloResponse> {
     return this.profilo.perUtente(utente.id);
+  }
+
+  /**
+   * La foto, in tre tempi come un allegato: si dichiara, si mandano i byte
+   * **diritti all'archivio**, si conferma citando la chiave.
+   *
+   * Sono tre endpoint e non uno perché sono tre momenti che possono fallire
+   * separatamente, e chi carica deve sapere quale dei tre è andato storto.
+   */
+  @Post('me/foto/pre-autorizzazione')
+  @ApiOperation({
+    operationId: 'preautorizzaFotoProfilo',
+    summary: 'Autorizza il caricamento della foto del profilo',
+  })
+  @ApiWrappedResponse({ type: PreautorizzaAllegatoRispostaDto })
+  @ResponseMessage('successes.ALLEGATO_PREAUTORIZZATO')
+  preautorizzaFoto(
+    @Utente() utente: UtenteDiDominio,
+    @Body() corpo: PreautorizzaFotoProfiloDto,
+  ): Promise<PreautorizzaAllegatoResponse & { chiave: string }> {
+    return this.profilo.preautorizzaFoto(utente.id, corpo);
+  }
+
+  @Put('me/foto')
+  @ApiOperation({
+    operationId: 'confermaFotoProfilo',
+    summary: 'Adotta la foto caricata e la mette sul profilo',
+  })
+  @ApiWrappedResponse({ type: ProfiloDto })
+  @ResponseMessage('successes.FOTO_AGGIORNATA')
+  confermaFoto(
+    @Utente() utente: UtenteDiDominio,
+    @Body() corpo: ConfermaFotoProfiloDto,
+  ): Promise<ProfiloResponse> {
+    return this.profilo.confermaFoto(utente.id, corpo.chiave);
+  }
+
+  @Delete('me/foto')
+  @ApiOperation({
+    operationId: 'rimuoviFotoProfilo',
+    summary: 'Toglie la foto: restano le iniziali',
+  })
+  @ApiWrappedResponse({ type: ProfiloDto })
+  @ResponseMessage('successes.FOTO_RIMOSSA')
+  rimuoviFoto(@Utente() utente: UtenteDiDominio): Promise<ProfiloResponse> {
+    return this.profilo.rimuoviFoto(utente.id);
   }
 
   @Put('me')

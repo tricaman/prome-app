@@ -417,7 +417,9 @@
       "vuoto": "Posts from your course will appear here. Start it off.",
       "tipoNonAmmesso": "You can attach PDFs, images and text files",
       "caricamentoFallito": "Upload failed",
-      "caricaAltri": "Load more posts"
+      "caricaAltri": "Load more posts",
+      "unCommento": "1 comment",
+      "nCommenti": "{numero} comments"
     },
     "post": {
       "indietro": "Go back",
@@ -438,7 +440,12 @@
       "elimina": "Delete",
       "salva": "Save",
       "annulla": "Cancel",
-      "titoloCommenti": "Comments"
+      "titoloCommenti": "Comments",
+      "unCommento": "1 comment",
+      "opzioni": "Post options",
+      "confermaEliminazione": "Confirm deletion",
+      "testo": "Post text",
+      "eliminaAvviso": "It disappears for everyone, comments included. This cannot be undone."
     },
     "aule": {
       "titolo": "Study rooms",
@@ -569,7 +576,21 @@
       "retrocedi": "Remove as moderator",
       "rimuovi": "Remove",
       "indirizzo": "Email address",
-      "invitaAiuto": "The invitation is valid for seven days and works even for people not yet on Prome."
+      "invitaAiuto": "The invitation is valid for seven days and works even for people not yet on Prome.",
+      "inviaMessaggio": "Send",
+      "ieri": "Yesterday",
+      "linea": {
+        "connessione": "Connecting…",
+        "assente": "Not live · messages are still saved"
+      },
+      "aggiungi": "Add",
+      "aggiungiAiuto": "A file from your archive or camera roll, or a topic to gather them in.",
+      "titoloArgomento": "Topic title",
+      "creaArgomento": "Create the topic",
+      "invitaAltrove": "Invite to a room of yours",
+      "invitaAltroveSub": "Pick the room you want to invite them to",
+      "nonContattabile": "They don’t accept invitations from people outside their spaces",
+      "nessunaAulaDaModerare": "You can only invite into rooms you moderate: none right now."
     },
     "gruppo": {
       "titolo": "Groups",
@@ -763,7 +784,9 @@
         "bio": "Bio",
         "bioTesto": "A line about you, under your name.",
         "anno": "Year of study",
-        "emailAltrove": "The address you sign in with can't be changed here, and doesn't appear in your profile: the session carries only an identifier, and showing it would mean letting it out of sign-in."
+        "emailAltrove": "The address you sign in with can't be changed here, and doesn't appear in your profile: the session carries only an identifier, and showing it would mean letting it out of sign-in.",
+        "scegliFoto": "Choose another photo",
+        "togliFoto": "Remove the photo"
       },
       "contattabilita": {
         "titolo": "Who can contact you",
@@ -784,7 +807,12 @@
         "aspetto": "The theme applies to this browser, right away.",
         "dati": "A complete copy of posts, comments, materials and profile data.",
         "elimina": "Before you go ahead, read what happens to your content."
-      }
+      },
+      "temaChiaro": "Light",
+      "temaScuro": "Dark",
+      "temaSistemaSub": "Same as your phone: light by day, dark in the evening if you set it that way.",
+      "temaChiaroSub": "Always light, whatever the phone does.",
+      "temaScuroSub": "Always dark, whatever the phone does."
     },
     "segnala": {
       "segnala": "Report",
@@ -823,11 +851,50 @@
       },
       "versione": "Prome {versione} · {motto}",
       "contenuti": "Your content",
-      "nessunGruppo": "You are not part of any group yet."
+      "nessunGruppo": "You are not part of any group yet.",
+      "tueAule": "Your study rooms",
+      "nessunPost": "You have not written anything yet. Your first post starts here.",
+      "nessunaAula": "You are not part of any study room yet."
     },
     "privacy": {
       "titolo": "Privacy policy",
       "condividi": "Share the document"
+    },
+    "aiuto": {
+      "titolo": "Help and contact",
+      "sommario": "Tell us what is going on. We reply to the mailbox you signed in with.",
+      "categoria": "What is it about",
+      "categorie": {
+        "BUG": "Something is broken",
+        "ACCOUNT": "Account problems",
+        "CONTENUTO": "A piece of content or a person",
+        "SUGGERIMENTO": "A suggestion",
+        "DOMANDA": "A question",
+        "ALTRO": "Other"
+      },
+      "categorieSub": {
+        "BUG": "A defect, something behaving oddly",
+        "ACCOUNT": "Sign-in, profile, your data",
+        "CONTENUTO": "To report a post or comment use «Report» on the content itself: it gets there faster",
+        "SUGGERIMENTO": "What Prome should do and does not yet",
+        "DOMANDA": "How do I…",
+        "ALTRO": "Whatever does not fit the others"
+      },
+      "messaggio": "Your message",
+      "messaggioAiuto": "If it is a defect: what you were doing, what you expected, what happened.",
+      "contatto": "Address for the reply (optional)",
+      "contattoAiuto": "Only leave it if you prefer to be contacted elsewhere.",
+      "contesto": "We also attach: {contesto}",
+      "contestoPerche": "They let us reproduce a defect without having to ask you anything.",
+      "invia": "Send to support",
+      "inviata": "Request sent. We will reply as soon as we can."
+    },
+    "materialiSalvati": {
+      "titolo": "Saved materials",
+      "vuoto": "You have not saved anything yet. The bookmark on a room’s materials collects them here.",
+      "salva": "Save it",
+      "salvato": "Remove from your collection",
+      "da": "from {aula}"
     }
   }
 }

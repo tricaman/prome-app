@@ -12,15 +12,13 @@ import {
 } from '@prome/api-client';
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
-import { useApiMutation, useT } from '@/hooks';
-import { SEGNAPOSTO_AVATAR, gestoSospeso } from '@/lib/segnaposto';
+import { useApiMutation, useFotoProfilo, useT } from '@/hooks';
 import { QueryBoundary } from '@/components/feedback';
 import { ElencoCatalogo } from '@/components/app/elenco-catalogo';
 import {
   Avatar,
   Button,
   Card,
-  Chip,
   Elenco,
   Foglio,
   Icona,
@@ -59,9 +57,10 @@ const CHIAVI = { PRIVATO: 'privato', ATENEO: 'ateneo', PUBBLICO: 'pubblico' } as
  * Non si usa `usePreventRemove`: expo-router 57 lo contiene ma non lo esporta,
  * e pescarlo dentro `build/` si rompe al prossimo SDK.
  *
- * SEGNAPOSTO: «Cambia foto» — nel profilo non c'è una foto e non esiste un
- * endpoint per caricarla (`SEGNAPOSTO_AVATAR`). Il selettore del rullino c'è
- * già in `lib/scelta-file.ts`, ma non avrebbe dove mandare i byte.
+ * **La foto si cambia toccando l'avatar**, che è il gesto che tutti provano
+ * per primo. Il bottone «Cambia foto» sotto non c'è più: era la stessa azione
+ * detta una seconda volta, e portava accanto una pastiglia «presto» — adesso
+ * il caricamento esiste davvero (tre tempi, come un allegato).
  */
 export default function SchermataModificaProfilo() {
   const t = useT();
@@ -82,6 +81,13 @@ function Modulo({ profilo, t }: { profilo: ProfiloDto; t: ReturnType<typeof useT
   const [corso, setCorso] = useState<string | null>(profilo.corso?.id ?? null);
   const [ricercaCorso, setRicercaCorso] = useState(profilo.corso?.nome ?? '');
   const [chiedeDiUscire, setChiedeDiUscire] = useState(false);
+  const [scelteFoto, setScelteFoto] = useState(false);
+
+  // La foto vive nel profilo, non in questo modulo: si carica subito e non
+  // aspetta «Salva». Un'immagine che scompare perché si è usciti senza
+  // salvare sarebbe l'unica cosa in questa schermata a comportarsi così.
+  const foto = useFotoProfilo();
+  const fotoAttuale = profilo.foto;
 
   const atenei = useElencaUniversita({
     ricerca: ricercaAteneo.trim() || undefined,
@@ -151,10 +157,26 @@ function Modulo({ profilo, t }: { profilo: ProfiloDto; t: ReturnType<typeof useT
         }
       />
 
-      <Screen scorrevole>
-        <View style={{ alignItems: 'center', gap: tema.spaziatura[3] }}>
-          <View>
-            <Avatar nome={[nome, cognome].filter(Boolean).join(' ') || '?'} dimensione={96} />
+      <Screen scorrevole conAreaSicura={false}>
+        {/* **Si tocca l'avatar**, e basta: il bottone «Cambia foto» sotto era
+            un secondo modo di fare la stessa cosa, con accanto una pastiglia
+            che diceva «presto» a una funzione che adesso c'è. Con una foto
+            già messa il tocco apre le due scelte — cambiarla o toglierla —
+            perché toglierla non deve costare una schermata. */}
+        <View style={{ alignItems: 'center' }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('app.impostazioni.modificaProfilo.cambiaFoto')}
+            accessibilityState={{ busy: foto.inCorso }}
+            disabled={foto.inCorso}
+            onPress={() => (fotoAttuale ? setScelteFoto(true) : void foto.cambia())}
+            style={{ opacity: foto.inCorso ? 0.6 : 1 }}
+          >
+            <Avatar
+              nome={[nome, cognome].filter(Boolean).join(' ') || '?'}
+              foto={fotoAttuale}
+              dimensione={96}
+            />
             <View
               style={{
                 position: 'absolute',
@@ -163,26 +185,16 @@ function Modulo({ profilo, t }: { profilo: ProfiloDto; t: ReturnType<typeof useT
                 width: 34,
                 height: 34,
                 borderRadius: tema.raggio.full,
-                backgroundColor: tema.colori.superficieAlt2,
+                backgroundColor: tema.colori.primario,
                 borderWidth: 3,
                 borderColor: tema.colori.sfondo,
                 alignItems: 'center',
                 justifyContent: 'center',
-                opacity: 0.55,
               }}
             >
-              <Icona nome="fotocamera" dimensione={16} colore="tenue" />
+              <Icona nome="fotocamera" dimensione={16} colore="primarioTesto" />
             </View>
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[2] }}>
-            <Button
-              titolo={t('app.impostazioni.modificaProfilo.cambiaFoto')}
-              variante="contorno"
-              disabled
-              onPress={gestoSospeso(SEGNAPOSTO_AVATAR)}
-            />
-            <Chip tono="ambra">{t('comune.presto')}</Chip>
-          </View>
+          </Pressable>
         </View>
 
         <Card style={{ gap: tema.spaziatura[3] }}>
@@ -298,6 +310,33 @@ function Modulo({ profilo, t }: { profilo: ProfiloDto; t: ReturnType<typeof useT
           />
         </Elenco>
       </Screen>
+
+      <Foglio
+        aperto={scelteFoto}
+        titolo={t('app.impostazioni.modificaProfilo.cambiaFoto')}
+        onChiudi={() => setScelteFoto(false)}
+      >
+        <Elenco>
+          <RigaElenco
+            icona="fotocamera"
+            tinta="menta"
+            etichetta={t('app.impostazioni.modificaProfilo.scegliFoto')}
+            onPress={() => {
+              setScelteFoto(false);
+              void foto.cambia();
+            }}
+          />
+          <RigaElenco
+            icona="cestino"
+            etichetta={t('app.impostazioni.modificaProfilo.togliFoto')}
+            distruttiva
+            onPress={() => {
+              setScelteFoto(false);
+              void foto.togli();
+            }}
+          />
+        </Elenco>
+      </Foglio>
 
       <Foglio
         aperto={chiedeDiUscire}

@@ -174,8 +174,12 @@ export function RigaElenco({
         >
           {etichetta}
         </Text>
+        {/* Secondario, non spento: sul fondo scuro il grigio delle didascalie
+            scendeva sotto la soglia di lettura, e la riga di contesto è la
+            cosa che dice cosa c'è dietro alla voce. Stesso colore delle icone
+            neutre, che lì si leggono. */}
         {sottotitolo ? (
-          <Text variante="didascalia" numberOfLines={2}>
+          <Text variante="didascalia" colore="tenue" numberOfLines={2}>
             {sottotitolo}
           </Text>
         ) : null}

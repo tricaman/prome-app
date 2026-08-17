@@ -82,6 +82,21 @@ export function chiaveMaterialeAula(
 }
 
 /**
+ * La chiave della foto di un profilo: per foto, mai per utente.
+ *
+ * La regola è la stessa delle altre chiavi — l'identificativo dell'utente non
+ * entra in un indirizzo — ma la ragione qui è rovesciata. Gli allegati d'aula
+ * hanno una chiave neutra perché **sopravvivono** alla cancellazione
+ * dell'account; questo file invece **muore con l'account**, ed è la riga del
+ * profilo a sapere dove si trova. Una chiave che nominasse la persona sarebbe
+ * un dato personale servito a chiunque veda l'indirizzo dell'immagine — che è
+ * pubblico per costruzione, perché lo carica ogni scheda della bacheca.
+ */
+export function chiaveFotoProfilo(fotoId: string, nomeFile: string): string {
+  return `profilo/foto/${fotoId}/${nomeSicuro(nomeFile)}`;
+}
+
+/**
  * Il nome del file, ridotto a ciò che può stare in una chiave.
  *
  * Non è cosmetica: un nome con `../` o con una barra dentro cambierebbe il

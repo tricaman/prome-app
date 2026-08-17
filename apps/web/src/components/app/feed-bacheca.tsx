@@ -121,11 +121,10 @@ function SentinellaFine({
 /**
  * Dalla forma dell'API a quella della scheda.
  *
- * È una cucitura temporanea e dichiarata: la scheda nasce dal mockup e parla
- * ancora la lingua dei dati dimostrativi (una riga di contesto già composta,
- * il numero di commenti). Quando arriveranno i commenti — che sono un
- * aggregato a sé, non un campo del post — la scheda leggerà direttamente la
- * risposta e questa funzione sparirà.
+ * È una cucitura dichiarata: la scheda nasce dal mockup e parla ancora la
+ * lingua di allora (una riga di contesto già composta). Il numero dei commenti
+ * non è più inventato — lo conta il server e arriva con l'elenco — anche se i
+ * commenti restano un aggregato a sé, letto altrove.
  */
 function perLaScheda(post: PostDto, utenteRimosso: string): PostDiBacheca {
   // Un autore senza nome è un account cancellato (contenuto anonimizzato) o
@@ -138,9 +137,11 @@ function perLaScheda(post: PostDto, utenteRimosso: string): PostDiBacheca {
     autore: autore || utenteRimosso,
     contesto: [post.autore.universita, quando(post.creatoIl)].filter(Boolean).join(' · '),
     corpo: post.testo,
+    foto: post.autore.foto,
     allegato: primoAllegato
       ? { nome: primoAllegato.nome, dettaglio: pesoLeggibile(primoAllegato.dimensione) }
       : undefined,
+    commenti: post.commenti,
   };
 }
 

@@ -44,7 +44,7 @@ export default function SchermataPrivacyPolicy() {
         }
       />
 
-      <Screen scorrevole>
+      <Screen scorrevole conAreaSicura={false}>
         <Text variante="didascalia" style={{ fontWeight: tema.tipografia.peso.grassetto }}>
           {t('pagine.privacy.vigore')}
         </Text>

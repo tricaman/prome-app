@@ -46,6 +46,12 @@ export const TRACCIATI = {
     'M12 3.2a8.8 8.8 0 100 17.6 8.8 8.8 0 000-17.6M9.6 9.4a2.5 2.5 0 114.3 2c-.9.8-1.9 1.3-1.9 2.6M12 17.2v.4',
   fotocamera:
     'M4.5 7.5h3l1.4-2h6.2l1.4 2h3A1.5 1.5 0 0121 9v8.5a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 17.5V9a1.5 1.5 0 011.5-1.5M12 10.6a3.2 3.2 0 100 6.4 3.2 3.2 0 000-6.4',
+  // L'aeroplanino: il gesto di mandare un messaggio non ha bisogno di una
+  // parola, ed è l'unico segno che chiunque abbia usato una chat riconosce.
+  invia: 'M21 3 10.2 13.8M21 3l-6.9 18-3.9-7.2L3 9.9Z',
+  // I tre puntini: «c'è dell'altro qui», senza dover nominare cosa. Verticali
+  // perché la riga che li ospita è alta, non larga.
+  altro: 'M12 5.2v.1M12 12v.1M12 18.8v.1',
 } as const;
 
 export type NomeIcona = keyof typeof TRACCIATI;

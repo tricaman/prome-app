@@ -73,7 +73,7 @@ export default function SchermataCodice() {
   return (
     <>
       <Intestazione conIndietro />
-      <Screen scorrevole>
+      <Screen scorrevole conAreaSicura={false}>
         <View style={{ gap: tema.spaziatura[2] }}>
           <Text variante="titoloGrande" style={{ fontSize: 30 }}>
             {t('app.accesso.codiceTitolo')}

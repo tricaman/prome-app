@@ -126,6 +126,24 @@ model Profilo {
   /// per ateneo attraversa la relazione (`corso: { universitaId }`).
   corsoId              String?
 
+  /// La chiave della foto del profilo nell'archivio, o null se non ce n'è una.
+  ///
+  /// La chiave **non contiene l'identificativo dell'utente** (come tutte le
+  /// altre), ma a differenza degli allegati questo file **muore con
+  /// l'account**: è il ritratto di una persona, non un contenuto che resta
+  /// dietro un autore anonimizzato. Lo si ritrova per cancellarlo leggendo
+  /// questa colonna prima di eliminare la riga.
+  fotoChiave String?
+
+  /// La chiave appena pre-autorizzata, in attesa che i byte arrivino.
+  ///
+  /// Sta qui e non in una tabella di prenotazioni (come per gli allegati)
+  /// perché la foto è **una sola**: la seconda pre-autorizzazione sovrascrive
+  /// la prima, e non resta niente da ripulire. È anche ciò che rende
+  /// verificabile la conferma — si accetta solo la chiave che il server ha
+  /// emesso per questa persona, non una qualunque che arrivi dal client.
+  fotoChiaveInAttesa String?
+
   onboardingCompletato Boolean  @default(false)
   creatoIl             DateTime @default(now())
   aggiornatoIl         DateTime @default(now()) @updatedAt
@@ -882,10 +900,39 @@ model AllegatoDiAulaStudio {
   dimensione   Int
   creatoIl     DateTime                 @default(now())
 
+  salvataggi MaterialeSalvato[]
+
   @@index([aulaStudioId, creatoIl])
   @@index([argomentoId])
   @@index([caricatoDa])
   @@map("allegato_di_aula_studio")
+  @@schema("aula_studio")
+}
+
+/// Un materiale messo da parte da qualcuno: la sua raccolta personale.
+///
+/// Sta **nello schema dell'aula** e non in quello del profilo perché il
+/// materiale è dell'aula, ed è l'Aula studio a sapere chi può vederlo: da
+/// Profilo servirebbe leggere aule e partecipanti, cioè attraversare la
+/// Context Map nel verso vietato.
+///
+/// La chiave primaria composta è l'idempotenza (come per l'appartenenza al
+/// gruppo, G3): salvare due volte lo stesso materiale è **un'operazione senza
+/// effetto**, non un errore da gestire.
+///
+/// La cascata è verso il materiale, dentro lo stesso contesto: un segnalibro a
+/// un materiale che non c'è più non è un dato, è un riferimento rotto.
+model MaterialeSalvato {
+  /// Identificativo nudo, come ovunque si attraversi un confine di contesto.
+  utenteId    String
+  materialeId String
+  salvatoIl   DateTime @default(now())
+
+  materiale AllegatoDiAulaStudio @relation(fields: [materialeId], references: [id], onDelete: Cascade)
+
+  @@id([utenteId, materialeId])
+  @@index([utenteId, salvatoIl(sort: Desc)])
+  @@map("materiale_salvato")
   @@schema("aula_studio")
 }
 

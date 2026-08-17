@@ -51,15 +51,20 @@ export function PostBacheca({ post }: { post: PostDiBacheca }) {
       {/* Una sola azione, e vera. «Salva» prometteva una raccolta che non
           esiste, «Condividi» un collegamento che per la maggior parte dei
           destinatari sarebbe un 404 — la visibilità si risolve per autore — e
-          «···» non apriva niente. Il numero dei commenti non c'è perché il
-          feed non lo conosce: si contano nel dettaglio, dove ci sono. */}
+          «···» non apriva niente. Il numero dei commenti adesso c'è, perché il
+          server lo conta insieme all'elenco: senza, il collegamento non diceva
+          se sotto ci fosse una conversazione o il silenzio. */}
       <footer className="mt-4 flex items-center gap-6 border-t border-superficie-alt-2 pt-3.5">
         <Link
           href={percorsiApp.post(post.id)}
           className="flex items-center gap-2 text-[13px] font-extrabold text-testo-tenue hover:text-primario-collegamento"
         >
           <Icona nome="commento" dimensione={19} />
-          {t('commenta')}
+          {post.commenti === 0
+            ? t('commenta')
+            : post.commenti === 1
+              ? t('unCommento')
+              : t('nCommenti', { numero: String(post.commenti) })}
         </Link>
       </footer>
     </Card>

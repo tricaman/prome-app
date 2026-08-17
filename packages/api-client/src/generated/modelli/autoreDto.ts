@@ -14,6 +14,11 @@ export interface AutoreDto {
   cognome: string | null;
   /** @nullable */
   universita: string | null;
+  /**
+   * Foto del profilo, o null: allora restano le iniziali
+   * @nullable
+   */
+  foto?: string | null;
   /** Vero quando l'account dell'autore non esiste più: il client mostra «Utente rimosso» */
   rimosso?: boolean;
 }

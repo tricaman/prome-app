@@ -33,6 +33,15 @@ export const AulaStudioErrorCode = {
   MESSAGGIO_VUOTO: 'AS019',
   /** AS9: si colloca un'aula solo in un gruppo di cui si fa parte adesso. */
   COLLOCAZIONE_NEGATA: 'AS020',
+
+  /**
+   * Le impostazioni di chi si vuole invitare non ammettono il contatto.
+   *
+   * 403 e non 404: chi lo riceve **sta già guardando quella persona** in una
+   * sala che può aprire, quindi non c'è alcuna esistenza da nascondere — e
+   * dirle «non esiste» sarebbe una bugia visibile a occhio nudo.
+   */
+  NON_CONTATTABILE: 'AS021',
 } as const;
 
 export type AulaStudioErrorCode =

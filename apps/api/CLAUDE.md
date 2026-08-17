@@ -218,6 +218,40 @@ Componente **trasversale**, non un bounded context: `modules/cancellazione` orch
 - Bloccare chi è in grazia di cancellazione è legittimo (se torna, il blocco lo aspetta); quando la sua catena si completa, la cascata porta via la riga e la voce sparisce dall'elenco dei bloccati — corretto, non un difetto: il suo contenuto è ormai `anonimo-` e non riconducibile.
 - I test stanno in `test/segnalazioni-e-blocchi.spec.ts` (21 casi, scritti prima del codice), con feed e link diretto verificati separatamente nelle due direzioni.
 
+## «Chi può messaggiarmi» — la contattabilità, applicata dove non racconta niente
+
+**La regola vive in un posto solo**, `ProfiloService.contattabiliDa` (Profilo possiede le decisioni di privacy). Chi la applica chiede, non riscrive. Sopra i tre livelli c'è il **blocco**, in entrambe le direzioni, come per la bacheca.
+
+- **`giaInsieme` lo dichiara chi chiama.** «Privato» significa «solo chi è già nei tuoi gruppi o nelle tue aule», e Profilo non conosce né gli uni né le altre: chiederglielo sarebbe la dipendenza che la Context Map vieta. Aula studio risponde per le aule (dati suoi) e per i gruppi attraverso `PortaAppartenenzaGruppo.condividonoUnGruppo`, che attraversa il confine come **un booleano** — quale spazio si condivida non entra nel core.
+- **Si applica solo all'invito per utente** (`POST /aule-studio/:id/inviti/utente`), che nasce dalla sala di un'aula che chi invita **sta già guardando**: il destinatario è una persona che si sa esistere, quindi il rifiuto (403, `AS021`) non racconta niente di nuovo.
+- **Sull'invito per indirizzo la regola NON si applica, ed è deliberato**: un rifiuto lì direbbe a chiunque, con un modulo aperto a tutti, se una certa email ha un account su Prome e come si è impostata. `test/contattabilita.spec.ts` sorveglia anche questo — è la riga che impedisce di «sistemare» l'incoerenza apparente e introdurre la fuga.
+- **`contattabile` viaggia nella sala** (`PartecipanteResponse`), calcolato in lotto: i client spengono il pulsante **prima** del gesto invece di far scoprire il divieto con un errore, ed è lo stesso valore che l'API applicherebbe — non possono divergere.
+- L'indirizzo del destinatario lo risolve il server (`PortaIdentitàUtente.indirizzoDi`) e **non torna mai a chi invita**.
+
+## I materiali salvati — la raccolta personale
+
+`MaterialeSalvato` sta nello schema **`aula_studio`** e non in `profilo`: il materiale è dell'aula, ed è Aula studio a sapere chi può vederlo. Da Profilo servirebbe leggere aule e partecipanti, cioè attraversare la Context Map nel verso vietato.
+
+- **La chiave primaria composta è l'idempotenza** (stile G3): salvare due volte è un'operazione senza effetto, non un errore. `PUT`/`DELETE` su `/materiali-salvati/:materialeId`, `GET` per la raccolta — è una collezione a sé perché la domanda è «cosa ho messo da parte», non «cosa c'è in quest'aula».
+- **Si salva ciò che si vede**, e la partecipazione si verifica **adesso** (AL4): materiale inesistente e materiale di un'aula in cui non si è dentro rispondono entrambi 404. La lettura filtra allo stesso modo: chi lascia un'aula smette di vederne i materiali salvati, **la riga resta** e rientrando li ritrova.
+- **`salvato` viaggia nella sala** (`AllegatoDiAulaStudioResponse`), come `puoModificare` su un post: il client non incrocia due elenchi a mano.
+- **È un detentore**: `contaResiduiDi` lo conta, `eliminaMaterialiSalvatiDi` è un passo della catena, `datiPersonaliDi` esporta i **nomi** di ciò che si teneva da parte (mai i file: sono di chi li ha caricati). Un segnalibro non è un contributo a chi studia — se ne va con la persona. La cascata verso il materiale porta via i segnalibri di tutti quando il materiale è eliminato.
+- I test stanno in `test/materiali-salvati.spec.ts` (7 casi, scritti prima del codice).
+
+## Generare il client senza spegnere il server di sviluppo
+
+`openapi:emit` compila in **`dist-openapi/`**, non in `dist/`. Non è una preferenza: `nest start --watch` gira da `dist/`, e un `nest build` concorrente (con `deleteOutDir`) glielo svuota sotto i piedi — il watcher smette di ricostruire e il processo continua a servire il **grafo vecchio in memoria**. Il sintomo è una rotta appena aggiunta che risponde 404 mentre il codice sorgente ce l'ha, e non c'è niente nei log che lo dica.
+
+## «Scrivici» — la richiesta di aiuto
+
+`POST /supporto` sta nel modulo **Segnalazione** e non in un contesto nuovo: è la stessa coda vista dall'altra parte — qualcuno scrive, qualcuno legge, e il posto in cui si legge è la casella del supporto. Un contesto a sé avrebbe schema vuoto, nessun aggregato e nessuna invariante.
+
+- **Non si conserva niente, e qui è l'opposto della segnalazione**: là la riga è la fonte di verità e l'email è il campanello, qui **l'email È il ticket**. Una tabella di richieste sarebbe un detentore di dati personali in più — con dentro testo scritto da una persona — da cancellare con l'account, contare in SE3 ed esportare, in cambio di una coda che il supporto ha già nella propria casella. Per la stessa ragione non esiste un `GET`: non c'è un posto da cui leggerle.
+- **L'errore arriva a chi scrive.** Se l'email non parte, `inoltraRichiesta` lancia: senza una riga che resta, tacere farebbe credere di aver chiesto aiuto a chi non l'ha chiesto a nessuno. È l'unico punto in cui il fallimento di un'email non è best-effort.
+- **La categoria è un elenco chiuso** (`CATEGORIE_DI_SUPPORTO`), come i motivi di segnalazione: a testo libero la coda smette di essere smistabile in poche settimane. Il **testo libero invece c'è**, ed è la differenza con la segnalazione: quella smista verso una decisione già definita, questa È il canale.
+- **Serve una sessione** (guardia globale): non è il contatto pubblico, che sta sul sito.
+- I test stanno in `test/supporto.spec.ts` e provano il difetto invisibile per definizione: una richiesta che non arriva a nessuno *sembra* funzionare, perché non esiste una riga da cui accorgersene.
+
 ## Notifiche (E8) — la spina dorsale, senza fornitore
 
 ### La casella in-app (16 agosto 2026)

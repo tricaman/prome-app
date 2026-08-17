@@ -5,8 +5,8 @@ import { rotte } from '@/content';
 import { etichettaVisibilita } from '@/lib/visibilita';
 import { useTema } from '@/theme';
 import { useT } from '@/hooks';
-import { QueryBoundary } from '@/components/feedback';
-import { Card, Chip, Icona, Intestazione, Screen, Text } from '@/components/ui';
+import { SchermataTab } from '@/components/app/schermata-tab';
+import { Card, Chip, Icona, PulsanteFluttuante, Text } from '@/components/ui';
 
 /**
  * I gruppi di cui si fa parte.
@@ -24,55 +24,27 @@ export default function SchedaGruppi() {
   const gruppi = useElencaMieiGruppi({ limit: 50 });
 
   return (
-    <View style={{ flex: 1 }}>
-      <Intestazione titolo={t('app.gruppo.titolo')} />
-
-      {/* Spazio in fondo, perché il pulsante fluttuante non copra l'ultima
-          scheda dell'elenco. */}
-      <Screen scorrevole style={{ paddingBottom: tema.spaziatura[20] }}>
-        <Text variante="corpoTenue">{t('app.gruppo.sommario')}</Text>
-
-        <QueryBoundary
-          query={gruppi}
-          eVuoto={(risposta) => risposta.data.length === 0}
-          vuoto={<Text variante="corpoTenue">{t('app.gruppo.nessuno')}</Text>}
-        >
-          {(risposta) => (
-            <View style={{ gap: tema.spaziatura[3] }}>
-              {risposta.data.map((gruppo) => (
-                <SchedaGruppo key={gruppo.id} gruppo={gruppo} />
-              ))}
-            </View>
-          )}
-        </QueryBoundary>
-      </Screen>
-
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('app.gruppo.crea')}
-        onPress={() => router.push(rotte.creaGruppo())}
-        style={[
-          {
-            position: 'absolute',
-            right: tema.spaziatura[5],
-            bottom: tema.spaziatura[6],
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: tema.spaziatura[2],
-            height: 56,
-            paddingHorizontal: tema.spaziatura[5],
-            borderRadius: tema.raggio.full,
-            backgroundColor: tema.colori.primario,
-          },
-          tema.ombra.lg,
-        ]}
-      >
-        <Icona nome="piu" dimensione={22} colore="primarioTesto" />
-        <Text variante="etichetta" style={{ color: tema.colori.primarioTesto }}>
-          {t('app.gruppo.crea')}
-        </Text>
-      </Pressable>
-    </View>
+    <SchermataTab
+      titolo={t('app.gruppo.titolo')}
+      descrizione={t('app.gruppo.sommario')}
+      query={gruppi}
+      eVuoto={(risposta) => risposta.data.length === 0}
+      vuoto={<Text variante="corpoTenue">{t('app.gruppo.nessuno')}</Text>}
+      azione={
+        <PulsanteFluttuante
+          etichetta={t('app.gruppo.crea')}
+          onPress={() => router.push(rotte.creaGruppo())}
+        />
+      }
+    >
+      {(risposta) => (
+        <View style={{ gap: tema.spaziatura[3] }}>
+          {risposta.data.map((gruppo) => (
+            <SchedaGruppo key={gruppo.id} gruppo={gruppo} />
+          ))}
+        </View>
+      )}
+    </SchermataTab>
   );
 }
 
@@ -126,4 +98,3 @@ function SchedaGruppo({ gruppo }: { gruppo: GruppoDto }) {
     </Pressable>
   );
 }
-

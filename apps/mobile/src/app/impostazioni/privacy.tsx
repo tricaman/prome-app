@@ -87,7 +87,7 @@ export default function SchermataPrivacy() {
     <>
       <Intestazione conIndietro titolo={t('app.impostazioni.privacy')} />
 
-      <Screen scorrevole>
+      <Screen scorrevole conAreaSicura={false}>
         <TitoloSezione>{t('app.impostazioni.contenuti.titolo')}</TitoloSezione>
         <QueryBoundary query={profilo}>
           {({ data }) => (

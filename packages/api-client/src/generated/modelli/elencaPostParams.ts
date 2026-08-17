@@ -22,4 +22,8 @@ limit?: number;
  */
 sortBy?: string;
 sortOrder?: ElencaPostSortOrder;
+/**
+ * Solo i post di chi legge
+ */
+soloMiei?: boolean;
 };

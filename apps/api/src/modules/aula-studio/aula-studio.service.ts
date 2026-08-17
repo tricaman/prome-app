@@ -6,6 +6,7 @@ import type {
   AulaStudioResponse,
   CreaAulaStudioRequest,
   InvitoResponse,
+  MaterialeSalvatoResponse,
   MessaggioDiChatResponse,
   ModificaAulaStudioRequest,
   PaginatedResult,
@@ -285,11 +286,37 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       }),
     ]);
 
+    // Quali di questi ho già messo da parte: una lettura sola per l'intera
+    // sala, non una per materiale.
+    const salvati = new Set(
+      (
+        await this.prisma.materialeSalvato.findMany({
+          where: { utenteId, materialeId: { in: allegati.map((a) => a.id) } },
+          select: { materialeId: true },
+        })
+      ).map((riga) => riga.materialeId),
+    );
+
     const [profili, nomiAtenei] = await Promise.all([
       this.profilo.perUtenti([...new Set(partecipanti.map((p) => p.utenteId))]),
       this.nomiDegliAtenei([aula]),
     ]);
     const io = partecipanti.find((p) => p.utenteId === utenteId);
+
+    /*
+     * Chi di loro accetta di essere contattato da chi sta guardando.
+     *
+     * Si calcola **qui e in lotto**, non una domanda per riga: chi apre una
+     * sala pubblica senza esserci dentro vede persone con cui non condivide
+     * nulla, ed è l'unico posto del prodotto in cui la contattabilità decide
+     * qualcosa. Chi è già in questa aula insieme a chi guarda è «già insieme»
+     * per definizione — la sala stessa è lo spazio condiviso.
+     */
+    const dentroInsieme = Boolean(io);
+    const contattabili = await this.profilo.contattabiliDa(
+      utenteId,
+      partecipanti.map((p) => ({ utenteId: p.utenteId, giaInsieme: dentroInsieme })),
+    );
 
     return {
       aula: this.aulaPerIlClient(aula, partecipanti, utenteId, nomiAtenei),
@@ -301,6 +328,8 @@ export class AulaStudioService implements ConsumatoreDiFatti {
           nome: profilo?.nome ?? null,
           cognome: profilo?.cognome ?? null,
           universita: profilo?.universita?.nome ?? null,
+          foto: profilo?.foto ?? null,
+          contattabile: contattabili.get(p.utenteId) ?? false,
           // Senza profilo dietro: account cancellato o in cancellazione.
           ...(profilo ? {} : { rimosso: true }),
           moderatore: p.moderatore,
@@ -309,7 +338,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
         } satisfies PartecipanteResponse;
       }),
       argomenti: argomenti.map(argomentoPerIlClient),
-      allegati: allegati.map((a) => this.materialePerIlClient(a)),
+      allegati: allegati.map((a) => this.materialePerIlClient(a, salvati.has(a.id))),
       sonoModeratore: io?.moderatore ?? false,
       mieiPermessi: io ? permessiEffettivi(io) : { parlare: false, scrivere: false, caricare: false },
     };
@@ -552,6 +581,70 @@ export class AulaStudioService implements ConsumatoreDiFatti {
   }
 
   // --- Inviti ---------------------------------------------------------------
+
+  /**
+   * Invita **una persona che si sta guardando**, non un indirizzo.
+   *
+   * È il gesto che nasce dalla sala di un'aula pubblica: si vede chi c'è, e si
+   * chiede a qualcuno di venire nella propria. L'indirizzo lo risolve il
+   * server e non torna mai indietro: chi invita non deve sapere con quale email
+   * quella persona è iscritta.
+   *
+   * **Qui la contattabilità si applica davvero**, ed è l'unico posto in cui
+   * può farlo senza raccontare niente: chi riceve il rifiuto sta già guardando
+   * il destinatario in una sala che ha potuto aprire, quindi sa già che
+   * esiste. Sull'invito **per indirizzo** la regola resta inapplicata, e non è
+   * una dimenticanza: un rifiuto lì direbbe a chiunque, con un modulo aperto a
+   * tutti, se una certa email ha un account su Prome.
+   */
+  async invitaUtente(
+    mittenteId: string,
+    aulaId: string,
+    destinatarioId: string,
+  ): Promise<InvitoResponse> {
+    // Lo stesso permesso dell'invito per indirizzo: invitare in un'aula è un
+    // gesto di chi la modera, comunque si nomini l'invitato.
+    await this.esigiModeratore(mittenteId, aulaId);
+
+    const giaInsieme = await this.giaInsieme(mittenteId, destinatarioId);
+    if (!(await this.profilo.puoContattare(mittenteId, destinatarioId, giaInsieme))) {
+      throw new AppException(
+        AulaStudioErrorCode.NON_CONTATTABILE,
+        'AULA_NON_CONTATTABILE',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const indirizzo = await this.identita.indirizzoDi(destinatarioId);
+    if (!indirizzo) {
+      throw new AppException(
+        AulaStudioErrorCode.NON_CONTATTABILE,
+        'AULA_NON_CONTATTABILE',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    return this.invita(mittenteId, aulaId, indirizzo);
+  }
+
+  /**
+   * «Sono già insieme?», nelle due metà che i due contesti sanno rispondere.
+   *
+   * Le aule le conosce questo modulo; i gruppi li conosce il Gruppo, e la
+   * risposta attraversa il confine come un booleano — quale spazio
+   * condividano non entra qui, perché non servirebbe a decidere e sarebbe
+   * un'informazione in più da custodire.
+   */
+  private async giaInsieme(unoId: string, altroId: string): Promise<boolean> {
+    const [aulaComune, gruppoComune] = await Promise.all([
+      this.prisma.partecipante.findFirst({
+        where: { utenteId: unoId, aula: { partecipanti: { some: { utenteId: altroId } } } },
+        select: { aulaStudioId: true },
+      }),
+      this.appartenenza.condividonoUnGruppo(unoId, altroId),
+    ]);
+    return Boolean(aulaComune) || gruppoComune;
+  }
 
   async invita(utenteId: string, aulaId: string, destinatario: string): Promise<InvitoResponse> {
     const aula = await this.esigiModeratore(utenteId, aulaId);
@@ -1023,7 +1116,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
    * e una copia dei propri dati non è una copia della stanza.
    */
   async datiPersonaliDi(utenteId: string) {
-    const [partecipazioni, materiali, messaggi] = await Promise.all([
+    const [partecipazioni, materiali, salvati, messaggi] = await Promise.all([
       this.prisma.partecipante.findMany({
         where: { utenteId },
         orderBy: { ammessoIl: 'asc' },
@@ -1032,6 +1125,14 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       this.prisma.allegatoDiAulaStudio.findMany({
         where: { caricatoDa: utenteId },
         orderBy: { creatoIl: 'asc' },
+      }),
+      // La propria raccolta: **i nomi dei file che si tenevano da parte**, non
+      // i file — quelli sono di chi li ha caricati, e una copia dei propri
+      // dati non è una copia della stanza.
+      this.prisma.materialeSalvato.findMany({
+        where: { utenteId },
+        orderBy: { salvatoIl: 'asc' },
+        include: { materiale: { select: { nome: true } } },
       }),
       this.prisma.messaggioDiChat.findMany({
         where: { autoreId: utenteId },
@@ -1053,6 +1154,10 @@ export class AulaStudioService implements ConsumatoreDiFatti {
         caricatoIl: materiale.creatoIl.toISOString(),
         url: this.archivio.urlDiLettura(materiale.chiave),
       })),
+      materialiSalvati: salvati.map((riga) => ({
+        nome: riga.materiale.nome,
+        salvatoIl: riga.salvatoIl.toISOString(),
+      })),
       messaggi: messaggi.map((messaggio) => ({
         id: messaggio.id,
         aulaStudioId: messaggio.aulaStudioId,
@@ -1060,6 +1165,121 @@ export class AulaStudioService implements ConsumatoreDiFatti {
         inviatoIl: messaggio.inviatoIl.toISOString(),
       })),
     };
+  }
+
+  // --- La raccolta personale (materiali salvati) -----------------------------
+
+  /**
+   * Mette da parte un materiale.
+   *
+   * **Si salva ciò che si vede**, come si segnala ciò che si vede: la
+   * partecipazione all'aula si verifica **adesso** (AL4), non da una copia
+   * presa all'ingresso. Un materiale di un'aula in cui non si è più dentro non
+   * si può mettere da parte, e uno già messo da parte smette di comparire —
+   * senza che la riga sparisca, perché rientrando torna.
+   *
+   * **Salvare due volte non è un errore**: la chiave primaria composta lo
+   * rende un'operazione senza effetto, come aggiungere due volte lo stesso
+   * membro a un gruppo (G3).
+   */
+  async salvaMateriale(utenteId: string, materialeId: string): Promise<void> {
+    const materiale = await this.materialeVisibilePer(utenteId, materialeId);
+
+    await this.prisma.materialeSalvato.upsert({
+      where: { utenteId_materialeId: { utenteId, materialeId: materiale.id } },
+      create: { utenteId, materialeId: materiale.id },
+      update: {},
+    });
+  }
+
+  /** Toglie dalla raccolta. Idempotente: senza riga non c'è niente da fare. */
+  async dimenticaMateriale(utenteId: string, materialeId: string): Promise<void> {
+    await this.prisma.materialeSalvato.deleteMany({ where: { utenteId, materialeId } });
+  }
+
+  /**
+   * La raccolta di chi legge, dalla più recente.
+   *
+   * **La visibilità si risolve in lettura**, come per la bacheca: si tengono
+   * solo i materiali delle aule di cui si fa ancora parte. Chi esce da
+   * un'aula smette di vederne i materiali salvati; se rientra li ritrova, e
+   * questo è il motivo per cui uscire non cancella le righe.
+   */
+  async elencaMaterialiSalvati(
+    utenteId: string,
+    pagina: { page: number; limit: number },
+  ): Promise<PaginatedResult<MaterialeSalvatoResponse>> {
+    const aule = (
+      await this.prisma.partecipante.findMany({ where: { utenteId }, select: { aulaStudioId: true } })
+    ).map((p) => p.aulaStudioId);
+
+    const dove = { utenteId, materiale: { aulaStudioId: { in: aule } } };
+
+    const [totale, righe] = await Promise.all([
+      this.prisma.materialeSalvato.count({ where: dove }),
+      this.prisma.materialeSalvato.findMany({
+        where: dove,
+        orderBy: { salvatoIl: 'desc' },
+        skip: (pagina.page - 1) * pagina.limit,
+        take: pagina.limit,
+        include: { materiale: true },
+      }),
+    ]);
+
+    // Il materiale riferisce la propria aula per identificativo e non per
+    // relazione: i titoli si risolvono in lotto, come i nomi degli atenei.
+    const titoli = new Map(
+      (
+        await this.prisma.aulaStudio.findMany({
+          where: { id: { in: [...new Set(righe.map((riga) => riga.materiale.aulaStudioId))] } },
+          select: { id: true, titolo: true },
+        })
+      ).map((aula) => [aula.id, aula.titolo]),
+    );
+
+    return {
+      data: righe.map((riga) => ({
+        materiale: this.materialePerIlClient(riga.materiale, true),
+        aulaStudioId: riga.materiale.aulaStudioId,
+        titoloAula: titoli.get(riga.materiale.aulaStudioId) ?? '',
+        salvatoIl: riga.salvatoIl.toISOString(),
+      })),
+      meta: {
+        total: totale,
+        page: pagina.page,
+        limit: pagina.limit,
+        totalPages: Math.max(1, Math.ceil(totale / pagina.limit)),
+      },
+    };
+  }
+
+  /**
+   * Il materiale, se chi legge è dentro l'aula che lo contiene.
+   *
+   * Materiale inesistente e materiale di un'aula in cui non si è dentro danno
+   * la **stessa** risposta, come per un post non visibile: dire «esiste ma non
+   * puoi» racconta comunque che esiste.
+   */
+  private async materialeVisibilePer(utenteId: string, materialeId: string) {
+    const materiale = await this.prisma.allegatoDiAulaStudio.findUnique({
+      where: { id: materialeId },
+    });
+    const dentro =
+      materiale &&
+      (await this.prisma.partecipante.findUnique({
+        where: {
+          aulaStudioId_utenteId: { aulaStudioId: materiale.aulaStudioId, utenteId },
+        },
+      }));
+
+    if (!materiale || !dentro) {
+      throw new AppException(
+        AulaStudioErrorCode.ALLEGATO_NOT_FOUND,
+        'AULA_ALLEGATO_NOT_FOUND',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return materiale;
   }
 
   // --- Interni --------------------------------------------------------------
@@ -1265,7 +1485,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     argomentoId: string | null;
     caricatoDa: string;
     creatoIl: Date;
-  }): AllegatoDiAulaStudioResponse {
+  }, salvato?: boolean): AllegatoDiAulaStudioResponse {
     return {
       id: materiale.id,
       nome: materiale.nome,
@@ -1275,6 +1495,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       argomentoId: materiale.argomentoId,
       caricatoDa: materiale.caricatoDa,
       creatoIl: materiale.creatoIl.toISOString(),
+      ...(salvato === undefined ? {} : { salvato }),
     };
   }
 
@@ -1292,6 +1513,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
         nome: autore?.nome ?? null,
         cognome: autore?.cognome ?? null,
         universita: autore?.universita?.nome ?? null,
+        foto: autore?.foto ?? null,
         ...(autore ? {} : { rimosso: true }),
       },
       mio: messaggio.autoreId === lettoreId,

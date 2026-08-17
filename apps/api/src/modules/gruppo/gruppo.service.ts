@@ -429,6 +429,26 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
     return Boolean(membro);
   }
 
+  /**
+   * Se due persone fanno parte di uno stesso gruppo, adesso.
+   *
+   * Serve a chi deve decidere un contatto: «Privato» significa «solo chi è già
+   * nei tuoi gruppi o nelle tue aule», e questa è la metà della domanda che il
+   * Gruppo sa rispondere. Torna **un booleano**, non l'elenco dei gruppi
+   * comuni: quale spazio si condivida è un'informazione che chi chiede non
+   * deve ricevere per decidere.
+   */
+  async condividonoUnGruppo(unoId: string, altroId: string): Promise<boolean> {
+    const comune = await this.prisma.membro.findFirst({
+      where: {
+        utenteId: unoId,
+        gruppo: { membri: { some: { utenteId: altroId } } },
+      },
+      select: { gruppoId: true },
+    });
+    return Boolean(comune);
+  }
+
   /** Il consumo del proprio fatto: l'invito accettato diventa un membro. */
   async elabora(tipo: string, payload: unknown): Promise<void> {
     if (tipo !== INVITO_AL_GRUPPO_ACCETTATO) return;

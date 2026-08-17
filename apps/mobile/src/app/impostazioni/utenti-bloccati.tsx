@@ -32,7 +32,7 @@ export default function SchermataUtentiBloccati() {
   return (
     <>
       <Intestazione conIndietro titolo={t('app.impostazioni.bloccati.titolo')} />
-      <Screen scorrevole>
+      <Screen scorrevole conAreaSicura={false}>
         <Card>
           <Text variante="corpoTenue">{t('app.impostazioni.bloccati.testo')}</Text>
         </Card>

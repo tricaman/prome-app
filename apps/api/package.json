@@ -12,7 +12,7 @@
     "build": "pnpm --filter @prome/api^... build && prisma generate && nest build",
     "start:prod": "node dist/main.js",
     "typecheck": "tsc --noEmit",
-    "openapi:emit": "nest build && node dist/scripts/genera-openapi.js",
+    "openapi:emit": "nest build -p tsconfig.openapi.json && node dist-openapi/scripts/genera-openapi.js",
     "catalogo:semina": "nest build && node dist/scripts/semina-catalogo.js",
     "email:anteprima": "nest build && node dist/scripts/anteprima-email.js",
     "test": "jest",

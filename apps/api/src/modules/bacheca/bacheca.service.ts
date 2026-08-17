@@ -199,20 +199,9 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
   async elenca(
     lettoreId: string,
     pagina: { page: number; limit: number },
+    filtri: { soloMiei?: boolean } = {},
   ): Promise<PaginatedResult<PostResponse>> {
-    const lettore = await this.profilo.perUtente(lettoreId);
-    const autoriVisibili = await this.profilo.autoriVisibiliA(lettore);
-
-    // I contenuti anonimizzati (autore rimosso con la cancellazione account)
-    // restano visibili a ogni iscritto: non c'è più un proprietario, quindi
-    // non c'è più una decisione di privacy da interrogare. Mai al web: la
-    // guardia della facciata resta.
-    const dove = {
-      OR: [
-        { autoreId: { in: autoriVisibili } },
-        { autoreId: { startsWith: PREFISSO_AUTORE_ANONIMO } },
-      ],
-    };
+    const dove = filtri.soloMiei ? { autoreId: lettoreId } : await this.doveVisibiliA(lettoreId);
     const [totale, righe] = await Promise.all([
       this.prisma.post.count({ where: dove }),
       this.prisma.post.findMany({
@@ -225,9 +214,12 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
     ]);
 
     const autori = await this.profilo.perUtenti([...new Set(righe.map((r) => r.autoreId))]);
+    const commenti = await this.contaCommentiDi(righe.map((riga) => riga.id));
 
     return {
-      data: righe.map((riga) => this.perIlClient(riga, autori.get(riga.autoreId), lettoreId)),
+      data: righe.map((riga) =>
+        this.perIlClient(riga, autori.get(riga.autoreId), lettoreId, commenti.get(riga.id) ?? 0),
+      ),
       meta: {
         total: totale,
         page: pagina.page,
@@ -306,7 +298,8 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
     });
 
     const autori = await this.profilo.perUtenti([post.autoreId]);
-    return this.perIlClient(post, autori.get(post.autoreId), lettoreId);
+    const commenti = await this.prisma.commento.count({ where: { postId: post.id } });
+    return this.perIlClient(post, autori.get(post.autoreId), lettoreId, commenti);
   }
 
   /**
@@ -373,7 +366,8 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
       include: { allegati: true },
     });
 
-    return this.perIlClient(aggiornato, await this.profilo.perUtente(utenteId), utenteId);
+    const commenti = await this.prisma.commento.count({ where: { postId: aggiornato.id } });
+    return this.perIlClient(aggiornato, await this.profilo.perUtente(utenteId), utenteId, commenti);
   }
 
   /**
@@ -664,6 +658,7 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
         nome: autore?.nome ?? null,
         cognome: autore?.cognome ?? null,
         universita: autore?.universita?.nome ?? null,
+        foto: autore?.foto ?? null,
         // Senza profilo dietro: account cancellato (contenuto anonimizzato)
         // o in corso di cancellazione. Il client mostra «Utente rimosso».
         ...(autore ? {} : { rimosso: true }),
@@ -672,6 +667,51 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
       // copie della stessa regola, e quella del client sarebbe aggirabile.
       puoEliminare: commento.autoreId === lettoreId || autoreDelPost === lettoreId,
     };
+  }
+
+  /**
+   * Di chi si vedono i post, adesso.
+   *
+   * **I propri non passano di qui** ed è una scelta, non una scorciatoia: la
+   * visibilità dice chi può vedere i contenuti di qualcun altro, e le proprie
+   * Impostazioni non sono un modo di nascondersi le proprie cose. Con
+   * `PRIVATO` la regola escluderebbe l'autore da sé stesso, e «I tuoi post»
+   * sarebbe una schermata vuota per chi ha scelto di stare chiuso.
+   */
+  private async doveVisibiliA(lettoreId: string) {
+    const lettore = await this.profilo.perUtente(lettoreId);
+    const autoriVisibili = await this.profilo.autoriVisibiliA(lettore);
+
+    // I contenuti anonimizzati (autore rimosso con la cancellazione account)
+    // restano visibili a ogni iscritto: non c'è più un proprietario, quindi
+    // non c'è più una decisione di privacy da interrogare. Mai al web: la
+    // guardia della facciata resta.
+    return {
+      OR: [
+        { autoreId: { in: autoriVisibili } },
+        { autoreId: { startsWith: PREFISSO_AUTORE_ANONIMO } },
+      ],
+    };
+  }
+
+  /**
+   * Quanti commenti hanno questi post, in una lettura sola.
+   *
+   * Il Commento non ha chiave esterna verso il Post (C3): non esiste un
+   * `_count` da chiedere insieme alle righe, e contarli uno per uno sarebbe
+   * una query per scheda dello scorrimento. Il raggruppamento appoggia
+   * sull'indice `(postId, creatoIl)` che c'è già.
+   */
+  private async contaCommentiDi(postIds: string[]): Promise<Map<string, number>> {
+    if (!postIds.length) return new Map();
+
+    const righe = await this.prisma.commento.groupBy({
+      by: ['postId'],
+      where: { postId: { in: postIds } },
+      _count: { _all: true },
+    });
+
+    return new Map(righe.map((riga) => [riga.postId, riga._count._all]));
   }
 
   private perIlClient(
@@ -684,6 +724,7 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
     },
     autore?: ProfiloResponse,
     lettoreId?: string,
+    commenti = 0,
   ): PostResponse {
     return {
       id: post.id,
@@ -694,11 +735,13 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
         nome: autore?.nome ?? null,
         cognome: autore?.cognome ?? null,
         universita: autore?.universita?.nome ?? null,
+        foto: autore?.foto ?? null,
         // Senza profilo dietro: account cancellato (contenuto anonimizzato)
         // o in corso di cancellazione. Il client mostra «Utente rimosso».
         ...(autore ? {} : { rimosso: true }),
       },
       puoModificare: post.autoreId === lettoreId,
+      commenti,
       allegati: post.allegati.map((a) => ({
         id: a.id,
         nome: a.nome,

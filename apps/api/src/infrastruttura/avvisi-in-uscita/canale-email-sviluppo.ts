@@ -4,6 +4,7 @@ import type {
   InvitoAlGruppoDaRecapitare,
   InvitoDaRecapitare,
   NotificaDiCommentoDaRecapitare,
+  RichiestaDiSupportoDaRecapitare,
   SegnalazioneDaRecapitare,
 } from './canale-email';
 
@@ -24,6 +25,9 @@ export class CanaleEmailSviluppo implements CanaleEmail {
 
   /** Ultimo codice per destinatario: lo leggono i test, non il codice di produzione. */
   private readonly ultimiCodici = new Map<string, string>();
+
+  /** Le richieste di supporto che sarebbero partite: le leggono i test. */
+  private readonly richieste: RichiestaDiSupportoDaRecapitare[] = [];
 
   /** Ultimo invito per destinatario, con lo stesso scopo. */
   private readonly ultimiInviti = new Map<string, InvitoDaRecapitare>();
@@ -95,6 +99,25 @@ export class CanaleEmailSviluppo implements CanaleEmail {
       `[SVILUPPO] Segnalazione ${segnalazione.tipo}/${segnalazione.motivo} su ${segnalazione.soggettoId} per ${destinatario} (lingua ${lingua}) — nessuna email inviata.`,
     );
     return Promise.resolve();
+  }
+
+  inviaRichiestaDiSupporto(
+    destinatario: string,
+    richiesta: RichiestaDiSupportoDaRecapitare,
+    lingua: string,
+  ): Promise<void> {
+    this.richieste.push(richiesta);
+    // Nel log niente testo: lo scrive una persona, e i log non portano mai
+    // ciò che scrive una persona.
+    this.logger.warn(
+      `[SVILUPPO] Richiesta di supporto ${richiesta.categoria} da ${richiesta.utenteId} per ${destinatario} (lingua ${lingua}) — nessuna email inviata.`,
+    );
+    return Promise.resolve();
+  }
+
+  /** Solo per i test: le richieste di supporto che sarebbero partite. */
+  richiesteDiSupportoDi(utenteId: string): RichiestaDiSupportoDaRecapitare[] {
+    return this.richieste.filter((r) => r.utenteId === utenteId);
   }
 
   /** Solo per i test: le segnalazioni che sarebbero partite per quel soggetto. */

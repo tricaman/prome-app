@@ -150,7 +150,7 @@ export default function SchermataComponi() {
 
       <Screen scorrevole>
         <View style={{ flexDirection: 'row', gap: tema.spaziatura[3] }}>
-          <Avatar nome={nome || '?'} dimensione={40} />
+          <Avatar nome={nome || '?'} foto={profilo.data?.data.foto} dimensione={40} />
           <View style={{ flex: 1 }}>
             <Text variante="etichetta">{nome}</Text>
             <Text variante="didascalia">{profilo.data?.data.corso?.nome ?? ''}</Text>

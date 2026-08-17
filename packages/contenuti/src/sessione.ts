@@ -17,5 +17,15 @@ export interface PostDiBacheca {
   autore: string;
   contesto: string;
   corpo: string;
+  /** La foto dell'autore, o assente: allora la scheda mostra le iniziali. */
+  foto?: string | null;
   allegato?: { nome: string; dettaglio: string };
+  /**
+   * Quanti commenti ha il post.
+   *
+   * Il numero accanto al pulsante è la differenza fra un invito e una porta:
+   * senza, non si sa se sotto c'è una conversazione o il silenzio. Lo conta il
+   * server e arriva con l'elenco.
+   */
+  commenti: number;
 }

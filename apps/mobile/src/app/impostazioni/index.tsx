@@ -1,23 +1,22 @@
+import { useState } from 'react';
 import { Linking, View } from 'react-native';
 import { router } from 'expo-router';
 import { useEsci } from '@prome/app-core';
 import { useLeggiPreferenzeNotifiche, useLeggiMioProfilo } from '@prome/api-client';
 import { paginaDelSito, rotte } from '@/content';
-import { useTema } from '@/theme';
+import { useSceltaTema, useTema, SCELTE_TEMA } from '@/theme';
 import { useT } from '@/hooks';
 import { useI18n } from '@/i18n/i18n-provider';
-import {
-  SEGNAPOSTO_DISPOSITIVI,
-  SEGNAPOSTO_EMAIL,
-  SEGNAPOSTO_TEMA,
-} from '@/lib/segnaposto';
+import { SEGNAPOSTO_DISPOSITIVI, SEGNAPOSTO_EMAIL } from '@/lib/segnaposto';
 import { useScaricaDati } from '@/components/app/scarica-dati';
 import {
   Button,
   Elenco,
+  Foglio,
   Icona,
   Intestazione,
   RigaElenco,
+  SceltaRadio,
   Screen,
   Text,
   TitoloSezione,
@@ -25,6 +24,19 @@ import {
 import { VersioneApp } from '@/components/app/versione-app';
 
 const CHIAVI = { PRIVATO: 'privato', ATENEO: 'ateneo', PUBBLICO: 'pubblico' } as const;
+
+/** Le tre risposte, con la chiave che le nomina in entrambe le lingue. */
+const ETICHETTA_TEMA = {
+  sistema: 'app.impostazioni.temaSistema',
+  chiaro: 'app.impostazioni.temaChiaro',
+  scuro: 'app.impostazioni.temaScuro',
+} as const;
+
+const DESCRIZIONE_TEMA = {
+  sistema: 'app.impostazioni.temaSistemaSub',
+  chiaro: 'app.impostazioni.temaChiaroSub',
+  scuro: 'app.impostazioni.temaScuroSub',
+} as const;
 
 /**
  * Impostazioni: un indice, non un pannello.
@@ -49,10 +61,9 @@ const CHIAVI = { PRIVATO: 'privato', ATENEO: 'ateneo', PUBBLICO: 'pubblico' } as
  * altro codice, e una conferma su un gesto reversibile insegna solo a premere
  * due volte senza leggere.
  *
- * SEGNAPOSTO: email e password, dispositivi collegati, aspetto. Il profilo non
- * espone l'email di proposito e l'accesso è a codice, quindi non c'è nemmeno
- * una password; i dispositivi si registrano ma non esiste un `GET` che li
- * elenchi; il tema sul telefono segue il sistema e non è una scelta.
+ * SEGNAPOSTO: email e password, dispositivi collegati. Il profilo non espone
+ * l'email di proposito e l'accesso è a codice, quindi non c'è nemmeno una
+ * password; i dispositivi si registrano ma non esiste un `GET` che li elenchi.
  */
 export default function SchermataImpostazioni() {
   const tema = useTema();
@@ -62,6 +73,8 @@ export default function SchermataImpostazioni() {
   const profilo = useLeggiMioProfilo();
   const preferenze = useLeggiPreferenzeNotifiche();
   const scarica = useScaricaDati();
+  const { scelta, imposta } = useSceltaTema();
+  const [sceltaAperta, setSceltaAperta] = useState(false);
 
   const visibilita = profilo.data?.data.impostazioniPrivacy.visibilita;
   const avvisiAccesi = preferenze.data
@@ -85,7 +98,7 @@ export default function SchermataImpostazioni() {
     <>
       <Intestazione conIndietro titolo={t('app.impostazioni.titolo')} />
 
-      <Screen scorrevole>
+      <Screen scorrevole conAreaSicura={false}>
         <TitoloSezione>{t('app.impostazioni.gruppi.account')}</TitoloSezione>
         <Elenco>
           <RigaElenco
@@ -134,12 +147,15 @@ export default function SchermataImpostazioni() {
             valore={riassuntoAvvisi}
             onPress={() => router.push(rotte.impostazioniNotifiche())}
           />
+          {/* L'aspetto è l'unica impostazione che **non** viaggia al server:
+              è una scelta di questo telefono, e sincronizzarla vorrebbe dire
+              scurire il portatile perché si è scurito il cellulare. */}
           <RigaElenco
-            icona="luna"
+            icona={scelta === 'chiaro' ? 'sole' : 'luna'}
             etichetta={t('app.impostazioni.aspetto')}
             sottotitolo={t('app.impostazioni.voci.aspettoSub')}
-            valore={t('app.impostazioni.temaSistema')}
-            presto={SEGNAPOSTO_TEMA}
+            valore={t(ETICHETTA_TEMA[scelta])}
+            onPress={() => setSceltaAperta(true)}
           />
         </Elenco>
 
@@ -205,6 +221,28 @@ export default function SchermataImpostazioni() {
           <VersioneApp />
         </View>
       </Screen>
+
+      <Foglio
+        aperto={sceltaAperta}
+        titolo={t('app.impostazioni.aspetto')}
+        onChiudi={() => setSceltaAperta(false)}
+      >
+        <SceltaRadio
+          etichetta={t('app.impostazioni.aspetto')}
+          valore={scelta}
+          conPallino
+          opzioni={SCELTE_TEMA.map((valore) => ({
+            valore,
+            etichetta: t(ETICHETTA_TEMA[valore]),
+            descrizione: t(DESCRIZIONE_TEMA[valore]),
+          }))}
+          // Il foglio **resta aperto**: il tema cambia sotto le dita, e si
+          // sceglie guardando. Chiudendosi al primo tocco costringerebbe a
+          // riaprirlo per provare l'altro, che è esattamente ciò che si vuole
+          // fare davanti a una scelta d'aspetto.
+          onScegli={imposta}
+        />
+      </Foglio>
     </>
   );
 }

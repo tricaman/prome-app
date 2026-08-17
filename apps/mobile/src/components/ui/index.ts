@@ -9,6 +9,7 @@ export { Avatar, AvatarGroup, type AvatarProps } from './avatar';
 export { Switch, type SwitchProps } from './switch';
 export { Segmented, type SegmentedProps, type OpzioneSegmento } from './segmented';
 export { Intestazione, AzioneTonda, type IntestazioneProps } from './intestazione';
+export { PulsanteFluttuante, type PulsanteFluttuanteProps } from './pulsante-fluttuante';
 export { Elenco, RigaElenco, TitoloSezione, type RigaElencoProps } from './elenco';
 export { SceltaRadio, type SceltaRadioProps, type OpzioneRadio } from './scelta-radio';
 export { Foglio, type FoglioProps } from './foglio';

@@ -1,13 +1,21 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import type {
-  AggiornaImpostazioniPrivacyRequest,
-  BloccatoResponse,
-  CompletaProfiloRequest,
-  PaginatedResult,
-  ProfiloResponse,
+import { randomUUID } from 'node:crypto';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  DIMENSIONE_MASSIMA_FOTO_PROFILO,
+  type AggiornaImpostazioniPrivacyRequest,
+  type BloccatoResponse,
+  type CompletaProfiloRequest,
+  type PaginatedResult,
+  type PreautorizzaAllegatoResponse,
+  type ProfiloResponse,
 } from '@prome/contracts';
 import { PrismaService } from '../../database/prisma.service';
 import { AppException } from '../../common/exceptions';
+import {
+  ARCHIVIO_DI_FILE,
+  chiaveFotoProfilo,
+  type ArchivioDiFile,
+} from '../../infrastruttura/archivio-file/archivio-file';
 import { ProfiloErrorCode } from './constants/error-codes';
 import { perIlClientCorso, perIlClientUniversita } from './catalogo/catalogo.service';
 import { emettiProvaOnboarding, type ProvaOnboardingCompletato } from './prova-onboarding';
@@ -32,7 +40,10 @@ const CON_CORSO = {
  */
 @Injectable()
 export class ProfiloService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(ARCHIVIO_DI_FILE) private readonly archivio: ArchivioDiFile,
+  ) {}
 
   /**
    * Il profilo di chi ha appena fatto il primo ingresso, creandolo se manca.
@@ -423,13 +434,228 @@ export class ProfiloService {
     });
   }
 
+  // --- Chi può contattare chi (IP «contattabilita») --------------------------
+
+  /**
+   * Chi di questi si lascia contattare da chi chiede, adesso.
+   *
+   * **La regola vive qui una volta sola** perché è una decisione di privacy, e
+   * le decisioni di privacy le possiede Profilo. Chi la applica — oggi l'Aula
+   * studio, domani chiunque abbia un gesto rivolto a una persona — chiede, non
+   * riscrive.
+   *
+   * `giaInsieme` **lo dichiara chi chiama**, e non è una scorciatoia: «Privato»
+   * significa «solo chi è già nei tuoi gruppi o nelle tue aule», e Profilo non
+   * conosce né gli uni né le altre — chiederglielo sarebbe la dipendenza che la
+   * Context Map vieta. Chi possiede gli spazi sa rispondere; Profilo sa cosa
+   * farne.
+   *
+   * I tre livelli, e sopra a tutti il blocco:
+   *
+   * - **bloccati in una delle due direzioni** → mai, qualunque livello. È la
+   *   stessa regola della bacheca, con lo stesso segno.
+   * - **Pubblico** → chiunque sia iscritto a Prome.
+   * - **Ateneo** → chi studia nello stesso ateneo, più chi è già insieme:
+   *   restringere anche quest'ultimo caso vorrebbe dire non poter più scrivere
+   *   a una persona con cui si condivide un'aula da mesi.
+   * - **Privato** → solo chi è già insieme.
+   */
+  async contattabiliDa(
+    mittenteId: string,
+    destinatari: Array<{ utenteId: string; giaInsieme: boolean }>,
+  ): Promise<Map<string, boolean>> {
+    const esito = new Map<string, boolean>();
+    if (!destinatari.length) return esito;
+
+    const [mittente, profili, bloccati] = await Promise.all([
+      this.perUtente(mittenteId).catch(() => null),
+      this.prisma.profilo.findMany({
+        where: { utenteId: { in: destinatari.map((d) => d.utenteId) } },
+        include: { impostazioniPrivacy: true, corso: { select: { universitaId: true } } },
+      }),
+      this.coppieBloccateCon(mittenteId),
+    ]);
+
+    const perUtente = new Map(profili.map((profilo) => [profilo.utenteId, profilo]));
+    const bloccatiSet = new Set(bloccati);
+
+    for (const destinatario of destinatari) {
+      const profilo = perUtente.get(destinatario.utenteId);
+      // Chi non ha un profilo — o è in cancellazione — non si contatta: non
+      // c'è nessuno dall'altra parte.
+      if (!profilo || profilo.inCancellazioneDal || bloccatiSet.has(destinatario.utenteId)) {
+        esito.set(destinatario.utenteId, false);
+        continue;
+      }
+      // Sé stessi non è un caso: nessun gesto di contatto è rivolto a sé.
+      if (destinatario.utenteId === mittenteId) {
+        esito.set(destinatario.utenteId, false);
+        continue;
+      }
+
+      const livello = profilo.impostazioniPrivacy?.contattabilita ?? 'PRIVATO';
+      const stessoAteneo = Boolean(
+        mittente?.universita?.id && profilo.corso?.universitaId === mittente.universita.id,
+      );
+
+      esito.set(
+        destinatario.utenteId,
+        livello === 'PUBBLICO' ||
+          (livello === 'ATENEO' && (stessoAteneo || destinatario.giaInsieme)) ||
+          (livello === 'PRIVATO' && destinatario.giaInsieme),
+      );
+    }
+
+    return esito;
+  }
+
+  /** Lo stesso giudizio per una persona sola. */
+  async puoContattare(
+    mittenteId: string,
+    destinatarioId: string,
+    giaInsieme: boolean,
+  ): Promise<boolean> {
+    const esito = await this.contattabiliDa(mittenteId, [
+      { utenteId: destinatarioId, giaInsieme },
+    ]);
+    return esito.get(destinatarioId) ?? false;
+  }
+
+  // --- La foto del profilo --------------------------------------------------
+
+  /**
+   * Autorizza il caricamento di una foto e prenota la sua chiave.
+   *
+   * Stessi tre tempi degli allegati — si dichiara, si caricano i byte
+   * **diritti all'archivio**, si conferma — perché è lo stesso problema: far
+   * transitare l'immagine dall'API significherebbe pagarne la banda due volte.
+   *
+   * La chiave prenotata sta **sulla riga del profilo** e non in una tabella di
+   * prenotazioni: la foto è una sola, quindi la seconda pre-autorizzazione
+   * sovrascrive la prima e non resta niente da ripulire. È anche ciò che rende
+   * verificabile la conferma — si accetta solo la chiave emessa per questa
+   * persona.
+   */
+  async preautorizzaFoto(
+    utenteId: string,
+    dati: { nome: string; dimensione: number },
+  ): Promise<PreautorizzaAllegatoResponse & { chiave: string }> {
+    // Il peso si verifica **prima** di spendere banda, come per gli allegati:
+    // cinque megabyte caricati per intero e poi rifiutati sono cinque
+    // megabyte di dati mobili di qualcun altro.
+    if (dati.dimensione <= 0 || dati.dimensione > DIMENSIONE_MASSIMA_FOTO_PROFILO) {
+      throw new AppException(
+        ProfiloErrorCode.FOTO_NON_VALIDA,
+        'FOTO_NON_VALIDA',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        { massimo: DIMENSIONE_MASSIMA_FOTO_PROFILO },
+      );
+    }
+
+    const chiave = chiaveFotoProfilo(randomUUID(), dati.nome);
+    await this.prisma.profilo.update({
+      where: { utenteId },
+      data: { fotoChiaveInAttesa: chiave },
+    });
+
+    const preautorizzazione = await this.archivio.preautorizzaCaricamento(chiave, 'IMMAGINE');
+    return { chiave, ...preautorizzazione, scadeIl: preautorizzazione.scadeIl.toISOString() };
+  }
+
+  /**
+   * Adotta la foto caricata.
+   *
+   * Due verifiche, e nessuna è di forma: la chiave dev'essere **quella
+   * prenotata da questa persona** (altrimenti si adotterebbe il file di
+   * chiunque, indovinando un indirizzo) e i byte devono essere davvero
+   * arrivati (altrimenti il profilo mostrerebbe un'immagine rotta, che è
+   * peggio delle iniziali).
+   *
+   * La foto precedente si toglie **dopo** che la nuova è al suo posto: se
+   * l'archivio non risponde resta un file orfano, e un file orfano è meno
+   * grave di un profilo senza ritratto per un errore di rete.
+   */
+  async confermaFoto(utenteId: string, chiave: string): Promise<ProfiloResponse> {
+    const profilo = await this.prisma.profilo.findUnique({ where: { utenteId } });
+    if (!profilo) {
+      throw new AppException(ProfiloErrorCode.NOT_FOUND, 'PROFILO_NOT_FOUND', HttpStatus.NOT_FOUND);
+    }
+    if (!profilo.fotoChiaveInAttesa || profilo.fotoChiaveInAttesa !== chiave) {
+      throw new AppException(
+        ProfiloErrorCode.FOTO_CHIAVE_SCONOSCIUTA,
+        'FOTO_CHIAVE_SCONOSCIUTA',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    if (!(await this.archivio.eStatoCaricato(chiave))) {
+      throw new AppException(
+        ProfiloErrorCode.FOTO_NON_CARICATA,
+        'FOTO_NON_CARICATA',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    const precedente = profilo.fotoChiave;
+    const aggiornato = await this.prisma.profilo.update({
+      where: { utenteId },
+      data: { fotoChiave: chiave, fotoChiaveInAttesa: null },
+      include: CON_CORSO,
+    });
+
+    if (precedente && precedente !== chiave) await this.togliDallArchivio(precedente);
+    return this.perIlClient(aggiornato);
+  }
+
+  /**
+   * Toglie la foto: si torna alle iniziali, che non sono uno stato incompleto.
+   *
+   * Idempotente: senza foto non c'è niente da fare, non un errore.
+   */
+  async rimuoviFoto(utenteId: string): Promise<ProfiloResponse> {
+    const profilo = await this.prisma.profilo.findUnique({ where: { utenteId } });
+    if (!profilo) {
+      throw new AppException(ProfiloErrorCode.NOT_FOUND, 'PROFILO_NOT_FOUND', HttpStatus.NOT_FOUND);
+    }
+
+    const aggiornato = await this.prisma.profilo.update({
+      where: { utenteId },
+      data: { fotoChiave: null, fotoChiaveInAttesa: null },
+      include: CON_CORSO,
+    });
+
+    if (profilo.fotoChiave) await this.togliDallArchivio(profilo.fotoChiave);
+    return this.perIlClient(aggiornato);
+  }
+
+  /** Un archivio che non risponde non deve far fallire ciò che è già scritto. */
+  private async togliDallArchivio(chiave: string): Promise<void> {
+    await this.archivio.rimuovi(chiave).catch(() => undefined);
+  }
+
   /**
    * Eliminazione dei dati personali (V5): Profilo e Impostazioni di privacy
    * cadono insieme — la cascata è nello schema. Idempotente: a zero righe non
    * c'è niente da fare, non un errore.
+   *
+   * **La foto se ne va con la riga**, e qui è l'opposto degli allegati dei
+   * post: quelli restano dietro un autore anonimizzato perché sono contenuti,
+   * questo è il ritratto di una persona e non c'è nessuno dietro cui possa
+   * restare. La chiave si legge **prima** di eliminare — dopo, non saprebbe
+   * dirla più nessuno.
    */
   async eliminaDatiDi(utenteId: string): Promise<void> {
+    const profilo = await this.prisma.profilo.findUnique({
+      where: { utenteId },
+      select: { fotoChiave: true, fotoChiaveInAttesa: true },
+    });
+
     await this.prisma.profilo.deleteMany({ where: { utenteId } });
+
+    // Anche quella in attesa: dei byte caricati e mai confermati restano
+    // comunque la foto di questa persona.
+    for (const chiave of [profilo?.fotoChiave, profilo?.fotoChiaveInAttesa]) {
+      if (chiave) await this.togliDallArchivio(chiave);
+    }
   }
 
   /**
@@ -472,6 +698,7 @@ export class ProfiloService {
     onboardingCompletato: boolean;
     impostazioniPrivacy: { contattabilita: string; visibilita: string };
     preferenzeDiNotifica: { commenti: boolean; inviti: boolean };
+    foto: string | null;
     dispositiviRegistrati: Array<{ piattaforma: string; registratoIl: Date }>;
     notifiche: Array<{ tipo: string; letta: boolean; ricevutaIl: Date }>;
     bloccati: Array<{ utenteId: string; bloccatoIl: Date }>;
@@ -495,6 +722,9 @@ export class ProfiloService {
       // Il corso per esteso, mai il suo identificativo: una copia dei propri
       // dati deve restare leggibile da sola, mesi dopo, senza il catalogo
       // accanto per tradurre un uuid.
+      // L'indirizzo della propria foto, firmato al momento dell'esportazione
+      // come per gli allegati: scaduto, si riscarica la copia.
+      foto: perIlClient.foto,
       universita: perIlClient.universita?.nome ?? null,
       corso: perIlClient.corso
         ? {
@@ -659,6 +889,7 @@ export class ProfiloService {
     } | null;
     onboardingCompletato: boolean;
     impostazioniPrivacy: { contattabilita: string; visibilita: string } | null;
+    fotoChiave?: string | null;
   }): ProfiloResponse {
     return {
       utenteId: profilo.utenteId,
@@ -676,6 +907,10 @@ export class ProfiloService {
         visibilita: (profilo.impostazioniPrivacy?.visibilita ??
           'PRIVATO') as ProfiloResponse['impostazioniPrivacy']['visibilita'],
       },
+      // L'indirizzo si costruisce a ogni lettura dalla chiave: conservarlo
+      // vorrebbe dire conservare un indirizzo che il giorno in cui l'archivio
+      // cambia fornitore punta al nulla.
+      foto: profilo.fotoChiave ? this.archivio.urlDiLettura(profilo.fotoChiave) : null,
     };
   }
 }

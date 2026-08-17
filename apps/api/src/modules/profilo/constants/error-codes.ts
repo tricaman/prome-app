@@ -33,6 +33,13 @@ export const ProfiloErrorCode = {
   /** Copre insieme «non esiste» e «non è tua»: distinguerli direbbe a chi
    *  indovina gli id che quella notifica esiste per qualcun altro. */
   NOTIFICA_NOT_FOUND: 'PR013',
+
+  /** La foto dichiarata non è un'immagine, o pesa troppo. */
+  FOTO_NON_VALIDA: 'PR014',
+  /** Si conferma solo la chiave che il server ha emesso per questa persona. */
+  FOTO_CHIAVE_SCONOSCIUTA: 'PR015',
+  /** La chiave è quella giusta, ma all'archivio i byte non sono mai arrivati. */
+  FOTO_NON_CARICATA: 'PR016',
 } as const;
 
 export type ProfiloErrorCode = (typeof ProfiloErrorCode)[keyof typeof ProfiloErrorCode];

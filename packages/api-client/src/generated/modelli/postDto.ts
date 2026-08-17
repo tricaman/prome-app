@@ -16,4 +16,6 @@ export interface PostDto {
   allegati: AllegatoDto[];
   /** Se chi legge ne è l'autore: lo decide il server */
   puoModificare: boolean;
+  /** Quanti commenti ha il post */
+  commenti: number;
 }

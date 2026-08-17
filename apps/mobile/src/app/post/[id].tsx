@@ -3,23 +3,34 @@ import { Linking, Pressable, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { pesoLeggibile, statusErrore } from '@prome/app-core';
 import {
-  commentaPost,
-  eliminaCommento,
-  getElencaCommentiQueryKey,
+  eliminaPost,
   getElencaPostQueryKey,
-  useElencaCommenti,
-  useLeggiMioProfilo,
+  getLeggiPostQueryKey,
+  modificaPost,
   useLeggiPost,
   type AllegatoDto,
-  type CommentoDto,
 } from '@prome/api-client';
-import { LUNGHEZZA_MASSIMA_COMMENTO } from '@prome/contracts';
+import { LUNGHEZZA_MASSIMA_POST } from '@prome/contracts';
 import { useTema } from '@/theme';
-import { useApiMutation, useT } from '@/hooks';
+import { useApiMutation, useConferma, useT } from '@/hooks';
 import { TarghettaAllegato } from '@/components/contenuti';
 import { SegnalaEBlocca } from '@/components/app/segnala-e-blocca';
+import { Commenti } from '@/components/app/commenti';
 import { ErrorState, QueryBoundary, RisorsaNonTrovata } from '@/components/feedback';
-import { Avatar, Button, Card, Icona, Input, Intestazione, Screen, Text } from '@/components/ui';
+import {
+  Avatar,
+  AzioneTonda,
+  Button,
+  Card,
+  Elenco,
+  Foglio,
+  Icona,
+  Input,
+  Intestazione,
+  RigaElenco,
+  Screen,
+  Text,
+} from '@/components/ui';
 
 /**
  * Dettaglio di un post, con la sua discussione.
@@ -35,10 +46,28 @@ export default function SchermataPost() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const post = useLeggiPost(id);
 
+  const [foglio, setFoglio] = useState<'chiuso' | 'opzioni' | 'modifica'>('chiuso');
+  const mio = post.data?.data.puoModificare ?? false;
+
   return (
     <>
-      <Intestazione conIndietro />
-      <Screen scorrevole>
+      <Intestazione
+        conIndietro
+        // I tre puntini solo sul proprio post: su quello altrui non c'è nulla
+        // dietro — segnalare e bloccare hanno il loro posto, in fondo al post,
+        // e nasconderli qui li renderebbe più difficili proprio a chi ne ha
+        // bisogno.
+        azioni={
+          mio ? (
+            <AzioneTonda
+              icona="altro"
+              etichetta={t('app.post.opzioni')}
+              onPress={() => setFoglio('opzioni')}
+            />
+          ) : undefined
+        }
+      />
+      <Screen scorrevole conAreaSicura={false}>
         <QueryBoundary query={post}
           errore={(errore, riprova) =>
             statusErrore(errore) === 404 ? (
@@ -63,7 +92,7 @@ export default function SchermataPost() {
                       gap: tema.spaziatura[3],
                     }}
                   >
-                    <Avatar nome={autore} dimensione={44} />
+                    <Avatar nome={autore} foto={data.autore.foto} dimensione={44} />
                     <View style={{ flex: 1 }}>
                       <Text variante="etichetta">{autore}</Text>
                       <Text variante="didascalia">
@@ -100,12 +129,125 @@ export default function SchermataPost() {
                   ) : null}
                 </Card>
 
-                <Commenti postId={id} />
+                <Card>
+                  <Text variante="sottotitolo">{t('app.post.titoloCommenti')}</Text>
+                  <View style={{ marginTop: tema.spaziatura[3] }}>
+                    <Commenti postId={id} />
+                  </View>
+                </Card>
               </View>
             );
           }}
         </QueryBoundary>
       </Screen>
+
+      <OpzioniPost
+        aperto={foglio}
+        onCambia={setFoglio}
+        postId={id}
+        testo={post.data?.data.testo ?? ''}
+      />
+    </>
+  );
+}
+
+/**
+ * Cosa si può fare con il **proprio** post.
+ *
+ * Le due azioni stavano sparse nella pagina, e l'eliminazione era un bottone
+ * rosso a portata di pollice accanto al testo: un gesto che non si annulla non
+ * si mette in mezzo a ciò che si legge. Stanno dietro i tre puntini, che è il
+ * posto in cui tutti le cercano.
+ *
+ * **L'eliminazione si conferma sulla riga stessa**: la prima pressione cambia
+ * la parola in «Conferma eliminazione», la seconda esegue. Un avviso di
+ * sistema, alla terza volta, è un «Sì» premuto senza leggere; una riga che
+ * cambia parola sotto il dito, no.
+ */
+function OpzioniPost({
+  aperto,
+  onCambia,
+  postId,
+  testo,
+}: {
+  aperto: 'chiuso' | 'opzioni' | 'modifica';
+  onCambia: (foglio: 'chiuso' | 'opzioni' | 'modifica') => void;
+  postId: string;
+  testo: string;
+}) {
+  const t = useT();
+  const [bozza, setBozza] = useState(testo);
+
+  const salva = useApiMutation({
+    mutationFn: () => modificaPost(postId, { testo: bozza.trim() }),
+    invalida: [getLeggiPostQueryKey(postId) as never, getElencaPostQueryKey() as never],
+    onSuccess: () => onCambia('chiuso'),
+  });
+
+  const elimina = useApiMutation({
+    mutationFn: () => eliminaPost(postId),
+    invalida: [getElencaPostQueryKey() as never],
+    // Il post non c'è più: restare qui mostrerebbe un errore per una cosa
+    // riuscita.
+    onSuccess: () => {
+      onCambia('chiuso');
+      router.back();
+    },
+  });
+
+  const conferma = useConferma(() => elimina.mutate(undefined));
+
+  return (
+    <>
+      <Foglio
+        aperto={aperto === 'opzioni'}
+        titolo={t('app.post.opzioni')}
+        onChiudi={() => {
+          conferma.annulla();
+          onCambia('chiuso');
+        }}
+      >
+        <Elenco>
+          <RigaElenco
+            icona="matita"
+            tinta="menta"
+            etichetta={t('app.post.modifica')}
+            onPress={() => {
+              setBozza(testo);
+              onCambia('modifica');
+            }}
+          />
+          <RigaElenco
+            icona="cestino"
+            etichetta={conferma.armata ? t('app.post.confermaEliminazione') : t('app.post.elimina')}
+            sottotitolo={conferma.armata ? t('app.post.eliminaAvviso') : undefined}
+            distruttiva
+            disabilitato={elimina.isPending}
+            onPress={conferma.premi}
+          />
+        </Elenco>
+      </Foglio>
+
+      <Foglio
+        aperto={aperto === 'modifica'}
+        titolo={t('app.post.modifica')}
+        onChiudi={() => onCambia('chiuso')}
+      >
+        <Input
+          etichetta={t('app.post.testo')}
+          value={bozza}
+          onChangeText={setBozza}
+          righe={5}
+          massimoCaratteri={LUNGHEZZA_MASSIMA_POST}
+        />
+        <Button
+          titolo={t('app.post.salva')}
+          larghezzaPiena
+          disabled={!bozza.trim() || bozza.trim() === testo}
+          inCaricamento={salva.isPending}
+          onPress={() => salva.mutate(undefined)}
+        />
+      </Foglio>
     </>
   );
 }
@@ -151,127 +293,3 @@ function RigaAllegato({ allegato }: { allegato: AllegatoDto }) {
 
 const tipoDiTarghetta = (tipo: AllegatoDto['tipo']) =>
   tipo === 'PDF' ? 'pdf' : tipo === 'IMMAGINE' ? 'immagine' : 'testo';
-
-/** La discussione: si legge dal più vecchio, perché una discussione ha un ordine. */
-function Commenti({ postId }: { postId: string }) {
-  const tema = useTema();
-  const t = useT();
-  const [testo, setTesto] = useState('');
-  const commenti = useElencaCommenti(postId, { limit: 50 });
-  const chiave = getElencaCommentiQueryKey(postId, { limit: 50 });
-
-  const invia = useApiMutation({
-    mutationFn: () => commentaPost(postId, { testo }),
-    invalida: [chiave as never],
-    onSuccess: () => setTesto(''),
-  });
-
-  return (
-    <Card>
-      <Text variante="sottotitolo">{t('app.post.titoloCommenti')}</Text>
-
-      <View style={{ gap: tema.spaziatura[3], marginTop: tema.spaziatura[3] }}>
-        <QueryBoundary
-          query={commenti}
-          eVuoto={(risposta) => risposta.data.length === 0}
-          vuoto={<Text variante="corpoTenue">{t('app.post.nessunCommento')}</Text>}
-        >
-          {(risposta) =>
-            risposta.data.map((commento) => (
-              <RigaCommento key={commento.id} commento={commento} chiaveElenco={chiave} />
-            ))
-          }
-        </QueryBoundary>
-
-        <Input
-          value={testo}
-          onChangeText={setTesto}
-          placeholder={t('app.post.scriviCommento')}
-          righe={3}
-          massimoCaratteri={LUNGHEZZA_MASSIMA_COMMENTO}
-        />
-        <Button
-          titolo={t('app.post.invia')}
-          disabled={!testo.trim()}
-          inCaricamento={invia.isPending}
-          onPress={() => invia.mutate(undefined)}
-        />
-      </View>
-    </Card>
-  );
-}
-
-function RigaCommento({
-  commento,
-  chiaveElenco,
-}: {
-  commento: CommentoDto;
-  chiaveElenco: readonly unknown[];
-}) {
-  const tema = useTema();
-  const t = useT();
-  const profilo = useLeggiMioProfilo();
-  const autore =
-    [commento.autore.nome, commento.autore.cognome].filter(Boolean).join(' ') ||
-    t('comune.utenteRimosso');
-
-  const elimina = useApiMutation({
-    mutationFn: () => eliminaCommento(commento.id),
-    invalida: [chiaveElenco as never],
-  });
-
-  // Sui commenti degli ALTRI, non dove manca il permesso di eliminare:
-  // `puoEliminare` è vero anche per il proprietario del post sui commenti
-  // altrui — che è esattamente chi deve potersi difendere. X e «Segnala»
-  // convivono.
-  const mio = profilo.data?.data.utenteId === commento.autore.utenteId;
-  const segnalabile = !mio && !commento.autore.rimosso;
-
-  return (
-    <View style={{ flexDirection: 'row', gap: tema.spaziatura[3] }}>
-      <Avatar nome={autore} dimensione={34} />
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: tema.colori.superficieAlt,
-          borderRadius: tema.raggio.lg,
-          padding: tema.spaziatura[3],
-        }}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[2] }}>
-          <Text variante="etichetta" style={{ flex: 1 }}>
-            {autore}
-          </Text>
-          {/* Il permesso arriva dal server: ricalcolarlo qui vorrebbe dire
-              tenere due copie della stessa regola, e questa sarebbe aggirabile. */}
-          {commento.puoEliminare ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('app.post.eliminaCommento')}
-              onPress={() => elimina.mutate(undefined)}
-              hitSlop={8}
-            >
-              <Icona nome="chiudi" dimensione={16} />
-            </Pressable>
-          ) : null}
-        </View>
-        <Text variante="corpo" style={{ marginTop: 4 }}>
-          {commento.testo}
-        </Text>
-        {segnalabile ? (
-          <View style={{ marginTop: tema.spaziatura[2] }}>
-            <SegnalaEBlocca
-              tipo="COMMENTO"
-              soggettoId={commento.id}
-              autore={{ utenteId: commento.autore.utenteId, nome: autore }}
-              variante="compatta"
-              // Bloccato l'autore del commento, spariscono i suoi commenti
-              // qui e i suoi post dal feed.
-              invalidaAlBlocco={[chiaveElenco, getElencaPostQueryKey()]}
-            />
-          </View>
-        ) : null}
-      </View>
-    </View>
-  );
-}

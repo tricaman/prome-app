@@ -41,6 +41,26 @@ export interface InvitoAlGruppoDaRecapitare {
  * una copia del contenuto altrui dentro lo schema segnalazione sarebbe un
  * detentore di dati personali senza via di cancellazione.
  */
+/**
+ * Una richiesta di aiuto da recapitare al supporto.
+ *
+ * **Non si conserva da nessuna parte**: l'email è il ticket. Una tabella di
+ * richieste sarebbe un detentore di dati personali in più — con testo scritto
+ * da una persona dentro — da cancellare con l'account, contare nella verifica
+ * del residuo ed esportare. Il campanello qui è anche la fonte di verità, ed è
+ * la ragione per cui questa è l'unica cosa che il modulo fa.
+ */
+export interface RichiestaDiSupportoDaRecapitare {
+  categoria: string;
+  testo: string;
+  /** Chi scrive: l'identificativo, mai il nome. */
+  utenteId: string;
+  /** L'indirizzo su cui vuole risposta, se ne ha indicato uno. */
+  contatto?: string;
+  /** Versione dell'app, piattaforma, sistema: quello che il client dichiara. */
+  contesto?: string;
+}
+
 export interface SegnalazioneDaRecapitare {
   tipo: string;
   motivo: string;
@@ -83,6 +103,12 @@ export interface CanaleEmail {
   inviaSegnalazione(
     destinatario: string,
     segnalazione: SegnalazioneDaRecapitare,
+    lingua: string,
+  ): Promise<void>;
+  /** Anche questa al supporto: è la stessa coda, con una domanda invece di un contenuto. */
+  inviaRichiestaDiSupporto(
+    destinatario: string,
+    richiesta: RichiestaDiSupportoDaRecapitare,
     lingua: string,
   ): Promise<void>;
 }

@@ -1,15 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, Length } from 'class-validator';
-import { Transform } from 'class-transformer';
-import type {
-  BloccatoResponse,
-  AggiornaImpostazioniPrivacyRequest,
-  CompletaProfiloRequest,
-  CorsoResponse,
-  ImpostazioniDiPrivacyResponse,
-  ProfiloResponse,
-  UniversitaResponse,
-  Visibilita,
+import { IsEnum, IsInt, IsOptional, IsString, Length, Max, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  DIMENSIONE_MASSIMA_FOTO_PROFILO,
+  type BloccatoResponse,
+  type AggiornaImpostazioniPrivacyRequest,
+  type CompletaProfiloRequest,
+  type ConfermaFotoProfiloRequest,
+  type CorsoResponse,
+  type ImpostazioniDiPrivacyResponse,
+  type PreautorizzaFotoProfiloRequest,
+  type ProfiloResponse,
+  type UniversitaResponse,
+  type Visibilita,
 } from '@prome/contracts';
 import { CorsoDto, UniversitaDto } from './catalogo.dto';
 
@@ -52,6 +55,44 @@ export class ProfiloDto implements ProfiloResponse {
 
   @ApiProperty({ type: ImpostazioniDiPrivacyDto })
   impostazioniPrivacy!: ImpostazioniDiPrivacyDto;
+
+  @ApiProperty({
+    nullable: true,
+    type: String,
+    description: 'Indirizzo della foto del profilo, o null: allora restano le iniziali',
+  })
+  foto!: string | null;
+}
+
+/**
+ * Chiedere di poter caricare una foto: nome e peso, come per un allegato.
+ *
+ * Il **tipo non si dichiara**: qui è ammessa solo un'immagine, e chiederlo al
+ * client vorrebbe dire accettare la sua parola su un valore che non è una
+ * scelta. Il peso invece serve prima del caricamento, per rifiutare senza
+ * spendere banda.
+ */
+export class PreautorizzaFotoProfiloDto implements PreautorizzaFotoProfiloRequest {
+  @ApiProperty({ example: 'ritratto.jpg' })
+  @Transform(ripulisci)
+  @IsString()
+  @Length(1, 200)
+  nome!: string;
+
+  @ApiProperty({ maximum: DIMENSIONE_MASSIMA_FOTO_PROFILO })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(DIMENSIONE_MASSIMA_FOTO_PROFILO)
+  dimensione!: number;
+}
+
+/** La conferma cita la chiave, come la pubblicazione di un post cita le sue. */
+export class ConfermaFotoProfiloDto implements ConfermaFotoProfiloRequest {
+  @ApiProperty()
+  @IsString()
+  @Length(1, 500)
+  chiave!: string;
 }
 
 /**

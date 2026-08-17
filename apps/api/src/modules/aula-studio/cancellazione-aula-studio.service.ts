@@ -70,6 +70,18 @@ export class CancellazioneAulaStudioService {
     });
   }
 
+  /**
+   * La raccolta personale sparisce con l'account.
+   *
+   * Qui non c'è niente da anonimizzare e niente da conservare: un segnalibro
+   * non è un contributo a chi studia — è l'elenco di ciò che una persona
+   * teneva da parte, cioè un suo dato e basta. Il materiale resta dov'è.
+   */
+  async eliminaMaterialiSalvatiDi(utenteId: string): Promise<number> {
+    const esito = await this.prisma.materialeSalvato.deleteMany({ where: { utenteId } });
+    return esito.count;
+  }
+
   /** Gli inviti che portano il suo indirizzo, o che ha emesso lui. */
   async eliminaInvitiDi(utenteId: string, indirizzo: string | null): Promise<number> {
     const esito = await this.prisma.invito.deleteMany({
@@ -119,9 +131,12 @@ export class CancellazioneAulaStudioService {
    * sopravvivano senza essere un dato personale.
    */
   async contaResiduiDi(utenteId: string, indirizzo: string | null): Promise<number> {
-    const [partecipazioni, materiali, messaggi, inviti, fatti] = await Promise.all([
+    const [partecipazioni, materiali, salvati, messaggi, inviti, fatti] = await Promise.all([
       this.prisma.partecipante.count({ where: { utenteId } }),
       this.prisma.allegatoDiAulaStudio.count({ where: { caricatoDa: utenteId } }),
+      // >>> Ogni nuova tabella di questo schema si conta QUI <<< una verifica
+      // che non guarda una tabella si dichiara «totale» senza esserlo.
+      this.prisma.materialeSalvato.count({ where: { utenteId } }),
       this.prisma.messaggioDiChat.count({ where: { autoreId: utenteId } }),
       this.prisma.invito.count({
         where: {
@@ -136,7 +151,7 @@ export class CancellazioneAulaStudioService {
       }),
     ]);
 
-    return partecipazioni + materiali + messaggi + inviti + fatti;
+    return partecipazioni + materiali + salvati + messaggi + inviti + fatti;
   }
 
   /** I fatti che portano il suo identificativo, ovunque siano nel payload. */

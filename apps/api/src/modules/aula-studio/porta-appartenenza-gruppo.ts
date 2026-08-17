@@ -26,4 +26,16 @@ export class PortaAppartenenzaGruppo {
   async eAmmessoPerAppartenenza(utenteId: string, gruppoId: string): Promise<boolean> {
     return this.gruppi.eMembro(utenteId, gruppoId);
   }
+
+  /**
+   * Se due persone stanno già in uno stesso gruppo.
+   *
+   * Attraversa il confine sempre e solo un booleano: **quale** gruppo
+   * condividano non entra nel core, che non saprebbe cosa farne e non deve
+   * poterlo raccontare a nessuno. Serve alla metà «gruppi» della domanda «sono
+   * già insieme?», che decide se un contatto è ammesso.
+   */
+  async condividonoUnGruppo(unoId: string, altroId: string): Promise<boolean> {
+    return this.gruppi.condividonoUnGruppo(unoId, altroId);
+  }
 }

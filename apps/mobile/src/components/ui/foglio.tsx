@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Modal, Pressable, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTema } from '@/theme';
 import { Text } from './text';
@@ -9,8 +9,23 @@ export interface FoglioProps {
   /** Titolo mostrato in cima e letto da chi non vede lo schermo. */
   titolo: string;
   onChiudi: () => void;
+  /**
+   * Quanto è alto.
+   *
+   * `contenuto` (predefinito) è la decisione breve: tre righe e via, e il
+   * foglio è alto quanto quello che porta. `alto` è per ciò che si **legge e
+   * si scorre** — una conversazione — e prende tre quarti di schermo: sotto
+   * quella misura si vedrebbero due commenti, sopra tanto valeva una
+   * schermata. Chi passa `alto` deve dare a `children` un figlio con `flex: 1`.
+   */
+  altezza?: 'contenuto' | 'alto';
+  /** Azione a destra del titolo: una chiusura, un conteggio, un'aggiunta. */
+  azioni?: ReactNode;
   children: ReactNode;
 }
+
+/** Tre quarti: la conversazione si legge, il post sotto resta in vista. */
+const ALTEZZA_ALTA = '75%';
 
 /**
  * Foglio che sale dal basso per una decisione.
@@ -25,9 +40,18 @@ export interface FoglioProps {
  * Da `Modal` arrivano gratis il velo, la salita dal basso e il tasto indietro
  * di Android, che qui chiude invece di uscire dalla schermata.
  */
-export function Foglio({ aperto, titolo, onChiudi, children }: FoglioProps) {
+export function Foglio({
+  aperto,
+  titolo,
+  onChiudi,
+  altezza = 'contenuto',
+  azioni,
+  children,
+}: FoglioProps) {
   const tema = useTema();
   const bordi = useSafeAreaInsets();
+
+  const alto = altezza === 'alto';
 
   return (
     <Modal
@@ -37,7 +61,10 @@ export function Foglio({ aperto, titolo, onChiudi, children }: FoglioProps) {
       statusBarTranslucent
       onRequestClose={onChiudi}
     >
-      <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1, justifyContent: 'flex-end' }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={titolo}
@@ -46,15 +73,21 @@ export function Foglio({ aperto, titolo, onChiudi, children }: FoglioProps) {
         />
 
         <View
-          style={{
-            backgroundColor: tema.colori.sovrapposizione,
-            borderTopLeftRadius: tema.raggio['3xl'],
-            borderTopRightRadius: tema.raggio['3xl'],
-            paddingTop: tema.spaziatura[3],
-            paddingHorizontal: tema.spaziatura[5],
-            paddingBottom: bordi.bottom + tema.spaziatura[5],
-            gap: tema.spaziatura[3],
-          }}
+          style={[
+            {
+              backgroundColor: tema.colori.sovrapposizione,
+              borderTopLeftRadius: tema.raggio['3xl'],
+              borderTopRightRadius: tema.raggio['3xl'],
+              paddingTop: tema.spaziatura[3],
+              paddingHorizontal: tema.spaziatura[5],
+              gap: tema.spaziatura[3],
+            },
+            // Il foglio alto tiene la barra gesti al proprio interno: chi
+            // scrive in fondo deve poterlo fare fino al bordo.
+            alto
+              ? { height: ALTEZZA_ALTA, paddingBottom: 0 }
+              : { paddingBottom: bordi.bottom + tema.spaziatura[5] },
+          ]}
         >
           <View
             style={{
@@ -66,12 +99,17 @@ export function Foglio({ aperto, titolo, onChiudi, children }: FoglioProps) {
               marginBottom: tema.spaziatura[2],
             }}
           />
-          <Text variante="sottotitolo" style={{ fontSize: 21 }}>
-            {titolo}
-          </Text>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[3] }}>
+            <Text variante="sottotitolo" style={{ flex: 1, fontSize: 21 }}>
+              {titolo}
+            </Text>
+            {azioni}
+          </View>
+
           {children}
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

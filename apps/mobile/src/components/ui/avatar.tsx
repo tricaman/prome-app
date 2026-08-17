@@ -1,4 +1,5 @@
 import { View, type ViewStyle } from 'react-native';
+import { Image } from 'expo-image';
 import { riempimenti, RIEMPIMENTO_TESTO } from '@prome/design-tokens';
 import { useTema } from '@/theme';
 import { Text } from './text';
@@ -17,24 +18,35 @@ function tintaDi(seme: string): string {
 
 export interface AvatarProps {
   nome: string;
+  /** L'unica cosa che cambia da un posto all'altro. */
   dimensione?: number;
-  /** Nasconde le iniziali: per i gruppi decorativi di avatar. */
-  soloColore?: boolean;
+  /**
+   * La foto, se quella persona ne ha una. Senza, restano le iniziali — che
+   * non sono un ripiego provvisorio: sono il ritratto di chi la foto non la
+   * mette, e non deve somigliare a un'immagine che non ha finito di caricare.
+   */
+  foto?: string | null;
   /** Anello attorno all'avatar: segnala chi sta parlando. */
   evidenziato?: boolean;
   style?: ViewStyle;
 }
 
 /**
- * Ritratto di una persona.
+ * Ritratto di una persona. **Ce n'è uno solo**, e prende la misura in
+ * ingresso: dove serve più piccolo si passa un numero più piccolo.
  *
  * Finché non ci sono immagini reali mostra le iniziali su una tinta derivata
  * dal nome: riconoscibile e stabile, senza il grigio anonimo di un segnaposto.
+ *
+ * Non esiste più la variante senza iniziali: era un disco colorato e muto —
+ * nell'intestazione della bacheca e accanto al campo dei commenti si leggeva
+ * come un'immagine che non ha finito di caricare, e non diceva di chi fosse.
+ * Un avatar che non dice chi è non è un avatar.
  */
 export function Avatar({
   nome,
   dimensione = 40,
-  soloColore = false,
+  foto,
   evidenziato = false,
   style,
 }: AvatarProps) {
@@ -58,21 +70,47 @@ export function Avatar({
           justifyContent: 'center',
           borderWidth: evidenziato ? 2.5 : 0,
           borderColor: tema.colori.primario,
+          overflow: 'hidden',
         },
         style,
       ]}
     >
-      {soloColore ? null : (
-        <Text
+      {/* Le iniziali restano **sotto** la foto, non al suo posto: mentre
+          l'immagine arriva si vede già chi è, e non un buco grigio. */}
+      {foto ? (
+        <Image
+          source={{ uri: foto }}
           style={{
-            fontSize: dimensione * 0.36,
-            fontWeight: tema.tipografia.peso.extra,
-            color: RIEMPIMENTO_TESTO,
+            position: 'absolute',
+            width: dimensione,
+            height: dimensione,
+            borderRadius: tema.raggio.full,
           }}
-        >
-          {iniziali}
-        </Text>
-      )}
+          contentFit="cover"
+          // La cache è del disco: la stessa faccia compare in venti schede
+          // dello scorrimento, e riscaricarla venti volte è banda di qualcun
+          // altro.
+          cachePolicy="memory-disk"
+          transition={120}
+          accessibilityLabel={nome}
+        />
+      ) : null}
+
+      {/* L'interlinea si ricava dalla dimensione, sempre. Senza, restava
+          quella della variante di testo — ventiquattro punti — e a un avatar
+          grande le iniziali venivano tagliate in cima: si vedeva solo nel
+          profilo, che è l'unico posto dove l'avatar è da novantasei. */}
+      <Text
+        allineamento="center"
+        style={{
+          fontSize: dimensione * 0.36,
+          lineHeight: dimensione * 0.44,
+          fontWeight: tema.tipografia.peso.extra,
+          color: RIEMPIMENTO_TESTO,
+        }}
+      >
+        {iniziali}
+      </Text>
     </View>
   );
 }
@@ -99,7 +137,7 @@ export function AvatarGroup({
             borderRadius: tema.raggio.full,
           }}
         >
-          <Avatar nome={nome} dimensione={dimensione} soloColore />
+          <Avatar nome={nome} dimensione={dimensione} />
         </View>
       ))}
     </View>

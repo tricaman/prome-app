@@ -6,4 +6,9 @@ export {
 } from './allegato';
 export { PostCard } from './post-card';
 export { AulaCard, AulaProgrammataRiga } from './aula-card';
-export { FeedBacheca } from './feed-bacheca';
+export {
+  FeedBacheca,
+  useFeedBacheca,
+  type QueryFeedBacheca,
+  type PaginaFeed,
+} from './feed-bacheca';

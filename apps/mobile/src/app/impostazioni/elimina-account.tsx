@@ -74,7 +74,7 @@ export default function SchermataEliminaAccount() {
     <>
       <Intestazione conIndietro titolo={t('app.impostazioni.elimina.titolo')} />
 
-      <Screen scorrevole>
+      <Screen scorrevole conAreaSicura={false}>
         <View style={{ gap: tema.spaziatura[2] }}>
           <Text variante="titolo" style={{ fontSize: 26 }}>
             {t('app.impostazioni.elimina.introTitolo')}

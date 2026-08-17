@@ -332,6 +332,153 @@
         ]
       }
     },
+    "/profilo/me/foto/pre-autorizzazione": {
+      "post": {
+        "operationId": "preautorizzaFotoProfilo",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreautorizzaFotoProfiloDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PreautorizzaAllegatoRispostaDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Autorizza il caricamento della foto del profilo",
+        "tags": [
+          "profilo"
+        ]
+      }
+    },
+    "/profilo/me/foto": {
+      "put": {
+        "operationId": "confermaFotoProfilo",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfermaFotoProfiloDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ProfiloDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Adotta la foto caricata e la mette sul profilo",
+        "tags": [
+          "profilo"
+        ]
+      },
+      "delete": {
+        "operationId": "rimuoviFotoProfilo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ProfiloDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Toglie la foto: restano le iniziali",
+        "tags": [
+          "profilo"
+        ]
+      }
+    },
     "/profilo/me/privacy": {
       "put": {
         "operationId": "aggiornaMiaPrivacy",
@@ -976,6 +1123,15 @@
                 "asc",
                 "desc"
               ]
+            }
+          },
+          {
+            "name": "soloMiei",
+            "required": false,
+            "in": "query",
+            "description": "Solo i post di chi legge",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -2184,6 +2340,68 @@
         ]
       }
     },
+    "/aule-studio/{id}/inviti/utente": {
+      "post": {
+        "operationId": "invitaUtenteInAulaStudio",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitaUtenteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/InvitoDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Invita una persona che vedi, rispettando le sue impostazioni di contatto",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
     "/aule-studio/{id}/messaggi": {
       "post": {
         "operationId": "scriviInAula",
@@ -2768,6 +2986,214 @@
         ]
       }
     },
+    "/materiali-salvati": {
+      "get": {
+        "operationId": "elencaMaterialiSalvati",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Campo di ordinamento (dipende dalla risorsa)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "asc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MaterialeSalvatoDto"
+                      }
+                    },
+                    "meta": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ResponseMetaDto"
+                        },
+                        {
+                          "properties": {
+                            "pagination": {
+                              "$ref": "#/components/schemas/PaginationMetaDto"
+                            }
+                          },
+                          "required": [
+                            "pagination"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "I materiali che ho messo da parte, dal più recente",
+        "tags": [
+          "materiali-salvati"
+        ]
+      }
+    },
+    "/materiali-salvati/{materialeId}": {
+      "put": {
+        "operationId": "salvaMateriale",
+        "parameters": [
+          {
+            "name": "materialeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Materiale salvato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Mette da parte un materiale di un’aula di cui faccio parte",
+        "tags": [
+          "materiali-salvati"
+        ]
+      },
+      "delete": {
+        "operationId": "dimenticaMateriale",
+        "parameters": [
+          {
+            "name": "materialeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Materiale tolto dalla raccolta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Toglie dalla raccolta",
+        "tags": [
+          "materiali-salvati"
+        ]
+      }
+    },
     "/notifiche": {
       "get": {
         "operationId": "elencaNotifiche",
@@ -3262,6 +3688,60 @@
         "summary": "Segnala un post o un commento: qualcuno lo guarda entro 24 ore",
         "tags": [
           "segnalazioni"
+        ]
+      }
+    },
+    "/supporto": {
+      "post": {
+        "operationId": "chiediAiuto",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RichiestaDiSupportoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Richiesta inoltrata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                      "description": "Nessun dato"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Manda una richiesta di aiuto al supporto",
+        "tags": [
+          "supporto"
         ]
       }
     },
@@ -4397,6 +4877,11 @@
           },
           "impostazioniPrivacy": {
             "$ref": "#/components/schemas/ImpostazioniDiPrivacyDto"
+          },
+          "foto": {
+            "type": "string",
+            "nullable": true,
+            "description": "Indirizzo della foto del profilo, o null: allora restano le iniziali"
           }
         },
         "required": [
@@ -4406,7 +4891,68 @@
           "universita",
           "corso",
           "onboardingCompletato",
-          "impostazioniPrivacy"
+          "impostazioniPrivacy",
+          "foto"
+        ]
+      },
+      "PreautorizzaAllegatoRispostaDto": {
+        "type": "object",
+        "properties": {
+          "chiave": {
+            "type": "string",
+            "description": "Da rimandare alla creazione del post"
+          },
+          "url": {
+            "type": "string",
+            "description": "Dove mandare i byte: non passano dall'API"
+          },
+          "metodo": {
+            "type": "string",
+            "enum": [
+              "PUT"
+            ]
+          },
+          "intestazioni": {
+            "type": "object"
+          },
+          "scadeIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chiave",
+          "url",
+          "metodo",
+          "intestazioni",
+          "scadeIl"
+        ]
+      },
+      "PreautorizzaFotoProfiloDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "example": "ritratto.jpg"
+          },
+          "dimensione": {
+            "type": "number",
+            "maximum": 5242880
+          }
+        },
+        "required": [
+          "nome",
+          "dimensione"
+        ]
+      },
+      "ConfermaFotoProfiloDto": {
+        "type": "object",
+        "properties": {
+          "chiave": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chiave"
         ]
       },
       "CompletaProfiloDto": {
@@ -4483,38 +5029,6 @@
           "bloccatoIl"
         ]
       },
-      "PreautorizzaAllegatoRispostaDto": {
-        "type": "object",
-        "properties": {
-          "chiave": {
-            "type": "string",
-            "description": "Da rimandare alla creazione del post"
-          },
-          "url": {
-            "type": "string",
-            "description": "Dove mandare i byte: non passano dall'API"
-          },
-          "metodo": {
-            "type": "string",
-            "enum": [
-              "PUT"
-            ]
-          },
-          "intestazioni": {
-            "type": "object"
-          },
-          "scadeIl": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "chiave",
-          "url",
-          "metodo",
-          "intestazioni",
-          "scadeIl"
-        ]
-      },
       "PreautorizzaAllegatoDto": {
         "type": "object",
         "properties": {
@@ -4559,6 +5073,11 @@
           "universita": {
             "type": "string",
             "nullable": true
+          },
+          "foto": {
+            "type": "string",
+            "nullable": true,
+            "description": "Foto del profilo, o null: allora restano le iniziali"
           },
           "rimosso": {
             "type": "boolean",
@@ -4628,6 +5147,10 @@
           "puoModificare": {
             "type": "boolean",
             "description": "Se chi legge ne è l'autore: lo decide il server"
+          },
+          "commenti": {
+            "type": "number",
+            "description": "Quanti commenti ha il post"
           }
         },
         "required": [
@@ -4636,7 +5159,8 @@
           "creatoIl",
           "autore",
           "allegati",
-          "puoModificare"
+          "puoModificare",
+          "commenti"
         ]
       },
       "CreaPostDto": {
@@ -4833,6 +5357,15 @@
             "type": "string",
             "nullable": true
           },
+          "foto": {
+            "type": "string",
+            "nullable": true,
+            "description": "Foto del profilo, o null: allora restano le iniziali"
+          },
+          "contattabile": {
+            "type": "boolean",
+            "description": "Se chi legge può invitarla altrove: lo decidono le sue impostazioni"
+          },
           "rimosso": {
             "type": "boolean",
             "description": "Account non più esistente: «Utente rimosso»"
@@ -4914,6 +5447,10 @@
           },
           "creatoIl": {
             "type": "string"
+          },
+          "salvato": {
+            "type": "boolean",
+            "description": "Vero se chi legge lo ha messo da parte"
           }
         },
         "required": [
@@ -5050,6 +5587,17 @@
           "destinatario"
         ]
       },
+      "InvitaUtenteDto": {
+        "type": "object",
+        "properties": {
+          "utenteId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "utenteId"
+        ]
+      },
       "AutoreDiAulaDto": {
         "type": "object",
         "properties": {
@@ -5067,6 +5615,11 @@
           "universita": {
             "type": "string",
             "nullable": true
+          },
+          "foto": {
+            "type": "string",
+            "nullable": true,
+            "description": "Foto del profilo, o null: allora restano le iniziali"
           },
           "rimosso": {
             "type": "boolean",
@@ -5209,6 +5762,30 @@
           "chiave"
         ]
       },
+      "MaterialeSalvatoDto": {
+        "type": "object",
+        "properties": {
+          "materiale": {
+            "$ref": "#/components/schemas/MaterialeDto"
+          },
+          "aulaStudioId": {
+            "type": "string"
+          },
+          "titoloAula": {
+            "type": "string",
+            "description": "Un elenco di nomi di file senza provenienza non dice niente"
+          },
+          "salvatoIl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "materiale",
+          "aulaStudioId",
+          "titoloAula",
+          "salvatoIl"
+        ]
+      },
       "NotificaDto": {
         "type": "object",
         "properties": {
@@ -5337,6 +5914,38 @@
           "tipo",
           "soggettoId",
           "motivo"
+        ]
+      },
+      "RichiestaDiSupportoDto": {
+        "type": "object",
+        "properties": {
+          "categoria": {
+            "type": "string",
+            "enum": [
+              "BUG",
+              "ACCOUNT",
+              "CONTENUTO",
+              "SUGGERIMENTO",
+              "DOMANDA",
+              "ALTRO"
+            ]
+          },
+          "testo": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "contatto": {
+            "type": "string",
+            "description": "Indirizzo su cui vuole risposta, se diverso"
+          },
+          "contesto": {
+            "type": "string",
+            "description": "Versione app, piattaforma, sistema"
+          }
+        },
+        "required": [
+          "categoria",
+          "testo"
         ]
       },
       "GruppoDto": {

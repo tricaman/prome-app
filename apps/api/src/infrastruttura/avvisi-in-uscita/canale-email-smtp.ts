@@ -7,6 +7,7 @@ import type {
   CanaleEmail,
   InvitoAlGruppoDaRecapitare,
   NotificaDiCommentoDaRecapitare,
+  RichiestaDiSupportoDaRecapitare,
   SegnalazioneDaRecapitare,
   InvitoDaRecapitare,
 } from './canale-email';
@@ -196,6 +197,48 @@ export class CanaleEmailSmtp implements CanaleEmail {
     });
 
     this.logger.log('Segnalazione inoltrata al supporto');
+  }
+
+  /**
+   * La richiesta di aiuto, al supporto.
+   *
+   * Stessa casella delle segnalazioni e stesso involucro, ma un'email diversa:
+   * qui non c'è un contenuto da guardare entro ventiquattro ore, c'è una
+   * persona che aspetta una risposta. I riferimenti tecnici bastano a
+   * riprodurre un difetto senza chiedere niente indietro.
+   */
+  async inviaRichiestaDiSupporto(
+    destinatario: string,
+    richiesta: RichiestaDiSupportoDaRecapitare,
+    lingua: string,
+  ): Promise<void> {
+    const t = (chiave: string) => this.traduci(`email.supporto.${chiave}`, lingua, {});
+
+    await this.recapita(destinatario, lingua, {
+      oggetto: `${t('oggetto')} — ${richiesta.categoria}`,
+      anteprima: t('anteprima'),
+      blocchi: [
+        titolo(t('titolo')),
+        paragrafo(t('istruzioni')),
+        dettagli([
+          { etichetta: t('categoria'), valore: richiesta.categoria },
+          { etichetta: t('mittente'), valore: richiesta.utenteId },
+          ...(richiesta.contatto
+            ? [{ etichetta: t('contatto'), valore: richiesta.contatto }]
+            : []),
+          ...(richiesta.contesto
+            ? [{ etichetta: t('contesto'), valore: richiesta.contesto }]
+            : []),
+        ]),
+        separatore(),
+        // Il testo lo scrive una persona: la fuga dei marcatori la fa la
+        // catena dei blocchi, come per l'estratto di una segnalazione.
+        nota(t('messaggio')),
+        paragrafo(richiesta.testo),
+      ],
+    });
+
+    this.logger.log('Richiesta di supporto inoltrata');
   }
 
   /**

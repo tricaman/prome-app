@@ -217,6 +217,14 @@ export interface ProfiloResponse {
   corso: CorsoResponse | null;
   onboardingCompletato: boolean;
   impostazioniPrivacy: ImpostazioniDiPrivacyResponse;
+  /**
+   * L'indirizzo della foto del profilo, o `null` se non ce n'è una.
+   *
+   * Campo **additivo**: un client che non lo conosce continua a disegnare le
+   * iniziali, che restano il ripiego di sempre — e restano anche il ritratto
+   * di chi la foto non la mette, che non è uno stato incompleto.
+   */
+  foto: string | null;
 }
 
 /**
@@ -264,6 +272,33 @@ export type TipoAllegato = 'PDF' | 'IMMAGINE' | 'TESTO';
 
 /** 25 MB, in byte. Vale per la bacheca e, separatamente, per le aule studio. */
 export const DIMENSIONE_MASSIMA_ALLEGATO = 25 * 1024 * 1024;
+
+/**
+ * 5 MB per la foto del profilo: un quinto di un allegato.
+ *
+ * Una foto di profilo si guarda a quaranta punti di lato, e ogni megabyte in
+ * più è banda spesa per pixel che nessuno vedrà — sul telefono di chi la
+ * carica e su quello di chiunque scorra la bacheca.
+ */
+export const DIMENSIONE_MASSIMA_FOTO_PROFILO = 5 * 1024 * 1024;
+
+/**
+ * Chiedere di poter caricare una foto del profilo.
+ *
+ * Stessi tre tempi degli allegati — si dichiara, si caricano i byte
+ * direttamente all'archivio, si conferma — perché è lo stesso problema: i byte
+ * non attraversano gli endpoint di dominio.
+ */
+export interface PreautorizzaFotoProfiloRequest {
+  nome: string;
+  /** Solo immagini: il tipo non è una scelta, è l'unico ammesso. */
+  dimensione: number;
+}
+
+/** La conferma: la chiave che il server aveva emesso, e nessun'altra. */
+export interface ConfermaFotoProfiloRequest {
+  chiave: string;
+}
 
 /** 5.000 caratteri dopo il trim. */
 export const LUNGHEZZA_MASSIMA_POST = 5000;
@@ -331,11 +366,67 @@ export interface SegnalazioneResponse {
   creatoIl: string;
 }
 
+/**
+ * Di cosa parla una richiesta di aiuto.
+ *
+ * **Elenco chiuso**, come i motivi di segnalazione e gli eventi di prodotto:
+ * a testo libero, in poche settimane, la stessa cosa comparirebbe scritta in
+ * sei modi e la coda non sarebbe più smistabile. Sei voci, perché la settima
+ * è quasi sempre «Altro» detto meglio.
+ */
+export const CATEGORIE_DI_SUPPORTO = [
+  /** Qualcosa non funziona come dovrebbe. */
+  'BUG',
+  /** Non riesco a entrare, il profilo, i dati. */
+  'ACCOUNT',
+  /** Un contenuto o una persona: il modulo rimanda alla segnalazione. */
+  'CONTENUTO',
+  /** Vorrei che Prome facesse anche… */
+  'SUGGERIMENTO',
+  /** Come si fa a…? */
+  'DOMANDA',
+  'ALTRO',
+] as const;
+
+export type CategoriaDiSupporto = (typeof CATEGORIE_DI_SUPPORTO)[number];
+
+/** 2.000 caratteri: quanto basta a raccontare un problema, non un romanzo. */
+export const LUNGHEZZA_MASSIMA_RICHIESTA_SUPPORTO = 2000;
+
+export interface RichiestaDiSupportoRequest {
+  categoria: CategoriaDiSupporto;
+  testo: string;
+  /**
+   * Come ricontattare chi scrive, se preferisce un altro indirizzo.
+   *
+   * Facoltativo **e non prefillato dal server**: l'indirizzo dell'account non
+   * esce dal profilo (non c'è un endpoint che lo dica), e il supporto risponde
+   * comunque alla casella con cui la persona è entrata. Serve a chi vuole
+   * essere ricontattato altrove.
+   */
+  contatto?: string;
+  /**
+   * Le informazioni tecniche dell'apparecchio, dichiarate a schermo prima di
+   * partire: versione dell'app, piattaforma, sistema. Senza, la metà delle
+   * segnalazioni di difetto comincia con tre domande di rimpallo.
+   */
+  contesto?: string;
+}
+
 export interface AutoreResponse {
   utenteId: string;
   nome: string | null;
   cognome: string | null;
   universita: string | null;
+  /**
+   * La foto del profilo dell'autore, o `null`: allora restano le iniziali.
+   *
+   * Viaggia con il contenuto e non si chiede a parte, per la stessa ragione
+   * del nome: un elenco di venti post non deve diventare venti letture di
+   * profilo. **È sempre `null` per un autore rimosso** — non perché il campo
+   * manchi, ma perché il profilo dietro non c'è più.
+   */
+  foto?: string | null;
   /**
    * Vero quando l'autore non esiste più (account cancellato: contenuto
    * anonimizzato) o è in corso di cancellazione. Il client mostra
@@ -358,6 +449,15 @@ export interface PostResponse {
    * è l'utente corrente per disegnare un bottone.
    */
   puoModificare: boolean;
+  /**
+   * Quanti commenti ha il post.
+   *
+   * Sta nell'elenco perché la scheda di un post lo mostra accanto al pulsante
+   * dei commenti, e senza il numero quel pulsante non dice se sotto c'è una
+   * conversazione o il silenzio. Contarli nel client vorrebbe dire una lettura
+   * per ogni scheda dello scorrimento.
+   */
+  commenti: number;
 }
 
 export interface CreaPostRequest {
@@ -424,6 +524,17 @@ export interface PartecipanteResponse {
   nome: string | null;
   cognome: string | null;
   universita: string | null;
+  /** La foto del profilo, o `null`: allora restano le iniziali. */
+  foto?: string | null;
+  /**
+   * Se chi legge può rivolgersi a questa persona — invitarla altrove.
+   *
+   * **Lo dichiara il server**, che è l'unico a conoscere le impostazioni di
+   * contattabilità dell'altro: il client spegne il pulsante con la sua
+   * ragione, invece di scoprirlo con un errore dopo il gesto. È lo stesso
+   * valore che l'API applicherebbe, quindi le due cose non possono divergere.
+   */
+  contattabile?: boolean;
   /** Vero quando l'account non esiste più: il client mostra «Utente rimosso». */
   rimosso?: boolean;
   moderatore: boolean;
@@ -465,6 +576,27 @@ export interface AllegatoDiAulaStudioResponse {
   argomentoId: string | null;
   caricatoDa: string;
   creatoIl: string;
+  /**
+   * Vero se chi legge lo ha messo da parte.
+   *
+   * **Lo dice il server**, come `puoModificare` su un post: dedurlo nel client
+   * vorrebbe dire tenere in memoria l'elenco dei propri salvataggi e
+   * incrociarlo a mano in ogni schermata che mostri un materiale.
+   */
+  salvato?: boolean;
+}
+
+/**
+ * Un materiale messo da parte, con l'aula da cui viene.
+ *
+ * Porta il titolo dell'aula perché una raccolta senza provenienza è un elenco
+ * di nomi di file: «Esercizi 3.pdf» dice qualcosa solo insieme a «Analisi 1».
+ */
+export interface MaterialeSalvatoResponse {
+  materiale: AllegatoDiAulaStudioResponse;
+  aulaStudioId: string;
+  titoloAula: string;
+  salvatoIl: string;
 }
 
 /**
