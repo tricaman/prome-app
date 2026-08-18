@@ -88,13 +88,6 @@ services:
       # parte comunque: un'email che nessuno può aprire, e nessun errore.
       URL_APP_WEB: https://${DOMINIO_WEB}
       ARCHIVIO_LOCALE_PERCORSO: /archivio
-      # L'audiochat. `assente` è il valore predefinito nel codice, quindi una
-      # macchina senza queste righe serve l'aula senza voce invece di non
-      # partire: la degradazione è dichiarata, non un guasto.
-      AUDIOCHAT: ${AUDIOCHAT:-assente}
-      LIVEKIT_URL: ${LIVEKIT_URL:-}
-      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-}
-      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
     volumes:
       - archivio_data:/archivio
     logging: *log
@@ -126,6 +119,13 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_MITTENTE: ${SMTP_MITTENTE:-}
       URL_APP_WEB: https://${DOMINIO_WEB}
+      # L'audiochat. `assente` è il valore predefinito nel codice, quindi una
+      # macchina senza queste righe serve l'aula senza voce invece di non
+      # partire: la degradazione è dichiarata, non un guasto.
+      AUDIOCHAT: ${AUDIOCHAT:-assente}
+      LIVEKIT_URL: ${LIVEKIT_URL:-}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
       ARCHIVIO_LOCALE_PERCORSO: /archivio
     # La sonda dell'immagine interroga /health, che qui non esiste: il worker
     # non ascolta su HTTP, ed è il punto. Lasciarla accesa lo terrebbe
