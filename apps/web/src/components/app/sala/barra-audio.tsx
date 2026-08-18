@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useAudiochat, type GuastoAudio } from '@/hooks/use-audiochat';
 import { Button, Icona } from '@/components/ui';
+import { cn } from '@/lib/utils';
 
 /**
  * La voce dell'aula.
@@ -50,11 +51,23 @@ export function BarraAudio({ aulaId, puoParlare }: { aulaId: string; puoParlare:
 
       {audio.stato === 'dentro' ? (
         <div className="flex gap-2">
+          {/* **Il microfono si accende quando parlo, e non prima.**
+              Tre stati e non due: acceso e silenzioso è la condizione normale
+              e sta in grigio — un microfono sempre evidenziato non direbbe
+              niente — acceso e con la voce si illumina di menta, spento è
+              barrato. Il segno viene dall'evento del server, lo stesso che
+              decide chi appare come parlante agli altri: così quello che vedo
+              su di me e quello che vedono loro non possono scostarsi. */}
           <Button
             variante="secondaria"
             size="sm"
             onPress={() => void audio.commutaMicrofono()}
-            className="flex-1"
+            className={cn(
+              'flex-1 transition-colors',
+              audio.microfonoAcceso && audio.ioParlo
+                ? 'bg-primario text-primario-testo ring-2 ring-primario/40'
+                : 'text-superficie-inversa-tenue',
+            )}
             aria-pressed={!audio.microfonoAcceso}
             iconaSinistra={
               audio.microfonoAcceso ? (

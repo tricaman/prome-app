@@ -13,7 +13,7 @@ import {
   type PartecipanteDto,
 } from '@prome/api-client';
 import { useApiMutation } from '@/hooks';
-import { Avatar, Button, Card, Chip, Switch } from '@/components/ui';
+import { Avatar, Card, Chip, Icona, Menu, Switch, VoceMenu } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
 /** I tre permessi, nell'ordine in cui il dominio li nomina. */
@@ -109,6 +109,9 @@ export function TabellaPermessi({ aulaId, partecipanti, sonoModeratore }: Tabell
           const nome =
             [partecipante.nome, partecipante.cognome].filter(Boolean).join(' ') ||
             tComune('utenteRimosso');
+          // `contattabile` lo manda il server solo per chi si può invitare
+          // altrove; di chi è stato rimosso non si invita nessuno.
+          const puoInvitare = partecipante.contattabile !== undefined && !partecipante.rimosso;
 
           return (
             <li
@@ -155,70 +158,69 @@ export function TabellaPermessi({ aulaId, partecipanti, sonoModeratore }: Tabell
                 </span>
               ))}
 
-              {/* L'invito nasce dalla persona che si sta guardando, e **lo
-                  stato lo dichiara il server** (`contattabile`): il pulsante è
-                  spento prima del gesto, con la ragione nel titolo. Scoprire
-                  un divieto di privacy da un errore, dopo aver premuto,
-                  somiglia a un guasto e non a una scelta di qualcun altro. */}
-              {partecipante.contattabile !== undefined && !partecipante.rimosso ? (
-                <span
-                  className="flex justify-end"
-                  // La ragione sta sul contenitore e non sul bottone: un
-                  // elemento spento non riceve il passaggio del mouse, e il
-                  // suo titolo non lo leggerebbe nessuno.
-                  title={partecipante.contattabile ? t('invitaAltrove') : t('nonContattabile')}
+              {/* **Un innesco solo, e un menu.**
+                  Prima erano tre bottoni in fila — Invita, Promuovi/Retrocedi,
+                  Elimina — con larghezze fisse: su una riga stretta finivano
+                  uno sopra l'altro, e «Invita» spariva sotto «Non moderatore».
+                  Tre comandi che si usano di rado non meritano tre bersagli
+                  permanenti accanto a ogni nome: meritano un posto solo dove
+                  cercarli.
+
+                  Il divieto di contatto resta dichiarato **prima** del gesto,
+                  come è sempre stato — ma diventa una voce spenta con la
+                  ragione scritta sotto, perché in un menu non c'è il passaggio
+                  del mouse a cui appendere una spiegazione. */}
+              {sonoModeratore || puoInvitare ? (
+                <Menu
+                  etichetta={t('azioniSu', { nome })}
+                  classNameInnesco="flex h-9 w-9 items-center justify-center rounded-xl text-testo-tenue hover:bg-superficie-alt-2 hover:text-testo"
+                  innesco={<Icona nome="altro" dimensione={18} />}
                 >
-                  <Button
-                    variante="contorno"
-                    className="h-9 rounded-xl px-3 text-[12px]"
-                    isDisabled={!partecipante.contattabile || !aulaDoveInvitare}
-                    aria-label={
-                      partecipante.contattabile ? t('invitaAltrove') : t('nonContattabile')
-                    }
-                    onPress={() =>
-                      aulaDoveInvitare &&
-                      invita.mutate({
-                        aulaId: aulaDoveInvitare,
-                        utenteId: partecipante.utenteId,
-                      })
-                    }
-                  >
-                    {t('invita')}
-                  </Button>
-                </span>
+                  {puoInvitare ? (
+                    <VoceMenu
+                      icona="piu"
+                      etichetta={t('invita')}
+                      descrizione={
+                        partecipante.contattabile ? t('invitaAltrove') : t('nonContattabile')
+                      }
+                      disattivata={!partecipante.contattabile || !aulaDoveInvitare}
+                      onSeleziona={() =>
+                        aulaDoveInvitare &&
+                        invita.mutate({
+                          aulaId: aulaDoveInvitare,
+                          utenteId: partecipante.utenteId,
+                        })
+                      }
+                    />
+                  ) : null}
+
+                  {sonoModeratore && partecipante.moderatore ? (
+                    // L'ultimo moderatore lo ferma il server (AS2), con il
+                    // messaggio che dice cosa fare.
+                    <VoceMenu
+                      icona="profilo"
+                      etichetta={t('retrocedi')}
+                      onSeleziona={() => retrocedi.mutate(partecipante.utenteId)}
+                    />
+                  ) : null}
+                  {sonoModeratore && !partecipante.moderatore ? (
+                    <VoceMenu
+                      icona="scudo"
+                      etichetta={t('promuovi')}
+                      onSeleziona={() => promuovi.mutate(partecipante.utenteId)}
+                    />
+                  ) : null}
+                  {sonoModeratore ? (
+                    <VoceMenu
+                      icona="cestino"
+                      etichetta={tComune('elimina')}
+                      distruttiva
+                      onSeleziona={() => rimuovi.mutate(partecipante.utenteId)}
+                    />
+                  ) : null}
+                </Menu>
               ) : null}
 
-              {sonoModeratore ? (
-                <span className="flex w-[160px] justify-end gap-2">
-                  {partecipante.moderatore ? (
-                    // Mancava del tutto: si promuoveva e non si poteva più
-                    // tornare indietro. L'ultimo moderatore lo ferma il server
-                    // (AS2), con il messaggio che dice cosa fare.
-                    <Button
-                      variante="contorno"
-                      className="h-9 rounded-xl px-3 text-[12px]"
-                      onPress={() => retrocedi.mutate(partecipante.utenteId)}
-                    >
-                      {t('retrocedi')}
-                    </Button>
-                  ) : (
-                    <Button
-                      variante="contorno"
-                      className="h-9 rounded-xl px-3 text-[12px]"
-                      onPress={() => promuovi.mutate(partecipante.utenteId)}
-                    >
-                      {t('promuovi')}
-                    </Button>
-                  )}
-                  <Button
-                    variante="fantasma"
-                    className="h-9 rounded-xl px-3 text-[12px] text-errore"
-                    onPress={() => rimuovi.mutate(partecipante.utenteId)}
-                  >
-                    {tComune('elimina')}
-                  </Button>
-                </span>
-              ) : null}
             </li>
           );
         })}

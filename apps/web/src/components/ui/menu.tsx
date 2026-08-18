@@ -81,6 +81,12 @@ export function Menu({
 export interface VoceMenuProps {
   etichetta: string;
   icona?: NomeIcona;
+  /**
+   * Riga sotto l'etichetta: serve soprattutto a **spiegare perché una voce è
+   * spenta**. Un comando disattivato senza ragione somiglia a un guasto, e in
+   * un menu non c'è il passaggio del mouse a cui appendere una spiegazione.
+   */
+  descrizione?: string;
   /** Dove porta. Con `href` la voce è un collegamento, senza è un comando. */
   href?: string;
   /** Cosa fa, quando non porta da nessuna parte. */
@@ -94,6 +100,7 @@ export interface VoceMenuProps {
 export function VoceMenu({
   etichetta,
   icona,
+  descrizione,
   href,
   onSeleziona,
   distruttiva = false,
@@ -112,7 +119,14 @@ export function VoceMenu({
       )}
     >
       {icona ? <Icona nome={icona} dimensione={17} /> : null}
-      {etichetta}
+      {descrizione ? (
+        <span className="flex flex-col gap-0.5">
+          <span>{etichetta}</span>
+          <span className="text-[11.5px] font-medium text-testo-didascalia">{descrizione}</span>
+        </span>
+      ) : (
+        etichetta
+      )}
     </Dropdown.Item>
   );
 }

@@ -532,7 +532,7 @@
       "solaLetturaPlurale": "{nomi} are read-only: they can listen and read, without taking part.",
       "staParlando": "{nome} is speaking",
       "audioFuori": "In audio: {dentro} of {totale} participants · you are not connected",
-      "audioDentro": "You are in audio · {numero} people connected",
+      "audioDentro": "You are in voice · {numero, plural, =1 {# person connected} other {# people connected}}",
       "audioMuto": "You are in audio · microphone off",
       "entraAudio": "Join the audio",
       "esciAudio": "Leave the audio",
@@ -608,7 +608,8 @@
       "audioGuastoNonDisponibileCosa": "Try again shortly: the rest of the room works normally.",
       "audioGuastoRete": "This network blocks voice calls",
       "audioGuastoReteCosa": "Some networks — universities, offices — block audio calls. Try using your phone connection.",
-      "audioRiprova": "Try again"
+      "audioRiprova": "Try again",
+      "azioniSu": "Actions for {nome}"
     },
     "gruppo": {
       "titolo": "Groups",

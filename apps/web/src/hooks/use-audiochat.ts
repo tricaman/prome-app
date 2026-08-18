@@ -50,6 +50,14 @@ export interface Audiochat {
   parlanti: ReadonlySet<string>;
   /** Quante persone sono in voce, me compresa. */
   quanti: number;
+  /**
+   * Sto parlando adesso.
+   *
+   * Viene dallo stesso evento del server che dice chi parla, non da un
+   * misuratore di volume nostro: così il segno che vedo su di me è **lo
+   * stesso** che gli altri vedono, e non due verità che si scostano.
+   */
+  ioParlo: boolean;
   microfonoAcceso: boolean;
   entra: () => Promise<void>;
   esci: () => Promise<void>;
@@ -61,6 +69,7 @@ export function useAudiochat(aulaId: string): Audiochat {
   const [guasto, setGuasto] = useState<GuastoAudio | null>(null);
   const [parlanti, setParlanti] = useState<ReadonlySet<string>>(new Set());
   const [quanti, setQuanti] = useState(0);
+  const [ioParlo, setIoParlo] = useState(false);
   const [microfonoAcceso, setMicrofonoAcceso] = useState(true);
 
   const stanza = useRef<Room | null>(null);
@@ -74,6 +83,7 @@ export function useAudiochat(aulaId: string): Audiochat {
     setStato('fuori');
     setParlanti(new Set());
     setQuanti(0);
+    setIoParlo(false);
     setMicrofonoAcceso(true);
   }, []);
 
@@ -117,6 +127,7 @@ export function useAudiochat(aulaId: string): Audiochat {
       })
       .on(RoomEvent.ActiveSpeakersChanged, (attivi) => {
         setParlanti(new Set(attivi.map((p) => p.identity)));
+        setIoParlo(attivi.some((p) => p.isLocal));
       })
       .on(RoomEvent.ParticipantConnected, () => setQuanti(room.numParticipants + 1))
       .on(RoomEvent.ParticipantDisconnected, () => setQuanti(room.numParticipants + 1))
@@ -151,7 +162,21 @@ export function useAudiochat(aulaId: string): Audiochat {
     const acceso = room.localParticipant.isMicrophoneEnabled;
     await room.localParticipant.setMicrophoneEnabled(!acceso);
     setMicrofonoAcceso(!acceso);
+    // Chi si muta smette di parlare all'istante: aspettare l'evento del
+    // server lascerebbe il segno acceso per una frazione di secondo dopo il
+    // gesto, cioè esattamente quando si vuole essere certi di essere zitti.
+    if (acceso) setIoParlo(false);
   }, []);
 
-  return { stato, guasto, parlanti, quanti, microfonoAcceso, entra, esci: smonta, commutaMicrofono };
+  return {
+    stato,
+    guasto,
+    parlanti,
+    quanti,
+    ioParlo,
+    microfonoAcceso,
+    entra,
+    esci: smonta,
+    commutaMicrofono,
+  };
 }

@@ -532,7 +532,7 @@
       "solaLetturaPlurale": "{nomi} sono in sola lettura: possono ascoltare e leggere, senza intervenire.",
       "staParlando": "{nome} sta parlando",
       "audioFuori": "In audio: {dentro} di {totale} partecipanti · tu non sei collegata",
-      "audioDentro": "Sei in audio · {numero} persone collegate",
+      "audioDentro": "Sei in audio · {numero, plural, =1 {# persona collegata} other {# persone collegate}}",
       "audioMuto": "Sei in audio · microfono spento",
       "entraAudio": "Entra nell'audio",
       "esciAudio": "Esci dall'audio",
@@ -608,7 +608,8 @@
       "audioGuastoNonDisponibileCosa": "Riprova fra poco: il resto dell'aula funziona normalmente.",
       "audioGuastoRete": "Questa rete non fa passare la voce",
       "audioGuastoReteCosa": "Alcune reti — università, uffici — bloccano le chiamate audio. Prova con la rete del telefono.",
-      "audioRiprova": "Riprova"
+      "audioRiprova": "Riprova",
+      "azioniSu": "Azioni su {nome}"
     },
     "gruppo": {
       "titolo": "Gruppi",
