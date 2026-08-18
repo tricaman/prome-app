@@ -121,3 +121,28 @@ l'aula che resta testuale.
 C4 non era verificabile qui — nulla dell'aula chiamava LiveKit — e diventa un
 criterio con un senso dentro E5.1, dove il test con `AUDIOCHAT=assente` lo
 rende eseguibile.
+
+---
+
+## 18 agosto — la voce è in esercizio
+
+E5.1, E5.2 ed E5.3 sono rilasciate, e LiveKit è uscito da questa cartella: sta
+in `docker-compose.prod.yml` insieme agli altri. Della cartella resta la sola
+pagina di prova, che serve per C2.
+
+La catena è stata provata **fino in fondo**, con l'API in locale ma puntata al
+nodo di produzione con le sue chiavi vere — l'unico modo di verificarla senza
+forzare una sessione, cosa che avrebbe scavalcato proprio il controllo su cui
+tutto questo si regge:
+
+1. accesso, onboarding, creazione dell'aula;
+2. `POST /aule-studio/:id/audiochat/accesso` → **200**, con la stanza derivata
+   dall'identificativo dell'aula, l'identità di chi chiede, `canPublish` vero e
+   nessun diritto di amministrazione;
+3. il **nodo in esercizio accetta quel lasciapassare** (`/rtc/validate` → 200,
+   mentre uno inventato prende 401): le chiavi in produzione sono quelle giuste;
+4. nella stanza nominata dalla nostra API il media passa davvero: 4 tracce su
+   4, perdita **0%**.
+
+**Resta solo C2.** Nessuno ha ancora provato da una rete restrittiva, e il
+rimedio è già scritto: un IP aggiuntivo per il TURN sulla 443.
