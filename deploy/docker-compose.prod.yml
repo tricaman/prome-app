@@ -76,11 +76,25 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_MITTENTE: ${SMTP_MITTENTE:-}
       ORIGINI_CONSENTITE: https://${DOMINIO_WEB}
+      # L'audiochat. `assente` è il valore predefinito nel codice, quindi una
+      # macchina senza queste righe serve l'aula senza voce invece di non
+      # partire: la degradazione è dichiarata, non un guasto.
+      AUDIOCHAT: ${AUDIOCHAT:-assente}
+      LIVEKIT_URL: ${LIVEKIT_URL:-}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
       # I collegamenti degli inviti portano dentro l'applicazione web, non
       # dentro l'API. Senza, il valore predefinito è `localhost` e l'invito
       # parte comunque: un'email che nessuno può aprire, e nessun errore.
       URL_APP_WEB: https://${DOMINIO_WEB}
       ARCHIVIO_LOCALE_PERCORSO: /archivio
+      # L'audiochat. `assente` è il valore predefinito nel codice, quindi una
+      # macchina senza queste righe serve l'aula senza voce invece di non
+      # partire: la degradazione è dichiarata, non un guasto.
+      AUDIOCHAT: ${AUDIOCHAT:-assente}
+      LIVEKIT_URL: ${LIVEKIT_URL:-}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
     volumes:
       - archivio_data:/archivio
     logging: *log
@@ -144,6 +158,29 @@ services:
       # ricostruzione dell'immagine.
       APPLE_TEAM_ID: ${APPLE_TEAM_ID:-}
       ANDROID_SHA256_FIRMA: ${ANDROID_SHA256_FIRMA:-}
+    logging: *log
+
+  # Il nodo audio. Non lo tocca nessuno degli altri servizi: l'API gli parla
+  # soltanto **coniando gettoni**, che il nodo verifica da sé con la chiave
+  # condivisa. Nessuna chiamata di rete fra i due, quindi un nodo lento non
+  # rallenta l'apertura di una sala.
+  #
+  # Della segnalazione (7880) si occupa Caddy sulla rete interna; qui si
+  # pubblicano solo le porte del media. **Una sola porta UDP con mux** e non
+  # l'intervallo 50000-60000: in Docker ogni porta pubblicata è un processo
+  # `docker-proxy`, e diecimila su due core non sono una configurazione.
+  livekit:
+    image: livekit/livekit-server:v1.13.5
+    container_name: livekit
+    restart: unless-stopped
+    command: --config /etc/livekit.yaml
+    environment:
+      LIVEKIT_KEYS: ${LIVEKIT_KEYS}
+    ports:
+      - '7881:7881'
+      - '7882:7882/udp'
+    volumes:
+      - ./livekit/livekit.yaml:/etc/livekit.yaml:ro
     logging: *log
 
   caddy:
