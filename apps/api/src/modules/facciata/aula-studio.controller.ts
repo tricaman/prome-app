@@ -22,6 +22,7 @@ import type {
   PaginatedResult,
   PermessoAulaStudio,
   SalaResponse,
+  AccessoAudiochatResponse,
 } from '@prome/contracts';
 import {
   ApiPaginatedResponse,
@@ -48,6 +49,7 @@ import {
   QueryAuleStudioDto,
   QueryMessaggiDto,
   SalaDto,
+  AccessoAudiochatDto,
 } from './dtos/aula-studio.dto';
 import { Utente } from './guardia-accesso';
 
@@ -279,6 +281,21 @@ export class AulaStudioController {
    * qui che il messaggio viene persistito. Il tempo reale lo consegna dopo, a
    * chi sta guardando: se non ci riesce, il messaggio esiste lo stesso.
    */
+  @Post(':id/audiochat/accesso')
+  @ApiOperation({
+    operationId: 'entraInAudiochat',
+    summary: "Rilascia l'accesso al canale audio dell'aula",
+  })
+  @ApiWrappedResponse({ type: AccessoAudiochatDto })
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('successes.AUDIOCHAT_APERTA')
+  async entraInAudiochat(
+    @Utente() utente: UtenteDiDominio,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<AccessoAudiochatResponse> {
+    return this.aule.accessoAudiochat(utente.id, id);
+  }
+
   @Post(':id/messaggi')
   @ApiOperation({ operationId: 'scriviInAula', summary: 'Scrive un messaggio nella chat' })
   @ApiWrappedResponse({ type: MessaggioDiChatDto, status: HttpStatus.CREATED })

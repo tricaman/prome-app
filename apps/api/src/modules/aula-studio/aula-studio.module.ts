@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ArchivioFileModule } from '../../infrastruttura/archivio-file/archivio-file.module';
 import { AvvisiInUscitaModule } from '../../infrastruttura/avvisi-in-uscita/avvisi-in-uscita.module';
 import { TempoRealeModule } from '../../infrastruttura/tempo-reale/tempo-reale.module';
+import { AudiochatModule } from '../../infrastruttura/audiochat/audiochat.module';
 import { GruppoModule } from '../gruppo/gruppo.module';
 import { AvvisiModule } from '../avvisi/avvisi.module';
 import { ProfiloModule } from '../profilo/profilo.module';
@@ -37,6 +38,7 @@ import { RecapitoFattiService } from './recapito-fatti.service';
     ArchivioFileModule,
     AvvisiInUscitaModule,
     TempoRealeModule,
+    AudiochatModule,
     AvvisiModule,
   ],
   providers: [

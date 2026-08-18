@@ -26,3 +26,13 @@ process.env.TRASPORTO_TEMPO_REALE ??= 'assente';
 // Il supporto delle segnalazioni: un indirizzo qualunque, l'adattatore di
 // sviluppo non manda niente e i test guardano ciò che sarebbe partito.
 process.env.EMAIL_SUPPORTO ??= 'supporto@prome.test';
+
+// Coordinate finte per provare l'adattatore LiveKit **in isolamento**: conia
+// un gettone e si guarda cosa contiene, senza collegarsi a niente.
+//
+// `AUDIOCHAT` resta al suo valore predefinito (`assente`), quindi l'API
+// continua a girare senza audio: è la degradazione dichiarata, ed è ciò che i
+// test dell'endpoint devono vedere.
+process.env.LIVEKIT_URL ??= 'wss://audio.di-prova.invalid';
+process.env.LIVEKIT_API_KEY ??= 'chiave-di-prova';
+process.env.LIVEKIT_API_SECRET ??= 'segreto-di-prova-lungo-abbastanza-per-firmare';

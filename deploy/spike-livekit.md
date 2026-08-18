@@ -92,12 +92,32 @@ Per un'aula di studio è esattamente ciò che si vuole: la banda di chi ascolta 
 
 ## Esito
 
-_Da compilare alla scadenza del timebox._
-
 | | |
 |---|---|
-| Data di inizio | |
-| Data di fine | |
-| Ore effettive | |
-| Esito | |
-| Decisione | |
+| Data di inizio | 16 agosto 2026 |
+| Data di fine | 18 agosto 2026 |
+| Ore effettive | ~2, dentro il timebox di 2,5 giorni |
+| Esito | **positivo, con una riserva dichiarata** |
+| Decisione | **E5 entra nel perimetro.** Si procede con E5.1. |
+
+Tre partecipanti da tre reti diverse si sentono, dal browser del computer e da
+quello del telefono. Il trasporto regge con margine largo: a otto partecipanti
+la macchina resta sotto metà core e la perdita di pacchetti è zero.
+
+**La riserva è C2, e non è un dettaglio da spuntare più tardi.** Nessuno è
+ancora entrato da una rete restrittiva — wifi universitario, rete aziendale,
+NAT simmetrico — che è la rete del pubblico a cui Prome si rivolge. Serve il
+TURN, il TURN vuole la porta 443, e la 443 è di Caddy su TCP e UDP. Le due
+strade restano quelle già scritte: un IP aggiuntivo Hetzner (~1 €/mese), che
+risolve pulito, oppure il TURN su 5349, che molte reti restrittive bloccano —
+cioè non risolve il caso per cui esiste.
+
+Si procede con E5.1 perché il rischio residuo è **noto e limitato**: non è
+«l'audio funziona?», a cui la prova ha risposto di sì, ma «da quante reti
+funziona», che si chiude comprando un indirizzo. Se un giorno la risposta
+fosse che non basta, la degradazione è già prevista: `AudiochatAssente` e
+l'aula che resta testuale.
+
+C4 non era verificabile qui — nulla dell'aula chiamava LiveKit — e diventa un
+criterio con un senso dentro E5.1, dove il test con `AUDIOCHAT=assente` lo
+rende eseguibile.

@@ -107,6 +107,21 @@ const SchemaEnv = z.object({
    * messaggi restano persistiti e leggibili. È anche il valore dei test.
    */
   TRASPORTO_TEMPO_REALE: z.enum(['socket-io', 'assente']).default('socket-io'),
+
+  /**
+   * L'audiochat dell'aula.
+   *
+   * `assente` è la degradazione dichiarata resa eseguibile (RE4): l'aula
+   * funziona al 100% in tutto ciò che non è audio, e chi chiede di parlare
+   * riceve un rifiuto spiegato. È il valore predefinito e quello dei test —
+   * l'audio si accende quando c'è un nodo, non si spegne quando manca.
+   */
+  AUDIOCHAT: z.enum(['livekit', 'assente']).default('assente'),
+
+  /** Dove si collegano i client. Finisce nella risposta, non nel bundle. */
+  LIVEKIT_URL: z.string().optional(),
+  LIVEKIT_API_KEY: z.string().optional(),
+  LIVEKIT_API_SECRET: z.string().optional(),
 });
 
 export type Env = z.infer<typeof SchemaEnv>;
@@ -150,6 +165,20 @@ if (esito.data.NODE_ENV === 'production' && !esito.data.EMAIL_SUPPORTO) {
  * parte, accetta richieste di accesso e non manda niente: l'utente aspetta un
  * codice che non arriverà mai. Meglio non partire.
  */
+/**
+ * Scegliere l'audiochat senza darne le coordinate significa un'aula che
+ * promette la voce e non la apre: meglio non partire.
+ */
+if (esito.data.AUDIOCHAT === 'livekit') {
+  const mancanti = (['LIVEKIT_URL', 'LIVEKIT_API_KEY', 'LIVEKIT_API_SECRET'] as const).filter(
+    (nome) => !esito.data[nome],
+  );
+  if (mancanti.length) {
+    console.error(`[prome-api] AUDIOCHAT=livekit richiede: ${mancanti.join(', ')}`);
+    process.exit(1);
+  }
+}
+
 if (esito.data.CANALE_EMAIL === 'smtp') {
   const mancanti = (['SMTP_HOST', 'SMTP_UTENTE', 'SMTP_PASSWORD', 'SMTP_MITTENTE'] as const).filter(
     (nome) => !esito.data[nome],

@@ -37,6 +37,7 @@ import {
   type StatoInvito,
   type TipoAllegato,
   type VisibilitaAulaStudio,
+  type AccessoAudiochatResponse,
 } from '@prome/contracts';
 import { PaginationDto } from '../../../common/dto';
 
@@ -312,6 +313,17 @@ export class InvitoDto implements InvitoResponse {
   @ApiProperty() emessoIl!: string;
   @ApiProperty({ description: 'Falso subito dopo l\'accettazione: compare entro pochi secondi' })
   partecipanteCreato!: boolean;
+}
+
+export class AccessoAudiochatDto implements AccessoAudiochatResponse {
+  @ApiProperty({ description: 'Dove collegarsi' })
+  url!: string;
+
+  @ApiProperty({ description: 'Lasciapassare valido per questa aula e questa persona' })
+  lasciapassare!: string;
+
+  @ApiProperty({ description: 'Dopo, se ne chiede un altro' })
+  scadeIl!: string;
 }
 
 export class MessaggioDiChatDto implements MessaggioDiChatResponse {

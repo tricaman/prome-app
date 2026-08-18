@@ -279,6 +279,18 @@ Le occasioni in cui il prodotto interrompe qualcuno sono **due e sono un elenco 
 - **`DispositivoDiNotifica` e `PreferenzeDiNotifica` sono detentori censiti**: cadono con il profilo, e sono contati dalla verifica del residuo (SE3) — una verifica che non guarda una tabella si dichiara «totale» senza esserlo. Nell'esportazione **il token non esce**: non è un dato della persona ma il modo in cui il sistema raggiunge il suo apparecchio, e in un file nella cartella dei download sarebbe un modo per mandarle notifiche a nome nostro. Escono quanti apparecchi, di che tipo e da quando.
 - I test stanno in `test/notifiche.spec.ts` (16 casi, scritti prima del codice) e contano **solo gli avvisi del proprio post**: le suite girano in parallelo sullo stesso database e la corsia dei fatti è una sola.
 
+## Audiochat (E5.1) — la porta, e ciò che il dominio non sa
+
+`PortaAudiochat` si esprime **solo** nei termini del canale audio di un'aula e della persona che vi entra: nessuna parola del fornitore attraversa il confine. Sostituirlo è riscrivere un adattatore (MA1), non toccare `AulaStudio`.
+
+- **AS8 in negativo, ed è la parte che si viola per prima**: nessun aggregato «Audiochat», nessuno stato del canale, e **nessun elenco di chi sta parlando**. Quell'elenco vive nel client, che lo riceve dal fornitore. Non aggiungerlo qui per «farlo vedere anche a chi non è in voce»: sarebbe uno stato da tenere allineato a una realtà che cambia dieci volte al secondo.
+- **Il titolo lo verifica il modulo, non la porta.** `accessoAudiochat` legge `permessiEffettivi(...).parlare` **adesso**, come per il caricamento (AL4) e per la scrittura (MA2): concedere apre, revocare richiude al gesto successivo. Una porta tecnica che decidesse l'ammissione terrebbe la stessa regola in due posti, e la copia fuori dal contesto sarebbe quella dimenticata.
+- **Due rifiuti distinti perché dicono cose diverse**: `AS022` (403, non hai il permesso — l'aula esiste e ci sei dentro, non c'è nulla da nascondere) e `AS023` (503, l'audio non è disponibile). Il 503 **non è un guasto dell'aula**: dice al client di mostrare la sala senza la voce.
+- **`AUDIOCHAT=assente` è la degradazione dichiarata resa eseguibile** (RE4), come `assente` per il trasporto, ed è il valore predefinito e quello dei test. `test/audiochat.spec.ts` prova che con l'audio spento sala, chat, cronologia e moderazione continuano a funzionare: è l'unico modo di accorgersi che una dipendenza non bloccante è diventata bloccante.
+- **Il lasciapassare si conia, non si chiede**: è un gettone firmato con la chiave che abbiamo, quindi nessuna chiamata di rete dentro il percorso della richiesta — un nodo lento non rallenta l'apertura della sala. È stretto per costruzione (solo quella stanza, solo quella persona, nessuna amministrazione, `recorder: false` per A3) e dura 15 minuti: serve a collegarsi, non a restare.
+- **Il nome della stanza lo decide `stanzaDiAula`**, la stessa funzione del tempo reale. Due formule per la stessa aula sarebbero due stanze, e nessuno se ne accorgerebbe finché qualcuno non si trova solo in una conversazione che gli altri hanno altrove.
+- **PE4 non è ancora soddisfatta, ed è scritto invece di essere sostituito**: i minuti-partecipante non si contano dagli ingressi, e il dominio non tiene lo stato del canale. Arriveranno dai webhook del fornitore, letti dall'unità lavoratrice.
+
 ## Misurazioni di utilizzo (E1.6)
 
 `MisurazioniDiUtilizzo` è una porta **senza fornitore assegnato**, e resta tale finché non è dimostrabile la conformità su regione e trattamento: quello che esiste sono i punti di emissione, provati da `test/misurazioni.spec.ts`. Attaccarci un prodotto sarà un adattatore, non una riscrittura.

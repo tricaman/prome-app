@@ -692,6 +692,19 @@ export interface CreaInvitoRequest {
 /** 2.000 caratteri, non vuoto dopo il trim. */
 export const LUNGHEZZA_MASSIMA_MESSAGGIO = 2000;
 
+/**
+ * L'accesso al canale audio di un'aula.
+ *
+ * Non descrive uno stato: non dice chi c'è dentro né chi sta parlando —
+ * quello lo sa il fornitore e lo riceve il client. Qui c'è solo ciò che serve
+ * per collegarsi, e scade.
+ */
+export interface AccessoAudiochatResponse {
+  url: string;
+  lasciapassare: string;
+  scadeIl: string;
+}
+
 export interface MessaggioDiChatResponse {
   id: string;
   testo: string;

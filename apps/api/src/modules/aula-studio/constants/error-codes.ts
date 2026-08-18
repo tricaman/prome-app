@@ -42,6 +42,25 @@ export const AulaStudioErrorCode = {
    * dirle «non esiste» sarebbe una bugia visibile a occhio nudo.
    */
   NON_CONTATTABILE: 'AS021',
+
+  /**
+   * Si chiede di entrare in audiochat senza il Permesso di Parlare.
+   *
+   * 403 e non 404: l'aula esiste e chi chiede ci è dentro — sta guardando la
+   * sala. Non c'è nessuna esistenza da nascondere, solo un permesso che non
+   * c'è, e che un moderatore può concedere.
+   */
+  NON_PUOI_PARLARE: 'AS022',
+
+  /**
+   * L'audiochat non è disponibile: nessun fornitore configurato, oppure il
+   * nodo non risponde.
+   *
+   * 503 e non 500, perché **non è un guasto dell'aula** (RE4): tutto il resto
+   * continua a funzionare, e il codice dice al client di mostrare la sala
+   * senza la voce invece di una schermata di errore.
+   */
+  AUDIOCHAT_NON_DISPONIBILE: 'AS023',
 } as const;
 
 export type AulaStudioErrorCode =

@@ -1,6 +1,7 @@
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import type {
+  AccessoAudiochatResponse,
   AllegatoDiAulaStudioResponse,
   ArgomentoResponse,
   AulaStudioResponse,
@@ -34,6 +35,10 @@ import {
   TRASPORTO_TEMPO_REALE,
   type TrasportoInTempoReale,
 } from '../../infrastruttura/tempo-reale/trasporto';
+import {
+  PORTA_AUDIOCHAT,
+  type PortaAudiochat,
+} from '../../infrastruttura/audiochat/audiochat';
 import {
   GRUPPO_ELIMINATO,
   MEMBRO_RIMOSSO,
@@ -97,6 +102,7 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     @Inject(CANALE_EMAIL) private readonly email: CanaleEmail,
     private readonly avvisi: AvvisiService,
     @Inject(TRASPORTO_TEMPO_REALE) private readonly trasporto: TrasportoInTempoReale,
+    @Inject(PORTA_AUDIOCHAT) private readonly audiochat: PortaAudiochat,
   ) {
     this.recapito.registra(this);
     // Anche sui fatti del gruppo: la decadenza dell'appartenenza è una
@@ -1041,6 +1047,54 @@ export class AulaStudioService implements ConsumatoreDiFatti {
       .catch(() => undefined);
 
     return perIlClient;
+  }
+
+  /**
+   * Entra nell'audiochat dell'aula.
+   *
+   * **Se e solo se** chi chiede ha il Permesso di Parlare, letto **adesso** e
+   * non da una copia presa all'ingresso: un permesso revocato mentre la sala
+   * è aperta chiude la porta al gesto successivo, come per il caricamento e
+   * per la scrittura.
+   *
+   * Il controllo sta qui, nel modulo che possiede il permesso, e mai nella
+   * porta tecnica: una porta che decidesse un'ammissione terrebbe la stessa
+   * regola in due posti, e la copia fuori dal contesto sarebbe quella
+   * dimenticata.
+   *
+   * **Non registra nulla.** Nessuna riga, nessuno stato del canale, nessun
+   * elenco di chi è entrato: AS8 dice che il dominio possiede il solo
+   * Permesso di Parlare, e chi sta parlando lo sa il client dal fornitore.
+   * Questo metodo rilascia un lasciapassare e dimentica di averlo fatto.
+   */
+  async accessoAudiochat(utenteId: string, aulaId: string): Promise<AccessoAudiochatResponse> {
+    const partecipante = await this.esigiPartecipante(utenteId, aulaId);
+    if (!permessiEffettivi(partecipante).parlare) {
+      throw new AppException(
+        AulaStudioErrorCode.NON_PUOI_PARLARE,
+        'AULA_NON_PUOI_PARLARE',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const accesso = await this.audiochat.apriCanale({ aulaStudioId: aulaId, utenteId });
+    if (!accesso) {
+      // RE4: l'audio manca, l'aula no. Il 503 dice al client di mostrare la
+      // sala senza la voce, invece di trattarla come rotta.
+      throw new AppException(
+        AulaStudioErrorCode.AUDIOCHAT_NON_DISPONIBILE,
+        'AUDIOCHAT_NON_DISPONIBILE',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+
+    // PE4 chiede i **minuti-partecipante**, non gli ingressi, e quelli non si
+    // contano da qui: la durata la conosce il fornitore, e il dominio non
+    // tiene lo stato del canale (AS8). Arriveranno dai suoi webhook, letti
+    // dall'unità lavoratrice. Finché non ci sono, la misura manca — ed è
+    // scritto, invece di essere sostituito da un conteggio che sembra la
+    // stessa cosa e non lo è.
+    return accesso;
   }
 
   /** La cronologia, dal più vecchio: una conversazione ha un ordine. */

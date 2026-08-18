@@ -2402,6 +2402,58 @@
         ]
       }
     },
+    "/aule-studio/{id}/audiochat/accesso": {
+      "post": {
+        "operationId": "entraInAudiochat",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AccessoAudiochatDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetaDto"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Rilascia l'accesso al canale audio dell'aula",
+        "tags": [
+          "aule studio"
+        ]
+      }
+    },
     "/aule-studio/{id}/messaggi": {
       "post": {
         "operationId": "scriviInAula",
@@ -5701,6 +5753,28 @@
         },
         "required": [
           "utenteId"
+        ]
+      },
+      "AccessoAudiochatDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Dove collegarsi"
+          },
+          "lasciapassare": {
+            "type": "string",
+            "description": "Lasciapassare valido per questa aula e questa persona"
+          },
+          "scadeIl": {
+            "type": "string",
+            "description": "Dopo, se ne chiede un altro"
+          }
+        },
+        "required": [
+          "url",
+          "lasciapassare",
+          "scadeIl"
         ]
       },
       "AutoreDiAulaDto": {

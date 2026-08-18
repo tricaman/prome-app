@@ -6,6 +6,7 @@
  * OpenAPI spec version: v1
  */
 
+export * from './accessoAudiochatDto';
 export * from './accettaInvito200';
 export * from './accettaInvitoDiGruppo200';
 export * from './accountEsportatoDto';
@@ -127,6 +128,7 @@ export * from './eliminaMaterialeAula200';
 export * from './eliminaMaterialeAula200Data';
 export * from './eliminaPost200';
 export * from './eliminaPost200Data';
+export * from './entraInAudiochat200';
 export * from './entraInAulaStudio200';
 export * from './entraInAulaStudio200Data';
 export * from './errorResponseDto';

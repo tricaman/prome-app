@@ -80,6 +80,7 @@ import type {
   EliminaGruppo200,
   EliminaMaterialeAula200,
   EliminaPost200,
+  EntraInAudiochat200,
   EntraInAulaStudio200,
   ErrorResponseDto,
   EsciDaProme200,
@@ -2879,6 +2880,69 @@ export const useInvitaUtenteInAulaStudio = <TError = ErrorResponseDto,
       > => {
 
       const mutationOptions = getInvitaUtenteInAulaStudioMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Rilascia l'accesso al canale audio dell'aula
+ */
+export const entraInAudiochat = (
+    id: string,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<EntraInAudiochat200>(
+      {url: `/aule-studio/${id}/audiochat/accesso`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getEntraInAudiochatMutationOptions = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof entraInAudiochat>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof entraInAudiochat>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['entraInAudiochat'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof entraInAudiochat>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  entraInAudiochat(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EntraInAudiochatMutationResult = NonNullable<Awaited<ReturnType<typeof entraInAudiochat>>>
+    
+    export type EntraInAudiochatMutationError = ErrorResponseDto
+
+    /**
+ * @summary Rilascia l'accesso al canale audio dell'aula
+ */
+export const useEntraInAudiochat = <TError = ErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof entraInAudiochat>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof entraInAudiochat>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getEntraInAudiochatMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
