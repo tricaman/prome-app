@@ -294,12 +294,15 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      livekit-client:
+        specifier: ^2.22.0
+        version: 2.22.0(@types/dom-mediacapture-record@1.0.22)
       next:
         specifier: ^16.3.0
         version: 16.3.0(@babel/core@7.29.7)(@types/node@22.20.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       next-intl:
         specifier: ^4.13.5
-        version: 4.13.5(@swc/helpers@0.5.23)(next@16.3.0(@types/node@22.20.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
+        version: 4.13.5(@swc/helpers@0.5.23)(next@16.3.0(@babel/core@7.29.7)(@types/node@22.20.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
       react:
         specifier: 19.2.3
         version: 19.2.3
@@ -2090,6 +2093,9 @@ packages:
     peerDependencies:
       jsep: ^0.4.0||^1.0.0
 
+  '@livekit/mutex@1.1.1':
+    resolution: {integrity: sha512-EsshAucklmpuUAfkABPxJNhzj9v2sG7JuzFDL4ML1oJQSV14sqrpTYnsaOudMAw9yOaW53NU3QQTlUQoRs4czw==}
+
   '@livekit/protocol@1.50.4':
     resolution: {integrity: sha512-L1uggNQAqyY21smQY8AllyOYbcv9Me9TaxwuLytL1R8ck9nbYPmQLNwEDi3pOFGAMa5F8I2nUi2Jc59W5awxlA==}
 
@@ -3305,6 +3311,9 @@ packages:
 
   '@types/cors@2.8.19':
     resolution: {integrity: sha512-mFNylyeyqN93lfe/9CSxOGREz8cpzAhH+E93xJ4xWQf62V8sQ/24reV2nyzUWM6H6Xji+GGHpkbLe7pVoUEskg==}
+
+  '@types/dom-mediacapture-record@1.0.22':
+    resolution: {integrity: sha512-mUMZLK3NvwRLcAAT9qmcK+9p7tpU2FHdDsntR3YI4+GY88XrgG4XiE7u1Q2LAN2/FZOz/tdMDC3GQCR4T8nFuw==}
 
   '@types/es-aggregate-error@1.0.6':
     resolution: {integrity: sha512-qJ7LIFp06h1QE1aVxbVd+zJP2wdaugYXYfd6JxsyRMrYHaxb6itXPogW2tz+ylUJ1n1b+JF1PHyYCfYHm0dvUg==}
@@ -6054,6 +6063,11 @@ packages:
   linkify-it@5.0.2:
     resolution: {integrity: sha512-ONTm2jCMAVZjgQa/Fy1kScXsuOoF5NPTsoFBdE1KVIZ2vAh/r9+Bqo+0jINCBYnavTPQZz38QzFTme79ENoN3Q==}
 
+  livekit-client@2.22.0:
+    resolution: {integrity: sha512-GLtYQfRh/RsvXaOX1x609bFZ17yyKmKWDqu9JmkMKn9vIFLi2GsapRv9gT8OJO/1R2dsitrkbGmloyUfxWQsaA==}
+    peerDependencies:
+      '@types/dom-mediacapture-record': ^1
+
   livekit-server-sdk@2.17.0:
     resolution: {integrity: sha512-GWNEQrUD13UwZNrmosyTVFPgeBvSU2lFKGxdA4DaUI5F4sMb1cGeep/PPEE9vvRNELJYpxWS0ImS4gQmovKUDA==}
     engines: {node: '>=18'}
@@ -7182,6 +7196,13 @@ packages:
     resolution: {integrity: sha512-eflK8wEtyOE6+hsaRVPxvUKYCpRgzLqDTb8krvAsRIwOGlHoSgYLgBXoubGgLd2fT41/OUYdb48v4k4WWHQurA==}
     engines: {node: '>= 10.13.0'}
 
+  sdp-transform@2.15.0:
+    resolution: {integrity: sha512-KrOH82c/W+GYQ0LHqtr3caRpM3ITglq3ljGUIb8LTki7ByacJZ9z+piSGiwZDsRyhQbYBOBJgr2k6X4BZXi3Kw==}
+    hasBin: true
+
+  sdp@3.2.2:
+    resolution: {integrity: sha512-xZocWwfyp4hkbN4hLWxMjmv2Q8aNa9MhmOZ7L9aCZPT+dZsgRr6wZRrSYE3HTdyk/2pZKPSgqI7ns7Een1xMSA==}
+
   secure-json-parse@4.1.0:
     resolution: {integrity: sha512-l4KnYfEyqYJxDwlNVyRfO2E4NTHfMKAWdUuA8J0yve2Dz/E/PdBepY03RvyJpssIpRFwJoCD55wA+mEDs6ByWA==}
 
@@ -7761,6 +7782,9 @@ packages:
     resolution: {integrity: sha512-phPGCwqr2+Qo0fwniCE8e4pKnGu/yFb5nD5Y8bf0EEeiI5GklnACYA9GFy/DrAeRrKHXvHn+1SUsOWgJp6RO+g==}
     engines: {node: '>= 0.4'}
 
+  typed-emitter@2.1.0:
+    resolution: {integrity: sha512-g/KzbYKbH5C2vPkaXGu8DJlHrGKHLsM25Zg9WuC9pMGfuvT+X25tZQWo5fK1BjBm8+UrVE9LDCvaY0CQk+fXDA==}
+
   typedoc-plugin-coverage@4.0.3:
     resolution: {integrity: sha512-baim3wyMkqpX7rBzL/6iZ7wzKJuSr9ffP16RHOsdTUNoHUZeXLIZHSUBtUhXmNHaUNRgfqdmKLBwyggbJjGdeQ==}
     engines: {node: '>= 18'}
@@ -7980,6 +8004,10 @@ packages:
     peerDependenciesMeta:
       webpack-cli:
         optional: true
+
+  webrtc-adapter@9.0.6:
+    resolution: {integrity: sha512-CHbl2ZQbxx164IgWRgzJno4hWtM4tFbRam1QfI3Yxhs3w/DvqluVxVWeXs3oL5/fbGkSNLKo0Ty5MgUWceNhog==}
+    engines: {node: '>=6.0.0', npm: '>=3.10.0'}
 
   whatwg-fetch@3.6.20:
     resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
@@ -10048,6 +10076,8 @@ snapshots:
     dependencies:
       jsep: 1.4.0
 
+  '@livekit/mutex@1.1.1': {}
+
   '@livekit/protocol@1.50.4':
     dependencies:
       '@bufbuild/protobuf': 1.10.1
@@ -11416,6 +11446,8 @@ snapshots:
   '@types/cors@2.8.19':
     dependencies:
       '@types/node': 22.20.1
+
+  '@types/dom-mediacapture-record@1.0.22': {}
 
   '@types/es-aggregate-error@1.0.6':
     dependencies:
@@ -12994,8 +13026,8 @@ snapshots:
       '@next/eslint-plugin-next': 16.3.0(eslint@9.39.5(jiti@2.7.0))
       eslint: 9.39.5(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.5(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.5(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@9.39.5(jiti@2.7.0))
       eslint-plugin-react-hooks: 7.1.1(eslint@9.39.5(jiti@2.7.0))
@@ -13017,21 +13049,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0)):
-    dependencies:
-      '@nolyfill/is-core-module': 1.0.39
-      debug: 4.4.3
-      eslint: 9.39.5(jiti@2.7.0)
-      get-tsconfig: 4.14.1
-      is-bun-module: 2.0.0
-      stable-hash: 0.0.5
-      tinyglobby: 0.2.17
-      unrs-resolver: 1.12.2
-    optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0))
-    transitivePeerDependencies:
-      - supports-color
-
   eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.5(jiti@2.7.0)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
@@ -13043,18 +13060,18 @@ snapshots:
       tinyglobby: 0.2.17
       unrs-resolver: 1.12.2
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0)):
+  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
       eslint: 9.39.5(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.5(jiti@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -13078,7 +13095,7 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0)):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -13089,7 +13106,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.5(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0))
+      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0))
       hasown: 2.0.4
       is-core-module: 2.16.2
       is-glob: 4.0.3
@@ -14785,6 +14802,19 @@ snapshots:
     dependencies:
       uc.micro: 2.1.0
 
+  livekit-client@2.22.0(@types/dom-mediacapture-record@1.0.22):
+    dependencies:
+      '@livekit/mutex': 1.1.1
+      '@livekit/protocol': 1.50.4
+      '@types/dom-mediacapture-record': 1.0.22
+      events: 3.3.0
+      jose: 6.2.8
+      loglevel: 1.9.2
+      sdp-transform: 2.15.0
+      tslib: 2.8.1
+      typed-emitter: 2.1.0
+      webrtc-adapter: 9.0.6
+
   livekit-server-sdk@2.17.0:
     dependencies:
       '@bufbuild/protobuf': 1.10.1
@@ -15165,7 +15195,7 @@ snapshots:
 
   next-intl-swc-plugin-extractor@4.13.5: {}
 
-  next-intl@4.13.5(@swc/helpers@0.5.23)(next@16.3.0(@types/node@22.20.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(typescript@5.9.3):
+  next-intl@4.13.5(@swc/helpers@0.5.23)(next@16.3.0(@babel/core@7.29.7)(@types/node@22.20.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(typescript@5.9.3):
     dependencies:
       '@formatjs/intl-localematcher': 0.8.13
       '@parcel/watcher': 2.6.0
@@ -16100,6 +16130,10 @@ snapshots:
       ajv-formats: 2.1.1(ajv@8.20.0)
       ajv-keywords: 5.1.0(ajv@8.20.0)
 
+  sdp-transform@2.15.0: {}
+
+  sdp@3.2.2: {}
+
   secure-json-parse@4.1.0: {}
 
   semver@6.3.1: {}
@@ -16718,6 +16752,10 @@ snapshots:
       possible-typed-array-names: 1.1.0
       reflect.getprototypeof: 1.0.10
 
+  typed-emitter@2.1.0:
+    optionalDependencies:
+      rxjs: 7.8.2
+
   typedoc-plugin-coverage@4.0.3(typedoc@0.28.20(typescript@5.9.3)):
     dependencies:
       typedoc: 0.28.20(typescript@5.9.3)
@@ -16951,6 +16989,10 @@ snapshots:
       - lightningcss
       - postcss
       - uglify-js
+
+  webrtc-adapter@9.0.6:
+    dependencies:
+      sdp: 3.2.2
 
   whatwg-fetch@3.6.20: {}
 

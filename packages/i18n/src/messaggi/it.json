@@ -597,7 +597,18 @@
       "invitaAltrove": "Invita in una tua aula",
       "invitaAltroveSub": "Scegli l’aula in cui vuoi invitarla",
       "nonContattabile": "Non accetta inviti da chi non è già nei suoi spazi",
-      "nessunaAulaDaModerare": "Puoi invitare solo nelle aule che moderi: al momento nessuna."
+      "nessunaAulaDaModerare": "Puoi invitare solo nelle aule che moderi: al momento nessuna.",
+      "audioMotivazione": "Il microfono serve solo a farti sentire da chi è in aula: niente viene registrato.",
+      "audioCollegamento": "Collegamento in corso…",
+      "audioGuastoMicrofono": "Il microfono non è disponibile",
+      "audioGuastoMicrofonoCosa": "Il browser ha negato il permesso, oppure un'altra applicazione lo sta usando. Consentilo dall'icona nella barra degli indirizzi e riprova.",
+      "audioGuastoPermesso": "Non puoi parlare in quest’aula",
+      "audioGuastoPermessoCosa": "Un moderatore può darti il permesso di parlare. Intanto puoi seguire la chat e i materiali.",
+      "audioGuastoNonDisponibile": "La voce non è disponibile",
+      "audioGuastoNonDisponibileCosa": "Riprova fra poco: il resto dell'aula funziona normalmente.",
+      "audioGuastoRete": "Questa rete non fa passare la voce",
+      "audioGuastoReteCosa": "Alcune reti — università, uffici — bloccano le chiamate audio. Prova con la rete del telefono.",
+      "audioRiprova": "Riprova"
     },
     "gruppo": {
       "titolo": "Gruppi",

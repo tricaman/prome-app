@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { ChatAula } from './chat-aula';
 import { MaterialiAula } from './materiali-aula';
 import { TabellaPermessi } from './tabella-permessi';
+import { BarraAudio } from './barra-audio';
 import { InvitaInAula } from './invita-in-aula';
 import { EsciDallAula, ImpostazioniAula } from './impostazioni-aula';
 
@@ -92,6 +93,8 @@ export function SalaAula({ aulaId }: { aulaId: string }) {
             </div>
 
             <aside className="hidden w-[280px] flex-none flex-col gap-5 bg-superficie p-5 xl:flex">
+              <BarraAudio aulaId={aulaId} puoParlare={data.mieiPermessi.parlare} />
+
               <section>
                 <p className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.08em] text-testo-debole">
                   {t('schede.partecipanti')}

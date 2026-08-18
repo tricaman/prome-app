@@ -597,7 +597,18 @@
       "invitaAltrove": "Invite to a room of yours",
       "invitaAltroveSub": "Pick the room you want to invite them to",
       "nonContattabile": "They don’t accept invitations from people outside their spaces",
-      "nessunaAulaDaModerare": "You can only invite into rooms you moderate: none right now."
+      "nessunaAulaDaModerare": "You can only invite into rooms you moderate: none right now.",
+      "audioMotivazione": "Your microphone is only used so people in the room can hear you: nothing is recorded.",
+      "audioCollegamento": "Connecting…",
+      "audioGuastoMicrofono": "The microphone is unavailable",
+      "audioGuastoMicrofonoCosa": "Your browser denied permission, or another app is using it. Allow access from the address bar icon and try again.",
+      "audioGuastoPermesso": "You cannot speak in this room",
+      "audioGuastoPermessoCosa": "A moderator can grant you permission to speak. In the meantime you can follow the chat and materials.",
+      "audioGuastoNonDisponibile": "Voice is unavailable",
+      "audioGuastoNonDisponibileCosa": "Try again shortly: the rest of the room works normally.",
+      "audioGuastoRete": "This network blocks voice calls",
+      "audioGuastoReteCosa": "Some networks — universities, offices — block audio calls. Try using your phone connection.",
+      "audioRiprova": "Try again"
     },
     "gruppo": {
       "titolo": "Groups",

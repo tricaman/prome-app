@@ -137,6 +137,18 @@ Il click su una riga **naviga subito e segna letta senza aspettare** (best-effor
 
 **«Risorsa non trovata»**: le destinazioni (post, gruppo, sala, inviti) passano al `QueryBoundary` un ramo `errore` che su `statusErrore(e) === 404` mostra `RisorsaNonTrovata` — senza Riprova, perché riprovare un 404 produce lo stesso 404. Il 404 si riconosce dallo **status**, mai elencando codici di dominio.
 
+### La voce dell'aula (E5.2, E5.3)
+
+`BarraAudio` sta nella colonna della sala, in **fascia inversa** come il piè di pagina. Tre regole, e nessuna è estetica.
+
+- **Non si collega mai da sola.** L'audio si accende con un gesto, non perché una schermata si è aperta: il microfono di qualcuno non è una risorsa che si prende quando fa comodo. È anche l'unico modo corretto di chiederne il permesso, perché il browser lo concede solo in risposta a un gesto — chiederlo al caricamento significa vederselo negare per sempre.
+- **La motivazione d'uso è dichiarata prima**, sopra il bottone, non in un tooltip dopo. E **senza il permesso di parlare il bottone non c'è**: al suo posto c'è la ragione. Scoprire un divieto da un errore, dopo aver premuto, somiglia a un guasto e non a una scelta di qualcun altro — stessa regola del pulsante «Invita».
+- **Quattro guasti, quattro messaggi, quattro rimedi** (`GuastoAudio` in `use-audiochat.ts`): microfono negato, permesso mancante, audio non disponibile, rete che blocca. Non è pignoleria: il rimedio di «consenti dalla barra degli indirizzi» non ha niente a che vedere con «prova con la rete del telefono», e un messaggio solo sarebbe sbagliato per metà delle persone. Per tenerli distinti **il microfono si chiede prima di collegarsi, e da solo**: chiedendoli insieme i due fallimenti diventano indistinguibili.
+
+**Chi sta parlando lo dice il server, mai il conteggio delle tracce.** Il nodo inoltra solo i parlanti più attivi — misurato durante lo spike, non supposto — quindi un elenco costruito sulle tracce ricevute mostrerebbe meno persone di quante ce ne sono, e diverse da quelle che si sentono. Si usa `ActiveSpeakersChanged`.
+
+**Quando l'audio non parte, la sala resta.** Nessuna schermata d'errore, nessun `QueryBoundary` in stato di guasto: il messaggio sta dentro la barra e tutto il resto — chat, materiali, partecipanti, moderazione — continua a funzionare. È RE4 vista da chi la usa, e c'è un test dell'API che la sorveglia dall'altra parte.
+
 ### Preferenze di notifica
 
 `impostazioni-notifiche.tsx` **dichiara il proprio stato invece di tacerlo**: le preferenze si salvano davvero e il server le rilegge all'istante dell'invio, ma governano **i canali che interrompono** — l'email del commento oggi, il push quando ci sarà un fornitore — mai la campanella, dove le notifiche arrivano sempre. Spegnere un asse significa «non disturbarmi», non «nascondimi l'informazione», e la scheda lo dice in prima riga. È l'opposto degli interruttori tolti a luglio, che si dicevano attivi senza salvare niente.
