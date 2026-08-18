@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useAudiochat, type GuastoAudio } from '@/hooks/use-audiochat';
+import type { Audiochat, GuastoAudio } from '@/hooks/use-audiochat';
 import { Button, Icona } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
@@ -24,9 +24,8 @@ import { cn } from '@/lib/utils';
  *    mostra una schermata d'errore: il resto dell'aula continua a funzionare,
  *    che è la promessa di RE4 vista da chi la usa.
  */
-export function BarraAudio({ aulaId, puoParlare }: { aulaId: string; puoParlare: boolean }) {
+export function BarraAudio({ audio, puoParlare }: { audio: Audiochat; puoParlare: boolean }) {
   const t = useTranslations('app.sala');
-  const audio = useAudiochat(aulaId);
 
   const guasti: Record<GuastoAudio, { titolo: string; cosa: string }> = {
     microfono: { titolo: t('audioGuastoMicrofono'), cosa: t('audioGuastoMicrofonoCosa') },

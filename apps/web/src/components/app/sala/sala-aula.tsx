@@ -13,6 +13,7 @@ import { ChatAula } from './chat-aula';
 import { MaterialiAula } from './materiali-aula';
 import { TabellaPermessi } from './tabella-permessi';
 import { BarraAudio } from './barra-audio';
+import { useAudiochat } from '@/hooks/use-audiochat';
 import { InvitaInAula } from './invita-in-aula';
 import { EsciDallAula, ImpostazioniAula } from './impostazioni-aula';
 
@@ -35,6 +36,10 @@ export function SalaAula({ aulaId }: { aulaId: string }) {
   const tComune = useTranslations('comune');
   const [scheda, setScheda] = useState<Scheda>('chat');
   const sala = useApriSalaAulaStudio(aulaId);
+  // L'audio sta **qui** e non dentro la barra, perché lo guardano in due: la
+  // barra per i comandi, l'elenco dei partecipanti per accendere il cerchio a
+  // chi parla. Due copie dello stesso collegamento sarebbero due stanze.
+  const audio = useAudiochat(aulaId, sala.data?.data.mieiPermessi.parlare ?? false);
   // Serve per sapere quale riga dei partecipanti sono io, e quindi per uscire.
   const io = useLeggiMioProfilo();
 
@@ -93,7 +98,7 @@ export function SalaAula({ aulaId }: { aulaId: string }) {
             </div>
 
             <aside className="hidden w-[280px] flex-none flex-col gap-5 bg-superficie p-5 xl:flex">
-              <BarraAudio aulaId={aulaId} puoParlare={data.mieiPermessi.parlare} />
+              <BarraAudio audio={audio} puoParlare={data.mieiPermessi.parlare} />
 
               <section>
                 <p className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.08em] text-testo-debole">
@@ -106,7 +111,23 @@ export function SalaAula({ aulaId }: { aulaId: string }) {
                       tComune('utenteRimosso');
                     return (
                       <li key={partecipante.utenteId} className="flex items-center gap-2.5">
-                        <Avatar nome={nome} dimensione={32} />
+                        {/* Il cerchio si accende su chi parla, ed è lo stesso
+                            segnale del microfono nella barra: viene dagli
+                            eventi del server, quindi l'elenco che vedo è
+                            quello che vedono tutti. Il colore non basta da
+                            solo — chi non lo distingue non perde niente,
+                            perché la voce si sente comunque: è un aiuto, non
+                            l'unico canale dell'informazione. */}
+                        <span
+                          className={cn(
+                            'flex-none rounded-full transition-all',
+                            audio.parlanti.has(partecipante.utenteId)
+                              ? 'ring-2 ring-primario ring-offset-2 ring-offset-superficie'
+                              : 'ring-0',
+                          )}
+                        >
+                          <Avatar nome={nome} dimensione={32} />
+                        </span>
                         <span className="min-w-0 flex-1 truncate text-[13px] font-bold text-testo">
                           {nome}
                         </span>

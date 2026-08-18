@@ -64,7 +64,22 @@ export interface Audiochat {
   commutaMicrofono: () => Promise<void>;
 }
 
-export function useAudiochat(aulaId: string): Audiochat {
+/**
+ * `puoParlare` accende l'**ingresso automatico**, che è ciò che ci si aspetta
+ * da una stanza vocale: si atterra e si è dentro, poi semmai ci si muta.
+ *
+ * Con una condizione che non è una cautela ma il vincolo del work package —
+ * «mai attivazione implicita»: si entra da soli **solo se il permesso del
+ * microfono è già stato concesso**, cioè solo quando entrare non fa comparire
+ * alcuna richiesta. La prima volta il permesso lo si chiede con un gesto, con
+ * la motivazione scritta sopra il bottone; dalla seconda in poi si entra da
+ * sé, esattamente come in Discord.
+ *
+ * Dove il browser non sa rispondere alla domanda (Firefox e Safari non
+ * espongono lo stato del microfono) si resta al gesto: è la risposta prudente,
+ * e in cambio nessuno si trova il microfono aperto senza averlo chiesto.
+ */
+export function useAudiochat(aulaId: string, puoParlare = false): Audiochat {
   const [stato, setStato] = useState<Audiochat['stato']>('fuori');
   const [guasto, setGuasto] = useState<GuastoAudio | null>(null);
   const [parlanti, setParlanti] = useState<ReadonlySet<string>>(new Set());
@@ -155,6 +170,30 @@ export function useAudiochat(aulaId: string): Audiochat {
     setQuanti(room.numParticipants + 1);
     setStato('dentro');
   }, [aulaId, smonta]);
+
+  // Un tentativo solo per visita: chi esce di proposito non deve ritrovarsi
+  // dentro un istante dopo, che sarebbe il modo più fastidioso di ignorare un
+  // gesto.
+  const giaTentato = useRef(false);
+
+  useEffect(() => {
+    if (!puoParlare || giaTentato.current) return;
+    if (typeof navigator === 'undefined' || !navigator.permissions) return;
+
+    let vivo = true;
+    navigator.permissions
+      .query({ name: 'microphone' as PermissionName })
+      .then((permesso) => {
+        if (!vivo || permesso.state !== 'granted' || giaTentato.current) return;
+        giaTentato.current = true;
+        void entra();
+      })
+      .catch(() => undefined);
+
+    return () => {
+      vivo = false;
+    };
+  }, [puoParlare, entra]);
 
   const commutaMicrofono = useCallback(async () => {
     const room = stanza.current;

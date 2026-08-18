@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { LUNGHEZZA_MASSIMA_MESSAGGIO } from '@prome/contracts';
 import { useChatAula } from '@/hooks/use-chat-aula';
-import { Avatar, Button } from '@/components/ui';
+import { Avatar, Button, Icona } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
 /**
@@ -122,13 +122,18 @@ export function ChatAula({ aulaId, puoScrivere }: { aulaId: string; puoScrivere:
               aria-label={t('scrivi')}
               className="max-h-32 min-h-[46px] flex-1 resize-y rounded-[14px] border-2 border-bordo bg-superficie px-3.5 py-3 text-sm text-testo"
             />
+            {/* Un aeroplanino e basta. La label diceva «Invia invito» —
+                era la chiave degli inviti, finita nella chat — e comunque il
+                gesto di mandare un messaggio è il più riconoscibile che ci
+                sia: il nome per chi non vede resta in `aria-label`. */}
             <Button
-              className="h-[46px] flex-none px-5"
+              className="h-[46px] w-[46px] flex-none p-0"
               isDisabled={!testo.trim()}
               inCaricamento={inInvio}
               onPress={() => void manda()}
+              aria-label={t('inviaMessaggio')}
             >
-              {t('invia')}
+              <Icona nome="invia" dimensione={18} />
             </Button>
           </div>
         ) : (
