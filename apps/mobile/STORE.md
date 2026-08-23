@@ -32,15 +32,32 @@ Confini dichiarati: il blocco vale per la bacheca (la superficie non scelta) e n
 gruppi già condivisi, dove restano uscita e moderazione; si segnalano post e commenti, non i
 messaggi d'aula (spazi a moderazione propria).
 
+**Cosa vuol dire «moderazione propria», per esteso** — verificato sul codice, non dedotto. In
+un'aula un moderatore può revocare il permesso `scrivere` a un partecipante (silenziarlo in chat) e
+rimuoverlo dall'aula: `concediPermesso` / `revocaPermesso` / `rimuoviPartecipante`, con l'interfaccia
+presente anche sul telefono. Quello che **non** esiste è l'eliminazione di un messaggio già scritto —
+nessun endpoint, su nessun client — e la segnalazione di un messaggio di chat: `POST /segnalazioni`
+accetta solo `POST` e `COMMENTO`. Conseguenza pratica: un messaggio offensivo in un'aula resta
+leggibile a chi c'è dentro, e chi lo legge non ha un modo per farlo vedere a noi.
+
+> È il buco residuo della 1.2, ed è più un rischio per Apple che per Google: la chat d'aula è
+> contenuto generato dagli utenti senza percorso di segnalazione. Le due cose che lo chiudono sono
+> **segnalare un messaggio** ed **eliminarlo da moderatore**, e vanno fatte insieme: segnalare senza
+> poter rimuovere sposta il problema, rimuovere senza segnalare lo fa vedere solo a chi è già
+> moderatore.
+
 ### 1.2 Gli account esterni sono tuoi
 
 - **Apple Developer Program** (99 $/anno) e **Google Play Console** (25 $ una volta): senza, `eas
   submit` non ha dove andare.
-- **Account Expo** e progetto EAS: `eas init` scrive `extra.eas.projectId` in `app.json` — l'ho
+- **Account Expo** e progetto EAS: `eas init` scrive `extra.eas.projectId` in `app.config.ts` — l'ho
   lasciato fuori di proposito, perché un identificativo inventato fa fallire la prima build con un
   errore che non nomina la causa.
-- **Credenziali di firma**: le gestisce EAS (`eas credentials`). La cartella `credenziali/` è
-  ignorata da git, ed è dove va la chiave del service account di Play.
+- **Credenziali di firma**: le build si fanno **in locale**, non su EAS. La chiave di caricamento
+  Android sta in `~/keys/prome-upload.keystore`, con le password nelle gradle properties dell'utente
+  (`~/.gradle/gradle.properties`, mai nel repo) — la procedura completa è in `DEPLOY.md`. La cartella
+  `credenziali/` è ignorata da git, ed è dove andrebbe la chiave del service account di Play se un
+  giorno si automatizzasse l'upload.
 
 ---
 
@@ -49,9 +66,9 @@ messaggi d'aula (spazi a moderazione propria).
 | campo | valore |
 | --- | --- |
 | Nome | Prome |
-| Bundle identifier (iOS) | `app.prome` |
-| Package name (Android) | `app.prome` |
-| Versione | 1.0.0 (build number e versionCode li incrementa EAS: `appVersionSource: "remote"`) |
+| Bundle identifier (iOS) | `app.mariustrica.prome` |
+| Package name (Android) | `app.mariustrica.prome` |
+| Versione | 1.0.0 — `version`, `ios.buildNumber` e `android.versionCode` stanno in `app.config.ts` e si incrementano a mano prima di ogni build (`appVersionSource: "local"`) |
 | Categoria primaria | Istruzione |
 | Categoria secondaria | Social |
 | Lingue | Italiano, Inglese |
@@ -159,6 +176,38 @@ Prome is built for Italian universities, and the servers are in the European Uni
 **Keywords**:
 `study,university,notes,exams,study group,campus,materials,students,share,study room`
 
+### Note di rilascio
+
+Sono un campo **per lingua e per versione**, e il limite è **500 caratteri** su Play (App Store è
+più largo, 4000: si usa lo stesso testo). Su Play compaiono ai tester subito e nella voce «Novità»
+della scheda quando la stessa build arriva in produzione — quindi si riscrivono a ogni release, e
+non si lascia in pubblico quella scritta per i tester.
+
+**1.0.0 — prima build sui track di prova** (426 caratteri):
+
+```
+Prima versione di prova di Prome.
+
+Cosa puoi già fare: entrare con l'email e un codice, completare il profilo con il tuo corso, scrivere in bacheca con allegati e commenti, aprire un'aula studio con i materiali e la chat, creare gruppi e invitare chi vuoi, decidere chi vede i tuoi contenuti.
+
+Qualche parte è ancora in lavorazione: se qualcosa non torna o si comporta in modo strano, scrivicelo — è il motivo per cui sei qui.
+```
+
+**1.0.0 — versione pubblica**, da usare quando la stessa versione va in produzione (434 caratteri):
+
+```
+Prima versione di Prome.
+
+Aule studio: i materiali di un esame in un posto solo, e una chat che resta scritta per chi arriva dopo. Gruppi per le persone con cui studi sempre. Bacheca per chiedere e rispondere, con allegati e commenti.
+
+Chi vede cosa lo decidi tu: solo tu, il tuo ateneo o tutti gli iscritti. Niente pagine pubbliche, niente tracciamento pubblicitario.
+
+Si entra con l'email e un codice: nessuna password da ricordare.
+```
+
+> La versione inglese va scritta prima di pubblicare la scheda in inglese: Play mostra le note nella
+> lingua della scheda, e una scheda inglese con note italiane sembra un errore di caricamento.
+
 ---
 
 ## 4. Cosa tratta il prodotto, tabella per tabella
@@ -247,8 +296,11 @@ account senza offrirne l'eliminazione.
 Domande trasversali:
 
 - **Dati cifrati in transito**: sì, HTTPS su tutto (certificati Let's Encrypt, un solo servizio esposto).
-- **Gli utenti possono chiedere la cancellazione dei dati**: sì, **dall'app** e dal web. URL per la
-  richiesta senza installare l'app: `https://prome.app/app/impostazioni`.
+- **Gli utenti possono chiedere la cancellazione dei dati**: sì, **dall'app** e dal web. URL da
+  dichiarare a Play: **`https://prome.app/elimina-account`** — pagina pubblica, raggiungibile senza
+  installare niente e senza entrare, collegata dal piè di pagina del sito. Non dichiarare
+  `/app/impostazioni`: è dietro l'accesso, quindi non soddisfa il requisito.
+  Contenuto e struttura: `packages/contenuti/src/legali.ts` (`ELIMINA_ACCOUNT_SEZIONI`).
 - **Raccolta obbligatoria per usare l'app**: nome, email e identificativo sì; il resto no.
 - **Dati raccolti solo in modo effimero**: no, ciò che è dichiarato è conservato.
 - **Rivolta ai bambini**: no. Pubblico: studenti universitari.

@@ -168,6 +168,7 @@
       "privacy": "Privacy",
       "termini": "Termini",
       "cookie": "Cookie",
+      "eliminaAccount": "Eliminare l’account",
       "sitemap": "Sitemap",
       "diritti": "© {anno} Prome · Brescia",
       "argomenti": "Argomenti",
@@ -320,6 +321,14 @@
     "lineeGuida": {
       "titolo": "Linee guida della community",
       "descrizione": "Le regole della community di Prome: cosa non è ammesso, come segnalare un contenuto e come bloccare una persona.",
+      "documenti": "Documenti",
+      "inQuestaPagina": "In questa pagina",
+      "inBreve": "In breve",
+      "soloItaliano": "Questo documento è disponibile solo in italiano: una traduzione redatta arriverà, una automatica no."
+    },
+    "eliminaAccount": {
+      "titolo": "Eliminare l’account",
+      "descrizione": "Come eliminare il tuo account Prome e tutti i tuoi dati, dall’app o dal sito, senza chiedere niente a nessuno.",
       "documenti": "Documenti",
       "inQuestaPagina": "In questa pagina",
       "inBreve": "In breve",

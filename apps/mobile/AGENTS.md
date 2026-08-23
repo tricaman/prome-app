@@ -36,14 +36,19 @@ Materiale, dichiarazioni e il conto di ciò che manca prima di sottomettere stan
 si aggiorna nello stesso commit del prodotto: una dichiarazione vecchia è indistinguibile da una
 giusta per chi la legge.
 
-- **Le versioni le tiene EAS** (`appVersionSource: "remote"`, `autoIncrement` in produzione): non si
-  scrivono `buildNumber` né `versionCode` in `app.json`, e non si committa un bump. La politica del
+- **Le versioni stanno in `app.config.ts`** (`version`, `ios.buildNumber`, `android.versionCode`) e
+  si incrementano a mano prima di ogni build: le build si fanno in locale, non su EAS, e nessuno le
+  incrementa al posto tuo. La fonte di verità è lo **store**, non il file. La politica del
   piano resta quella: **nessuna funzionalità richiede l'aggiornamento simultaneo di client e
   backend**, e nessuna versione dell'app si rende inutilizzabile prima di 90 giorni dalla
   pubblicazione della successiva. In pratica significa che il server non risponde mai «aggiorna
   l'app» a un client vecchio: l'evoluzione del contratto è solo additiva dentro una versione.
-- **`app.prome`** è l'identificativo su entrambe le piattaforme (il dominio è `prome.app`, letto al
-  contrario), e non si cambia: cambiarlo dopo la prima pubblicazione significa un'app nuova.
+- **`app.mariustrica.prome`** è l'identificativo su entrambe le piattaforme — stessa forma delle
+  altre app pubblicate — e non si cambia: cambiarlo dopo la prima pubblicazione significa un'app
+  nuova, che perde installazioni, recensioni e tester. La variante di sviluppo
+  (`APP_VARIANT=development`) aggiunge il suffisso `.dev` e si installa accanto a quella dello
+  store; il ripiego di `APP_VARIANT` è **production**, così dimenticarla non manda una build `.dev`
+  sugli store.
 - **`ios.config.usesNonExemptEncryption: false`**: usiamo solo TLS e le API di sistema, che sono
   esenti. Senza questa riga la stessa domanda torna a ogni sottomissione, e una risposta data a mano
   in fretta è una dichiarazione sbagliata su un modulo di conformità.
@@ -157,9 +162,11 @@ vera, non un ripiego.
 
 Tre pezzi, e vanno cambiati insieme:
 
-1. `app.json` — `ios.associatedDomains` e `android.intentFilters` (con `autoVerify`) dichiarano
-   quali indirizzi l'app rivendica. **Solo gli inviti**: rivendicare tutta `/app/` aprirebbe l'app
-   su «Pagina non trovata» ogni volta che manca la schermata corrispondente.
+1. `app.config.ts` — `ios.associatedDomains` e `android.intentFilters` (con `autoVerify`)
+   dichiarano quali indirizzi l'app rivendica. **Solo gli inviti**: rivendicare tutta `/app/`
+   aprirebbe l'app su «Pagina non trovata» ogni volta che manca la schermata corrispondente. Li
+   rivendica **solo la variante di produzione**: l'associazione sul server nomina un identificativo
+   solo, e una build `.dev` fra i candidati renderebbe ambiguo chi apre cosa.
 2. `src/app/+native-intent.tsx` — traduce l'indirizzo del sito (`/it/app/inviti/<id>`) nella rotta
    dell'app (`/inviti/<id>`). Senza, un link universale aprirebbe l'app su un 404, che è peggio di
    non averla aperta. Non può lanciare: un errore lì cade all'avvio.

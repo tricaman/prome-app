@@ -72,6 +72,11 @@ export function SiteFooter() {
             <Link href={percorsi.cookie()} className="hover:text-primary-500">
               {t('footer.cookie')}
             </Link>
+            {/* Richiesto da Google Play: l'indirizzo per eliminare l'account deve
+                essere pubblico e trovabile senza avere l'app installata. */}
+            <Link href={percorsi.eliminaAccount()} className="hover:text-primary-500">
+              {t('footer.eliminaAccount')}
+            </Link>
           </span>
         </div>
       </Container>

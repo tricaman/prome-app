@@ -24,8 +24,8 @@
  * di oggi e si comporta esattamente come oggi.
  */
 
-/** Lo stesso identificativo di `app.json`, sulle due piattaforme. */
-const IDENTIFICATIVO_APP = 'app.prome';
+/** Lo stesso identificativo di `app.config.ts`, sulle due piattaforme. */
+const IDENTIFICATIVO_APP = 'app.mariustrica.prome';
 
 /**
  * Con e senza prefisso di lingua: l'email manda a `/app/inviti/<id>` e il

@@ -168,6 +168,7 @@
       "privacy": "Privacy",
       "termini": "Terms",
       "cookie": "Cookies",
+      "eliminaAccount": "Delete your account",
       "sitemap": "Sitemap",
       "diritti": "© {anno} Prome · Brescia",
       "argomenti": "Topics",
@@ -324,6 +325,14 @@
       "inQuestaPagina": "On this page",
       "inBreve": "In short",
       "soloItaliano": "This document is only available in Italian: a properly drafted translation will come, a machine one will not."
+    },
+    "eliminaAccount": {
+      "titolo": "Delete your account",
+      "descrizione": "How to delete your Prome account and all your data, from the app or the website, without asking anyone.",
+      "documenti": "Documents",
+      "inQuestaPagina": "On this page",
+      "inBreve": "In short",
+      "soloItaliano": "This document is only available in Italian: a written translation will come, a machine one will not."
     }
   },
   "app": {

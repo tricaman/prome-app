@@ -73,7 +73,7 @@ const ESTENSIONI: Record<string, string> = {
  * **Non chiede alcun permesso**: la selezione avviene nel selettore di
  * sistema, che consegna all'app la sola immagine scelta. Il modulo dichiara
  * comunque la libreria foto su iOS (Apple lo pretende appena il framework è
- * collegato) e in `app.json` fotocamera, microfono e archiviazione sono
+ * collegato) e in `app.config.ts` fotocamera, microfono e archiviazione sono
  * bloccati: quello che resta dichiarato è ciò che serve, e non produce
  * richieste a schermo.
  *

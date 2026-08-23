@@ -216,6 +216,63 @@ export const COOKIE_SEZIONI: readonly SezioneLegale[] = [
   },
 ];
 
+// --- Eliminazione dell'account ------------------------------------------------
+
+export const ELIMINA_ACCOUNT_IN_BREVE = [
+  'L’account si elimina da solo, dall’app o dal sito: nessuna richiesta da mandare, nessuno da aspettare.',
+  'Hai quattordici giorni per cambiare idea: basta rientrare e la richiesta si annulla.',
+  'Passati i quattordici giorni profilo e account spariscono; post e commenti restano come «Utente rimosso».',
+  `Se non riesci più a entrare, scrivi a ${EMAIL_PRIVACY} e lo facciamo noi.`,
+] as const;
+
+/**
+ * La pagina che gli store pretendono, e che serve anche a chi non ha l'app.
+ *
+ * Google Play chiede un **indirizzo web pubblico** dove chiedere la
+ * cancellazione dell'account, raggiungibile senza installare niente. Il
+ * requisito non è soddisfatto da una schermata dentro l'app — che è dove il
+ * gesto vive, non dove arriva chi l'app non ce l'ha — né dal paragrafo della
+ * privacy policy, che spiega il trattamento e non è un posto dove si fa
+ * qualcosa.
+ *
+ * Quello che segue **non duplica** la privacy policy: quella descrive il
+ * trattamento, questa dice dove premere. Che si contraddicano è la cosa da
+ * evitare, ed è il motivo per cui i quattordici giorni e il destino dei
+ * contenuti sono scritti con le stesse parole di «6. Cosa succede quando
+ * elimini l'account».
+ */
+export const ELIMINA_ACCOUNT_SEZIONI: readonly SezioneLegale[] = [
+  {
+    id: 'dallapp',
+    titolo: '1. Dall’app o dal sito, da solo',
+    corpo:
+      'Apri le Impostazioni — nell’app Prome oppure su prome.app dopo essere entrato — e scegli «Elimina account». Ti viene chiesto di digitare una parola per confermare, perché non è un gesto che deve poter partire per sbaglio. Non serve installare l’app per farlo: il sito fa la stessa cosa, dallo stesso account.',
+  },
+  {
+    id: 'grazia',
+    titolo: '2. Quattordici giorni per cambiare idea',
+    corpo:
+      'Appena chiedi la cancellazione le sessioni vengono revocate e il profilo scompare: per gli altri, da quel momento, non ci sei più. Per quattordici giorni però la richiesta è annullabile — rientri con la tua email e il codice, te lo diciamo a schermo, e ritrovi tutto. Passati i quattordici giorni la cancellazione è definitiva e non è più reversibile in nessun modo.',
+  },
+  {
+    id: 'cosa-sparisce',
+    titolo: '3. Cosa viene eliminato e cosa resta',
+    corpo:
+      'Vengono eliminati: profilo, account e credenziali di accesso, la tua foto, gli inviti che ti riguardano, le persone che hai bloccato, le segnalazioni che hai mandato, le notifiche.\n\nRestano, senza il tuo nome: post e commenti diventano «Utente rimosso», anonimizzati con un identificativo diverso per ogni contenuto — non esiste una tabella che permetta di ricollegarli fra loro o a te. I materiali che hai caricato in un’aula restano a chi studiava con te, con il nome di chi li ha portati reso anonimo, e lo stesso vale per i messaggi delle chat d’aula: il contributo alla comunità sopravvive, il riferimento alla persona no.',
+  },
+  {
+    id: 'senza-accesso',
+    titolo: '4. Se non riesci più a entrare',
+    corpo: `Se hai perso l’accesso alla casella email con cui ti sei iscritto, scrivi a ${EMAIL_PRIVACY} dall’indirizzo che riesci a usare, indicando l’email dell’account da eliminare. Ti verrà chiesto di dimostrare che l’account è tuo — è una tutela per te — e la cancellazione parte da lì, con le stesse regole descritte sopra.`,
+  },
+  {
+    id: 'dati',
+    titolo: '5. Prima di andartene, i tuoi dati',
+    corpo:
+      'Dalle Impostazioni puoi scaricare una copia completa di ciò che Prome ha su di te, in un file solo. Conviene farlo prima: dopo la cancellazione non c’è più nulla da esportare. Il dettaglio del trattamento sta nella privacy policy.',
+  },
+] as const;
+
 // --- Linee guida della community --------------------------------------------
 
 /**

@@ -27,4 +27,11 @@ export const percorsi = {
   termini: () => '/termini',
   cookie: () => '/cookie',
   lineeGuida: () => '/linee-guida',
+  /**
+   * L'indirizzo che Google Play pretende: pubblico, raggiungibile senza
+   * installare l'app, ed è quello dichiarato nella scheda dello store. Se
+   * cambia, va cambiato anche là — un 404 lì è una violazione delle norme,
+   * non un collegamento rotto.
+   */
+  eliminaAccount: () => '/elimina-account',
 } as const;
