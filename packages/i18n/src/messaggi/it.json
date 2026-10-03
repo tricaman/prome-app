@@ -792,7 +792,9 @@
         "lineeGuida": "Linee guida della community",
         "eliminaSub": "Contenuti anonimizzati, dati cancellati entro 30 giorni",
         "scaricaSub": "Una copia di tutto, in formato leggibile",
-        "apreIlSito": "Si apre nel browser"
+        "apreIlSito": "Si apre nel browser",
+        "valuta": "Valuta Prome",
+        "valutaSub": "Si apre lo store del telefono"
       },
       "modificaProfilo": {
         "titolo": "Modifica profilo",

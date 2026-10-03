@@ -792,7 +792,9 @@
         "lineeGuida": "Community guidelines",
         "eliminaSub": "Content anonymised, data deleted within 30 days",
         "scaricaSub": "A copy of everything, in a readable format",
-        "apreIlSito": "Opens in the browser"
+        "apreIlSito": "Opens in the browser",
+        "valuta": "Rate Prome",
+        "valutaSub": "Opens your phone's app store"
       },
       "modificaProfilo": {
         "titolo": "Edit profile",

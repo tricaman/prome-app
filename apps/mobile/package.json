@@ -29,6 +29,7 @@
     "expo-sharing": "~57.0.12",
     "expo-splash-screen": "~57.0.6",
     "expo-status-bar": "~57.0.1",
+    "expo-store-review": "57.0.3",
     "expo-symbols": "~57.0.2",
     "expo-system-ui": "~57.0.2",
     "expo-web-browser": "~57.0.2",
@@ -47,6 +48,7 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@types/node": "22.20.1",
     "@types/react": "~19.2.2",
     "eslint-config-expo": "~57.0.1",
     "typescript": "~6.0.3"
@@ -58,6 +60,7 @@
     "web": "expo start --web",
     "icone": "node scripts/genera-icone.mjs",
     "lint": "expo lint",
+    "test": "node --test 'src/**/*.test.ts'",
     "typecheck": "tsc --noEmit"
   },
   "private": true

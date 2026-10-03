@@ -9,6 +9,7 @@ import {
   useLeggiMioProfilo,
 } from '@prome/api-client';
 import { LUNGHEZZA_MASSIMA_POST } from '@prome/contracts';
+import { dopoPostPubblicato } from '@/lib/recensione-nativa';
 import { scegliDocumento, scegliFoto, type FileScelto } from '@/lib/scelta-file';
 import { useTema } from '@/theme';
 import { useApiMutation, useT } from '@/hooks';
@@ -57,7 +58,10 @@ export default function SchermataComponi() {
         allegati: allegati.map((a) => a.chiave).filter((c): c is string => Boolean(c)),
       }),
     invalida: [getElencaPostQueryKey()],
-    onSuccess: () => router.back(),
+    onSuccess: () => {
+      dopoPostPubblicato();
+      router.back();
+    },
   });
 
   const puoPubblicare =

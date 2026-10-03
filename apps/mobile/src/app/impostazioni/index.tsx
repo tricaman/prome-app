@@ -7,6 +7,7 @@ import { paginaDelSito, rotte } from '@/content';
 import { useSceltaTema, useTema, SCELTE_TEMA } from '@/theme';
 import { useT } from '@/hooks';
 import { useI18n } from '@/i18n/i18n-provider';
+import { apriSchedaRecensione, indirizzoRecensioneApp } from '@/lib/recensione-nativa';
 import { SEGNAPOSTO_DISPOSITIVI, SEGNAPOSTO_EMAIL } from '@/lib/segnaposto';
 import { useScaricaDati } from '@/components/app/scarica-dati';
 import {
@@ -179,6 +180,16 @@ export default function SchermataImpostazioni() {
             sottotitolo={t('app.impostazioni.voci.apreIlSito')}
             onPress={apriSulSito('/linee-guida')}
           />
+          {/* Drawn only where there is a store page to open: on iOS that
+              waits for the App Store id (see `app.config.ts`). */}
+          {indirizzoRecensioneApp() ? (
+            <RigaElenco
+              icona="stella"
+              etichetta={t('app.impostazioni.voci.valuta')}
+              sottotitolo={t('app.impostazioni.voci.valutaSub')}
+              onPress={() => void apriSchedaRecensione()}
+            />
+          ) : null}
         </Elenco>
 
         <TitoloSezione>{t('app.impostazioni.gruppi.tuoiDati')}</TitoloSezione>

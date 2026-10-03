@@ -116,6 +116,44 @@ due era cosmetica:
 Un peer non soddisfatto (`@expo/metro-runtime`) **non si aggiusta con un override**: gli override non
 toccano i peer. Si installa nell'app la versione attesa, e allora la risoluzione torna a posto.
 
+## In-app review
+
+Native review prompt via `expo-store-review`, which fronts SKStoreReviewController on iOS and
+Play In-App Review on Android. Ported from norbo-mobile and dit-mobile; only the trigger moment is
+Prome's own.
+
+- `src/lib/recensione.ts` holds the decisions and imports NOTHING, so `node --test` can load it:
+  `richiestaDovuta` (the weekly gate) and `indirizzoRecensione` (what the settings row opens).
+  `src/lib/recensione-nativa.ts` owns the native calls, the moment and the timestamp.
+- It fires on a MOMENT, never on launch: `RITARDO_MOMENTO_MS` (3s) after `dopoPostPubblicato()`,
+  which the composer calls when a post is published. Not after creating a room or accepting an
+  invite: both land in the voice room, and a sheet there covers the call. A new trigger must land
+  on a calm screen.
+- One armed ask at a time. Going to `background` DROPS it: Android pauses JS timers there and fires
+  the overdue one on resume, when `AppState` already reads "active". `inactive` keeps it (transient
+  on iOS). The fire-time check stays as a backstop.
+- The timestamp lives in `expo-secure-store` (`prome.recensione.ultimaRichiesta`, next to
+  `prome.tema`). The first post only STARTS the clock, so the first prompt lands 7 days later or
+  more, never on day one. A timestamp in the future counts as due, or the prompt locks out forever.
+  It is written AFTER `requestReview()` resolves: a rejection means nothing was shown, so the slot
+  stays open.
+- The automatic prompt is native-sheet-only (`isAvailableAsync()`, false on TestFlight) and never
+  falls back to the store listing.
+- The "Rate Prome" row (settings, Information group) NEVER calls `requestReview()`: both stores
+  cap the sheet and then show nothing, so a tap would look broken. It opens the listing
+  (`?action=write-review` on iOS) and restarts the weekly clock. The ids come from `extra` in
+  `app.config.ts`: `pacchettoAndroid` is the production package, `idAppStore` stays `undefined` until
+  the app exists in App Store Connect (not `null`: Expo's config merge turns it into `{}`), and until then **the row is not drawn on iOS**. Set it there when
+  the id exists; nothing else changes.
+- Absence of a sheet is not a bug: iOS shows it freely in debug builds and caps it at 3 a year in
+  production; Android shows it only for an install from Play (an internal track works).
+- Native module: a dev client built before the dependency crashes at import. Rebuild after pulling.
+
+`pnpm test` runs Node's own runner over `src/**/*.test.ts`, no jest and no babel: Node strips the
+types. Only dependency-free modules are testable this way, which is the point. A test imports its
+subject with the `.ts` extension (`allowImportingTsExtensions` keeps `tsc` happy) and declares
+`/// <reference types="node" />`, because TypeScript 6 no longer loads `@types` on its own.
+
 ## Accesso
 
 **Unificato: email + codice OTP, nessuna password.** `accedi.tsx` chiede solo l'email e passa a `codice.tsx` portandosi dietro l'indirizzo (`rotte.codice(email)`), che va ripetuto in schermata: è l'unico modo per accorgersi di averlo sbagliato prima di aspettare un messaggio che non arriverà. Non c'è una registrazione separata, quindi la schermata iniziale ha un invito solo.

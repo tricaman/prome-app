@@ -32,6 +32,13 @@ const IN_SVILUPPO = VARIANTE === 'development';
 /** Il dominio al contrario, come le altre app. Il sito è `prome.app`. */
 const IDENTIFICATIVO_BASE = 'app.mariustrica.prome';
 
+/**
+ * The numeric App Store id, which exists only once the app is created in App
+ * Store Connect. Until it is set, iOS has no store page to open, and the
+ * "Rate Prome" settings row is not drawn (`src/lib/recensione-nativa.ts`).
+ */
+const ID_APP_STORE: string | undefined = undefined;
+
 const identificativo = IN_SVILUPPO ? `${IDENTIFICATIVO_BASE}.dev` : IDENTIFICATIVO_BASE;
 const nome = IN_SVILUPPO ? 'Prome (Dev)' : 'Prome';
 
@@ -150,5 +157,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   extra: {
     variante: VARIANTE,
+    // Store pages for the "Rate Prome" row. Always the production listing,
+    // even from a `.dev` build: that one is not on any store.
+    idAppStore: ID_APP_STORE,
+    pacchettoAndroid: IDENTIFICATIVO_BASE,
   },
 });
