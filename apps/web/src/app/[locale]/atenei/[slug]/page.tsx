@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { ATENEI, ateneiPiuAttivi, ateneoDi, percorsi } from '@/content';
+import { ATENEI, ateneiInEvidenza, ateneoDi, percorsi } from '@/content';
 import { linguaDellaRotta, linguaDeiMetadati } from '@/lib/pagina';
 import { creaMetadata } from '@/lib/seo';
 import { briciole, organizzazioneEducativa } from '@/lib/schema';
@@ -10,10 +10,8 @@ import {
   ColonneContenuto,
   RiquadroLaterale,
   RichiamoMenta,
-  Statistica,
   TestataPagina,
   TitoloSezione,
-  numero,
 } from '@/components/contenuti';
 import { Button, ButtonLink, Card } from '@/components/ui';
 import { Link } from '@/i18n/navigazione';
@@ -56,19 +54,12 @@ export default async function PaginaAteneo({ params }: { params: Promise<Paramet
 
   const t = await getTranslations('pagine.ateneo');
   const tSito = await getTranslations('sito');
-  const altri = ateneiPiuAttivi(6).filter((voce) => voce.slug !== ateneo.slug);
+  const altri = ateneiInEvidenza(6).filter((voce) => voce.slug !== ateneo.slug);
 
   const voci = [
     { etichetta: tSito('home'), href: percorsi.home() },
     { etichetta: tSito('nav.atenei'), href: percorsi.atenei() },
     { etichetta: ateneo.nome },
-  ];
-
-  const statistiche = [
-    { valore: numero(ateneo.statistiche.studenti), etichetta: t('statistiche.studenti') },
-    { valore: numero(ateneo.statistiche.auleStudioMese), etichetta: t('statistiche.aule') },
-    { valore: numero(ateneo.statistiche.materiali), etichetta: t('statistiche.materiali') },
-    { valore: numero(ateneo.statistiche.gruppi), etichetta: t('statistiche.gruppi') },
   ];
 
   return (
@@ -96,15 +87,6 @@ export default async function PaginaAteneo({ params }: { params: Promise<Paramet
       />
 
       <Container className="py-7">
-        {/* Numeri aggregati, non contenuti: rispondono all'unica domanda del
-            visitatore — "ci sono i miei compagni qui?" — senza esporre nulla
-            di ciò che gli studenti hanno scritto. */}
-        <div className="mb-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {statistiche.map((voce) => (
-            <Statistica key={voce.etichetta} valore={voce.valore} etichetta={voce.etichetta} />
-          ))}
-        </div>
-
         <ColonneContenuto
           larghezzaFianco={320}
           fianco={
@@ -143,10 +125,6 @@ export default async function PaginaAteneo({ params }: { params: Promise<Paramet
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-extrabold text-testo">
                         {corso.nome}
-                      </span>
-                      <span className="mt-0.5 block text-[11.5px] text-testo-didascalia">
-                        {t('studenti', { numero: numero(corso.studenti) })} ·{' '}
-                        {t('conAule', { numero: corso.auleStudio })}
                       </span>
                     </span>
                   </Card>

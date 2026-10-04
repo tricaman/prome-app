@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { eLinguaSupportata } from '@prome/i18n';
-import { ateneiPiuAttivi, percorsi } from '@/content';
+import { ateneiInEvidenza, percorsi } from '@/content';
 import { percorsiApp } from '@/lib/percorsi-app';
 import { creaMetadata } from '@/lib/seo';
 import { Container, SiteShell } from '@/components/layout';
@@ -31,7 +31,7 @@ export default async function PaginaHome({ params }: { params: Promise<{ locale:
   setRequestLocale(locale);
 
   const t = await getTranslations('home');
-  const atenei = ateneiPiuAttivi(6);
+  const atenei = ateneiInEvidenza(6);
   const funzioni = ['bacheca', 'aule', 'gruppi'] as const;
   const passi = ['apri', 'invita', 'studiate'] as const;
 

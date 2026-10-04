@@ -218,22 +218,14 @@
     "ateneo": {
       "titolo": "{nome} su Prome",
       "entra": "Entra con la mail {breve}",
-      "statistiche": {
-        "studenti": "Studenti su Prome",
-        "aule": "Aule studio questo mese",
-        "materiali": "Materiali condivisi",
-        "gruppi": "Gruppi attivi"
-      },
-      "corsi": "Corsi più attivi",
+      "corsi": "Corsi su Prome",
       "aule": "Aule studio {breve}",
       "materiali": "Materiali più scaricati",
       "suQuesto": "Su questo ateneo",
       "altri": "Altri atenei",
-      "studenti": "{numero} studenti",
-      "conAule": "{numero} aule studio",
       "elenco": {
         "titolo": "Gli atenei su Prome",
-        "sommario": "Ogni ateneo ha la sua pagina: quanti studenti lo usano e quali corsi sono più attivi."
+        "sommario": "Ogni ateneo ha la sua pagina, con i corsi che puoi scegliere su Prome."
       }
     },
     "argomento": {

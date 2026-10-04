@@ -9,7 +9,7 @@
  * Il catalogo è **chiuso**: chi fa l'onboarding sceglie da questo elenco e non
  * può scrivere altro. La conseguenza va tenuta presente ogni volta che si
  * guarda questo file: **un corso che manca qui è una persona che non può
- * entrare in Prome**. Finché gli atenei sono cinque, questo file è anche la
+ * entrare in Prome**. Finché gli atenei sono sei, questo file è anche la
  * lista d'attesa del prodotto.
  *
  * Gli `slug` degli atenei sono gli stessi delle pagine pubbliche
@@ -87,6 +87,23 @@ const CLASSI: readonly ClasseDaSeminare[] = [
 ];
 
 const UNIVERSITA: readonly UniversitaDaSeminare[] = [
+  {
+    slug: 'universita-di-brescia',
+    nome: 'Università degli Studi di Brescia',
+    nomeBreve: 'UniBS',
+    citta: 'Brescia',
+    corsi: [
+      // Names, classes and durations checked on unibs.it (A.A. 2025/2026).
+      // The numeric codes are not public outside the Cineca catalog: these
+      // are placeholders. Replace them with the real codes before anyone
+      // picks these courses, because the seed keys a course on
+      // (ateneo, codice) and a new code creates a new course row.
+      { codice: 'INFLT', nome: 'Ingegneria informatica', classeCodice: 'L-8', durataAnni: 3, daVerificare: true },
+      { codice: 'UNIBS-EGA', nome: 'Economia e gestione aziendale', classeCodice: 'L-18', durataAnni: 3, daVerificare: true },
+      { codice: 'UNIBS-GIU', nome: 'Giurisprudenza', classeCodice: 'LMG/01', durataAnni: 5, daVerificare: true },
+      { codice: 'UNIBS-MED', nome: 'Medicina e chirurgia', classeCodice: 'LM-41', durataAnni: 6, daVerificare: true },
+    ],
+  },
   {
     slug: 'universita-di-bologna',
     nome: 'Università di Bologna',

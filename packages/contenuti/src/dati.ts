@@ -14,22 +14,39 @@ import type { Argomento, Ateneo, Guida } from './tipi';
  * dati della sessione.
  */
 
+// Only facts about each university and the courses in the API catalog
+// (apps/api/src/modules/profilo/catalogo/dati/catalogo.ts): no usage numbers
+// and no "on Prome students do X". Until the hub reads real figures from the
+// API, a number shown here would be invented, and these pages are public.
 export const ATENEI: readonly Ateneo[] = [
+  {
+    slug: 'universita-di-brescia',
+    nome: 'Università degli Studi di Brescia',
+    nomeBreve: 'UniBS',
+    citta: 'Brescia',
+    descrizione:
+      'Ateneo statale nato nel 1982, con dipartimenti di ingegneria, economia, giurisprudenza e medicina. È l’università della città da cui viene Prome.',
+    corsi: [
+      { nome: 'Ingegneria informatica' },
+      { nome: 'Economia e gestione aziendale' },
+      { nome: 'Giurisprudenza' },
+      { nome: 'Medicina e chirurgia' },
+    ],
+  },
   {
     slug: 'universita-di-bologna',
     nome: 'Università di Bologna',
     nomeBreve: 'UniBo',
     citta: 'Bologna',
-    descrizione:
-      'L’Alma Mater Studiorum è il più antico ateneo del mondo occidentale. Su Prome gli studenti UniBo si organizzano soprattutto tra Ingegneria e Giurisprudenza, con picchi di aule studio nelle due settimane prima degli appelli di gennaio e giugno.',
-    statistiche: { studenti: 3240, auleStudioMese: 128, materiali: 4100, gruppi: 62 },
+    descrizione: 'L’Alma Mater Studiorum è il più antico ateneo del mondo occidentale.',
     corsi: [
-      { nome: 'Ingegneria informatica', studenti: 412, auleStudio: 28 },
-      { nome: 'Giurisprudenza', studenti: 386, auleStudio: 22 },
-      { nome: 'Medicina e chirurgia', studenti: 351, auleStudio: 19 },
-      { nome: 'Economia e management', studenti: 298, auleStudio: 14 },
-      { nome: 'Lettere moderne', studenti: 184, auleStudio: 9 },
-      { nome: 'Scienze politiche', studenti: 142, auleStudio: 7 },
+      { nome: 'Economia e commercio' },
+      { nome: 'Ingegneria informatica' },
+      { nome: 'Giurisprudenza' },
+      { nome: 'Medicina e chirurgia' },
+      { nome: 'Economia e management' },
+      { nome: 'Lettere moderne' },
+      { nome: 'Scienze politiche' },
     ],
   },
   {
@@ -37,14 +54,13 @@ export const ATENEI: readonly Ateneo[] = [
     nome: 'Sapienza Università di Roma',
     nomeBreve: 'Sapienza',
     citta: 'Roma',
-    descrizione:
-      'Il più grande ateneo europeo per numero di iscritti. Su Prome la Sapienza è trainata da Giurisprudenza e Scienze politiche, con gruppi di corso che restano attivi per l’intero triennio.',
-    statistiche: { studenti: 2810, auleStudioMese: 96, materiali: 3450, gruppi: 54 },
+    descrizione: 'Il più grande ateneo europeo per numero di iscritti.',
     corsi: [
-      { nome: 'Giurisprudenza', studenti: 468, auleStudio: 31 },
-      { nome: 'Scienze politiche', studenti: 302, auleStudio: 16 },
-      { nome: 'Ingegneria gestionale', studenti: 274, auleStudio: 13 },
-      { nome: 'Psicologia', studenti: 221, auleStudio: 11 },
+      { nome: 'Giurisprudenza' },
+      { nome: 'Scienze politiche e relazioni internazionali' },
+      { nome: 'Ingegneria gestionale' },
+      { nome: 'Psicologia e processi sociali' },
+      { nome: 'Medicina e chirurgia' },
     ],
   },
   {
@@ -52,14 +68,13 @@ export const ATENEI: readonly Ateneo[] = [
     nome: 'Politecnico di Milano',
     nomeBreve: 'PoliMi',
     citta: 'Milano',
-    descrizione:
-      'Al Politecnico le aule studio si concentrano sulle materie del primo biennio: Analisi, Fisica e Geometria. È l’ateneo con la media più alta di materiali per studente.',
-    statistiche: { studenti: 2260, auleStudioMese: 74, materiali: 3980, gruppi: 47 },
+    descrizione: 'La più grande università tecnica d’Italia: ingegneria, architettura e design.',
     corsi: [
-      { nome: 'Ingegneria informatica', studenti: 389, auleStudio: 24 },
-      { nome: 'Ingegneria matematica', studenti: 196, auleStudio: 12 },
-      { nome: 'Design del prodotto', studenti: 174, auleStudio: 8 },
-      { nome: 'Architettura', studenti: 168, auleStudio: 7 },
+      { nome: 'Ingegneria informatica' },
+      { nome: 'Ingegneria matematica' },
+      { nome: 'Design del prodotto industriale' },
+      { nome: 'Progettazione dell’architettura' },
+      { nome: 'Ingegneria gestionale' },
     ],
   },
   {
@@ -67,13 +82,12 @@ export const ATENEI: readonly Ateneo[] = [
     nome: 'Università di Padova',
     nomeBreve: 'Padova',
     citta: 'Padova',
-    descrizione:
-      'A Padova le sessioni serali sono la norma: più della metà delle aule studio parte dopo le 20:00, soprattutto tra Medicina e Statistica.',
-    statistiche: { studenti: 1940, auleStudioMese: 61, materiali: 2760, gruppi: 38 },
+    descrizione: 'Fondata nel 1222, è una delle università più antiche del mondo.',
     corsi: [
-      { nome: 'Medicina e chirurgia', studenti: 312, auleStudio: 18 },
-      { nome: 'Statistica', studenti: 187, auleStudio: 10 },
-      { nome: 'Psicologia', studenti: 165, auleStudio: 9 },
+      { nome: 'Medicina e chirurgia' },
+      { nome: 'Statistica per l’economia e l’impresa' },
+      { nome: 'Scienze psicologiche dello sviluppo' },
+      { nome: 'Ingegneria informatica' },
     ],
   },
   {
@@ -81,13 +95,12 @@ export const ATENEI: readonly Ateneo[] = [
     nome: 'Università di Napoli Federico II',
     nomeBreve: 'Federico II',
     citta: 'Napoli',
-    descrizione:
-      'La Federico II ha la comunità più attiva sulle materie mediche: le aule studio di Anatomia sono le più frequentate della piattaforma.',
-    statistiche: { studenti: 1780, auleStudioMese: 58, materiali: 2340, gruppi: 35 },
+    descrizione: 'Fondata nel 1224 da Federico II, è la più antica università statale del mondo.',
     corsi: [
-      { nome: 'Medicina e chirurgia', studenti: 341, auleStudio: 21 },
-      { nome: 'Ingegneria civile', studenti: 158, auleStudio: 8 },
-      { nome: 'Biologia', studenti: 142, auleStudio: 7 },
+      { nome: 'Medicina e chirurgia' },
+      { nome: 'Ingegneria civile' },
+      { nome: 'Scienze biologiche' },
+      { nome: 'Informatica' },
     ],
   },
 ];

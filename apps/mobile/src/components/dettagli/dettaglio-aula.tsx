@@ -642,7 +642,7 @@ function Invito({ aulaId }: { aulaId: string }) {
 
       <Input
         etichetta={t('app.sala.indirizzo')}
-        placeholder="compagno@studenti.unibo.it"
+        placeholder="compagno@studenti.unibs.it"
         value={destinatario}
         onChangeText={setDestinatario}
         keyboardType="email-address"

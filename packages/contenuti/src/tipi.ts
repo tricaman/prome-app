@@ -12,10 +12,9 @@ export type StatoAulaStudio = 'in-corso' | 'programmata' | 'terminata';
 
 export type TipoAllegato = 'pdf' | 'immagine' | 'testo';
 
+/** A course of the API catalog: one a student can pick on Prome. */
 export interface Corso {
   nome: string;
-  studenti: number;
-  auleStudio: number;
 }
 
 export interface Ateneo {
@@ -26,12 +25,6 @@ export interface Ateneo {
   citta: string;
   /** Testo redazionale: è ciò che distingue un hub da una lista di link. */
   descrizione: string;
-  statistiche: {
-    studenti: number;
-    auleStudioMese: number;
-    materiali: number;
-    gruppi: number;
-  };
   corsi: readonly Corso[];
 }
 

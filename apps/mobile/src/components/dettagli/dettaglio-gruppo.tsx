@@ -278,7 +278,7 @@ function Invito({ gruppoId }: { gruppoId: string }) {
       </View>
       <Input
         etichetta={t('app.gruppo.indirizzo')}
-        placeholder="compagno@studenti.unibo.it"
+        placeholder="compagno@studenti.unibs.it"
         value={destinatario}
         onChangeText={setDestinatario}
         keyboardType="email-address"

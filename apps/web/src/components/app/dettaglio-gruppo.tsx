@@ -312,7 +312,7 @@ function Invito({ gruppoId }: { gruppoId: string }) {
             <FormInput
               name="destinatario"
               etichetta={t('indirizzo')}
-              segnaposto="compagno@studenti.unibo.it"
+              segnaposto="compagno@studenti.unibs.it"
               tipo="email"
             />
           </div>

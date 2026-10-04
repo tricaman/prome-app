@@ -30,7 +30,7 @@ Regola: **le pagine compongono, non implementano**. Se una pagina supera le ~150
 ## Contenuti
 
 - Ogni pagina pubblica legge da `@/content`: mai dati scritti dentro la pagina.
-- Le ricerche (`ateneoDi`, `argomentoDi`, `guidaDi`, `ateneiPiuAttivi`, `guidaInEvidenza`, `guideSecondarie`) sono l'unico modo di accedere ai dati: quando arriverà l'API cambierà il corpo di quelle funzioni, non le pagine. Cercano **solo** fra atenei, argomenti e guide — vedi la sezione qui sotto sul perché non esiste una ricerca che trovi un'aula studio o un post.
+- Le ricerche (`ateneoDi`, `argomentoDi`, `guidaDi`, `ateneiInEvidenza`, `guidaInEvidenza`, `guideSecondarie`) sono l'unico modo di accedere ai dati: quando arriverà l'API cambierà il corpo di quelle funzioni, non le pagine. Cercano **solo** fra atenei, argomenti e guide — vedi la sezione qui sotto sul perché non esiste una ricerca che trovi un'aula studio o un post.
 - Gli indirizzi si costruiscono **solo** con `percorsi.*`: un URL scritto a mano è un collegamento che si romperà.
 - Testi dell'interfaccia → cataloghi i18n. Testi redazionali (descrizioni di atenei e argomenti, corpo delle guide) → `content/`, in italiano.
 - I dati dell'area privata sono un insieme separato, `content/sessione.ts`: schermate dell'app da una parte, pagine del sito dall'altra, senza scambi.

@@ -5,7 +5,7 @@ import { creaMetadata } from '@/lib/seo';
 import { briciole, raccolta } from '@/lib/schema';
 import { Container, SiteShell } from '@/components/layout';
 import { StructuredData } from '@/components/seo/structured-data';
-import { TestataPagina, numero } from '@/components/contenuti';
+import { TestataPagina } from '@/components/contenuti';
 import { Card, Heading } from '@/components/ui';
 import { Link } from '@/i18n/navigazione';
 
@@ -74,10 +74,6 @@ export default async function PaginaAtenei({ params }: { params: Promise<{ local
                     {ateneo.nome}
                   </Heading>
                   <p className="mt-1 text-[12.5px] text-testo-didascalia">{ateneo.citta}</p>
-                  <p className="mt-3 text-[12.5px] font-bold text-testo-tenue">
-                    {t('studenti', { numero: numero(ateneo.statistiche.studenti) })} ·{' '}
-                    {t('conAule', { numero: ateneo.statistiche.auleStudioMese })}
-                  </p>
                 </Link>
               </Card>
             </li>

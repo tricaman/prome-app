@@ -34,11 +34,12 @@ export const argomentoDi = (slug: string): Argomento | undefined =>
 export const guidaDi = (slug: string): Guida | undefined =>
   GUIDE.find((guida) => guida.slug === slug);
 
-/** Atenei con più aule studio: usata per il collegamento interno tra hub. */
-export const ateneiPiuAttivi = (limite = 5): readonly Ateneo[] =>
-  [...ATENEI]
-    .sort((a, b) => b.statistiche.auleStudioMese - a.statistiche.auleStudioMese)
-    .slice(0, limite);
+/**
+ * The first universities of the list, in the order `ATENEI` declares them:
+ * used for the internal links between hubs. Not "the most active": there is
+ * no real activity figure to sort by.
+ */
+export const ateneiInEvidenza = (limite = 5): readonly Ateneo[] => ATENEI.slice(0, limite);
 
 export const guidaInEvidenza = (): Guida | undefined => GUIDE.find((guida) => guida.inEvidenza);
 

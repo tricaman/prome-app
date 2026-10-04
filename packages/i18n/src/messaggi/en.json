@@ -218,22 +218,14 @@
     "ateneo": {
       "titolo": "{nome} on Prome",
       "entra": "Sign in with your {breve} email",
-      "statistiche": {
-        "studenti": "Students on Prome",
-        "aule": "Study rooms this month",
-        "materiali": "Shared materials",
-        "gruppi": "Active groups"
-      },
-      "corsi": "Most active courses",
+      "corsi": "Courses on Prome",
       "aule": "{breve} study rooms",
       "materiali": "Most downloaded materials",
       "suQuesto": "About this university",
       "altri": "Other universities",
-      "studenti": "{numero} students",
-      "conAule": "{numero} study rooms",
       "elenco": {
         "titolo": "Universities on Prome",
-        "sommario": "Every university has its own page: how many students use it and which courses are most active."
+        "sommario": "Every university has its own page, with the courses you can pick on Prome."
       }
     },
     "argomento": {
