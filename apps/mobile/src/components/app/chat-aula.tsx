@@ -387,7 +387,7 @@ function SolaLettura() {
       style={{
         borderTopWidth: 1,
         borderTopColor: tema.colori.bordo,
-        backgroundColor: tema.colori.superficie,
+        backgroundColor: tema.colori.sfondo,
         paddingHorizontal: tema.spaziatura[5],
         paddingTop: tema.spaziatura[3],
         paddingBottom: Math.max(bordi.bottom, tema.spaziatura[3]),

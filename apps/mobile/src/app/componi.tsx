@@ -130,7 +130,7 @@ export default function SchermataComponi() {
           padding: tema.spaziatura[4],
           borderBottomWidth: 1,
           borderBottomColor: tema.colori.bordo,
-          backgroundColor: tema.colori.superficie,
+          backgroundColor: tema.colori.sfondo,
         }}
       >
         <Pressable

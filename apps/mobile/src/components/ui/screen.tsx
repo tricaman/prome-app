@@ -23,6 +23,11 @@ export interface ScreenProps {
    * scorrimento non c'è il gesto che lo fa partire.
    */
   refreshControl?: ScrollViewProps['refreshControl'];
+  /**
+   * Applies to the content column, not to the whole screen: on a tablet the
+   * column is narrower than the screen, and a background here would paint a
+   * strip in the middle. The screen background is always the theme's `sfondo`.
+   */
   style?: ViewStyle;
 }
 

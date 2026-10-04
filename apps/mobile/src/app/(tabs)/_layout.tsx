@@ -53,7 +53,9 @@ export default function LayoutSchede() {
         tabBarActiveTintColor: tema.colori.primarioAccento,
         tabBarInactiveTintColor: tema.colori.testoTenue,
         tabBarStyle: {
-          backgroundColor: tema.colori.superficie,
+          // Same background as the page, split by the border: the bar is
+          // part of the screen, not a white strip laid over it.
+          backgroundColor: tema.colori.sfondo,
           borderTopColor: tema.colori.bordo,
           borderRightColor: tema.colori.bordo,
           // The library gives the sidebar a 360pt minimum (the Material

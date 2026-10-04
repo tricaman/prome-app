@@ -75,7 +75,7 @@ export function BarraScrittura({
         conCornice && {
           borderTopWidth: 1,
           borderTopColor: tema.colori.bordo,
-          backgroundColor: tema.colori.superficie,
+          backgroundColor: tema.colori.sfondo,
           paddingHorizontal: tema.spaziatura[3],
         },
       ]}

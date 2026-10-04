@@ -22,7 +22,12 @@ import {
  * lascia buchi da riempire a mano nel CSS.
  */
 export interface Tema {
-  /** Sfondo della pagina. */
+  /**
+   * Sfondo della pagina. The one background of the mobile app: every screen,
+   * the tab bar and sidebar, the bars at the edges and the splash read it, so
+   * changing it here changes them all (and the web `--background`). White
+   * (`superficie`) is for content laid on top of it: cards, fields, bubbles.
+   */
   sfondo: string;
   /** Titoli e testo forte. */
   testo: string;

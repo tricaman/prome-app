@@ -1,4 +1,5 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
+import { temaChiaro, temaScuro } from '@prome/design-tokens';
 
 /**
  * Configurazione Expo, controllata da `APP_VARIANT`.
@@ -143,12 +144,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-splash-screen',
       {
-        backgroundColor: '#F7F9FB',
+        // The app background, so launch and first screen are one color.
+        backgroundColor: temaChiaro.sfondo,
         image: './assets/images/splash-icon.png',
         imageWidth: 160,
         resizeMode: 'contain',
         dark: {
-          backgroundColor: '#14181F',
+          backgroundColor: temaScuro.sfondo,
           image: './assets/images/splash-icon.png',
         },
       },

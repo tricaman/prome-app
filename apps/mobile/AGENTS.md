@@ -97,7 +97,7 @@ mano — sono sei file che devono restare uguali fra loro, e a mano non lo resta
 di geometria (zona sicura Android a 0,66, segno mai ricolorato perché contiene un raster
 incorporato, posizione conservata rispetto al cerchio) sono spiegate in `scripts/genera-icone.mjs`.
 
-Lo splash usa i colori dei due temi (`#F7F9FB` e `#14181F`, gli stessi ruoli di `sfondo`) con il
+Lo splash usa `temaChiaro.sfondo` e `temaScuro.sfondo`, letti dai token in `app.config.ts`, con il
 marchio intero al centro: non si ricolora, quindi funziona su entrambi senza una seconda immagine.
 
 ### Dipendenze: la matrice dell'SDK non è un consiglio

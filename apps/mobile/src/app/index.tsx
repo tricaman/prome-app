@@ -19,7 +19,7 @@ export default function SchermataBenvenuto() {
   const t = useT();
 
   return (
-    <Screen style={{ backgroundColor: tema.colori.primarioTenue }}>
+    <Screen>
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: tema.spaziatura[4] }}>
         {/* Il marchio intero, lo stesso file dello splash: chi apre l'app vede
             due volte di seguito lo stesso segno, non un disco e poi un logo.
