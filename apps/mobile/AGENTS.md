@@ -142,9 +142,9 @@ Prome's own.
 - The "Rate Prome" row (settings, Information group) NEVER calls `requestReview()`: both stores
   cap the sheet and then show nothing, so a tap would look broken. It opens the listing
   (`?action=write-review` on iOS) and restarts the weekly clock. The ids come from `extra` in
-  `app.config.ts`: `pacchettoAndroid` is the production package, `idAppStore` stays `undefined` until
-  the app exists in App Store Connect (not `null`: Expo's config merge turns it into `{}`), and until then **the row is not drawn on iOS**. Set it there when
-  the id exists; nothing else changes.
+  `app.config.ts`: `pacchettoAndroid` is the production package, `idAppStore` is the App Store
+  Connect Apple ID (`6819014965`, set 2026-10-04). An unset id must be `undefined`, not `null`
+  (Expo's config merge turns `null` into `{}`), and without it **the row is not drawn on iOS**.
 - Absence of a sheet is not a bug: iOS shows it freely in debug builds and caps it at 3 a year in
   production; Android shows it only for an install from Play (an internal track works).
 - Native module: a dev client built before the dependency crashes at import. Rebuild after pulling.

@@ -44,3 +44,11 @@ example
 
 # Credenziali di firma e di pubblicazione: mai nel repository.
 credenziali/
+
+# fastlane: build output and reports (the .p8 is already covered by *.p8)
+/build
+fastlane/report.xml
+fastlane/README.md
+fastlane/test_output/
+# signing certificates fastlane downloads (public half; the private key stays in the keychain)
+*.cer

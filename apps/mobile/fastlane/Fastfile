@@ -1,0 +1,86 @@
+# Fastfile - iOS build + TestFlight upload for Prome.
+#
+#   fastlane ios prod   -> production variant -> bundle app.mariustrica.prome
+#
+# The lane UPLOADS the build to TestFlight (skip_submission) and does not send
+# it to review: "Submit for Review" is done by hand in App Store Connect after
+# the build has been tried.
+#
+# BEFORE the lane, regenerate the iOS native project (APP_VARIANT unset means
+# production, see app.config.ts):
+#
+#   pnpm exec expo prebuild --platform ios --clean --no-install
+#   (cd ios && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pod install)
+#
+# Full flow in DEPLOY.md section 6.
+#
+# Auth: the team's App Store Connect API key (.p8), the same one norbo-mobile
+# uses. No interactive Apple ID login / 2FA.
+
+default_platform(:ios)
+
+TEAM_ID   = "XFS75S4BYM"
+SCHEME    = "Prome"                    # production `name` in app.config.ts
+BUNDLE_ID = "app.mariustrica.prome"
+IPA_NAME  = "prome-prod.ipa"
+
+platform :ios do
+  desc "Production build and TestFlight upload (does NOT send to review)"
+  lane :prod do
+    api_key = asc_api_key
+    profile_name = "#{BUNDLE_ID} AppStore"
+
+    # Distribution certificate (shared by the team) + profile for the bundle,
+    # created or reused through the API key.
+    cert(api_key: api_key)
+    sigh(api_key: api_key, app_identifier: BUNDLE_ID, force: true)
+
+    # `expo prebuild` sets neither team nor signing style: write them into the
+    # pbxproj (manual signing with sigh's profile) instead of xcargs, to avoid
+    # quoting the space in the profile name.
+    update_code_signing_settings(
+      path: "ios/#{SCHEME}.xcodeproj",
+      use_automatic_signing: false,
+      team_id: TEAM_ID,
+      targets: [SCHEME],
+      bundle_identifier: BUNDLE_ID,
+      code_sign_identity: "Apple Distribution",
+      profile_name: profile_name,
+    )
+
+    build_app(
+      workspace: "ios/#{SCHEME}.xcworkspace",
+      scheme: SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "build",
+      output_name: IPA_NAME,
+      clean: true,
+      export_options: {
+        method: "app-store",
+        signingStyle: "manual",
+        teamID: TEAM_ID,
+        provisioningProfiles: { BUNDLE_ID => profile_name },
+      },
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      app_identifier: BUNDLE_ID,
+      skip_submission: true,
+      skip_waiting_for_build_processing: true,
+    )
+  end
+end
+
+# App Store Connect token through the API key (.p8). key_id and issuer_id are
+# public identifiers; the only secret is the .p8 content.
+def asc_api_key
+  app_store_connect_api_key(
+    key_id:       "279X5Y7X6H",
+    issuer_id:    "ce6e95bf-2366-4e78-abc5-cbb0162caba4",
+    key_filepath: "fastlane/AuthKey_279X5Y7X6H.p8",
+    duration:     1200,
+    in_house:     false,
+  )
+end

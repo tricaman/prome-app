@@ -1,0 +1,8 @@
+# Appfile - identifies the app and team for the fastlane tools.
+# No private key here: the .p8 lives next to it and is gitignored (*.p8).
+
+app_identifier("app.mariustrica.prome")   # production bundle ID (no .dev)
+apple_id("tricabit@gmail.com")            # Apple ID of the Developer account
+
+itc_team_id("XFS75S4BYM")                 # App Store Connect team ID
+team_id("XFS75S4BYM")                     # Apple Developer team ID (same)

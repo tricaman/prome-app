@@ -50,7 +50,7 @@ rifarla (perdita del file, reset richiesto a Google):
 ```bash
 keytool -genkeypair -v -storetype PKCS12 -keystore ~/keys/prome-upload.keystore \
   -alias upload -keyalg RSA -keysize 2048 -validity 10000 \
-  -dname "CN=Prome, OU=Prome, O=Prome, L=Bologna, ST=BO, C=IT"
+  -dname "CN=Prome, OU=Prome, O=Prome, L=Brescia, ST=BS, C=IT"
 ```
 
 E le properties in `~/.gradle/gradle.properties` (mai nel repo):
@@ -230,7 +230,34 @@ Apple come `APPLE_TEAM_ID`, quando arriveremo a iOS).
 
 ## 6. iOS — App Store
 
-Non ancora impostato. Quando ci arriviamo servono, nell'ordine: Apple Developer Program attivo,
-chiave API di App Store Connect per fastlane, `expo prebuild --platform ios`, `fastlane` per
-archivio e upload su TestFlight. Il flusso di riferimento, già collaudato, è in
-`norbo-mobile/DEPLOY.md` §3: stessa macchina, stessi strumenti.
+Local build + fastlane, same flow as `norbo-mobile/DEPLOY.md` section 3 (same machine, same
+team `XFS75S4BYM`, same App Store Connect API key). EAS is not used.
+
+### 6.0 One-time setup (done 2026-10-04)
+
+- Bundle ID `app.mariustrica.prome` registered with the **Associated Domains** capability
+  (needed by `applinks:prome.app`; without it the profile does not cover the entitlement and
+  signing fails).
+- `fastlane/Appfile`, `fastlane/Fastfile` (lane `prod`), and the team key
+  `fastlane/AuthKey_279X5Y7X6H.p8` (gitignored by `*.p8`).
+- The app record in App Store Connect is created **by hand** (the API cannot create apps).
+  Once it exists, its numeric Apple ID goes in `ID_APP_STORE` in `app.config.ts`.
+
+### 6.1 Build + TestFlight upload
+
+Use ONE shell with a UTF-8 locale for the whole session: this machine defaults to US-ASCII,
+and both `pod install` and xcpretty (inside `fastlane`) crash on it.
+
+```bash
+export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+cd apps/mobile
+pnpm exec expo prebuild --platform ios --clean --no-install
+(cd ios && pod install)
+EXPO_PUBLIC_URL_API=https://api.prome.app fastlane ios prod
+```
+
+- Bump `ios.buildNumber` in `app.config.ts` before every upload: App Store Connect rejects a
+  build number it already has for the same version.
+- If the build log freezes, check the keychain prompt first:
+  `pgrep -fl "codesign|SecurityAgent"` (see norbo DEPLOY.md 3.0).
+- Output: `build/prome-prod.ipa`. The build lands in TestFlight and is NOT sent to review.

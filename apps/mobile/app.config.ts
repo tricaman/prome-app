@@ -33,11 +33,11 @@ const IN_SVILUPPO = VARIANTE === 'development';
 const IDENTIFICATIVO_BASE = 'app.mariustrica.prome';
 
 /**
- * The numeric App Store id, which exists only once the app is created in App
- * Store Connect. Until it is set, iOS has no store page to open, and the
- * "Rate Prome" settings row is not drawn (`src/lib/recensione-nativa.ts`).
+ * The numeric App Store id from App Store Connect (App Information > Apple ID).
+ * It is what the "Rate Prome" settings row opens on iOS
+ * (`src/lib/recensione-nativa.ts`).
  */
-const ID_APP_STORE: string | undefined = undefined;
+const ID_APP_STORE: string | undefined = '6819014965';
 
 const identificativo = IN_SVILUPPO ? `${IDENTIFICATIVO_BASE}.dev` : IDENTIFICATIVO_BASE;
 const nome = IN_SVILUPPO ? 'Prome (Dev)' : 'Prome';
