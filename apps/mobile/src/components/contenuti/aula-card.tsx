@@ -1,10 +1,10 @@
 import { Pressable, View } from 'react-native';
-import { router } from 'expo-router';
 import type { AulaStudioDto } from '@prome/api-client';
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
 import { useT } from '@/i18n/i18n-provider';
 import { Card, Chip, Text } from '@/components/ui';
+import { useApriDettaglio } from '@/components/app/elenco-e-dettaglio';
 
 /**
  * Aula studio in corso.
@@ -15,9 +15,10 @@ import { Card, Chip, Text } from '@/components/ui';
 export function AulaCard({ aula }: { aula: AulaStudioDto }) {
   const tema = useTema();
   const t = useT();
+  const apri = useApriDettaglio(rotte.aula);
 
   return (
-    <Pressable accessibilityRole="button" onPress={() => router.push(rotte.aula(aula.id))}>
+    <Pressable accessibilityRole="button" onPress={() => apri(aula.id)}>
       <Card style={{ gap: tema.spaziatura[2] }}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: tema.spaziatura[2] }}>
           <Chip tono="menta" indicatore>
@@ -61,12 +62,13 @@ export function AulaProgrammataRiga({
   ultima?: boolean;
 }) {
   const tema = useTema();
+  const apri = useApriDettaglio(rotte.aula);
   const quando = new Date(aula.dataOraInizio!);
 
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={() => router.push(rotte.aula(aula.id))}
+      onPress={() => apri(aula.id)}
       style={{
         flexDirection: 'row',
         alignItems: 'center',

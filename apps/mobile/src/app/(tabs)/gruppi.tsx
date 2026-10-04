@@ -6,6 +6,8 @@ import { etichettaVisibilita } from '@/lib/visibilita';
 import { useTema } from '@/theme';
 import { useT } from '@/hooks';
 import { SchermataTab } from '@/components/app/schermata-tab';
+import { ElencoEDettaglio, useApriDettaglio } from '@/components/app/elenco-e-dettaglio';
+import { DettaglioGruppo } from '@/components/dettagli/dettaglio-gruppo';
 import { Card, Chip, Icona, PulsanteFluttuante, Text } from '@/components/ui';
 
 /**
@@ -24,39 +26,46 @@ export default function SchedaGruppi() {
   const gruppi = useElencaMieiGruppi({ limit: 50 });
 
   return (
-    <SchermataTab
-      titolo={t('app.gruppo.titolo')}
-      descrizione={t('app.gruppo.sommario')}
-      query={gruppi}
-      eVuoto={(risposta) => risposta.data.length === 0}
-      vuoto={<Text variante="corpoTenue">{t('app.gruppo.nessuno')}</Text>}
-      azione={
-        <PulsanteFluttuante
-          etichetta={t('app.gruppo.crea')}
-          onPress={() => router.push(rotte.creaGruppo())}
-        />
-      }
+    // On a tablet the list sits on the left and the opened gruppo on the right.
+    <ElencoEDettaglio
+      dettaglio={(id) => <DettaglioGruppo id={id} />}
+      suggerimento={t('app.dettaglio.gruppo')}
     >
-      {(risposta) => (
-        <View style={{ gap: tema.spaziatura[3] }}>
-          {risposta.data.map((gruppo) => (
-            <SchedaGruppo key={gruppo.id} gruppo={gruppo} />
-          ))}
-        </View>
-      )}
-    </SchermataTab>
+      <SchermataTab
+        titolo={t('app.gruppo.titolo')}
+        descrizione={t('app.gruppo.sommario')}
+        query={gruppi}
+        eVuoto={(risposta) => risposta.data.length === 0}
+        vuoto={<Text variante="corpoTenue">{t('app.gruppo.nessuno')}</Text>}
+        azione={
+          <PulsanteFluttuante
+            etichetta={t('app.gruppo.crea')}
+            onPress={() => router.push(rotte.creaGruppo())}
+          />
+        }
+      >
+        {(risposta) => (
+          <View style={{ gap: tema.spaziatura[3] }}>
+            {risposta.data.map((gruppo) => (
+              <SchedaGruppo key={gruppo.id} gruppo={gruppo} />
+            ))}
+          </View>
+        )}
+      </SchermataTab>
+    </ElencoEDettaglio>
   );
 }
 
 function SchedaGruppo({ gruppo }: { gruppo: GruppoDto }) {
   const tema = useTema();
   const t = useT();
+  const apri = useApriDettaglio(rotte.gruppo);
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={gruppo.nome}
-      onPress={() => router.push(rotte.gruppo(gruppo.id))}
+      onPress={() => apri(gruppo.id)}
     >
       <Card style={{ gap: tema.spaziatura[3] }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[3] }}>

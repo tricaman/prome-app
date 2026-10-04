@@ -5,6 +5,8 @@ import { rotte } from '@/content';
 import { useNonLette, useT } from '@/hooks';
 import { FeedBacheca, useFeedBacheca } from '@/components/contenuti';
 import { SchermataTab } from '@/components/app/schermata-tab';
+import { ElencoEDettaglio } from '@/components/app/elenco-e-dettaglio';
+import { DettaglioPost } from '@/components/dettagli/dettaglio-post';
 import { FoglioCommenti } from '@/components/app/foglio-commenti';
 import { AzioneTonda, PulsanteFluttuante } from '@/components/ui';
 
@@ -33,38 +35,44 @@ export default function SchedaBacheca() {
   const [commentiDi, setCommentiDi] = useState<string | undefined>(undefined);
 
   return (
-    <SchermataTab
-      titolo={t('app.nav.bacheca')}
-      // Il saluto compare solo quando il nome c'è davvero: durante il
-      // caricamento resta il titolo, mai un nome di ripiego.
-      sopraTitolo={nome ? `Ciao ${nome.split(' ')[0]} 👋` : undefined}
-      azioni={
-        <AzioneTonda
-          icona="campana"
-          etichetta={t('app.notifiche.apri')}
-          conteggio={nonLette}
-          onPress={() => router.push(rotte.notifiche())}
-        />
-      }
-      query={feed}
-      ancheQuery={[profilo]}
-      eVuoto={(risposta) => risposta.pages.every((pagina) => pagina.data.length === 0)}
-      azione={
-        <PulsanteFluttuante
-          etichetta={t('app.feed.pubblica')}
-          onPress={() => router.push(rotte.componi())}
-        />
-      }
+    // On a tablet the list sits on the left and the opened post on the right.
+    <ElencoEDettaglio
+      dettaglio={(id) => <DettaglioPost id={id} />}
+      suggerimento={t('app.dettaglio.post')}
     >
-      {(risposta) => (
-        <>
-          <FeedBacheca feed={feed} pagine={risposta.pages} onCommenti={setCommentiDi} />
-          {/* Il foglio è un `Modal`: sta nell'albero qui, ma si disegna sopra
-              tutto — comprese la barra delle schede e la chiamata
-              fluttuante. */}
-          <FoglioCommenti postId={commentiDi} onChiudi={() => setCommentiDi(undefined)} />
-        </>
-      )}
-    </SchermataTab>
+      <SchermataTab
+        titolo={t('app.nav.bacheca')}
+        // Il saluto compare solo quando il nome c'è davvero: durante il
+        // caricamento resta il titolo, mai un nome di ripiego.
+        sopraTitolo={nome ? `Ciao ${nome.split(' ')[0]} 👋` : undefined}
+        azioni={
+          <AzioneTonda
+            icona="campana"
+            etichetta={t('app.notifiche.apri')}
+            conteggio={nonLette}
+            onPress={() => router.push(rotte.notifiche())}
+          />
+        }
+        query={feed}
+        ancheQuery={[profilo]}
+        eVuoto={(risposta) => risposta.pages.every((pagina) => pagina.data.length === 0)}
+        azione={
+          <PulsanteFluttuante
+            etichetta={t('app.feed.pubblica')}
+            onPress={() => router.push(rotte.componi())}
+          />
+        }
+      >
+        {(risposta) => (
+          <>
+            <FeedBacheca feed={feed} pagine={risposta.pages} onCommenti={setCommentiDi} />
+            {/* Il foglio è un `Modal`: sta nell'albero qui, ma si disegna sopra
+                tutto — comprese la barra delle schede e la chiamata
+                fluttuante. */}
+            <FoglioCommenti postId={commentiDi} onChiudi={() => setCommentiDi(undefined)} />
+          </>
+        )}
+      </SchermataTab>
+    </ElencoEDettaglio>
   );
 }

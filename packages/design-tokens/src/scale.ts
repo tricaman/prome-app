@@ -106,6 +106,22 @@ export const ombra = {
   },
 } as const;
 
+/**
+ * Widths that do not depend on the screen.
+ *
+ * `colonna` is the widest a column of content gets: on a tablet, lines that
+ * run edge to edge are too long to read, and cards that stretch to 1300pt
+ * stop looking like cards. Phones are narrower than this, so on a phone it
+ * changes nothing.
+ */
+export const larghezza = {
+  colonna: 720,
+  /** The side navigation of the tablet layout: labels fit, content keeps the room. */
+  navigazione: 240,
+  /** The list pane when list and detail sit side by side. */
+  elenco: 360,
+} as const;
+
 /** Durate delle transizioni, in millisecondi. */
 export const durata = {
   veloce: 120,

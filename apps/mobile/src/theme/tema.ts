@@ -1,4 +1,5 @@
 import {
+  larghezza,
   ombra,
   raggio,
   spaziatura,
@@ -29,6 +30,8 @@ export interface TemaMobile {
   tinte: Record<Tinta, CoppiaTinta>;
   spaziatura: typeof spaziatura;
   raggio: typeof raggio;
+  /** Widths that do not depend on the screen, such as the content column. */
+  larghezza: typeof larghezza;
   tipografia: typeof tipografia;
   /** Ombre già pronte da applicare a una `View`. */
   ombra: Record<keyof typeof ombra, ViewStyle>;
@@ -115,6 +118,7 @@ const componiTema = (colori: Tema, eScuro: boolean): TemaMobile => ({
   tinte: eScuro ? tinteScure : tinte,
   spaziatura,
   raggio,
+  larghezza,
   tipografia,
   ombra: ombreNative(eScuro ? '#000000' : colori.testo),
   testo: stiliTesto(colori),

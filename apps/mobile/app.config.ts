@@ -75,11 +75,26 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // La fonte di verità è App Store Connect, non questo file: si incrementa
     // rispetto all'ultima build già caricata, non rispetto a ciò che si legge qui.
     buildNumber: '1',
-    supportsTablet: false,
+    // iPad is a real target: wide screens get a centered column, a side
+    // navigation and list and detail side by side (src/lib/layout.ts).
+    // NOTE: once a version ships with iPad support, Apple does not allow
+    // removing it in a later version.
+    supportsTablet: true,
     config: {
       // Solo crittografia di sistema (HTTPS/TLS): dichiararlo qui evita la
       // domanda sull'export a ogni caricamento.
       usesNonExemptEncryption: false,
+    },
+    infoPlist: {
+      // `orientation: 'portrait'` above writes only the iPhone key. iPad gets
+      // its own: every orientation, which iPadOS also needs to let the app
+      // live in a resizable window. The iPhone stays portrait.
+      'UISupportedInterfaceOrientations~ipad': [
+        'UIInterfaceOrientationPortrait',
+        'UIInterfaceOrientationPortraitUpsideDown',
+        'UIInterfaceOrientationLandscapeLeft',
+        'UIInterfaceOrientationLandscapeRight',
+      ],
     },
     ...(IN_SVILUPPO ? {} : { associatedDomains: ['applinks:prome.app'] }),
   },

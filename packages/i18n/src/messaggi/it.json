@@ -926,6 +926,11 @@
       "salva": "Metti da parte",
       "salvato": "Tolgi dalla raccolta",
       "da": "da {aula}"
+    },
+    "dettaglio": {
+      "post": "Scegli un post per leggerlo qui.",
+      "aula": "Scegli un'aula studio per aprirla qui.",
+      "gruppo": "Scegli un gruppo per vederlo qui."
     }
   }
 }

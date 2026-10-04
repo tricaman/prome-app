@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useTema } from '@/theme';
-import { useNotificheLive, useT } from '@/hooks';
+import { useLayoutLargo, useNotificheLive, useT } from '@/hooks';
 import { Icona } from '@/components/ui';
 
 /**
@@ -21,16 +21,28 @@ import { Icona } from '@/components/ui';
  *
  * Il socket lo tiene questo livello e non la scheda: qui è acceso finché lo è
  * una scheda qualsiasi, e ce n'è **uno solo**.
+ *
+ * On a wide window (tablet) the same four destinations move to a sidebar on
+ * the left, with the label beside the icon: a bar along the bottom of a
+ * 1000pt-wide screen puts four small targets far apart and far from the
+ * content. Same destinations, same badge, only the position changes.
  */
 export default function LayoutSchede() {
   const tema = useTema();
   const t = useT();
   const { nonLette } = useNotificheLive();
+  const largo = useLayoutLargo();
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarPosition: largo ? 'left' : 'bottom',
+        tabBarVariant: largo ? 'material' : 'uikit',
+        tabBarLabelPosition: largo ? 'beside-icon' : 'below-icon',
+        // In the sidebar the current destination is a filled row, the
+        // convention of a side navigation; on the phone bar color is enough.
+        tabBarActiveBackgroundColor: largo ? tema.colori.primarioTenue : undefined,
         // **Accento, non `primarioTesto`.** Quello è il colore del testo scritto
         // SOPRA il menta pieno — scuro, perché il menta è chiaro — e sulla
         // barra delle schede, che menta non è, sul fondo scuro spariva: la
@@ -43,6 +55,12 @@ export default function LayoutSchede() {
         tabBarStyle: {
           backgroundColor: tema.colori.superficie,
           borderTopColor: tema.colori.bordo,
+          borderRightColor: tema.colori.bordo,
+          // The library gives the sidebar a 360pt minimum (the Material
+          // default): fixed here, so the list and detail panes keep the room.
+          ...(largo
+            ? { width: tema.larghezza.navigazione, minWidth: tema.larghezza.navigazione }
+            : null),
         },
         tabBarLabelStyle: {
           fontSize: 10.5,

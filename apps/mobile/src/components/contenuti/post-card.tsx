@@ -1,11 +1,11 @@
 import { Pressable, View } from 'react-native';
-import { router } from 'expo-router';
 import type { PostDiBacheca } from '@prome/contenuti';
 import { rotte } from '@/content';
 import { useTema } from '@/theme';
 import { useT } from '@/i18n/i18n-provider';
 import { Avatar, Card, Icona, Text } from '@/components/ui';
 import { TarghettaAllegato } from './allegato';
+import { useApriDettaglio, usePannelloDettaglio } from '@/components/app/elenco-e-dettaglio';
 
 /**
  * Post nella bacheca.
@@ -31,13 +31,17 @@ export function PostCard({
 }) {
   const tema = useTema();
   const t = useT();
+  const apri = useApriDettaglio(rotte.post);
+  // Next to the list the post opens with its comments in the pane, so the
+  // comments sheet would be a second way to the same place.
+  const inPannello = usePannelloDettaglio() !== null;
 
   return (
     <Card style={{ gap: tema.spaziatura[3] }}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('app.post.titolo', { autore: post.autore })}
-        onPress={() => router.push(rotte.post(post.id))}
+        onPress={() => apri(post.id)}
         style={{ gap: tema.spaziatura[3] }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: tema.spaziatura[3] }}>
@@ -59,7 +63,7 @@ export function PostCard({
       {post.allegato ? (
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.push(rotte.post(post.id))}
+          onPress={() => apri(post.id)}
           style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -107,7 +111,7 @@ export function PostCard({
                 ? t('app.post.unCommento')
                 : t('app.post.commenti', { numero: post.commenti })
           }
-          onPress={onCommenti ?? (() => router.push(rotte.post(post.id)))}
+          onPress={(!inPannello && onCommenti) || (() => apri(post.id))}
         />
       </View>
     </Card>

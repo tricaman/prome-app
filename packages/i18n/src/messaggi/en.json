@@ -926,6 +926,11 @@
       "salva": "Save it",
       "salvato": "Remove from your collection",
       "da": "from {aula}"
+    },
+    "dettaglio": {
+      "post": "Pick a post to read it here.",
+      "aula": "Pick a study room to open it here.",
+      "gruppo": "Pick a group to see it here."
     }
   }
 }

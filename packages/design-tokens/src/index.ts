@@ -26,6 +26,7 @@ export {
 export {
   spaziatura,
   raggio,
+  larghezza,
   tipografia,
   ombra,
   durata,

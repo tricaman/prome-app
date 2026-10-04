@@ -48,11 +48,24 @@ export function Screen({
     gap: tema.spaziatura[4],
   };
 
+  // On a tablet the content stays a readable column in the middle, and the
+  // background still fills the screen. On a phone the cap is never reached.
+  const colonna: ViewStyle = {
+    width: '100%',
+    maxWidth: tema.larghezza.colonna,
+    alignSelf: 'center',
+  };
+
   if (scorrevole) {
     return (
       <ScrollView
         style={{ flex: 1, backgroundColor: tema.colori.sfondo }}
-        contentContainerStyle={[riempimento, centrato && { flexGrow: 1, justifyContent: 'center' }, style]}
+        contentContainerStyle={[
+          riempimento,
+          colonna,
+          centrato && { flexGrow: 1, justifyContent: 'center' },
+          style,
+        ]}
         keyboardShouldPersistTaps="handled"
         refreshControl={refreshControl}
       >
@@ -62,15 +75,18 @@ export function Screen({
   }
 
   return (
-    <View
-      style={[
-        { flex: 1, backgroundColor: tema.colori.sfondo },
-        riempimento,
-        centrato && { justifyContent: 'center', alignItems: 'center' },
-        style,
-      ]}
-    >
-      {children}
+    <View style={{ flex: 1, backgroundColor: tema.colori.sfondo }}>
+      <View
+        style={[
+          { flex: 1 },
+          riempimento,
+          colonna,
+          centrato && { justifyContent: 'center', alignItems: 'center' },
+          style,
+        ]}
+      >
+        {children}
+      </View>
     </View>
   );
 }

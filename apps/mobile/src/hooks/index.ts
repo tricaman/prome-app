@@ -12,3 +12,4 @@ export { useChatAula, type StatoConnessione } from './use-chat-aula';
 export { useConferma, type Conferma } from './use-conferma';
 export { useFotoProfilo, type FotoProfilo } from './use-foto-profilo';
 export { useNotificheLive, useNonLette } from './use-notifiche';
+export { useDuePannelli, useLayoutLargo } from './use-layout-largo';

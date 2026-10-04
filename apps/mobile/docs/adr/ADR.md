@@ -8,6 +8,7 @@ this directory are the source of truth; this index is generated from them by
 
 | # | Title | Date | Status | Tags |
 |---|-------|------|--------|------|
+| [002](002-tablet-and-ipad-layout-width-thresholds-sidebar-list-and-detail-panes.md) | Tablet and iPad layout: width thresholds, sidebar, list and detail panes | 2026-10-04 | accepted | frontend, mobile, tablet, layout |
 | [001](001-in-app-review-prompt-fires-after-a-published-post-the-settings-row-opens-the-sto.md) | In-app review prompt fires after a published post; the settings row opens the store listing | 2026-10-02 | accepted | mobile, growth, store-review |
 
 ## What each decision says
@@ -17,6 +18,7 @@ file. Where a line stops short the rest is in the ADR.
 
 | ADR | Decision | Consequence |
 |-----|----------|-------------|
+| [002](002-tablet-and-ipad-layout-width-thresholds-sidebar-list-and-detail-panes.md) | Layout follows the WINDOW width, never the device, through two pure functions in src/lib/layout.ts (tested with node --test): layoutLargo at 768pt moves the tabs to a 240pt sidebar (tabBarPosition left, material variant,... | Phones render exactly as before (all widths under 768pt). |
 | [001](001-in-app-review-prompt-fires-after-a-published-post-the-settings-row-opens-the-sto.md) | Add expo-store-review 57.0.3 (the SDK 57 version, no manifest permissions). | Positive: same behavior as norbo and dit, so one mental model across the three apps; the sheet appears right after Prome visibly did its job, never over launch, never on day one, never over a voice call; the settings row... |
 
 ## By theme

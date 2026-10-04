@@ -77,6 +77,11 @@ export function Intestazione({
         paddingBottom: tema.spaziatura[3],
         gap: tema.spaziatura[3],
         backgroundColor: tema.colori.sfondo,
+        // Same column as the content below (`Screen`): on a tablet the title
+        // lines up with the cards instead of sitting at the far left.
+        width: '100%',
+        maxWidth: tema.larghezza.colonna,
+        alignSelf: 'center',
       }}
     >
       {conIndietro ? (

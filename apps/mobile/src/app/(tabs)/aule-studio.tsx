@@ -6,6 +6,8 @@ import { useTema } from '@/theme';
 import { useT } from '@/hooks';
 import { AulaCard, AulaProgrammataRiga } from '@/components/contenuti';
 import { SchermataTab } from '@/components/app/schermata-tab';
+import { ElencoEDettaglio } from '@/components/app/elenco-e-dettaglio';
+import { DettaglioAula } from '@/components/dettagli/dettaglio-aula';
 import { Card, PulsanteFluttuante, Text } from '@/components/ui';
 
 /**
@@ -25,52 +27,58 @@ export default function SchedaAuleStudio() {
   const aule = useElencaAuleStudio({ limit: 50 });
 
   return (
-    <SchermataTab
-      titolo={t('app.aule.titolo')}
-      query={aule}
-      eVuoto={(risposta) => risposta.data.length === 0}
-      vuoto={<Text variante="corpoTenue">{t('app.aule.nessuna')}</Text>}
-      // Come in bacheca: l'azione principale sta sotto il pollice, non in cima
-      // allo scorrimento. Da qui si apre un'aula anche avendo soltanto il
-      // telefono — prima non si poteva affatto.
-      azione={
-        <PulsanteFluttuante
-          etichetta={t('app.aule.crea')}
-          onPress={() => router.push(rotte.creaAula())}
-        />
-      }
+    // On a tablet the list sits on the left and the opened aula on the right.
+    <ElencoEDettaglio
+      dettaglio={(id) => <DettaglioAula id={id} />}
+      suggerimento={t('app.dettaglio.aula')}
     >
-      {(risposta) => {
-        const programmate = risposta.data.filter(eProgrammata);
-        const aperte = risposta.data.filter((aula) => !eProgrammata(aula));
+      <SchermataTab
+        titolo={t('app.aule.titolo')}
+        query={aule}
+        eVuoto={(risposta) => risposta.data.length === 0}
+        vuoto={<Text variante="corpoTenue">{t('app.aule.nessuna')}</Text>}
+        // Come in bacheca: l'azione principale sta sotto il pollice, non in cima
+        // allo scorrimento. Da qui si apre un'aula anche avendo soltanto il
+        // telefono — prima non si poteva affatto.
+        azione={
+          <PulsanteFluttuante
+            etichetta={t('app.aule.crea')}
+            onPress={() => router.push(rotte.creaAula())}
+          />
+        }
+      >
+        {(risposta) => {
+          const programmate = risposta.data.filter(eProgrammata);
+          const aperte = risposta.data.filter((aula) => !eProgrammata(aula));
 
-        return (
-          <>
-            <Etichetta testo={t('app.aule.inCorso', { numero: aperte.length })} />
-            <View style={{ gap: tema.spaziatura[3] }}>
-              {aperte.map((aula) => (
-                <AulaCard key={aula.id} aula={aula} />
-              ))}
-            </View>
+          return (
+            <>
+              <Etichetta testo={t('app.aule.inCorso', { numero: aperte.length })} />
+              <View style={{ gap: tema.spaziatura[3] }}>
+                {aperte.map((aula) => (
+                  <AulaCard key={aula.id} aula={aula} />
+                ))}
+              </View>
 
-            {programmate.length ? (
-              <>
-                <Etichetta testo={t('app.aule.programmate')} />
-                <Card style={{ padding: 0, overflow: 'hidden' }}>
-                  {programmate.map((aula, indice) => (
-                    <AulaProgrammataRiga
-                      key={aula.id}
-                      aula={aula}
-                      ultima={indice === programmate.length - 1}
-                    />
-                  ))}
-                </Card>
-              </>
-            ) : null}
-          </>
-        );
-      }}
-    </SchermataTab>
+              {programmate.length ? (
+                <>
+                  <Etichetta testo={t('app.aule.programmate')} />
+                  <Card style={{ padding: 0, overflow: 'hidden' }}>
+                    {programmate.map((aula, indice) => (
+                      <AulaProgrammataRiga
+                        key={aula.id}
+                        aula={aula}
+                        ultima={indice === programmate.length - 1}
+                      />
+                    ))}
+                  </Card>
+                </>
+              ) : null}
+            </>
+          );
+        }}
+      </SchermataTab>
+    </ElencoEDettaglio>
   );
 }
 
