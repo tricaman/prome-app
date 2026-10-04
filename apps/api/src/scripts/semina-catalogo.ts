@@ -17,7 +17,8 @@ async function semina(): Promise<void> {
   try {
     const esito = await seminaCatalogo(prisma);
     console.log(
-      `Catalogo seminato: ${esito.universita} atenei, ${esito.classi} classi, ${esito.corsi} corsi.`,
+      `Catalogo seminato: ${esito.universita} atenei, ${esito.classi} classi, ${esito.corsi} corsi` +
+        ` (${esito.ritirati} ritirati perché non più nel file).`,
     );
     if (esito.codiciDaVerificare > 0) {
       // Non è un errore e non ferma niente: è l'unico posto in cui quel numero

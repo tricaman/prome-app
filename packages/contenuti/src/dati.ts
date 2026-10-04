@@ -14,9 +14,10 @@ import type { Argomento, Ateneo, Guida } from './tipi';
  * dati della sessione.
  */
 
-// Only facts about each university and the courses in the API catalog
-// (apps/api/src/modules/profilo/catalogo/dati/catalogo.ts): no usage numbers
-// and no "on Prome students do X". Until the hub reads real figures from the
+// Only facts about each university and a few of its courses from the API
+// catalog (apps/api/src/modules/profilo/catalogo/dati/catalogo-mur.json, the
+// full list is picked inside the app): no usage numbers and no "on Prome
+// students do X". Until the hub reads real figures from the
 // API, a number shown here would be invented, and these pages are public.
 export const ATENEI: readonly Ateneo[] = [
   {

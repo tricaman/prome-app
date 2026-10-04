@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit",
     "openapi:emit": "nest build -p tsconfig.openapi.json && node dist-openapi/scripts/genera-openapi.js",
     "catalogo:semina": "nest build && node dist/scripts/semina-catalogo.js",
+    "catalogo:importa": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/scripts/importa-catalogo-mur.ts",
     "email:anteprima": "nest build && node dist/scripts/anteprima-email.js",
     "test": "jest",
     "test:watch": "jest --watch",

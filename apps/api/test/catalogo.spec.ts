@@ -5,6 +5,7 @@ import { creaValidationPipe } from '../src/common/pipes/validation.pipe';
 import { registraCorpiBinari } from '../src/config/fastify';
 import { PrismaService } from '../src/database/prisma.service';
 import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/canale-email-sviluppo';
+import { seminaCatalogo } from '../src/modules/profilo/catalogo/semina-catalogo';
 import { assicuraCatalogoDiProva, NOME_ATENEO, type CatalogoDiProva } from './catalogo';
 
 /**
@@ -130,6 +131,40 @@ describe('Catalogo accademico', () => {
 
     expect(risposta.statusCode).toBe(401);
     expect(risposta.json().errorCode).toBe('PR006');
+  });
+
+  it('la semina ritira i corsi tolti dal file, solo negli atenei che il file descrive', async () => {
+    const slug = `ateneo-ritiri-${Date.now()}`;
+    const classi = [{ codice: 'L-8', nome: 'Ingegneria dell\'informazione', livello: 'TRIENNALE' as const }];
+    const corso = (codice: string) => ({ codice, nome: `Corso ${codice}`, classeCodice: 'L-8', durataAnni: 3 });
+    const ateneo = (corsi: ReturnType<typeof corso>[]) => ({
+      classi,
+      universita: [{ slug, nome: `Ateneo dei ritiri ${slug}`, nomeBreve: 'Ritiri', citta: 'Prova', corsi }],
+    });
+    const attivoDi = async (codice: string) =>
+      (await prisma.corso.findFirst({ where: { codice, universita: { slug } } }))!.attivo;
+    const attiviAltrove = await prisma.corso.count({
+      where: { universitaId: catalogo.ateneoId, attivo: true },
+    });
+
+    await seminaCatalogo(prisma, ateneo([corso('RESTA'), corso('ESCE')]));
+    await seminaCatalogo(prisma, ateneo([corso('RESTA')]));
+
+    // Tolto dal file: non si sceglie più, ma la riga resta, con chi c'è dentro.
+    expect(await attivoDi('ESCE')).toBe(false);
+    expect(await attivoDi('RESTA')).toBe(true);
+    // Un file che non nomina un ateneo non dice niente dei suoi corsi: le suite
+    // seminano cataloghi diversi sullo stesso database.
+    expect(
+      await prisma.corso.count({ where: { universitaId: catalogo.ateneoId, attivo: true } }),
+    ).toBe(attiviAltrove);
+
+    // Tornato nel file, torna sceglibile.
+    await seminaCatalogo(prisma, ateneo([corso('RESTA'), corso('ESCE')]));
+    expect(await attivoDi('ESCE')).toBe(true);
+
+    await prisma.corso.deleteMany({ where: { universita: { slug } } });
+    await prisma.universita.delete({ where: { slug } });
   });
 
   it('la semina è idempotente: due giri, stesse righe e stessi identificativi', async () => {

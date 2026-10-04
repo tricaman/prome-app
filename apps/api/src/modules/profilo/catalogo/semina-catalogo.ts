@@ -12,14 +12,18 @@ import { CATALOGO, type CatalogoDaSeminare } from './dati/catalogo';
  *
  * **Non cancella mai nulla.** Un corso tolto dal file non sparisce dal
  * database: potrebbe avere iscritti, e la loro identità accademica non è
- * revocabile con una modifica a un file. Per ritirarlo si usa `attivo` — non
- * si sceglie più, chi c'è resta.
+ * revocabile con una modifica a un file. Lo **ritira** (`attivo = false`):
+ * non si sceglie più, chi c'è resta. Il ritiro riguarda solo gli atenei che
+ * il file descrive: un file che non nomina un ateneo non dice niente dei suoi
+ * corsi, e le suite seminano cataloghi diversi sullo stesso database.
  */
 
 export interface EsitoSemina {
   universita: number;
   classi: number;
   corsi: number;
+  /** Corsi che il file non elenca più: non si scelgono più, chi c'è resta. */
+  ritirati: number;
   /** Corsi il cui codice non è ancora stato verificato sul catalogo dell'ateneo. */
   codiciDaVerificare: number;
 }
@@ -70,8 +74,11 @@ export async function seminaCatalogo(
   // una gestione dell'errore per ognuna. `xact` lo lega alla transazione,
   // quindi si rilascia da sé anche se qualcosa esplode a metà — un lock di
   // sessione, con un pool di connessioni, potrebbe non essere mai rilasciato.
+  // About 6,000 courses from the MUR import: a few seconds locally, more on a
+  // small production machine. The limit is generous so a slow disk does not
+  // roll back a release.
   return prisma.$transaction(async (tx) => seminaDentroIlLock(tx, catalogo), {
-    timeout: 30_000,
+    timeout: 180_000,
   });
 }
 
@@ -92,6 +99,7 @@ async function seminaDentroIlLock(
   }
 
   let corsiSeminati = 0;
+  let ritirati = 0;
   let codiciDaVerificare = 0;
 
   for (const universita of catalogo.universita) {
@@ -124,12 +132,23 @@ async function seminaDentroIlLock(
       corsiSeminati += 1;
       if (corso.daVerificare) codiciDaVerificare += 1;
     }
+
+    const esito = await tx.corso.updateMany({
+      where: {
+        universitaId: riga.id,
+        attivo: true,
+        codice: { notIn: corsi.map((corso) => corso.codice) },
+      },
+      data: { attivo: false },
+    });
+    ritirati += esito.count;
   }
 
   return {
     universita: catalogo.universita.length,
     classi: catalogo.classi.length,
     corsi: corsiSeminati,
+    ritirati,
     codiciDaVerificare,
   };
 }
