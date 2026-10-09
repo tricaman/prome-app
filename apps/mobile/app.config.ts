@@ -75,7 +75,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: identificativo,
     // La fonte di verità è App Store Connect, non questo file: si incrementa
     // rispetto all'ultima build già caricata, non rispetto a ciò che si legge qui.
-    buildNumber: '1',
+    buildNumber: '2',
     // iPad is a real target: wide screens get a centered column, a side
     // navigation and list and detail side by side (src/lib/layout.ts).
     // NOTE: once a version ships with iPad support, Apple does not allow
@@ -103,7 +103,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     package: identificativo,
     // La fonte di verità è Play Console: il prossimo è il massimo fra tutti i
     // track + 1. Un valore già caricato viene rifiutato all'upload.
-    versionCode: 1,
+    versionCode: 2,
     permissions: [],
     // I moduli nativi dichiarano permessi che l'app non chiede mai: qui
     // vengono tolti dal manifesto, perché un permesso dichiarato e non usato
