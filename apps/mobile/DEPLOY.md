@@ -158,6 +158,9 @@ Le cinque schermate da catturare, in ordine, sono elencate in `STORE.md` §7 (te
 - **Accesso all'app**: *tutte le funzionalità richiedono credenziali* → inserisci email e password
   di un account di prova vero su produzione. Senza, la revisione vede una schermata di login e
   rifiuta: in Prome **niente è pubblico**, non c'è un giro possibile da ospite.
+  The account is `review-android@prome.app`, and the "password" is its fixed sign-in code,
+  `CODICE_REVISIONE` in `deploy/.env` on the machine: reviewers cannot read a mailbox, so a
+  code sent by email would lock them out.
 - **Annunci**: no
 - **Classificazione dei contenuti**: questionario IARC. La risposta che pesa è **contenuti generati
   dagli utenti: sì** (con segnalazione e blocco presenti — sono implementati, vedi `STORE.md` §1.1)

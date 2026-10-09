@@ -75,6 +75,8 @@ services:
       SMTP_UTENTE: ${SMTP_UTENTE:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_MITTENTE: ${SMTP_MITTENTE:-}
+      # Fixed code of the store review account. Empty: random codes for it too.
+      CODICE_REVISIONE: ${CODICE_REVISIONE:-}
       ORIGINI_CONSENTITE: https://${DOMINIO_WEB}
       # L'audiochat. `assente` è il valore predefinito nel codice, quindi una
       # macchina senza queste righe serve l'aula senza voce invece di non

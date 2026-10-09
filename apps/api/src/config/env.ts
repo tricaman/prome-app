@@ -56,6 +56,16 @@ const SchemaEnv = z.object({
   EMAIL_SUPPORTO: z.email().optional(),
 
   /**
+   * Fixed sign-in code of the store review account (`EMAIL_REVISIONE`).
+   * Empty or unset: that account gets random codes like everyone else.
+   * Six digits, because the app's code field has six boxes.
+   */
+  CODICE_REVISIONE: z
+    .string()
+    .regex(/^(\d{6})?$/, 'CODICE_REVISIONE deve essere di 6 cifre')
+    .optional(),
+
+  /**
    * Credenziali SMTP. Servono solo con `CANALE_EMAIL=smtp`, e in quel caso
    * sono obbligatorie: il controllo sta più in basso, perché zod da solo non
    * sa dire "obbligatorio se un'altra variabile vale così".

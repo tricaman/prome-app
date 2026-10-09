@@ -5,7 +5,8 @@ import { creaValidationPipe } from '../src/common/pipes/validation.pipe';
 import { registraCorpiBinari } from '../src/config/fastify';
 import { PrismaService } from '../src/database/prisma.service';
 import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/canale-email-sviluppo';
-import { TENTATIVI_CONSENTITI } from '../src/infrastruttura/accesso/better-auth';
+import { env } from '../src/config/env';
+import { EMAIL_REVISIONE, TENTATIVI_CONSENTITI } from '../src/infrastruttura/accesso/better-auth';
 import {
   assicuraCatalogoDiProva,
   NOME_ATENEO,
@@ -314,6 +315,32 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
         payload: { email: indirizzo, codice },
       });
       expect(dopo.statusCode).toBe(200);
+    });
+  });
+
+  describe('account di revisione degli store', () => {
+    it('riceve sempre lo stesso codice, ed entra con quello', async () => {
+      expect(await codicePer(EMAIL_REVISIONE)).toBe(env.CODICE_REVISIONE);
+      expect(await codicePer(EMAIL_REVISIONE)).toBe(env.CODICE_REVISIONE);
+
+      const risposta = await chiedi('/accesso/verifica', {
+        method: 'POST',
+        payload: { email: EMAIL_REVISIONE, codice: env.CODICE_REVISIONE },
+      });
+
+      expect(risposta.statusCode).toBe(200);
+    });
+
+    it('il codice fisso non apre nessun altro account', async () => {
+      const indirizzo = nuovoIndirizzo();
+      await codicePer(indirizzo);
+
+      const risposta = await chiedi('/accesso/verifica', {
+        method: 'POST',
+        payload: { email: indirizzo, codice: env.CODICE_REVISIONE },
+      });
+
+      expect(risposta.statusCode).toBe(401);
     });
   });
 

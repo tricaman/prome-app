@@ -21,6 +21,13 @@ export const TENTATIVI_CONSENTITI = 3;
  */
 export const DURATA_SESSIONE_SECONDI = 30 * 24 * 60 * 60;
 
+/**
+ * The account Google Play reviewers sign in with. It gets `CODICE_REVISIONE`
+ * instead of a random code: reviewers cannot read a mailbox, and the store
+ * asks for access details that are reusable and never expire.
+ */
+export const EMAIL_REVISIONE = 'review-android@prome.app';
+
 export type FornitoreIdentita = ReturnType<typeof creaFornitoreIdentita>;
 
 /**
@@ -87,6 +94,9 @@ export function creaFornitoreIdentita(prisma: PrismaClient, canaleEmail: CanaleE
         // Verificare un codice è anche il modo per iscriversi: non esiste una
         // registrazione separata da abilitare.
         disableSignUp: false,
+        // `undefined` falls back to the provider's random code.
+        generateOTP: ({ email }) =>
+          env.CODICE_REVISIONE && email === EMAIL_REVISIONE ? env.CODICE_REVISIONE : undefined,
         async sendVerificationOTP({ email, otp }) {
           await canaleEmail.inviaCodiceAccesso(email, otp, 'it');
         },
