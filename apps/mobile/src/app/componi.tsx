@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { caricaConAvanzamento, pesoLeggibile } from '@prome/app-core';
 import {
   getElencaPostQueryKey,
@@ -121,7 +122,13 @@ export default function SchermataComponi() {
   };
 
   return (
-    <>
+    // Native SafeAreaView, not useSafeAreaInsets(): this modal is full screen
+    // under the status bar on Android and a sheet below it on iOS, and only
+    // the native view knows which (AGENTS.md, Tema e design system).
+    <SafeAreaView
+      edges={['top', 'bottom']}
+      style={{ flex: 1, backgroundColor: tema.colori.sfondo }}
+    >
       <View
         style={{
           flexDirection: 'row',
@@ -152,7 +159,7 @@ export default function SchermataComponi() {
         />
       </View>
 
-      <Screen scorrevole>
+      <Screen scorrevole conAreaSicura={false}>
         <View style={{ flexDirection: 'row', gap: tema.spaziatura[3] }}>
           <Avatar nome={nome || '?'} foto={profilo.data?.data.foto} dimensione={40} />
           <View style={{ flex: 1 }}>
@@ -210,7 +217,7 @@ export default function SchermataComponi() {
           {t('app.sala.conteggioFile', { numero: allegati.filter((a) => a.chiave).length })}
         </Text>
       </Screen>
-    </>
+    </SafeAreaView>
   );
 }
 

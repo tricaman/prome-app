@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   creaGruppo,
   getElencaMieiGruppiQueryKey,
@@ -38,7 +39,13 @@ export default function SchermataCreaGruppo() {
   });
 
   return (
-    <View style={{ flex: 1, backgroundColor: tema.colori.sfondo }}>
+    // Native SafeAreaView, not useSafeAreaInsets(): this modal is full screen
+    // under the status bar on Android and a sheet below it on iOS, and only
+    // the native view knows which (AGENTS.md, Tema e design system).
+    <SafeAreaView
+      edges={['top', 'bottom']}
+      style={{ flex: 1, backgroundColor: tema.colori.sfondo }}
+    >
       <View
         style={{
           flexDirection: 'row',
@@ -67,7 +74,7 @@ export default function SchermataCreaGruppo() {
         />
       </View>
 
-      <Screen scorrevole>
+      <Screen scorrevole conAreaSicura={false}>
         <Input
           etichetta={t('app.gruppo.nome')}
           placeholder={t('app.gruppo.nomeEsempio')}
@@ -84,6 +91,6 @@ export default function SchermataCreaGruppo() {
           />
         </View>
       </Screen>
-    </View>
+    </SafeAreaView>
   );
 }

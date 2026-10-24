@@ -295,6 +295,15 @@ Non c'è un evento di invio come sul web: l'invio parte da `FormSubmit`, che val
   in cui le quattro schede si erano scostate l'una dall'altra.
 - `Screen` prende le aree sicure **una volta sola**: dentro una cornice che le ha già prese (una
   `Intestazione` sopra, la barra delle schede sotto) va passato `conAreaSicura={false}`.
+- **A modal route takes its safe areas from the native `SafeAreaView`**
+  (`react-native-safe-area-context`, `edges={['top', 'bottom']}`) wrapped around bar and content,
+  with `conAreaSicura={false}` on `Screen`. Never from `useSafeAreaInsets()`: it returns the
+  window's insets, right only on a route that covers the window. `presentation: 'modal'` is full
+  screen and edge to edge on Android, so a bar that skips the inset lands under the status bar; on
+  iOS it is a sheet that starts below the status bar, so the same inset becomes an empty strip. The
+  native view reads the sheet's own safe area on iOS and the status bar on Android, and the bar
+  plus the status bar strip stay a fixed, opaque band the content scrolls under. `componi`,
+  `crea-aula` and `crea-gruppo` are the model; the alternatives are in ADR 003.
 - L'azione principale di una scheda è un `PulsanteFluttuante`, passato a `SchermataTab` come
   `azione`: è la cornice a riservargli lo spazio in fondo all'elenco.
 - Area toccabile minima 48 punti: `Button` la rispetta già.
