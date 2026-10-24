@@ -923,6 +923,19 @@
       "post": "Scegli un post per leggerlo qui.",
       "aula": "Scegli un'aula studio per aprirla qui.",
       "gruppo": "Scegli un gruppo per vederlo qui."
+    },
+    "aggiornamento": {
+      "apri": "Aggiornamento disponibile",
+      "disponibileTitolo": "C'è una nuova versione",
+      "disponibileTesto": "Aggiorna Prome per avere le ultime novità e correzioni.",
+      "aggiorna": "Aggiorna",
+      "scaricamentoTitolo": "Download in corso",
+      "scaricamentoTesto": "Puoi continuare a usare Prome mentre si scarica.",
+      "prontoTitolo": "Aggiornamento pronto",
+      "prontoTesto": "Riavvia Prome per installarlo: ci vuole un attimo.",
+      "riavvia": "Riavvia ora",
+      "fallitoTitolo": "Download non riuscito",
+      "fallitoTesto": "Riprova, oppure aggiorna dallo store del telefono."
     }
   }
 }

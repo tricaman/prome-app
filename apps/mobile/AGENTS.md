@@ -154,6 +154,49 @@ types. Only dependency-free modules are testable this way, which is the point. A
 subject with the `.ts` extension (`allowImportingTsExtensions` keeps `tsc` happy) and declares
 `/// <reference types="node" />`, because TypeScript 6 no longer loads `@types` on its own.
 
+## Store update notice
+
+Tells the user a newer version is on the store. Ported from dit-mobile (the shape) and
+norbo-mobile, with the fixes below. Optional only: a forced update would break the 90-day rule in
+"Build di distribuzione".
+
+- `src/lib/aggiornamento.ts` holds the decisions and imports NOTHING (`node --test`).
+  `src/lib/aggiornamento-nativo.ts` owns the store calls and the download state,
+  `src/providers/aggiornamento-provider.tsx` runs the check and draws the `Foglio`, and
+  `SchermataTab` shows the button.
+- **Each platform asks its own store, from the device.** No backend. Android asks Play Core
+  (`sp-react-native-in-app-updates` 2.0.0, a TurboModule), which answers for THIS device: a
+  sideloaded build, a staged rollout that has not reached it, or a version that does not run here
+  get no notice. iOS asks iTunes Lookup by App Store id (`extra.idAppStore`, so a `.dev` build finds
+  the real listing), in the device's storefront first and then `it`: without `country` the lookup
+  serves a global record that lags hours behind a release.
+- **Like against like.** The library compares Play's versionCode with `curVersion`, so we pass the
+  installed versionCode. The version name ("3" against "1.8.2", as dit and norbo do) works only
+  while every versionCode is larger than the major version.
+- **iOS checks `minimumOsVersion`.** A release that raises the minimum iOS is listed for everyone,
+  but the App Store will not install it on an older system: without the check the notice would
+  point at a page with no update button, forever.
+- **No popup.** A new version adds a round button (`scarica`, with the dot) to every tab header;
+  the `Foglio` opens only from there and can always be closed. Android downloads in the background
+  with Play's FLEXIBLE flow (our bar, then "Riavvia ora"); when Play does not allow FLEXIBLE for a
+  release, the button opens the Play listing. iOS opens the App Store.
+- **`startUpdate` resolves when Play's consent dialog is SHOWN**, not when the user answers. A "no
+  thanks" arrives only through `addIntentSelectionListener`, as a string ("6", hence `Number()`),
+  and goes back to idle, not to "failed": declining is not an error.
+- **A failed check keeps the last answer.** `controllaAggiornamento` throws when the store cannot
+  be asked and React Query keeps its data: reading offline as "nothing new" would hide a known
+  update. A download in flight keeps the button even when a check finds nothing, because Play then
+  reports the update as already under way. Re-checked on the way back to the foreground, once the
+  last answer is 30 minutes old.
+- **Native module.** A dev client built before the dependency crashes at import (`getEnforcing`):
+  rebuild after pulling. The library also links `react-native-device-info` 10.3.0, which it pins,
+  on both platforms. On iOS its required-reason APIs are already declared: UserDefaults and
+  FileTimestamp in our manifest, DiskSpace in `expo-file-system`'s.
+- **Testing.** Play Core answers only for an install from Play: use an internal testing track, not
+  a sideloaded APK. iOS needs a version on the App Store above the installed one. Locally,
+  `EXPO_PUBLIC_AGGIORNAMENTO_PROVA=1` in `.env` shows the notice and fakes the Android download
+  (development builds only).
+
 ## Accesso
 
 **Unificato: email + codice OTP, nessuna password.** `accedi.tsx` chiede solo l'email e passa a `codice.tsx` portandosi dietro l'indirizzo (`rotte.codice(email)`), che va ripetuto in schermata: è l'unico modo per accorgersi di averlo sbagliato prima di aspettare un messaggio che non arriverà. Non c'è una registrazione separata, quindi la schermata iniziale ha un invito solo.

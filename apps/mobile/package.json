@@ -45,6 +45,7 @@
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.10.1",
     "socket.io-client": "^4.8.3",
+    "sp-react-native-in-app-updates": "2.0.0",
     "zod": "^4.0.0"
   },
   "devDependencies": {

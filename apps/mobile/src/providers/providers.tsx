@@ -5,6 +5,7 @@ import { creaQueryClient } from '@prome/app-core';
 import { TemaProvider } from '@/theme';
 import { I18nProvider } from '@/i18n/i18n-provider';
 import { ErrorBoundary } from '@/components/feedback';
+import { AggiornamentoProvider } from './aggiornamento-provider';
 import { AvvisiProvider } from './avvisi-provider';
 import { PonteLinguaApi } from './ponte-lingua-api';
 
@@ -25,7 +26,9 @@ export function Providers({ children }: { children: ReactNode }) {
           <ErrorBoundary>
             <QueryClientProvider client={queryClient}>
               <PonteLinguaApi />
-              <AvvisiProvider>{children}</AvvisiProvider>
+              <AvvisiProvider>
+                <AggiornamentoProvider>{children}</AggiornamentoProvider>
+              </AvvisiProvider>
             </QueryClientProvider>
           </ErrorBoundary>
         </I18nProvider>

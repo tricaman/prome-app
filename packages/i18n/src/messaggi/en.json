@@ -923,6 +923,19 @@
       "post": "Pick a post to read it here.",
       "aula": "Pick a study room to open it here.",
       "gruppo": "Pick a group to see it here."
+    },
+    "aggiornamento": {
+      "apri": "Update available",
+      "disponibileTitolo": "A new version is out",
+      "disponibileTesto": "Update Prome to get the latest features and fixes.",
+      "aggiorna": "Update",
+      "scaricamentoTitolo": "Downloading the update",
+      "scaricamentoTesto": "You can keep using Prome while it downloads.",
+      "prontoTitolo": "Update ready",
+      "prontoTesto": "Restart Prome to install it. It only takes a moment.",
+      "riavvia": "Restart now",
+      "fallitoTitolo": "Download failed",
+      "fallitoTesto": "Try again, or update from your phone's app store."
     }
   }
 }

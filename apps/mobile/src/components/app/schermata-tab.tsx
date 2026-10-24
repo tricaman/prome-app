@@ -3,8 +3,9 @@ import { RefreshControl, View } from 'react-native';
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { OpzioniStatoQuery } from '@prome/app-core';
 import { useTema } from '@/theme';
+import { useAggiornamento, useT } from '@/hooks';
 import { QueryBoundary } from '@/components/feedback';
-import { Intestazione, Screen, Text } from '@/components/ui';
+import { AzioneTonda, Intestazione, Screen, Text } from '@/components/ui';
 
 /** Di una lettura qui serve una cosa sola: saperla rileggere. */
 type Rileggibile = Pick<UseQueryResult<unknown, unknown>, 'refetch'>;
@@ -79,6 +80,8 @@ export function SchermataTab<TDati>({
   children,
 }: SchermataTabProps<TDati>) {
   const tema = useTema();
+  const t = useT();
+  const aggiornamento = useAggiornamento();
   const [inAggiornamento, setInAggiornamento] = useState(false);
 
   const letture: Rileggibile[] = [...(query ? [query] : []), ...(ancheQuery ?? [])];
@@ -115,7 +118,23 @@ export function SchermataTab<TDati>({
       <Intestazione
         titolo={titolo}
         sopraTitolo={sopraTitolo}
-        azioni={azioni}
+        azioni={
+          // A new version on the store: the only place it is announced, in
+          // every tab, and silent otherwise (`AggiornamentoProvider`).
+          aggiornamento.disponibile ? (
+            <>
+              <AzioneTonda
+                icona="scarica"
+                etichetta={t('app.aggiornamento.apri')}
+                conPallino
+                onPress={aggiornamento.apri}
+              />
+              {azioni}
+            </>
+          ) : (
+            azioni
+          )
+        }
         altezzaCostante
       />
 
