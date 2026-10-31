@@ -10,7 +10,7 @@ import { Logo } from '@/components/layout';
 import { cn } from '@/lib/utils';
 
 interface VoceApp {
-  chiave: 'bacheca' | 'aule' | 'gruppi' | 'profilo' | 'impostazioni';
+  chiave: 'bacheca' | 'aule' | 'gruppi' | 'profilo' | 'impostazioni' | 'amministrazione';
   icona: NomeIcona;
   href: string;
 }
@@ -38,6 +38,13 @@ const VOCI: readonly VoceApp[] = [
  * pagina, e sta sotto una riga di separazione perché non è un quinto luogo
  * accanto a Bacheca e Gruppi: è un'altra categoria di cosa.
  */
+/** Shown only when the server flags the profile as the admin account. */
+const VOCE_AMMINISTRAZIONE: VoceApp = {
+  chiave: 'amministrazione',
+  icona: 'scudo',
+  href: percorsiApp.admin(),
+};
+
 const VOCI_SERVIZIO: readonly VoceApp[] = [
   { chiave: 'impostazioni', icona: 'impostazioni', href: percorsiApp.impostazioni() },
 ];
@@ -144,6 +151,14 @@ export function AppSidebar() {
           «Impostazioni» è una voce stabile del menu, non una che compare in
           fondo se lo spazio avanza. */}
       <div className="mt-2.5 flex flex-none flex-col gap-0.5 border-t border-bordo pt-2.5">
+        {profilo.data?.data.amministratore ? (
+          <VoceColonna
+            voce={VOCE_AMMINISTRAZIONE}
+            percorso={percorso}
+            etichetta={t('nav.amministrazione')}
+            tenue
+          />
+        ) : null}
         {VOCI_SERVIZIO.map((voce) => (
           <VoceColonna
             key={voce.chiave}

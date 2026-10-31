@@ -336,7 +336,8 @@
       "profilo": "Profile",
       "impostazioni": "Settings",
       "tuoiGruppi": "Your groups",
-      "esci": "Sign out"
+      "esci": "Sign out",
+      "amministrazione": "Admin"
     },
     "account": {
       "apri": "Your account",

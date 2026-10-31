@@ -54,6 +54,13 @@ export function MenuAccount() {
         etichetta={t('nav.impostazioni')}
         href={percorsiApp.impostazioni()}
       />
+      {profilo.data?.data.amministratore ? (
+        <VoceMenu
+          icona="scudo"
+          etichetta={t('nav.amministrazione')}
+          href={percorsiApp.admin()}
+        />
+      ) : null}
       {/* Uscire resta un gesto, non una destinazione: revoca la sessione sul
           server e svuota l'archivio locale anche se il server non risponde. */}
       <VoceMenu
