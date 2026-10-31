@@ -268,3 +268,11 @@ EXPO_PUBLIC_URL_API=https://api.prome.app fastlane ios prod
 - If the build log freezes, check the keychain prompt first:
   `pgrep -fl "codesign|SecurityAgent"` (see norbo DEPLOY.md 3.0).
 - Output: `build/prome-prod.ipa`. The build lands in TestFlight and is NOT sent to review.
+
+### 6.2 App Review sign-in
+
+App Store Connect → the version → App Review Information → Sign-In Information: user name
+`review-ios@prome.app`, password `CODICE_REVISIONE` from `deploy/.env` on the machine (the same
+fixed code as `review-android@prome.app`). Reviewers cannot read a mailbox, so a code sent by
+email would lock them out. The account is isolated from real users: notes for the reviewer in
+`STORE.md` §8.

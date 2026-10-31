@@ -339,8 +339,12 @@ Prome è una piattaforma di studio per studenti universitari italiani. Non ci so
 pubblici: senza un account non c'è nulla da vedere, ed è una scelta di progetto.
 
 Si entra con email + codice OTP, senza password. Per la revisione forniamo un account già
-attivo (credenziali nel campo dedicato). Il codice arriva per email in pochi secondi; se
-serve un secondo account per provare un invito, lo prepariamo su richiesta.
+attivo (credenziali nel campo dedicato): scrivi l'indirizzo, premi Continua e inserisci il
+codice indicato, che per questo account è fisso, quindi non serve leggere alcuna email.
+
+L'account di revisione è isolato dagli utenti reali: ciò che pubblica lo vede solo lui, le
+sue aule e i suoi gruppi restano privati, i suoi inviti non vengono recapitati e non può
+entrare negli spazi di altri utenti.
 
 Come provare le funzioni principali:
 1. Entra con l'account fornito.
@@ -366,6 +370,9 @@ https://prome.app/linee-guida
 
 **Account di prova**: da creare prima della sottomissione, con dati non riferibili a una persona
 reale, e da **tenere vivo** — un account di prova scaduto è un rifiuto al secondo giro.
+Sono due, con lo stesso codice fisso (`CODICE_REVISIONE` in `deploy/.env` sulla macchina):
+`review-android@prome.app` per Google Play (Accesso all'app) e `review-ios@prome.app` per App
+Store Connect (App Review Information → Sign-In Information, il codice va nel campo password).
 
 ---
 
