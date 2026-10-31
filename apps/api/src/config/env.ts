@@ -64,8 +64,8 @@ export const SchemaEnv = z.object({
   EMAIL_AMMINISTRATORE: z.union([z.email(), z.literal('')]).optional(),
 
   /**
-   * Fixed sign-in code of the store review account (`EMAIL_REVISIONE`).
-   * Empty or unset: that account gets random codes like everyone else.
+   * Fixed sign-in code of the store review accounts (`INDIRIZZI_DI_REVISIONE`).
+   * Empty or unset: those accounts get random codes like everyone else.
    * Six digits, because the app's code field has six boxes.
    */
   CODICE_REVISIONE: z

@@ -6,7 +6,7 @@ import { registraCorpiBinari } from '../src/config/fastify';
 import { PrismaService } from '../src/database/prisma.service';
 import { CanaleEmailSviluppo } from '../src/infrastruttura/avvisi-in-uscita/canale-email-sviluppo';
 import { env } from '../src/config/env';
-import { EMAIL_REVISIONE, TENTATIVI_CONSENTITI } from '../src/infrastruttura/accesso/better-auth';
+import { INDIRIZZI_DI_REVISIONE, TENTATIVI_CONSENTITI } from '../src/infrastruttura/accesso/better-auth';
 import {
   assicuraCatalogoDiProva,
   NOME_ATENEO,
@@ -319,13 +319,13 @@ describe('Accesso e profilo (E0.2 + E0.4)', () => {
   });
 
   describe('account di revisione degli store', () => {
-    it('riceve sempre lo stesso codice, ed entra con quello', async () => {
-      expect(await codicePer(EMAIL_REVISIONE)).toBe(env.CODICE_REVISIONE);
-      expect(await codicePer(EMAIL_REVISIONE)).toBe(env.CODICE_REVISIONE);
+    it.each(INDIRIZZI_DI_REVISIONE)('%s riceve sempre lo stesso codice, ed entra con quello', async (indirizzo) => {
+      expect(await codicePer(indirizzo)).toBe(env.CODICE_REVISIONE);
+      expect(await codicePer(indirizzo)).toBe(env.CODICE_REVISIONE);
 
       const risposta = await chiedi('/accesso/verifica', {
         method: 'POST',
-        payload: { email: EMAIL_REVISIONE, codice: env.CODICE_REVISIONE },
+        payload: { email: indirizzo, codice: env.CODICE_REVISIONE },
       });
 
       expect(risposta.statusCode).toBe(200);

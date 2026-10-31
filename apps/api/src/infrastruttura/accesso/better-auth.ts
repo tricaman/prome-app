@@ -28,6 +28,16 @@ export const DURATA_SESSIONE_SECONDI = 30 * 24 * 60 * 60;
  */
 export const EMAIL_REVISIONE = 'review-android@prome.app';
 
+/** The account App Store reviewers sign in with, on the same terms. */
+export const EMAIL_REVISIONE_IOS = 'review-ios@prome.app';
+
+/**
+ * Every store review account: a fixed sign-in code, and content visible to
+ * itself only, since stores test the app with them and real users must never
+ * see it.
+ */
+export const INDIRIZZI_DI_REVISIONE: readonly string[] = [EMAIL_REVISIONE, EMAIL_REVISIONE_IOS];
+
 export type FornitoreIdentita = ReturnType<typeof creaFornitoreIdentita>;
 
 /**
@@ -96,7 +106,7 @@ export function creaFornitoreIdentita(prisma: PrismaClient, canaleEmail: CanaleE
         disableSignUp: false,
         // `undefined` falls back to the provider's random code.
         generateOTP: ({ email }) =>
-          env.CODICE_REVISIONE && email === EMAIL_REVISIONE ? env.CODICE_REVISIONE : undefined,
+          env.CODICE_REVISIONE && INDIRIZZI_DI_REVISIONE.includes(email) ? env.CODICE_REVISIONE : undefined,
         async sendVerificationOTP({ email, otp }) {
           await canaleEmail.inviaCodiceAccesso(email, otp, 'it');
         },
