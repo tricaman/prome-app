@@ -936,6 +936,31 @@
       "riavvia": "Restart now",
       "fallitoTitolo": "Download failed",
       "fallitoTesto": "Try again, or update from your phone's app store."
+    },
+    "admin": {
+      "titolo": "Admin",
+      "sezioni": {
+        "segnalazioni": "Reports",
+        "utenti": "Users",
+        "post": "Posts"
+      },
+      "pagina": "Page {pagina} of {pagine} · {totale} total",
+      "vuoto": "Nothing here yet.",
+      "utenti": {
+        "senzaNome": "No name",
+        "onboarding": "Onboarding incomplete",
+        "inCancellazione": "Being deleted"
+      },
+      "segnalazioni": {
+        "tipo": {
+          "POST": "Post",
+          "COMMENTO": "Comment"
+        },
+        "eliminato": "Content already deleted",
+        "autore": "Author",
+        "segnalante": "Reported by",
+        "soggetto": "Content ID"
+      }
     }
   }
 }

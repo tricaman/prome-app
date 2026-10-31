@@ -126,7 +126,7 @@ function SentinellaFine({
  * non è più inventato — lo conta il server e arriva con l'elenco — anche se i
  * commenti restano un aggregato a sé, letto altrove.
  */
-function perLaScheda(post: PostDto, utenteRimosso: string): PostDiBacheca {
+export function perLaScheda(post: PostDto, utenteRimosso: string): PostDiBacheca {
   // Un autore senza nome è un account cancellato (contenuto anonimizzato) o
   // in corso di cancellazione: il contenuto resta, la persona no.
   const autore = [post.autore.nome, post.autore.cognome].filter(Boolean).join(' ');

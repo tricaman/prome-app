@@ -34,6 +34,11 @@ export const percorsiApp = {
   impostazioniAspetto: () => '/app/impostazioni/aspetto',
   impostazioniDati: () => '/app/impostazioni/dati',
   impostazioniElimina: () => '/app/impostazioni/elimina',
+  /** The admin panel: the API answers 404 to every account but one. */
+  admin: () => '/app/admin',
+  adminSegnalazioni: () => '/app/admin/segnalazioni',
+  adminUtenti: () => '/app/admin/utenti',
+  adminPost: () => '/app/admin/post',
 } as const;
 
 /** Il parametro con cui l'accesso sa dove riportare chi è stato rimandato lì. */

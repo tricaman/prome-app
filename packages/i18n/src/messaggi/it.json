@@ -936,6 +936,31 @@
       "riavvia": "Riavvia ora",
       "fallitoTitolo": "Download non riuscito",
       "fallitoTesto": "Riprova, oppure aggiorna dallo store del telefono."
+    },
+    "admin": {
+      "titolo": "Amministrazione",
+      "sezioni": {
+        "segnalazioni": "Segnalazioni",
+        "utenti": "Utenti",
+        "post": "Post"
+      },
+      "pagina": "Pagina {pagina} di {pagine} · {totale} in tutto",
+      "vuoto": "Ancora niente qui.",
+      "utenti": {
+        "senzaNome": "Senza nome",
+        "onboarding": "Onboarding incompleto",
+        "inCancellazione": "In cancellazione"
+      },
+      "segnalazioni": {
+        "tipo": {
+          "POST": "Post",
+          "COMMENTO": "Commento"
+        },
+        "eliminato": "Contenuto già eliminato",
+        "autore": "Autore",
+        "segnalante": "Segnalato da",
+        "soggetto": "ID contenuto"
+      }
     }
   }
 }
