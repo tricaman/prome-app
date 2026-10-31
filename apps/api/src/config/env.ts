@@ -20,7 +20,8 @@ for (const percorso of percorsiEnv) {
   caricaDotenv({ path: percorso });
 }
 
-const SchemaEnv = z.object({
+/** The environment contract, exported so its edge cases can be tested. */
+export const SchemaEnv = z.object({
   /** Stringa di connessione Postgres (obbligatoria). */
   DATABASE_URL: z.string().min(1, 'DATABASE_URL non può essere vuota'),
   /** Ruolo dell'unità di esecuzione: "app" (HTTP) | "worker" (meccanismi ricorrenti). */
@@ -56,10 +57,11 @@ const SchemaEnv = z.object({
   EMAIL_SUPPORTO: z.email().optional(),
 
   /**
-   * The only account that can open `/admin/*`. Unset: nobody can, and those
-   * routes answer 404 to everyone.
+   * The only account that can open `/admin/*`. Unset or empty: nobody can, and
+   * those routes answer 404 to everyone. Empty must parse: the prod compose
+   * passes `${EMAIL_AMMINISTRATORE:-}`, an empty string when it is unset.
    */
-  EMAIL_AMMINISTRATORE: z.email().optional(),
+  EMAIL_AMMINISTRATORE: z.union([z.email(), z.literal('')]).optional(),
 
   /**
    * Fixed sign-in code of the store review account (`EMAIL_REVISIONE`).
