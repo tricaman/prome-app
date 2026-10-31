@@ -366,6 +366,38 @@ export interface SegnalazioneResponse {
   creatoIl: string;
 }
 
+/** A registered user, as the admin panel sees them. */
+export interface UtenteRegistratoResponse {
+  utenteId: string;
+  /** Null only if the sign-in account is already gone while the profile is not. */
+  email: string | null;
+  nome: string | null;
+  cognome: string | null;
+  universita: string | null;
+  corso: string | null;
+  onboardingCompletato: boolean;
+  registratoIl: string;
+  /** Set while an account deletion is pending. */
+  inCancellazioneDal: string | null;
+}
+
+/** A report with what it points at, as the admin panel sees it. */
+export interface SegnalazioneRicevutaResponse {
+  id: string;
+  tipo: TipoDiSoggettoSegnalato;
+  motivo: MotivoDiSegnalazione;
+  soggettoId: string;
+  creatoIl: string;
+  segnalanteId: string;
+  segnalanteNome: string | null;
+  /** The content as it is now: null once deleted, the report outlives it. */
+  testo: string | null;
+  autoreId: string | null;
+  autoreNome: string | null;
+  /** The reported post, or the post the reported comment sits under. */
+  postId: string | null;
+}
+
 /**
  * Di cosa parla una richiesta di aiuto.
  *

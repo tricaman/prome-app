@@ -8,6 +8,7 @@ import {
   type PaginatedResult,
   type PreautorizzaAllegatoResponse,
   type ProfiloResponse,
+  type UtenteRegistratoResponse,
 } from '@prome/contracts';
 import { PrismaService } from '../../database/prisma.service';
 import { AppException } from '../../common/exceptions';
@@ -295,6 +296,45 @@ export class ProfiloService {
     });
 
     return new Map(profili.map((p) => [p.utenteId, this.perIlClient(p)]));
+  }
+
+  /**
+   * Every profile for the admin panel, newest first. Unlike `perUtenti`, those
+   * pending deletion stay in: the panel lists people, not what a reader may
+   * see. The address is not here, it belongs to `PortaIdentitaUtente`.
+   */
+  async elencoPerAmministrazione(pagina: {
+    page: number;
+    limit: number;
+  }): Promise<PaginatedResult<Omit<UtenteRegistratoResponse, 'email'>>> {
+    const [totale, profili] = await Promise.all([
+      this.prisma.profilo.count(),
+      this.prisma.profilo.findMany({
+        orderBy: { creatoIl: 'desc' },
+        skip: (pagina.page - 1) * pagina.limit,
+        take: pagina.limit,
+        include: { corso: { include: { universita: true } } },
+      }),
+    ]);
+
+    return {
+      data: profili.map((profilo) => ({
+        utenteId: profilo.utenteId,
+        nome: profilo.nome,
+        cognome: profilo.cognome,
+        universita: profilo.corso?.universita.nome ?? null,
+        corso: profilo.corso?.nome ?? null,
+        onboardingCompletato: profilo.onboardingCompletato,
+        registratoIl: profilo.creatoIl.toISOString(),
+        inCancellazioneDal: profilo.inCancellazioneDal?.toISOString() ?? null,
+      })),
+      meta: {
+        total: totale,
+        page: pagina.page,
+        limit: pagina.limit,
+        totalPages: Math.max(1, Math.ceil(totale / pagina.limit)),
+      },
+    };
   }
 
   // --- Blocchi ---------------------------------------------------------------

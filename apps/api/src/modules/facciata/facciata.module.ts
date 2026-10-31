@@ -10,6 +10,7 @@ import { GruppoModule } from '../gruppo/gruppo.module';
 import { SegnalazioneModule } from '../segnalazione/segnalazione.module';
 import { ProfiloModule } from '../profilo/profilo.module';
 import { AccessoController } from './accesso.controller';
+import { AmministrazioneController } from './amministrazione.controller';
 import { ArchivioController } from './archivio.controller';
 import { AulaStudioController } from './aula-studio.controller';
 import { BachecaController } from './bacheca.controller';
@@ -66,6 +67,7 @@ import { ProfiloController } from './profilo.controller';
     ArchivioController,
     CancellazioneController,
     EsportazioneController,
+    AmministrazioneController,
   ],
   providers: [{ provide: APP_GUARD, useClass: GuardiaAccesso }],
 })

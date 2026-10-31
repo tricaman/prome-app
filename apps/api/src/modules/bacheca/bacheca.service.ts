@@ -202,6 +202,52 @@ export class BachecaService implements ConsumatoreDiFattiDellaBacheca {
     filtri: { soloMiei?: boolean } = {},
   ): Promise<PaginatedResult<PostResponse>> {
     const dove = filtri.soloMiei ? { autoreId: lettoreId } : await this.doveVisibiliA(lettoreId);
+
+    return this.elencaDove(dove, lettoreId, pagina);
+  }
+
+  /**
+   * Every post, privacy and blocks ignored: for the admin panel only. A
+   * separate method and not a filter on `elenca`, so the feed can never be
+   * asked to skip visibility.
+   */
+  async tuttiPerAmministrazione(
+    amministratoreId: string,
+    pagina: { page: number; limit: number },
+  ): Promise<PaginatedResult<PostResponse>> {
+    return this.elencaDove({}, amministratoreId, pagina);
+  }
+
+  /**
+   * Reported posts and comments as they are now, by id, privacy ignored: for
+   * the admin panel only. A deleted one is just missing from the map.
+   */
+  async contenutiPerAmministrazione(ids: {
+    post: string[];
+    commenti: string[];
+  }): Promise<Map<string, { testo: string; autoreId: string; postId: string }>> {
+    const [post, commenti] = await Promise.all([
+      this.prisma.post.findMany({
+        where: { id: { in: ids.post } },
+        select: { id: true, testo: true, autoreId: true },
+      }),
+      this.prisma.commento.findMany({
+        where: { id: { in: ids.commenti } },
+        select: { id: true, testo: true, autoreId: true, postId: true },
+      }),
+    ]);
+
+    return new Map([
+      ...post.map((p) => [p.id, { testo: p.testo, autoreId: p.autoreId, postId: p.id }] as const),
+      ...commenti.map((c) => [c.id, { testo: c.testo, autoreId: c.autoreId, postId: c.postId }] as const),
+    ]);
+  }
+
+  private async elencaDove(
+    dove: Prisma.PostWhereInput,
+    lettoreId: string,
+    pagina: { page: number; limit: number },
+  ): Promise<PaginatedResult<PostResponse>> {
     const [totale, righe] = await Promise.all([
       this.prisma.post.count({ where: dove }),
       this.prisma.post.findMany({

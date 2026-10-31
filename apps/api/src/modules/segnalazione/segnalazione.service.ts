@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import type {
   CategoriaDiSupporto,
   MotivoDiSegnalazione,
+  PaginatedResult,
   RichiestaDiSupportoRequest,
   SegnalazioneResponse,
   TipoDiSoggettoSegnalato,
@@ -136,6 +137,37 @@ export class SegnalazioneService {
       },
       'it',
     );
+  }
+
+  /** Every report for the admin panel, newest first. */
+  async elenco(pagina: { page: number; limit: number }): Promise<
+    PaginatedResult<{
+      id: string;
+      segnalanteId: string;
+      tipo: TipoDiSoggettoSegnalato;
+      soggettoId: string;
+      motivo: MotivoDiSegnalazione;
+      creatoIl: Date;
+    }>
+  > {
+    const [totale, righe] = await Promise.all([
+      this.prisma.segnalazione.count(),
+      this.prisma.segnalazione.findMany({
+        orderBy: { creatoIl: 'desc' },
+        skip: (pagina.page - 1) * pagina.limit,
+        take: pagina.limit,
+      }),
+    ]);
+
+    return {
+      data: righe,
+      meta: {
+        total: totale,
+        page: pagina.page,
+        limit: pagina.limit,
+        totalPages: Math.max(1, Math.ceil(totale / pagina.limit)),
+      },
+    };
   }
 
   // --- Cancellazione dell'account (V5) --------------------------------------

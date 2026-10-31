@@ -56,6 +56,12 @@ const SchemaEnv = z.object({
   EMAIL_SUPPORTO: z.email().optional(),
 
   /**
+   * The only account that can open `/admin/*`. Unset: nobody can, and those
+   * routes answer 404 to everyone.
+   */
+  EMAIL_AMMINISTRATORE: z.email().optional(),
+
+  /**
    * Fixed sign-in code of the store review account (`EMAIL_REVISIONE`).
    * Empty or unset: that account gets random codes like everyone else.
    * Six digits, because the app's code field has six boxes.

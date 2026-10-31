@@ -27,6 +27,7 @@ process.env.TRASPORTO_TEMPO_REALE ??= 'assente';
 // Il supporto delle segnalazioni: un indirizzo qualunque, l'adattatore di
 // sviluppo non manda niente e i test guardano ciò che sarebbe partito.
 process.env.EMAIL_SUPPORTO ??= 'supporto@prome.test';
+process.env.EMAIL_AMMINISTRATORE ??= 'amministratore@prome.test';
 
 // Coordinate finte per provare l'adattatore LiveKit **in isolamento**: conia
 // un gettone e si guarda cosa contiene, senza collegarsi a niente.

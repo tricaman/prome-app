@@ -74,6 +74,19 @@ export class PortaIdentitaUtente {
   }
 
   /**
+   * Many addresses in one read, for the admin user list only: the one place
+   * where showing an address is the point.
+   */
+  async indirizziDi(utenteIds: string[]): Promise<Map<string, string>> {
+    const utenti = await this.prisma.user.findMany({
+      where: { id: { in: utenteIds } },
+      select: { id: true, email: true },
+    });
+
+    return new Map(utenti.map((utente) => [utente.id, utente.email.toLowerCase()]));
+  }
+
+  /**
    * La direzione inversa: chi c'è dietro un indirizzo, se c'è qualcuno.
    *
    * Serve a una cosa sola — **avvisare sul telefono chi è stato invitato** —

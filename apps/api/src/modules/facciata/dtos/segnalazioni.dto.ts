@@ -6,8 +6,10 @@ import type {
   TipoDiSoggettoSegnalato,
 } from '@prome/contracts';
 
-const TIPI: TipoDiSoggettoSegnalato[] = ['POST', 'COMMENTO'];
-const MOTIVI: MotivoDiSegnalazione[] = ['SPAM', 'MOLESTIE', 'CONTENUTO_INAPPROPRIATO'];
+/** What can be reported. */
+export const TIPI: TipoDiSoggettoSegnalato[] = ['POST', 'COMMENTO'];
+/** Why it can be reported. */
+export const MOTIVI: MotivoDiSegnalazione[] = ['SPAM', 'MOLESTIE', 'CONTENUTO_INAPPROPRIATO'];
 
 /**
  * Una segnalazione: cosa, e perché, da due elenchi chiusi. Nessun campo

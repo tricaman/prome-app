@@ -215,10 +215,17 @@ Componente **trasversale**, non un bounded context: `modules/cancellazione` orch
 - **Commentare esige di vedere il post**: 404, non 403 — «esiste ma non puoi» racconta che esiste, ed è anche il solo modo di non dire a nessuno che è stato bloccato.
 - **Gli avvisi hanno tre regole**, tutte in `AvvisiService`: mai a sé stessi, mai fra coppie bloccate (letta **all'istante dell'invio**: chiude la corsa commento-visibile-poi-blocco), mai dati personali. Le **email** di invito fra bloccati continuano a partire: viaggiano per indirizzo, e sopprimerle vorrebbe una risoluzione email→utente dentro aula/gruppo.
 - **La segnalazione è il contesto più piccolo** (`segnalazione`, schema proprio, nessuna FK fra schemi, **nessun codice errore SG**: non lancia nulla di suo). La facciata orchestra come per l'esportazione: il soggetto si verifica **attraverso la lettura del modulo proprietario** — *si segnala ciò che si vede*, 404 altrimenti (post → `leggi`, commento → `commentoVisibilePer`/BA015) — ed è la stessa lettura che procura l'estratto per l'email.
-- **La riga prima, l'email dopo**: la riga è la fonte di verità, l'email a `EMAIL_SUPPORTO` (obbligatoria in produzione, fail-fast) è il campanello; se fallisce, `logger.error` — il caso sancito per la mano umana. Doppione = `create` + catch P2002: una riga, **una sola email**. **L'estratto (≤300) attraversa solo l'email e non si conserva mai**: una copia del contenuto altrui in questo schema sarebbe un detentore senza via di cancellazione. Non esiste un pannello admin: l'operatore agisce via database, e le linee guida promettono 24 ore.
+- **La riga prima, l'email dopo**: la riga è la fonte di verità, l'email a `EMAIL_SUPPORTO` (obbligatoria in produzione, fail-fast) è il campanello; se fallisce, `logger.error` — il caso sancito per la mano umana. Doppione = `create` + catch P2002: una riga, **una sola email**. **L'estratto (≤300) attraversa solo l'email e non si conserva mai**: una copia del contenuto altrui in questo schema sarebbe un detentore senza via di cancellazione. The admin panel lists reports read-only (`GET /admin/segnalazioni`); acting on them is still done via database, and the guidelines promise 24 hours.
 - **Censimento**: `segnalazione` è fra i `DETENTORI_CENSITI` (passo in catena + `segnalazioniEliminateIl` sul registro); i blocchi cadono in cascata col profilo **e si contano comunque, in entrambe le direzioni**. L'export dice chi HO bloccato (senza nomi: sono dati altrui) e **mai chi ha bloccato me** — asimmetria deliberata: la cancellazione porta via tutte e due le direzioni, l'esportazione mostra solo la propria.
 - Bloccare chi è in grazia di cancellazione è legittimo (se torna, il blocco lo aspetta); quando la sua catena si completa, la cascata porta via la riga e la voce sparisce dall'elenco dei bloccati — corretto, non un difetto: il suo contenuto è ormai `anonimo-` e non riconducibile.
 - I test stanno in `test/segnalazioni-e-blocchi.spec.ts` (21 casi, scritti prima del codice), con feed e link diretto verificati separatamente nelle due direzioni.
+
+## Admin panel (`/admin/*`)
+
+- `facciata/amministrazione.controller.ts`: read-only lists `utenti`, `segnalazioni`, `post`. Composed in the facade like the data export, not in a new module.
+- `GuardiaAmministratore` (on the controller, after the global guard) lets through only `EMAIL_AMMINISTRATORE`; everyone else gets the H404 of a missing route. Unset: nobody gets in.
+- Each context hands its data over through a method named `...PerAmministrazione`, which ignores privacy and blocks: never call one from anywhere else.
+- Tests: `test/amministrazione.spec.ts`.
 
 ## «Chi può messaggiarmi» — la contattabilità, applicata dove non racconta niente
 

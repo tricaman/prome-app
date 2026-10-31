@@ -72,8 +72,14 @@ import type {
   ElencaNotificheParams,
   ElencaPost200,
   ElencaPostParams,
+  ElencaSegnalazioniRicevute200,
+  ElencaSegnalazioniRicevuteParams,
+  ElencaTuttiIPost200,
+  ElencaTuttiIPostParams,
   ElencaUniversita200,
   ElencaUniversitaParams,
+  ElencaUtentiRegistrati200,
+  ElencaUtentiRegistratiParams,
   EliminaArgomento200,
   EliminaAulaStudio200,
   EliminaCommento200,
@@ -5598,6 +5604,288 @@ export function useScaricaMieiDati<TData = Awaited<ReturnType<typeof scaricaMiei
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
 
   const queryOptions = getScaricaMieiDatiQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Registered users, newest first
+ */
+export const elencaUtentiRegistrati = (
+    params?: ElencaUtentiRegistratiParams,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ElencaUtentiRegistrati200>(
+      {url: `/admin/utenti`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getElencaUtentiRegistratiQueryKey = (params?: ElencaUtentiRegistratiParams,) => {
+    return [
+    `/admin/utenti`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getElencaUtentiRegistratiQueryOptions = <TData = Awaited<ReturnType<typeof elencaUtentiRegistrati>>, TError = ErrorResponseDto>(params?: ElencaUtentiRegistratiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaUtentiRegistrati>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getElencaUtentiRegistratiQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof elencaUtentiRegistrati>>> = ({ signal }) => elencaUtentiRegistrati(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof elencaUtentiRegistrati>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ElencaUtentiRegistratiQueryResult = NonNullable<Awaited<ReturnType<typeof elencaUtentiRegistrati>>>
+export type ElencaUtentiRegistratiQueryError = ErrorResponseDto
+
+
+export function useElencaUtentiRegistrati<TData = Awaited<ReturnType<typeof elencaUtentiRegistrati>>, TError = ErrorResponseDto>(
+ params: undefined |  ElencaUtentiRegistratiParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaUtentiRegistrati>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaUtentiRegistrati>>,
+          TError,
+          Awaited<ReturnType<typeof elencaUtentiRegistrati>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaUtentiRegistrati<TData = Awaited<ReturnType<typeof elencaUtentiRegistrati>>, TError = ErrorResponseDto>(
+ params?: ElencaUtentiRegistratiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaUtentiRegistrati>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaUtentiRegistrati>>,
+          TError,
+          Awaited<ReturnType<typeof elencaUtentiRegistrati>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaUtentiRegistrati<TData = Awaited<ReturnType<typeof elencaUtentiRegistrati>>, TError = ErrorResponseDto>(
+ params?: ElencaUtentiRegistratiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaUtentiRegistrati>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Registered users, newest first
+ */
+
+export function useElencaUtentiRegistrati<TData = Awaited<ReturnType<typeof elencaUtentiRegistrati>>, TError = ErrorResponseDto>(
+ params?: ElencaUtentiRegistratiParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaUtentiRegistrati>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getElencaUtentiRegistratiQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Reports, newest first, with the reported content as it is now
+ */
+export const elencaSegnalazioniRicevute = (
+    params?: ElencaSegnalazioniRicevuteParams,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ElencaSegnalazioniRicevute200>(
+      {url: `/admin/segnalazioni`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getElencaSegnalazioniRicevuteQueryKey = (params?: ElencaSegnalazioniRicevuteParams,) => {
+    return [
+    `/admin/segnalazioni`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getElencaSegnalazioniRicevuteQueryOptions = <TData = Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>, TError = ErrorResponseDto>(params?: ElencaSegnalazioniRicevuteParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getElencaSegnalazioniRicevuteQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>> = ({ signal }) => elencaSegnalazioniRicevute(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ElencaSegnalazioniRicevuteQueryResult = NonNullable<Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>>
+export type ElencaSegnalazioniRicevuteQueryError = ErrorResponseDto
+
+
+export function useElencaSegnalazioniRicevute<TData = Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>, TError = ErrorResponseDto>(
+ params: undefined |  ElencaSegnalazioniRicevuteParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>,
+          TError,
+          Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaSegnalazioniRicevute<TData = Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>, TError = ErrorResponseDto>(
+ params?: ElencaSegnalazioniRicevuteParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>,
+          TError,
+          Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaSegnalazioniRicevute<TData = Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>, TError = ErrorResponseDto>(
+ params?: ElencaSegnalazioniRicevuteParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Reports, newest first, with the reported content as it is now
+ */
+
+export function useElencaSegnalazioniRicevute<TData = Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>, TError = ErrorResponseDto>(
+ params?: ElencaSegnalazioniRicevuteParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaSegnalazioniRicevute>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getElencaSegnalazioniRicevuteQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Every post, newest first, privacy ignored
+ */
+export const elencaTuttiIPost = (
+    params?: ElencaTuttiIPostParams,
+ options?: SecondParameter<typeof istanzaApi>,signal?: AbortSignal
+) => {
+      
+      
+      return istanzaApi<ElencaTuttiIPost200>(
+      {url: `/admin/post`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getElencaTuttiIPostQueryKey = (params?: ElencaTuttiIPostParams,) => {
+    return [
+    `/admin/post`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getElencaTuttiIPostQueryOptions = <TData = Awaited<ReturnType<typeof elencaTuttiIPost>>, TError = ErrorResponseDto>(params?: ElencaTuttiIPostParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaTuttiIPost>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getElencaTuttiIPostQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof elencaTuttiIPost>>> = ({ signal }) => elencaTuttiIPost(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof elencaTuttiIPost>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type ElencaTuttiIPostQueryResult = NonNullable<Awaited<ReturnType<typeof elencaTuttiIPost>>>
+export type ElencaTuttiIPostQueryError = ErrorResponseDto
+
+
+export function useElencaTuttiIPost<TData = Awaited<ReturnType<typeof elencaTuttiIPost>>, TError = ErrorResponseDto>(
+ params: undefined |  ElencaTuttiIPostParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaTuttiIPost>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaTuttiIPost>>,
+          TError,
+          Awaited<ReturnType<typeof elencaTuttiIPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaTuttiIPost<TData = Awaited<ReturnType<typeof elencaTuttiIPost>>, TError = ErrorResponseDto>(
+ params?: ElencaTuttiIPostParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaTuttiIPost>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof elencaTuttiIPost>>,
+          TError,
+          Awaited<ReturnType<typeof elencaTuttiIPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useElencaTuttiIPost<TData = Awaited<ReturnType<typeof elencaTuttiIPost>>, TError = ErrorResponseDto>(
+ params?: ElencaTuttiIPostParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaTuttiIPost>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Every post, newest first, privacy ignored
+ */
+
+export function useElencaTuttiIPost<TData = Awaited<ReturnType<typeof elencaTuttiIPost>>, TError = ErrorResponseDto>(
+ params?: ElencaTuttiIPostParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof elencaTuttiIPost>>, TError, TData>>, request?: SecondParameter<typeof istanzaApi>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getElencaTuttiIPostQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
 
