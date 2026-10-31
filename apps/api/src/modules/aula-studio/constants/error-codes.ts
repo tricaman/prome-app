@@ -61,6 +61,10 @@ export const AulaStudioErrorCode = {
    * senza la voce invece di una schermata di errore.
    */
   AUDIOCHAT_NON_DISPONIBILE: 'AS023',
+  /** A store review account tried to enter someone else's room. */
+  REVISIONE_NON_AMMESSA: 'AS024',
+  /** A store review account tried to accept an invitation to someone else's room. */
+  REVISIONE_INVITO_RIFIUTATO: 'AS025',
 } as const;
 
 export type AulaStudioErrorCode =

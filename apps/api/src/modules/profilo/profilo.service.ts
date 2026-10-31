@@ -19,6 +19,7 @@ import {
 } from '../../infrastruttura/archivio-file/archivio-file';
 import { ProfiloErrorCode } from './constants/error-codes';
 import { perIlClientCorso, perIlClientUniversita } from './catalogo/catalogo.service';
+import { PortaIdentitaUtente } from './porta-identita-utente';
 import { emettiProvaOnboarding, type ProvaOnboardingCompletato } from './prova-onboarding';
 
 /**
@@ -44,6 +45,7 @@ export class ProfiloService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(ARCHIVIO_DI_FILE) private readonly archivio: ArchivioDiFile,
+    private readonly identita: PortaIdentitaUtente,
   ) {}
 
   /**
@@ -263,7 +265,13 @@ export class ProfiloService {
     // vedere, e chi non vuole essere visto da me» — e si risponde qui, nello
     // stesso punto della privacy, in entrambe le direzioni. Vince su ogni
     // impostazione: un profilo PUBBLICO bloccato non è visibile.
-    const coppie = await this.coppieBloccateCon(lettore.utenteId);
+    const [coppie, revisione] = await Promise.all([
+      this.coppieBloccateCon(lettore.utenteId),
+      this.identita.utentiDiRevisione(),
+    ]);
+    // The store review accounts are subtracted for every reader but themselves,
+    // over any privacy setting: they are how stores test the app, not people.
+    const esclusi = [...coppie, ...revisione.filter((id) => id !== lettore.utenteId)];
 
     const visibili = await this.prisma.profilo.findMany({
       // Chi è in cancellazione «scompare subito» (grazia di 14 giorni): il
@@ -272,7 +280,7 @@ export class ProfiloService {
       where: {
         OR: condizioni,
         inCancellazioneDal: null,
-        ...(coppie.length ? { utenteId: { notIn: coppie } } : {}),
+        ...(esclusi.length ? { utenteId: { notIn: esclusi } } : {}),
       },
       select: { utenteId: true },
     });

@@ -10,6 +10,7 @@
   "AUDIOCHAT_NON_DISPONIBILE": "L'audio non è disponibile in questo momento: il resto dell'aula funziona",
   "AULA_ALLEGATO_NOT_FOUND": "Materiale non trovato",
   "AULA_AMMISSIONE_NEGATA": "Non puoi entrare in questa aula studio",
+  "ACCOUNT_DI_REVISIONE_ESCLUSO": "Questo account di prova non può entrare negli spazi di altri utenti",
   "AULA_COLLOCAZIONE_NEGATA": "Puoi collocare un’aula solo in un gruppo di cui fai parte",
   "AULA_CONFLITTO_DI_VERSIONE": "Qualcun altro ha appena modificato l’aula: riprova",
   "AULA_DATA_NEL_PASSATO": "La data di inizio deve essere futura",

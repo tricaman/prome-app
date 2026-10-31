@@ -104,6 +104,9 @@ export class AvvisiService {
       // dopo il blocco non deve più suonare, né comparire in campanella.
       if (autoreId && (await this.profilo.esisteBloccoFra(destinatarioId, autoreId))) return;
 
+      // Never from a store review account: what it does stays with itself.
+      if (autoreId && (await this.identita.eDiRevisione(autoreId))) return;
+
       // La riga, sempre: è la fonte di verità della campanella. Se non è
       // nuova, il fatto è già stato elaborato una volta e i canali sono già
       // partiti (o già decisi): rimandarli sarebbe il doppio avviso che la

@@ -119,10 +119,13 @@ export class AulaStudioService implements ConsumatoreDiFatti {
   async crea(utenteId: string, dati: CreaAulaStudioRequest): Promise<AulaStudioResponse> {
     const prova = await this.profilo.provaDiOnboarding(utenteId);
     const chiSono = await this.profilo.perUtente(utenteId);
+    const revisione = await this.identita.eDiRevisione(utenteId);
 
     const daScrivere = costruisciAula(prova, {
       titolo: dati.titolo,
-      visibilita: dati.visibilita,
+      // A store review account's room is private whatever it asks: nobody
+      // else may find it, and its invitations never leave.
+      visibilita: revisione ? 'PRIVATO' : dati.visibilita,
       dataOraInizio: dati.dataOraInizio ? new Date(dati.dataOraInizio) : null,
       universitaIdDelCreatore: chiSono.universita?.id ?? null,
     });
@@ -381,12 +384,14 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     // uno spazio di cui non fa parte, e i suoi membri entrerebbero senza che
     // nessuno di loro l'abbia chiesto.
     if (dati.gruppoId) await this.esigiMembroDelGruppo(utenteId, dati.gruppoId);
+    // A store review account cannot open a room up, its own or anyone else's.
+    const visibilita = (await this.identita.eDiRevisione(utenteId)) ? undefined : dati.visibilita;
 
     const aggiornata = await this.prisma.aulaStudio.update({
       where: { id: aulaId },
       data: {
         ...(titolo ? { titolo } : {}),
-        ...(dati.visibilita ? { visibilita: dati.visibilita } : {}),
+        ...(visibilita ? { visibilita } : {}),
         ...(dataOraInizio !== undefined ? { dataOraInizio } : {}),
         ...(dati.gruppoId !== undefined ? { gruppoId: dati.gruppoId } : {}),
         versione: { increment: 1 },
@@ -450,6 +455,14 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     });
     // AS3 rende la seconda ammissione un'operazione senza effetto, non un errore.
     if (gia) return;
+
+    if (await this.identita.eDiRevisione(utenteId)) {
+      throw new AppException(
+        AulaStudioErrorCode.REVISIONE_NON_AMMESSA,
+        'ACCOUNT_DI_REVISIONE_ESCLUSO',
+        HttpStatus.FORBIDDEN,
+      );
+    }
 
     if (!(await this.haTitoloDiAmmissione(utenteId, aula))) {
       throw new AppException(
@@ -667,16 +680,20 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     });
 
     const nome = [chiInvita.nome, chiInvita.cognome].filter(Boolean).join(' ') || 'Un compagno';
-    await this.email.inviaInvitoAulaStudio(
-      invito.destinatario,
-      {
-        titoloAula: aula.titolo,
-        invitatoDa: nome,
-        collegamento: `${env.URL_APP_WEB}/app/inviti/${invito.id}`,
-        scadeIl,
-      },
-      'it',
-    );
+    // A store review account's invitation is written, never delivered; the
+    // notification below is dropped by AvvisiService for the same reason.
+    if (!(await this.identita.eDiRevisione(utenteId))) {
+      await this.email.inviaInvitoAulaStudio(
+        invito.destinatario,
+        {
+          titoloAula: aula.titolo,
+          invitatoDa: nome,
+          collegamento: `${env.URL_APP_WEB}/app/inviti/${invito.id}`,
+          scadeIl,
+        },
+        'it',
+      );
+    }
 
     // Se dietro quell'indirizzo c'è già un iscritto, l'avviso lo raggiunge
     // anche sul telefono. Il messaggio non nomina né l'aula né chi invita:
@@ -710,6 +727,14 @@ export class AulaStudioService implements ConsumatoreDiFatti {
     // IA2: la prova di onboarding è esibita, non verificata altrove. Chi non
     // ce l'ha non accetta, e l'invito resta legittimamente in attesa.
     await this.profilo.provaDiOnboarding(utenteId);
+
+    if (await this.identita.eDiRevisione(utenteId)) {
+      throw new AppException(
+        AulaStudioErrorCode.REVISIONE_INVITO_RIFIUTATO,
+        'ACCOUNT_DI_REVISIONE_ESCLUSO',
+        HttpStatus.FORBIDDEN,
+      );
+    }
 
     const invito = await this.prisma.invito.findUnique({ where: { id: invitoId } });
     if (!invito) {

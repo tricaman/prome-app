@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { FORNITORE_IDENTITA } from '../../infrastruttura/accesso/accesso.module';
-import type { FornitoreIdentita } from '../../infrastruttura/accesso/better-auth';
+import { INDIRIZZI_DI_REVISIONE, type FornitoreIdentita } from '../../infrastruttura/accesso/better-auth';
 import { PrismaService } from '../../database/prisma.service';
 
 /**
@@ -84,6 +84,27 @@ export class PortaIdentitaUtente {
     });
 
     return new Map(utenti.map((utente) => [utente.id, utente.email.toLowerCase()]));
+  }
+
+  /**
+   * The store review accounts' ids, those that have signed in at least once.
+   * Stores test the app with them, so what they write is visible to themselves
+   * only.
+   */
+  async utentiDiRevisione(): Promise<string[]> {
+    const utenti = await this.prisma.user.findMany({
+      where: { email: { in: [...INDIRIZZI_DI_REVISIONE] } },
+      select: { id: true },
+    });
+
+    return utenti.map((utente) => utente.id);
+  }
+
+  /** Whether this user is one of the store review accounts. */
+  async eDiRevisione(utenteId: string): Promise<boolean> {
+    const indirizzo = await this.indirizzoDi(utenteId);
+
+    return indirizzo !== null && INDIRIZZI_DI_REVISIONE.includes(indirizzo);
   }
 
   /**

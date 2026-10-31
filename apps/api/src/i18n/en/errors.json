@@ -10,6 +10,7 @@
   "AUDIOCHAT_NON_DISPONIBILE": "Audio is unavailable right now: the rest of the room still works",
   "AULA_ALLEGATO_NOT_FOUND": "Material not found",
   "AULA_AMMISSIONE_NEGATA": "You cannot join this study room",
+  "ACCOUNT_DI_REVISIONE_ESCLUSO": "This test account cannot join other users' spaces",
   "AULA_COLLOCAZIONE_NEGATA": "You can place a room only in a group you belong to",
   "AULA_CONFLITTO_DI_VERSIONE": "Someone just changed the room: try again",
   "AULA_DATA_NEL_PASSATO": "The start time must be in the future",

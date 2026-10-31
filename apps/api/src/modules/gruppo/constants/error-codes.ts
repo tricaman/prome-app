@@ -19,6 +19,8 @@ export const GruppoErrorCode = {
   INVITO_DI_UN_ALTRO: 'GR010',
   /** Due gesti concorrenti sullo stesso insieme di membri. */
   CONFLITTO_DI_VERSIONE: 'GR011',
+  /** A store review account tried to accept an invitation to someone else's group. */
+  REVISIONE_INVITO_RIFIUTATO: 'GR012',
 } as const;
 
 export type GruppoErrorCode = (typeof GruppoErrorCode)[keyof typeof GruppoErrorCode];

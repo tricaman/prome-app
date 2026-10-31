@@ -84,10 +84,12 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
     // crea gruppi, come non pubblica post.
     await this.profilo.provaDiOnboarding(utenteId);
     const chiSono = await this.profilo.perUtente(utenteId);
+    const revisione = await this.identita.eDiRevisione(utenteId);
 
     const nascita = costruisciGruppo({
       nome: dati.nome,
-      visibilita: dati.visibilita,
+      // A store review account's group is private whatever it asks.
+      visibilita: revisione ? 'PRIVATO' : dati.visibilita,
       universitaIdDelCreatore: chiSono.universita?.id ?? null,
     });
 
@@ -173,6 +175,8 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
   ): Promise<GruppoResponse> {
     await this.esigiModeratore(utenteId, gruppoId);
     const nome = dati.nome === undefined ? undefined : verificaNome(dati.nome);
+    // A store review account cannot open a group up, its own or anyone else's.
+    const visibilita = (await this.identita.eDiRevisione(utenteId)) ? undefined : dati.visibilita;
 
     // L'ateneo non compare: è congelato alla creazione (G5). Cambiare la
     // visibilità in ATENEO su un gruppo nato PRIVATO lo lascia senza ateneo, e
@@ -182,7 +186,7 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
       where: { id: gruppoId },
       data: {
         ...(nome ? { nome } : {}),
-        ...(dati.visibilita ? { visibilita: dati.visibilita } : {}),
+        ...(visibilita ? { visibilita } : {}),
       },
       include: { membri: true },
     });
@@ -309,16 +313,20 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
     });
 
     const nome = [chiInvita.nome, chiInvita.cognome].filter(Boolean).join(' ') || 'Un compagno';
-    await this.email.inviaInvitoAlGruppo(
-      invito.destinatario,
-      {
-        nomeGruppo: gruppo.nome,
-        invitatoDa: nome,
-        collegamento: `${env.URL_APP_WEB}/app/inviti-gruppo/${invito.id}`,
-        scadeIl,
-      },
-      'it',
-    );
+    // A store review account's invitation is written, never delivered; the
+    // notification below is dropped by AvvisiService for the same reason.
+    if (!(await this.identita.eDiRevisione(utenteId))) {
+      await this.email.inviaInvitoAlGruppo(
+        invito.destinatario,
+        {
+          nomeGruppo: gruppo.nome,
+          invitatoDa: nome,
+          collegamento: `${env.URL_APP_WEB}/app/inviti-gruppo/${invito.id}`,
+          scadeIl,
+        },
+        'it',
+      );
+    }
 
     await this.avvisi.avvisaIndirizzo(
       invito.destinatario,
@@ -345,6 +353,14 @@ export class GruppoService implements ConsumatoreDiFattiDelGruppo {
    */
   async accetta(utenteId: string, invitoId: string): Promise<InvitoAlGruppoResponse> {
     await this.profilo.provaDiOnboarding(utenteId);
+
+    if (await this.identita.eDiRevisione(utenteId)) {
+      throw new AppException(
+        GruppoErrorCode.REVISIONE_INVITO_RIFIUTATO,
+        'ACCOUNT_DI_REVISIONE_ESCLUSO',
+        HttpStatus.FORBIDDEN,
+      );
+    }
 
     const invito = await this.invitoEsistente(invitoId);
     await this.esigiDestinatario(utenteId, invito);
