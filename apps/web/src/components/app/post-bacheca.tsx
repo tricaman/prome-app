@@ -27,7 +27,7 @@ export function PostBacheca({ post }: { post: PostDiBacheca }) {
         </div>
       </header>
 
-      <p className="mt-3.5 text-[15.5px] leading-[1.7] text-testo-corpo">{post.corpo}</p>
+      <p className="mt-3.5 text-[15.5px] leading-[1.7] text-testo-corpo wrap-anywhere">{post.corpo}</p>
 
 
       {post.allegato ? (

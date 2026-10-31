@@ -52,7 +52,7 @@ export function SegnalazioniAdmin() {
                     {t('segnalazioni.eliminato')}
                   </p>
                 ) : (
-                  <p className="mt-3 whitespace-pre-line text-[15px] leading-[1.6] text-testo-corpo">
+                  <p className="mt-3 whitespace-pre-line text-[15px] leading-[1.6] text-testo-corpo wrap-anywhere">
                     {segnalazione.testo}
                   </p>
                 )}
@@ -91,7 +91,7 @@ function Voce({ termine, nome, id }: { termine: string; nome?: string; id: strin
   return (
     <div className="flex flex-wrap items-baseline gap-x-2">
       <dt className="font-extrabold text-testo-tenue">{termine}</dt>
-      <dd className="text-testo-corpo">
+      <dd className="text-testo-corpo wrap-anywhere">
         {nome}
         {id ? <code className="ml-2 font-mono text-testo-didascalia select-all">{id}</code> : null}
       </dd>
