@@ -3,22 +3,23 @@ import { useT } from '@/hooks';
 import { Text } from '@/components/ui';
 
 /**
- * La riga di firma in fondo: versione e motto.
+ * The signature line at the bottom: version and motto.
  *
- * La versione **si legge a runtime** e non si scrive in una costante: le
- * versioni le tiene EAS (`appVersionSource: "remote"`, con incremento
- * automatico in produzione), quindi un numero scritto qui sarebbe vecchio dal
- * primo rilascio e nessuno se ne accorgerebbe — è esattamente il tipo di
- * dettaglio che si legge quando si sta per segnalare un problema.
+ * The version is **read at runtime**, never written in a constant: it lives
+ * in `app.config.ts` and is bumped on every store build (DEPLOY.md, section 1),
+ * so a number written here would be stale from the next build, and it is the
+ * detail people read right before reporting a problem.
  *
- * Il motto è quello del sito, dalle stesse due chiavi: è spezzato in due
- * perché lì la seconda parola è colorata.
+ * The motto is the website's, from the same two keys: it is split in two
+ * because there the second word is colored.
  */
 export function VersioneApp() {
   const t = useT();
   const versione = Constants.expoConfig?.version;
 
-  if (!versione) return null;
+  if (!versione) {
+    return null;
+  }
 
   return (
     <Text variante="didascalia" allineamento="center">

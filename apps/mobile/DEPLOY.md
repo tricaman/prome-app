@@ -30,7 +30,10 @@ Una sola variante, un solo identificativo, su entrambe le piattaforme:
 
 ## 1. Pre-flight
 
-- [ ] `version` / `versionCode` / `buildNumber` incrementati in `app.config.ts` (§0)
+- [ ] All three bumped in `app.config.ts` (§0) on EVERY store build, internal testing and
+      TestFlight included: `version` (patch at least, 1.0.0 → 1.0.1), `android.versionCode` and
+      `ios.buildNumber` (+1). `version` is the only number a tester sees (profile footer, store
+      page): two builds with the same `version` cannot be told apart on the phone.
 - [ ] Tutto committato
 - [ ] `pnpm install` aggiornato, `pnpm --filter @prome/mobile typecheck` verde
 - [ ] **API in esercizio raggiungibile** e con le feature della release già deployate: l'app
@@ -259,7 +262,8 @@ pnpm exec expo prebuild --platform ios --clean --no-install
 EXPO_PUBLIC_URL_API=https://api.prome.app fastlane ios prod
 ```
 
-- Bump `ios.buildNumber` in `app.config.ts` before every upload: App Store Connect rejects a
+- Bump `version`, `ios.buildNumber` and `android.versionCode` before every upload (§1). On top
+  of that, App Store Connect rejects a
   build number it already has for the same version.
 - If the build log freezes, check the keychain prompt first:
   `pgrep -fl "codesign|SecurityAgent"` (see norbo DEPLOY.md 3.0).
