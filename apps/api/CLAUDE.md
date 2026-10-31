@@ -225,6 +225,7 @@ Componente **trasversale**, non un bounded context: `modules/cancellazione` orch
 - `facciata/amministrazione.controller.ts`: read-only lists `utenti`, `segnalazioni`, `post`. Composed in the facade like the data export, not in a new module.
 - `GuardiaAmministratore` (on the controller, after the global guard) lets through only `EMAIL_AMMINISTRATORE`; everyone else gets the H404 of a missing route. Unset: nobody gets in.
 - Each context hands its data over through a method named `...PerAmministrazione`, which ignores privacy and blocks: never call one from anywhere else.
+- Every response with the caller's own profile carries `amministratore: true` for the admin only (absent otherwise), through `proprio()` in the profile controller: the web shows the panel entry from it. Guard and flag share one rule, `eAmministratore()`.
 - Tests: `test/amministrazione.spec.ts`.
 
 ## «Chi può messaggiarmi» — la contattabilità, applicata dove non racconta niente

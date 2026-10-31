@@ -4,6 +4,19 @@ import { env } from '../../config/env';
 import { PortaIdentitaUtente, type UtenteDiDominio } from '../profilo/porta-identita-utente';
 
 /**
+ * Whether this user is the account named by `EMAIL_AMMINISTRATORE`: the one
+ * rule behind both this guard and the flag on the own profile.
+ */
+export async function eAmministratore(
+  identita: PortaIdentitaUtente,
+  utenteId: string,
+): Promise<boolean> {
+  const amministratore = env.EMAIL_AMMINISTRATORE?.toLowerCase();
+
+  return Boolean(amministratore) && (await identita.indirizzoDi(utenteId)) === amministratore;
+}
+
+/**
  * Lets through only the account named by `EMAIL_AMMINISTRATORE`.
  *
  * Runs after the global `GuardiaAccesso`, so a missing session is already a
@@ -18,12 +31,9 @@ export class GuardiaAmministratore implements CanActivate {
     const richiesta = contesto
       .switchToHttp()
       .getRequest<FastifyRequest & { utenteDiDominio?: UtenteDiDominio }>();
-    const amministratore = env.EMAIL_AMMINISTRATORE?.toLowerCase();
-    const indirizzo = richiesta.utenteDiDominio
-      ? await this.identita.indirizzoDi(richiesta.utenteDiDominio.id)
-      : null;
+    const utente = richiesta.utenteDiDominio;
 
-    if (!amministratore || indirizzo !== amministratore) {
+    if (!utente || !(await eAmministratore(this.identita, utente.id))) {
       // The router's own wording for an unknown route: the filter translates it
       // the same way, while a bare NotFoundException() would leak "Not Found".
       throw new NotFoundException(`Cannot ${richiesta.method} ${richiesta.url}`);

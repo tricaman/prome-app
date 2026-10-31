@@ -225,6 +225,8 @@ export interface ProfiloResponse {
    * di chi la foto non la mette, che non è uno stato incompleto.
    */
   foto: string | null;
+  /** True on the admin account's own profile only; absent for everyone else. */
+  amministratore?: boolean;
 }
 
 /**

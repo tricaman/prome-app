@@ -29,4 +29,6 @@ export interface ProfiloDto {
    * @nullable
    */
   foto: string | null;
+  /** True on the admin account's own profile only */
+  amministratore?: boolean;
 }

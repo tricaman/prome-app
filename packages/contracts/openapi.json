@@ -5350,6 +5350,10 @@
             "type": "string",
             "nullable": true,
             "description": "Indirizzo della foto del profilo, o null: allora restano le iniziali"
+          },
+          "amministratore": {
+            "type": "boolean",
+            "description": "True on the admin account's own profile only"
           }
         },
         "required": [

@@ -9,7 +9,7 @@ import type {
 import { ApiPaginatedResponse, ApiWrappedResponse, ResponseMessage } from '../../common/decorators';
 import { ProfiloService } from '../profilo/profilo.service';
 import { MISURAZIONI, type MisurazioniDiUtilizzo } from '../../infrastruttura/misurazioni/misurazioni';
-import type { UtenteDiDominio } from '../profilo/porta-identita-utente';
+import { PortaIdentitaUtente, type UtenteDiDominio } from '../profilo/porta-identita-utente';
 import { PaginationDto } from '../../common/dto';
 import { PreautorizzaAllegatoRispostaDto } from './dtos/bacheca.dto';
 import {
@@ -21,6 +21,7 @@ import {
   ProfiloDto,
 } from './dtos/profilo.dto';
 import { Utente } from './guardia-accesso';
+import { eAmministratore } from './guardia-amministratore';
 
 /**
  * Il profilo di chi sta usando Prome.
@@ -34,15 +35,33 @@ import { Utente } from './guardia-accesso';
 export class ProfiloController {
   constructor(
     private readonly profilo: ProfiloService,
+    private readonly identita: PortaIdentitaUtente,
     @Inject(MISURAZIONI) private readonly misurazioni: MisurazioniDiUtilizzo,
   ) {}
+
+  /**
+   * The caller's own profile, flagged on the admin account. Every handler that
+   * returns it goes through here: the web writes these responses into its
+   * profile cache, and one without the flag would hide the admin panel link.
+   */
+  private async proprio(
+    utenteId: string,
+    profilo: Promise<ProfiloResponse>,
+  ): Promise<ProfiloResponse> {
+    const [letto, amministratore] = await Promise.all([
+      profilo,
+      eAmministratore(this.identita, utenteId),
+    ]);
+
+    return amministratore ? { ...letto, amministratore: true } : letto;
+  }
 
   @Get('me')
   @ApiOperation({ operationId: 'leggiMioProfilo', summary: 'Il profilo di chi ha la sessione' })
   @ApiWrappedResponse({ type: ProfiloDto })
   @ResponseMessage('successes.PROFILO_LETTO')
   leggi(@Utente() utente: UtenteDiDominio): Promise<ProfiloResponse> {
-    return this.profilo.perUtente(utente.id);
+    return this.proprio(utente.id, this.profilo.perUtente(utente.id));
   }
 
   /**
@@ -77,7 +96,7 @@ export class ProfiloController {
     @Utente() utente: UtenteDiDominio,
     @Body() corpo: ConfermaFotoProfiloDto,
   ): Promise<ProfiloResponse> {
-    return this.profilo.confermaFoto(utente.id, corpo.chiave);
+    return this.proprio(utente.id, this.profilo.confermaFoto(utente.id, corpo.chiave));
   }
 
   @Delete('me/foto')
@@ -88,7 +107,7 @@ export class ProfiloController {
   @ApiWrappedResponse({ type: ProfiloDto })
   @ResponseMessage('successes.FOTO_RIMOSSA')
   rimuoviFoto(@Utente() utente: UtenteDiDominio): Promise<ProfiloResponse> {
-    return this.profilo.rimuoviFoto(utente.id);
+    return this.proprio(utente.id, this.profilo.rimuoviFoto(utente.id));
   }
 
   @Put('me')
@@ -106,7 +125,7 @@ export class ProfiloController {
     // Niente università né corso nell'evento: sono dati del profilo, non una
     // misura di prodotto.
     this.misurazioni.registra('onboarding_completato', { utenteId: utente.id });
-    return profilo;
+    return this.proprio(utente.id, Promise.resolve(profilo));
   }
 
   /**
@@ -128,7 +147,7 @@ export class ProfiloController {
     @Utente() utente: UtenteDiDominio,
     @Body() corpo: AggiornaPrivacyDto,
   ): Promise<ProfiloResponse> {
-    return this.profilo.aggiornaImpostazioni(utente.id, corpo);
+    return this.proprio(utente.id, this.profilo.aggiornaImpostazioni(utente.id, corpo));
   }
 
   // --- Blocchi ---------------------------------------------------------------

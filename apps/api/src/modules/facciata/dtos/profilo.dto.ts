@@ -62,6 +62,9 @@ export class ProfiloDto implements ProfiloResponse {
     description: 'Indirizzo della foto del profilo, o null: allora restano le iniziali',
   })
   foto!: string | null;
+
+  @ApiPropertyOptional({ description: "True on the admin account's own profile only" })
+  amministratore?: boolean;
 }
 
 /**

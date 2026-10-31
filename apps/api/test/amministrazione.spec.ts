@@ -117,6 +117,29 @@ describe('Amministrazione', () => {
     });
   });
 
+  describe('the admin flag on the own profile', () => {
+    // Both responses the web writes into its profile cache: a flag missing
+    // from one of them would hide the way into the panel until a refetch.
+    it('GET /profilo/me and PUT /profilo/me/privacy flag the admin', async () => {
+      const lettura = await chiedi('/profilo/me', { headers: comeUtente(amministratore) });
+      const modifica = await chiedi('/profilo/me/privacy', {
+        method: 'PUT',
+        headers: comeUtente(amministratore),
+        payload: { visibilita: 'ATENEO' },
+      });
+
+      expect(lettura.json().data.amministratore).toBe(true);
+      expect(modifica.json().data.amministratore).toBe(true);
+    });
+
+    it('everyone else gets no flag at all', async () => {
+      const qualcuno = await utente('PUBBLICO');
+      const risposta = await chiedi('/profilo/me', { headers: comeUtente(qualcuno.token) });
+
+      expect(risposta.json().data).not.toHaveProperty('amministratore');
+    });
+  });
+
   describe('registered users', () => {
     it('lists the newest users with email, name and course', async () => {
       const marta = await utente('PRIVATO', 'Marta');
